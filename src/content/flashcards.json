@@ -1,0 +1,429 @@
+[
+ {
+  "id": "fc-0fe5c271c2",
+  "front": "Developer – Foundations: exam code",
+  "back": "CCDV-F",
+  "kind": "facts",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-cca1346aa4",
+  "front": "Developer – Foundations: how many items",
+  "back": "53 items",
+  "kind": "facts",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-1c49b2f78c",
+  "front": "Developer – Foundations: list fee before partner discount",
+  "back": "$125",
+  "kind": "facts",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-1cb14e1ecb",
+  "front": "Developer – Foundations: heaviest domain and its weight",
+  "back": "Applications and integration at 33.1%",
+  "kind": "blueprint",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-0544f7f88b",
+  "front": "Developer – Foundations: lightest domain and its weight",
+  "back": "Eval, testing, and debugging at 2.6%",
+  "kind": "blueprint",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-4c9bec5775",
+  "front": "Developer – Foundations: domains in weight order",
+  "back": "Applications and integration 33.1% → Model selection and optimization 16.8% → Agents and workflows 14.7% → Prompt and context engineering 11.0% → Tools and MCPs 10.6% → Security and safety 8.1% → Claude Code 3.1% → Eval, testing, and debugging 2.6%",
+  "kind": "blueprint",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-4228f38d8a",
+  "front": "Developer – Foundations: who is it for",
+  "back": "Engineers building on the Claude platform",
+  "kind": "facts",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-91b862de74",
+  "front": "Developer – Foundations: finish the rule: stop_reason drives the loop: ...",
+  "back": "stop_reason drives the loop: tool_use executes, end_turn finishes.",
+  "kind": "rules",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-d49ca80a43",
+  "front": "Developer – Foundations: finish the rule: Batches for latency-tolerant volume: ...",
+  "back": "Batches for latency-tolerant volume: half cost, 24-hour window.",
+  "kind": "rules",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-a75e15b46f",
+  "front": "Developer – Foundations: Stable prefix first, then cache it. Why?",
+  "back": "Cuts latency and cost together.",
+  "kind": "rules",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-e4cde5bcd6",
+  "front": "Developer – Foundations: finish the rule: Enforce a schema, ...",
+  "back": "Enforce a schema, validate, retry with the validation error.",
+  "kind": "rules",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-5f65bda4d4",
+  "front": "Developer – Foundations: Known path is a workflow. Why?",
+  "back": "Unknown path earns an agent.",
+  "kind": "rules",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-052e6fcffa",
+  "front": "Developer – Foundations: finish the rule: Subagents exist to isolate context, ...",
+  "back": "Subagents exist to isolate context, not to add horsepower.",
+  "kind": "rules",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-70d04c4546",
+  "front": "Developer – Foundations: finish the rule: Pin model versions; ...",
+  "back": "Pin model versions; upgrades become evaluated changes.",
+  "kind": "rules",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-05909d2398",
+  "front": "Developer – Foundations: finish the rule: Injection is defeated structurally, ...",
+  "back": "Injection is defeated structurally, never by asking politely.",
+  "kind": "rules",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-fe20890dd1",
+  "front": "Developer – Foundations: finish the rule: A tool the agent does not ...",
+  "back": "A tool the agent does not hold cannot be misused.",
+  "kind": "rules",
+  "scope": "developer-foundations"
+ },
+ {
+  "id": "fc-0477602df0",
+  "front": "Passing score on every Claude certification exam",
+  "back": "720 on a scaled range of 100 to 1,000",
+  "kind": "facts",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-5316b87583",
+  "front": "Time limit on every Claude certification exam",
+  "back": "120 minutes, with about 135 minutes of total seat time",
+  "kind": "facts",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-609b5c2a0a",
+  "front": "How long is a Claude credential valid",
+  "back": "12 months from the date you earn it",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-4b40ab86e5",
+  "front": "What does on-time renewal involve",
+  "back": "A free, open-book, non-proctored assessment on Anthropic Partner Academy, retakable as often as needed",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-de0046c3c7",
+  "front": "What happens if a credential lapses",
+  "back": "You must pass the full exam again at full fee",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-25b82082c3",
+  "front": "Retake waiting periods after failed attempts",
+  "back": "14 days after the first, 30 after the second, 90 after the third",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-69df6c2f14",
+  "front": "Maximum attempts per exam per rolling 12 months",
+  "back": "Four",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-c16f777e56",
+  "front": "Free cancellation or reschedule window",
+  "back": "At least 24 hours before the appointment; inside that, the fee is forfeited",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-c3a6d3b889",
+  "front": "Who delivers the exams",
+  "back": "Pearson VUE, online proctored through OnVUE or at a test center",
+  "kind": "facts",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-cedde4630b",
+  "front": "Where does the digital badge come from",
+  "back": "Credly, by email after a pass",
+  "kind": "facts",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-09781affbf",
+  "front": "Which exam does not count toward partner tier eligibility",
+  "back": "Claude Certified Associate",
+  "kind": "facts",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-76f8a0f68c",
+  "front": "Partner tier discounts on exam fees",
+  "back": "Select, Preferred, and Global Premier partners receive 50% off, applied at checkout",
+  "kind": "facts",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-b5e9c3d807",
+  "front": "How is the exam scored, in one phrase",
+  "back": "Criterion-referenced: against a fixed standard, not against other candidates",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-ec078e9e12",
+  "front": "What does the score report show beyond pass or fail",
+  "back": "The scaled score and percent-correct per domain",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-011c93af3f",
+  "front": "Is there an official practice exam",
+  "back": "No. The previous platform's was retired in the Pearson migration; the exam guides' sample questions are the only official items",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-6362ec7148",
+  "front": "What is the authoritative scope of an exam",
+  "back": "The blueprint in its official exam guide; anything outside it is not tested",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-b98b0ddeb7",
+  "front": "Are the exams open book",
+  "back": "No. No notes, documentation, translation tools, or AI assistants",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-a23a0e0e33",
+  "front": "Who may currently sit these exams",
+  "back": "People at Claude Partner Network organizations, registering with a recognized company email",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-114140b482",
+  "front": "How long do partner email domain record changes take",
+  "back": "7 to 10 days, so resolve them before you plan to sit",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-5efea8cfce",
+  "front": "What does the exam NDA cover",
+  "back": "Questions, answer options, and scenarios, explicitly including study groups and online forums",
+  "kind": "policy",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-30cf0896e2",
+  "front": "Where can you take the official courses without a partner account",
+  "back": "The public Claude Academy; every course is free there",
+  "kind": "facts",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-c843d9fbac",
+  "front": "Glossary: Blueprint",
+  "back": "The exam content outline in each exam guide: the domains measured, their weights, and the objectives items are written against. The authoritative scope of the exam",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-f027016441",
+  "front": "Glossary: Domain weight",
+  "back": "The approximate share of scored items drawn from a domain, for example 33.1% for the Developer exam's Applications and integration domain",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-7d83c0ffc7",
+  "front": "Glossary: Task statement",
+  "back": "A numbered capability within a domain, used in the Architect Foundations guide, that items are written against",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-dc378cc3e0",
+  "front": "Glossary: MQC",
+  "back": "Minimally qualified candidate: the profile of the weakest examinee who should still pass, which the passing standard is calibrated to",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-4292af23a2",
+  "front": "Glossary: Criterion-referenced",
+  "back": "Scored against a fixed standard rather than against other candidates. There is no curve",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-8ee8d006e2",
+  "front": "Glossary: Scaled score",
+  "back": "The reported score on a 100 to 1,000 range, equated so results are comparable across exam forms of slightly different difficulty",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-0f342a105e",
+  "front": "Glossary: Cut score",
+  "back": "The passing threshold: 720 scaled, for all four exams",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-f1539ac91b",
+  "front": "Glossary: Item",
+  "back": "An exam question. Multiple-choice items have one best answer; multiple-response items state how many responses to select",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-7331a9e02e",
+  "front": "Glossary: Scenario-based exam",
+  "back": "The Architect Foundations format: 4 scenarios drawn from a published bank of 6, each framing a set of items",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-f6efb9d583",
+  "front": "Glossary: Exam form",
+  "back": "A specific assembled version of an exam; forms vary slightly, which scaled scoring corrects for",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-39fc56eb7b",
+  "front": "Glossary: NDA",
+  "back": "The non-disclosure agreement accepted before the exam starts: exam content may not be shared, reproduced, or discussed, including in study groups and forums",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-0c0237fc03",
+  "front": "Glossary: Pearson VUE",
+  "back": "The company that delivers the exams, online and at test centers, since June 30, 2026",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-2346fc9a65",
+  "front": "Glossary: OnVUE",
+  "back": "Pearson's online proctoring application, run on your own computer under remote supervision",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-621939f788",
+  "front": "Glossary: Test center",
+  "back": "A physical Pearson location with provided equipment, the alternative to online proctoring",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-926165acf5",
+  "front": "Glossary: Credly",
+  "back": "The digital badging platform that issues the shareable credential after a pass",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-8af273e7d7",
+  "front": "Glossary: CPN",
+  "back": "The Claude Partner Network, whose member organizations are eligible for certification",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-4edc0e3f0b",
+  "front": "Glossary: Partner tier",
+  "back": "An organization's CPN level: Registered pays list price; Select, Preferred, and Global Premier receive 50% off exams",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-cecd62a9b4",
+  "front": "Glossary: Prep path",
+  "back": "The curated course sequence on Partner Academy for a specific certification",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-e43d01ca5a",
+  "front": "Glossary: Exam guide",
+  "back": "The official PDF for each certification: blueprint, sample questions, policies, and scoring. The single most important study document",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-bb7ea8cacc",
+  "front": "Glossary: Renewal assessment",
+  "back": "The free, open-book, non-proctored assessment on Partner Academy that extends a credential 12 months when passed before expiry",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-fb8ded4aeb",
+  "front": "Glossary: Lapse",
+  "back": "Letting a credential expire without renewing; regaining it requires the full exam at full fee",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-84d3040bd1",
+  "front": "Glossary: Appeal",
+  "back": "A formal challenge to a certification decision or result, filed with Pearson within 14 days",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-68a1bbe6d5",
+  "front": "Glossary: Question report",
+  "back": "Flagging a possibly faulty item to Pearson; separate from an appeal and never counted against you",
+  "kind": "glossary",
+  "scope": "shared"
+ },
+ {
+  "id": "fc-eb707233e4",
+  "front": "Glossary: Accommodations",
+  "back": "Testing adjustments for documented needs, requested through Pearson and approved before scheduling",
+  "kind": "glossary",
+  "scope": "shared"
+ }
+]

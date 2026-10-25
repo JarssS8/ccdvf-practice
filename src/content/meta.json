@@ -1,0 +1,19 @@
+{
+ "exam": "developer-foundations",
+ "syncedAt": "2026-10-25T21:02:03.802Z",
+ "factsVerified": "2026-10-24",
+ "counts": {
+  "questions": 83,
+  "flashcards": 61,
+  "distinct": {
+   "Applications and Integration": 25,
+   "Model Selection and Optimization": 11,
+   "Agents and Workflows": 12,
+   "Prompt and Context Engineering": 9,
+   "Tools and MCPs": 7,
+   "Security and Safety": 5,
+   "Claude Code": 1,
+   "Eval, Testing, and Debugging": 3
+  }
+ }
+}

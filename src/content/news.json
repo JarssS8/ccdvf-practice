@@ -1,0 +1,47 @@
+[
+ {
+  "year": "2026",
+  "title": "October: the exams are published in Japanese",
+  "body": "The certification FAQ now states that \"the exam and prep content are available in\nEnglish and Japanese\", and documents how to move an appointment already booked\nin English onto the Japanese version: cancel it in the Pearson account and\nschedule the Japanese one, under the same 48-hour rule as any other change.\n\n**Who this affects.** Anyone who reads Japanese more comfortably than English,\nand anyone who read this repository before this entry appeared. Three pages here\nsaid the exam was English only, which was true when it was written and is not\ntrue now. Browser translation tools are still prohibited during proctoring, so\nthe readable languages are those two and no others.\n\nThe same FAQ section also names the delivery restrictions, now recorded under\n[Availability](policies.md#availability): no OnVUE online proctoring on an ID\nfrom Belarus, Cuba, North Korea, Russia, Syria or a restricted region of\nUkraine, and delivery to residents of Iran suspended from 8 September 2026 under\nthe OFAC General License G suspension. These are Pearson's restrictions, so they\nmove without the exam policy PDF moving."
+ },
+ {
+  "year": "2026",
+  "title": "October: a fourth role path, and a Claude Code badge",
+  "body": "Partner Academy's navigation gained two entries that are not certifications.\n[Claude Forward Deployed Engineer](https://anthropic-partners.skilljar.com/path/claude-fde)\nis a nine-course role path, three of whose courses are partner-only, and the\n[Claude Code partner badge](https://anthropic-partners.skilljar.com/path/partner-badge-claude-code)\nis an eight-course path ending in a scenario-based capstone. Both are listed in\n[Learning paths and courses](learning-paths.md).\n\n**Who this affects.** Nobody preparing for an exam. There is no Forward Deployed\nEngineer certification, and a badge is not a certification, so the program is\nstill four exams across three certified roles at unchanged prices. A role path\nappearing in the navigation is not evidence that an exam exists behind it.\n\nThe two pages describing the badge disagree on its length: the path says eight\ncourses and lists eight, the badge tile says ten."
+ },
+ {
+  "year": "2026",
+  "title": "August: the academy moved to a new home",
+  "body": "`anthropic.com/learn` now redirects permanently to\n[academy.claude.com](https://academy.claude.com/), and the public academy is\nbranded **Claude Academy**. Course URLs changed shape with the move: a course\nthat lived at `anthropic.skilljar.com/claude-101` is now at\n`academy.claude.com/courses/claude-101`, and several slugs were renamed rather\nthan simply moved.\n\n**Who this affects.** Anyone holding bookmarks or following links from older\nguides. The previous Skilljar pages still answer, so nothing is broken, but the\nmaintained home is the new one.\n\nCompletion badges already verified on `academy.claude.com` before the move, and\nstill do."
+ },
+ {
+  "year": "2026",
+  "title": "September: the catalog grew to twenty-six courses",
+  "body": "**Building Effective Human Agent Teams (Beta)** was added: five lessons and a\nquiz on moving a team from single-player AI to multiplayer, aimed at team leads\nrather than developers. It issues a completion badge and no certificate.\n\n**Introduction to Claude Tag** followed later in the month: eleven lessons and\na quiz on Claude inside a team's Slack workspace, written for the person using\nit in their channels rather than the admin installing it. Marked beta. It also\nissues a completion badge and no certificate, which is why the badge count now\nruns ahead of the certificate count on four courses.\n\nPartner Academy also lists **Working with Claude Fable 5.1**, on where that\nmodel sits and how to move a client build onto it. It returns 404 on the public\nClaude Academy, so it is partner-only and is recorded in\n[Learning paths](learning-paths.md) rather than in the course tables.\n\n**Who this affects.** Nobody sitting an exam. Neither course is required for any\ncertification, and neither is exam preparation. It matters only if you are\nworking through the catalog."
+ },
+ {
+  "year": "2026",
+  "title": "August: the catalog grew to twenty-four courses",
+  "body": "Two courses were added: **Deploying Claude Enterprise with Confidence**, on the\nfive organization-wide decisions behind a rollout, and **AI Fluency for pK-12\nTrain the Trainer**, built with the American Federation of Teachers.\n\n**Who this affects.** Nobody sitting an exam. No course is required for any\ncertification, and the guides say so explicitly. It matters only if you are\nworking through the catalog."
+ },
+ {
+  "year": "2026",
+  "title": "August 31: the Global Premier discount ends",
+  "body": "Through August 31, 2026, Global Premier partners paid nothing. From September 1\nthe standard 50% partner discount applies.\n\n**Who this affects.** Global Premier partners who were planning to sit an exam\nin the autumn. Booking before the deadline was worth the full fee."
+ },
+ {
+  "year": "2026",
+  "title": "July: exam guides published at version 1.0",
+  "body": "All four exam guides carry version 1.0, effective July 2026. These are the\nauthoritative scope documents: the domains, the weights, the item counts, the\nsample questions, and the scoring rules.\n\n**Who this affects.** Everyone. If anything on this site disagrees with a guide,\nthe guide is right."
+ },
+ {
+  "year": "2026",
+  "title": "June 30: delivery moved to Pearson VUE, badging to Credly",
+  "body": "The largest change in the program's history, and the one with the longest tail.\n\n| What changed | Consequence |\n| --- | --- |\n| Exam delivery moved to Pearson VUE | Booking, rescheduling, ID checks and the proctoring experience all run through Pearson now |\n| Badging moved to Credly | Credentials issue as Credly badges rather than on the previous platform |\n| Architect Foundations fee | Raised from 99 to 125 USD |\n| Pre-migration failed attempts | Failed Architect Foundations attempts from before the migration were cleared, so those candidates could retake with no waiting period |\n| Credential validity | Extended from 6 months to 12, applied automatically to credentials earned before the migration, dated from when they were originally earned |\n| Registrations in flight | Moved to Pearson in waves |\n| The official practice exam | Retired, and not replaced |\n\n**Who this affects.** Anyone who registered or certified before June 30, 2026.\nTwo cases still cause trouble. If you paid before the migration and never\nreceived a Pearson link, contact\n[certifications-support@anthropic.com](mailto:certifications-support@anthropic.com)\nrather than registering again, which charges you twice. And if a pre-migration\ncredential never appeared in Credly, the badge email may have gone to an\naddress you no longer read.\n\nThe retired practice exam is the change candidates notice most. There is no\nofficial practice exam any more. The sample questions inside each exam guide\nare the only official items that exist."
+ },
+ {
+  "year": "2026",
+  "title": "June 25: the exam policy document was revised",
+  "body": "The current [Anthropic Certification Exam\nPolicy](official-sources.md) carries a revision date of June 25, 2026. It\ngoverns conduct, identification, prohibited items, invalidation and appeals.\n\n**Who this affects.** Everyone sitting an exam. It is short, and it is the\ndocument people wish they had read only after something goes wrong."
+ }
+]

@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ccdvf-practice",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "ccdvf-practice", "database_id": "2fba57e6-0a0f-4e70-bcb3-7ad659e88985", "migrations_dir": "migrations" }
+  ],
+  "vars": {
+    "DEEPSEEK_MODEL": "deepseek-flash",
+    "DEEPSEEK_CHECK_MODEL": "deepseek-v4-pro",
+    "AI_DAILY_LIMIT": "80"
+  }
+  // Secrets (wrangler secret put): APP_PASSPHRASE, SESSION_SECRET, DEEPSEEK_API_KEY
+}
