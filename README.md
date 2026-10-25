@@ -2,7 +2,7 @@
 
 Práctica para **Claude Certified Developer – Foundations**: mocks cronometrados, drills por dominio, flashcards con repetición espaciada, tutor IA y progreso sincronizado entre dispositivos.
 
-Producción: https://ccdvf-practice.adriancgs.workers.dev
+Producción: https://exam.jarsss8.es (dominio propio en Cloudflare; la URL de workers.dev está desactivada)
 
 ## Cómo está hecho
 
