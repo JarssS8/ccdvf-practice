@@ -5,6 +5,8 @@ import { attemptTitle, MODES } from '../lib/engine'
 import { useStore } from '../lib/store'
 import type { Mode } from '../lib/types'
 
+const TONE: Partial<Record<Mode, string>> = { full: 'tile-blue', quick: 'tile-lime', guide: 'tile-lilac', missed: 'tile-pink', flagged: 'tile-sun' }
+
 const SECTIONS: { title: string; note: string; modes: Mode[] }[] = [
   { title: 'Condiciones de examen', note: 'Reloj corriendo, sin pausa y sin ver respuestas hasta entregar. Opciones barajadas en cada intento.', modes: ['full', 'quick'] },
   { title: 'Exámenes del repo', note: 'Los tres mocks de developer-foundations. A partir de la segunda vez mides memoria, no preparación: cuentan como repaso.', modes: ['repo-mock-1', 'repo-mock-2', 'repo-mock-3', 'guide'] },
@@ -41,13 +43,13 @@ export default function Exams() {
           </div>
           <div className="grid-modes">
             {s.modes.map((m) => (
-              <button key={m} type="button" className="tile-link" onClick={() => setErr(startAttempt(m) ?? '')}>
+              <button key={m} type="button" className={`tile-link ${TONE[m] ?? ''}`} onClick={() => setErr(startAttempt(m) ?? '')}>
                 <span className="row-between" style={{ width: '100%' }}>
                   <strong>{MODES[m].title}</strong>
                   {count(m) > 0 && <span className="chip">{count(m)} hecho{count(m) === 1 ? '' : 's'}</span>}
                 </span>
-                <span className="small muted">{MODES[m].detail}</span>
-                <span className="row small" style={{ color: 'var(--accent-ink)', fontWeight: 600, gap: 6 }}>Empezar<Icon name="arrowRight" size={16} /></span>
+                <span className="small muted" style={{ minHeight: 42 }}>{MODES[m].detail}</span>
+                <span className="row small" style={{ fontWeight: 700, gap: 6, marginTop: 'auto' }}>Empezar<Icon name="arrowRight" size={16} /></span>
               </button>
             ))}
           </div>

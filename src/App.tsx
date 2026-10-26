@@ -37,7 +37,7 @@ function Shell({ section, children }: { section: string; children: ReactNode }) 
       <a href="#main" className="sr-only">Saltar al contenido</a>
       <header className="topbar">
         <div className="topbar-inner">
-          <a href="#/" className="brand"><span className="brand-mark" aria-hidden="true">CC</span><span className="brand-name">CCDV-F Practice</span></a>
+          <a href="#/" className="brand"><span className="brand-mark" aria-hidden="true">CC</span><span className="brand-name">CCDV-F</span></a>
           <nav className="topnav" aria-label="Principal">
             {[...NAV, { path: 'notes', label: 'Apuntes', icon: 'book' }].map((n) => (
               <a key={n.path} href={`#/${n.path}`} aria-current={isActive(n.path) ? 'page' : undefined}>{n.label}</a>
@@ -53,7 +53,7 @@ function Shell({ section, children }: { section: string; children: ReactNode }) 
       <main id="main" className="page">{children}</main>
       <nav className="tabbar" aria-label="Principal">
         {NAV.map((n) => (
-          <a key={n.path} href={`#/${n.path}`} aria-current={isActive(n.path) ? 'page' : undefined}><Icon name={n.icon} size={22} />{n.label}</a>
+          <a key={n.path} href={`#/${n.path}`} aria-current={isActive(n.path) ? 'page' : undefined}><Icon name={n.icon} size={22} /><span className="tab-label">{n.label}</span></a>
         ))}
       </nav>
     </>

@@ -20,102 +20,118 @@ export default function Results({ id, timeout }: { id: string; timeout?: boolean
   const timedOut = timeout || (!!a.deadline && a.submittedAt === a.deadline)
   const repeat = r.fresh < r.total
   const est = estimate(r.correct, r.total)
+  const exam = !a.feedback
   const rows = a.questionIds.map((qid, i) => {
     const q = qs.get(qid)
     const ans = data.answers[`${a.id}|${qid}`]
     return { i, q, ans, ok: q ? isCorrect(q, ans?.choice) : false }
   })
+  const failed = rows.filter((x) => !x.ok).length
   const misses = rows.filter((x) => !x.ok || x.ans?.flagged)
   const perQ = r.total ? r.timeUsedMs / r.total : 0
+
+  // The headline says in plain words where you stand
+  const headline = !exam || !est ? 'Terminado.'
+    : est.zone === 'likely' ? 'Vas por buen camino.'
+    : est.zone === 'below' ? 'Aún te falta margen.'
+    : 'Estás en el límite.'
+
+  // Weakest first, so the list reads as "what to work on"
+  const domainRows = DOMAINS.filter((d) => r.byDomain[d.name])
+    .map((d) => ({ ...d, t: r.byDomain[d.name] }))
+    .sort((x, y) => (1 - y.t.c / y.t.n) * y.weight - (1 - x.t.c / x.t.n) * x.weight)
 
   return (
     <>
       <div className="row">
-        <a href="#/progress" className="btn btn-ghost btn-sm" style={{ paddingLeft: 4 }}><Icon name="chevronLeft" size={18} />Progreso</a>
+        <a href="#/progress" className="btn btn-ghost btn-sm" style={{ paddingLeft: 8 }}><Icon name="chevronLeft" size={18} />Progreso</a>
         <span className="small muted">{attemptTitle(a)} · {fmtDate(a.submittedAt ?? a.startedAt)} · {r.total} preguntas</span>
       </div>
 
       {timedOut && <p className="callout callout-bad" role="status"><strong>Tiempo agotado.</strong> Se entregó con las respuestas guardadas antes del final.</p>}
 
-      <section className="grid-auto" aria-labelledby="score-h">
-        <div className="card">
-          <div className="row-between">
-            <h1 id="score-h" className="small muted" style={{ fontFamily: 'var(--font)', fontWeight: 600 }}>Resultado</h1>
-            {est && !a.feedback && <ZoneChip zone={est.zone} />}
-          </div>
-          <div className="row" style={{ alignItems: 'baseline', gap: 10 }}>
-            <span className="big-number">{pct(r.correct, r.total)}%</span>
-            <span className="mono muted">{r.correct}/{r.total}</span>
-          </div>
-          {est && (
-            <>
-              <ScaleBar est={est} />
-              <p className="small muted">
-                Equivale a unos <strong style={{ color: 'var(--ink)' }}>{est.scaledLo}–{est.scaledHi}</strong> sobre {EXAM.scaleMax} (95 %, conversión lineal aproximada).
-                {r.total < 30 && ' Con tan pocas preguntas el rango es ancho.'}
-              </p>
-            </>
-          )}
-          {repeat && (
-            <p className="callout callout-info small">
-              <span><strong>{r.total - r.fresh} de {r.total}</strong> ya las habías visto. Sin ellas: {r.fresh ? `${pct(r.freshCorrect, r.fresh)} % en ${r.fresh} nuevas` : 'ninguna era nueva'}. Solo las nuevas cuentan para tu preparación estimada.</span>
+      <section aria-labelledby="score-h" className="stack" style={{ gap: 18, maxWidth: 760, padding: '8px 4px' }}>
+        <div className="row-between" style={{ alignItems: 'flex-start' }}>
+          <h1 id="score-h" className="h-page" style={{ fontSize: 'clamp(38px, 7vw, 60px)' }}>{headline}</h1>
+          {est && exam && <ZoneChip zone={est.zone} />}
+        </div>
+        <p style={{ fontSize: 18, color: 'var(--ink-2)' }}>
+          Acertaste <strong style={{ color: 'var(--ink)' }}>{r.correct} de {r.total}</strong> ({pct(r.correct, r.total)} %)
+          {est && exam && <>. Equivale a unos <strong style={{ color: 'var(--ink)' }}>{est.scaledLo}–{est.scaledHi}</strong> sobre {EXAM.scaleMax}, y el corte es {EXAM.passScaled}.</>}
+          {!exam && '. En un drill ves la corrección al momento, así que no se estima nota.'}
+        </p>
+        {est && exam && (
+          <>
+            <ScaleBar est={est} />
+            <p className="small muted">
+              {r.total < 30 ? 'Con tan pocas preguntas el rango es muy ancho. ' : 'El rango es amplio porque el número de preguntas da poca precisión; cuantas más hagas, más se estrecha. '}
+              La conversión a la escala real es aproximada (95 %).
+              {repeat ? ` ${r.total - r.fresh} de ${r.total} ya las habías visto: sin ellas, ${r.fresh ? `${pct(r.freshCorrect, r.fresh)} % en ${r.fresh} nuevas` : 'ninguna era nueva'}, y solo las nuevas cuentan para tu preparación.` : ` Las ${r.total} eran nuevas para ti, así que este resultado cuenta entero.`}
             </p>
-          )}
-        </div>
-
-        <div className="grid-auto" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 14 }}>
-          {[
-            ['Aciertos', `${r.correct}/${r.total}`],
-            ['Tiempo', fmtDuration(r.timeUsedMs)],
-            ['Por pregunta', `${(perQ / 60000).toFixed(1)} min`],
-            ['Marcadas · blanco', `${r.flagged} · ${r.blank}`],
-          ].map(([k, v]) => (
-            <div key={k} className="card card-tight">
-              <span className="tiny muted">{k}</span>
-              <span className="mono" style={{ fontSize: 24, fontWeight: 600 }}>{v}</span>
-            </div>
-          ))}
-          <p className="tiny muted" style={{ gridColumn: '1 / -1' }}>Ritmo del examen real: {(EXAM.minutes / EXAM.items).toFixed(2)} min por pregunta.</p>
-        </div>
+          </>
+        )}
       </section>
 
       {err && <p role="alert" className="callout callout-bad">{err}</p>}
 
-      <div className="split">
-        <section className="card main" aria-labelledby="bd-h">
-          <h2 id="bd-h" className="h-section">Por dominio</h2>
-          <p className="tiny muted">El informe oficial muestra el % por dominio, pero el aprobado depende solo de la puntuación total.</p>
-          {DOMAINS.filter((d) => r.byDomain[d.name]).map((d) => {
-            const t = r.byDomain[d.name]
-            return (
-              <div key={d.name} className="stack" style={{ gap: 6 }}>
-                <div className="row-between" style={{ flexWrap: 'nowrap' }}>
-                  <span style={{ fontWeight: 500 }}>{d.name}</span>
-                  <span className="mono small">{t.c}/{t.n}</span>
-                </div>
-                <Meter value={pct(t.c, t.n)} bad={t.c / t.n < 0.69} label={`${d.name}: ${t.c} de ${t.n}`} />
+      <div className="bento">
+        {failed > 0 ? (
+          <section className="tile tile-blue span-2" aria-labelledby="next-h" style={{ justifyContent: 'space-between', gap: 20 }}>
+            <div className="stack" style={{ gap: 8 }}>
+              <p className="eyebrow">Lo que más sube la nota ahora</p>
+              <h2 id="next-h" className="h-tile">Repasa lo que fallaste</h2>
+              <p className="muted">Cada fallada entra también en tus tarjetas para no volver a fallarla.</p>
+            </div>
+            <div className="row">
+              <button className="btn btn-hero" onClick={() => setErr(startAttempt('missed', undefined, a.id) ?? '')}>Repasar las {failed} falladas de este intento<Icon name="arrowRight" size={18} /></button>
+              <a className="btn btn-hero-ghost" href={`#/review/${a.id}/0`}>Ver todas</a>
+            </div>
+          </section>
+        ) : (
+          <section className="tile tile-lime span-2" style={{ justifyContent: 'space-between', gap: 16 }}>
+            <p className="eyebrow">Sin falladas</p>
+            <h2 className="h-tile">Todo correcto.</h2>
+            <a className="btn btn-ink" href="#/" style={{ alignSelf: 'flex-start' }}>Volver a Hoy</a>
+          </section>
+        )}
+
+        <div className="tile tile-lime" style={{ justifyContent: 'space-between', minHeight: 150 }}>
+          <span className="small" style={{ fontWeight: 500 }}>Tiempo</span>
+          <span><span className="big-number" style={{ display: 'block' }}>{fmtDuration(r.timeUsedMs)}</span><span className="small">{(perQ / 60000).toFixed(1)} min por pregunta</span></span>
+        </div>
+        <div className="tile tile-pink" style={{ justifyContent: 'space-between', minHeight: 150 }}>
+          <span className="small" style={{ fontWeight: 500 }}>Marcadas · en blanco</span>
+          <span><span className="big-number" style={{ display: 'block' }}>{r.flagged} · {r.blank}</span><span className="small">Examen real: {(EXAM.minutes / EXAM.items).toFixed(2)} min/pregunta</span></span>
+        </div>
+
+        <section className="tile span-2" aria-labelledby="bd-h" style={{ gap: 8 }}>
+          <div style={{ marginBottom: 6 }}>
+            <h2 id="bd-h" className="h-section">Por dominio</h2>
+            <p className="tiny muted" style={{ marginTop: 4 }}>De lo que más puntos te daría mejorar a lo que menos. El informe oficial muestra el % por dominio, pero el aprobado depende solo de la puntuación total.</p>
+          </div>
+          {domainRows.map((d) => (
+            <div key={d.name} className="stack" style={{ gap: 8, padding: '10px 0', borderTop: '1px solid var(--line)' }}>
+              <div className="row-between" style={{ flexWrap: 'nowrap', alignItems: 'baseline' }}>
+                <span style={{ fontWeight: 500 }}>{d.name}</span>
+                <span style={{ fontWeight: 700, fontSize: 14, whiteSpace: 'nowrap' }}>{d.t.c}/{d.t.n} · {pct(d.t.c, d.t.n)} %</span>
               </div>
-            )
-          })}
+              <Meter value={pct(d.t.c, d.t.n)} label={`${d.name}: ${d.t.c} de ${d.t.n}`} />
+            </div>
+          ))}
         </section>
 
-        <aside className="side">
-          <section className="card" aria-labelledby="miss-h">
-            <h2 id="miss-h" className="h-section" style={{ fontSize: 19 }}>Para repasar</h2>
-            {misses.length === 0 && <p className="small muted">Todo correcto y nada marcado.</p>}
-            {misses.slice(0, 8).map(({ i, q, ok, ans }) => (
-              <a key={i} href={`#/review/${a.id}/${i}`} className="list-item">
-                <span className="mono tiny" style={{ fontWeight: 600, color: ok ? 'var(--muted)' : 'var(--bad-ink)', minWidth: 30 }}>#{i + 1}</span>
-                <span className="small" style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{q?.question}</span>
-                <span className="tiny" style={{ color: ok ? 'var(--muted)' : 'var(--bad-ink)', whiteSpace: 'nowrap' }}>{!ans?.choice.length ? 'En blanco' : ok ? 'Marcada' : 'Fallada'}</span>
-              </a>
-            ))}
-            <a href={`#/review/${a.id}/0`} className="btn btn-sm">Revisar todas</a>
-          </section>
-          {rows.some((x) => !x.ok) && (
-            <button className="btn btn-primary btn-block" onClick={() => setErr(startAttempt('missed', undefined, a.id) ?? '')}><Icon name="target" size={18} />Repasar las {rows.filter((x) => !x.ok).length} falladas de este intento</button>
-          )}
-        </aside>
+        <section className="tile span-2" aria-labelledby="miss-h" style={{ gap: 10 }}>
+          <h2 id="miss-h" className="h-section">Para repasar</h2>
+          {misses.length === 0 && <p className="small muted">Todo correcto y nada marcado.</p>}
+          {misses.slice(0, 8).map(({ i, q, ok, ans }) => (
+            <a key={i} href={`#/review/${a.id}/${i}`} className="list-item">
+              <span className="tiny" style={{ fontWeight: 700, color: ok ? 'var(--muted)' : 'var(--bad-ink)', minWidth: 30 }}>#{i + 1}</span>
+              <span className="small" style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{q?.question}</span>
+              <span className="tiny" style={{ color: ok ? 'var(--muted)' : 'var(--bad-ink)', whiteSpace: 'nowrap', fontWeight: 600 }}>{!ans?.choice.length ? 'En blanco' : ok ? 'Marcada' : 'Fallada'}</span>
+            </a>
+          ))}
+          {misses.length > 8 && <a href={`#/review/${a.id}/0`} className="btn btn-sm" style={{ alignSelf: 'flex-start' }}>Ver las {misses.length}</a>}
+        </section>
       </div>
     </>
   )

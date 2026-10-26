@@ -27,7 +27,7 @@ export default function ReviewView({ id, index }: { id: string; index: number })
       <header className="exam-head">
         <div className="exam-head-inner">
           <div className="row" style={{ flexWrap: 'nowrap' }}>
-            <a href={`#/results/${a.id}`} className="btn btn-ghost icon-btn" aria-label="Volver a resultados" style={{ border: '1px solid var(--line)' }}><Icon name="chevronLeft" /></a>
+            <a href={`#/results/${a.id}`} className="btn icon-btn" aria-label="Volver a resultados"> <Icon name="chevronLeft" /></a>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="tiny muted" style={{ fontWeight: 500 }}>Revisión · {attemptTitle(a)}</div>
               <div style={{ fontWeight: 600 }}>Pregunta {i + 1} de {total}</div>

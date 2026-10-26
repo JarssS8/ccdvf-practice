@@ -125,7 +125,7 @@ export default function ExamView({ id }: { id: string }) {
       <header className="exam-head">
         <div className="exam-head-inner">
           <div className="row-between" style={{ flexWrap: 'nowrap' }}>
-            <a href="#/" className="btn btn-ghost icon-btn" aria-label={a.deadline ? 'Salir (el reloj sigue corriendo)' : 'Salir'} style={{ border: '1px solid var(--line)' }}><Icon name="x" /></a>
+            <a href="#/" className="btn icon-btn" aria-label={a.deadline ? 'Salir (el reloj sigue corriendo)' : 'Salir'}> <Icon name="x" /></a>
             <div style={{ textAlign: 'center', minWidth: 0 }}>
               <div className="tiny muted" style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{attemptTitle(a)}</div>
               <button type="button" className="btn btn-ghost btn-sm mono" onClick={() => gridRef.current?.showModal()} aria-label={`Pregunta ${idx + 1} de ${total}. Ver mapa de preguntas`} style={{ minHeight: 32, padding: '0 8px' }}>
@@ -177,16 +177,16 @@ export default function ExamView({ id }: { id: string }) {
 
       <footer className="exam-foot">
         <div className="exam-foot-inner">
-          <button type="button" className="btn icon-btn" onClick={() => move(-1)} disabled={idx === 0} aria-label="Pregunta anterior" style={{ width: 48, height: 48 }}><Icon name="chevronLeft" /></button>
+          <button type="button" className="btn icon-btn" onClick={() => move(-1)} disabled={idx === 0} aria-label="Pregunta anterior"><Icon name="chevronLeft" /></button>
           <button type="button" className={`btn ${saved?.flagged ? 'flag-on' : ''}`} onClick={flag} aria-pressed={!!saved?.flagged} disabled={lost}>
             <Icon name="flag" size={18} />{saved?.flagged ? 'Marcada' : 'Marcar'}
           </button>
           {a.feedback && !checked ? (
-            <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={check} disabled={draft.length !== q.answer.length || lost}>Comprobar</button>
+            <button type="button" className="btn btn-ink" style={{ flex: 1 }} onClick={check} disabled={draft.length !== q.answer.length || lost}>Comprobar</button>
           ) : last ? (
             <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={openSubmit}>Entregar</button>
           ) : (
-            <button type="button" className="btn btn-primary" style={{ flex: 1 }} onClick={() => move(1)}>Siguiente<Icon name="chevronRight" size={18} /></button>
+            <button type="button" className="btn btn-ink" style={{ flex: 1 }} onClick={() => move(1)}>Siguiente<Icon name="chevronRight" size={18} /></button>
           )}
         </div>
       </footer>
