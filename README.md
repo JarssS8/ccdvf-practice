@@ -40,6 +40,20 @@ npm run dev:worker -- --local-upstream localhost:8787   # http://localhost:8787
 
 `npm run sync` re-imports content when this folder sits inside a clone of the study repo; otherwise the committed content is used.
 
+### Tests
+
+```bash
+npm test               # unit: option shuffling, scoring, charts data, CSV, i18n parity, translations, reset email
+npm run test:e2e       # builds, starts the Worker on a throwaway local D1 and runs the API + browser tests
+npm run test:smoke     # against production with a self-deleting account (add `-- --ai` to also call the tutor)
+```
+
+The browser tests use headless Chromium through `playwright-core` (`CHROMIUM_PATH`, default `/usr/bin/chromium`; skipped if missing).
+
+### Password reset by email
+
+Uses **Cloudflare Email Service** (Workers Paid). Onboard the sending domain once in the dashboard (**Compute → Email Service → Email Sending → Onboard Domain**), then set `PASSWORD_RESET` to `"on"` in `wrangler.jsonc` and deploy. Until then the option stays hidden. The email goes out after the response (`waitUntil`), so its timing does not reveal which addresses have accounts; a reset signs every session out and marks the email as verified.
+
 ### Deploying your own
 
 1. Create a D1 database and put its id in `wrangler.jsonc`; set your domain in `routes` and `BETTER_AUTH_URL`.

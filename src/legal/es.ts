@@ -54,11 +54,12 @@ Esta política explica qué datos personales trata ${I.siteName} (${I.site}), pa
 | Dirección IP y navegador (user-agent) de cada sesión | Al iniciar sesión. |
 | Dirección IP en contadores de intentos | Al iniciar sesión, registrarte o borrar la cuenta, para frenar ataques. |
 | Número de usos diarios de la IA | Al usar el tutor o generar preguntas. |
+| Tu email y un enlace de un solo uso | Solo si pides restablecer la contraseña. |
 | La pregunta que estás repasando, tu respuesta y los mensajes que escribes al tutor | Solo si usas el tutor IA y lo has aceptado. |
 
 ## Para qué y con qué base legal
 
-1. **Prestarte el servicio**: crear y mantener tu cuenta, guardar tu progreso y sincronizarlo entre dispositivos. Base: ejecución de las condiciones de uso que aceptas al registrarte (art. 6.1.b RGPD).
+1. **Prestarte el servicio**: crear y mantener tu cuenta, guardar tu progreso y sincronizarlo entre dispositivos, y enviarte el enlace para restablecer la contraseña cuando lo pides. Base: ejecución de las condiciones de uso que aceptas al registrarte (art. 6.1.b RGPD).
 2. **Seguridad y prevención de abusos**: sesiones, límites de intentos y de uso de la IA. Base: interés legítimo en proteger el servicio y a sus usuarios (art. 6.1.f RGPD).
 3. **Tutor IA**: enviar la pregunta y tus mensajes al proveedor de IA para obtener la respuesta. Base: tu consentimiento (art. 6.1.a RGPD), que das la primera vez que usas el tutor y puedes retirar en cualquier momento en Ajustes. Retirarlo no afecta a lo tratado antes.
 
@@ -66,7 +67,7 @@ No hay publicidad, analítica ni perfiles, no se venden ni ceden datos y no se t
 
 ## Quién más trata tus datos
 
-- **Cloudflare, Inc.** aloja la web y la base de datos (Cloudflare Workers y D1). Actúa como encargado del tratamiento. Puede tratar datos en EE. UU.: está adherida al Marco de Privacidad de Datos UE-EE. UU. y su acuerdo de tratamiento incluye cláusulas contractuales tipo.
+- **Cloudflare, Inc.** aloja la web y la base de datos (Cloudflare Workers y D1) y envía los emails de recuperación de contraseña (Cloudflare Email Service). Actúa como encargado del tratamiento. Puede tratar datos en EE. UU.: está adherida al Marco de Privacidad de Datos UE-EE. UU. y su acuerdo de tratamiento incluye cláusulas contractuales tipo.
 - **Google** y **GitHub** (Microsoft), solo si eliges entrar con ellos. Te identifican con su propio servicio y nos facilitan nombre, email y foto. Su tratamiento se rige por sus propias políticas.
 - **DeepSeek**, proveedor de la IA del tutor y de la generación de preguntas, con servidores en la **República Popular China**. Solo recibe la pregunta del banco, tu respuesta y los mensajes que escribes al tutor. Nunca recibe tu nombre, tu email ni ningún identificador de tu cuenta.
 
@@ -78,6 +79,7 @@ China no cuenta con una decisión de adecuación de la Comisión Europea, de mod
 
 - **Cuenta y progreso**: hasta que borres la cuenta. Al borrarla se eliminan de inmediato todos tus datos de la base de datos.
 - **Sesiones** (con su IP y navegador): caducan a los ${I.sessionDays} días sin uso y se borran en la limpieza diaria.
+- **Enlaces de recuperación de contraseña**: caducan en 1 hora, solo sirven una vez y se borran en la limpieza diaria.
 - **Contadores de intentos por IP**: menos de 48 horas.
 - **Contadores de uso de la IA**: 30 días.
 - **Mensajes del tutor**: este servicio no los guarda en su servidor. La conversación solo se guarda en tu dispositivo y se borra al cerrar sesión. DeepSeek los conserva según su propia política.
@@ -134,7 +136,8 @@ ${I.siteName} es un servicio **gratuito** de práctica para el examen *Claude Ce
 
 - Debes tener al menos 14 años.
 - Usa un email que sea tuyo. Mantén tu contraseña en secreto: eres responsable de lo que se haga con tu cuenta.
-- No hay recuperación de contraseña por email. Si la olvidas, puedes entrar con Google o GitHub usando el mismo email. En ese caso, por seguridad, la contraseña anterior se elimina.
+- Si olvidas la contraseña, puedes restablecerla con el enlace que te enviamos por email (caduca en 1 hora). Al restablecerla se cierran todas tus sesiones.
+- Si entras con Google o GitHub usando un email que se registró con contraseña sin haberlo verificado, esa contraseña se elimina por seguridad.
 - Puedes borrar tu cuenta cuando quieras desde Ajustes.
 
 ## Uso aceptable

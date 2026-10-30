@@ -16,7 +16,7 @@ import Cards from './views/Cards'
 import Notes from './views/Notes'
 import Progress from './views/Progress'
 import Settings from './views/Settings'
-import AuthView from './views/Auth'
+import AuthView, { isResetPending } from './views/Auth'
 import Legal, { LegalLinks } from './views/Legal'
 
 const NAV = [
@@ -82,7 +82,7 @@ export default function App() {
   const [section = '', id, extra] = route
   // Legal pages are public: readable before signing up
   if (section === 'legal') return <Legal page={id ?? 'aviso'} />
-  if (authed === false) return <AuthView />
+  if (authed === false || isResetPending()) return <AuthView />
   if (authed === null && !hasSnapshot) return <main style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }} aria-busy="true"><p className="muted">{t.common.loading}</p></main>
 
   if (section === 'exam' && id) return <ExamView id={id} />

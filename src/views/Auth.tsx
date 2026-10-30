@@ -1,37 +1,67 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { authClient, PROVIDERS, type Provider } from '../lib/auth'
-import { signedIn } from '../lib/store'
-import { useT } from '../i18n'
+import { logout, signedIn } from '../lib/store'
+import { setLang, useLang, useT } from '../i18n'
 import { LangPicker } from '../components/ui'
 import { LegalLinks } from './Legal'
 
-type Mode = 'in' | 'up'
+type Mode = 'in' | 'up' | 'forgot' | 'reset'
+
+// The reset link lands on /?lang=xx&token=… (or ?error=INVALID_TOKEN); OAuth errors on ?error=<code>
+const query = new URLSearchParams(window.location.search)
+const resetToken = query.get('token')
+let resetPending = !!resetToken
+/** True while a reset link is being handled: shown even if this browser has a session. */
+export const isResetPending = () => resetPending
 
 export default function AuthView() {
   const t = useT()
-  const [mode, setMode] = useState<Mode>('in')
+  const lang = useLang()
+  const [mode, setMode] = useState<Mode>(resetToken ? 'reset' : 'in')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [accepted, setAccepted] = useState(false)
   const [busy, setBusy] = useState(false)
-  // OAuth errors come back as ?error=<code>
+  const [notice, setNotice] = useState('')
   const [err, setErr] = useState(() => {
-    const code = new URLSearchParams(window.location.search).get('error')
+    const code = query.get('error')
     return code ? t.auth.errors[code] ?? t.auth.errors.generic : ''
   })
   const [providers, setProviders] = useState<Provider[]>([])
+  const [canReset, setCanReset] = useState(false)
 
   useEffect(() => {
-    fetch('/api/config').then((r) => r.json()).then((c: { providers?: Provider[] }) => setProviders(c.providers ?? [])).catch(() => {})
+    const l = query.get('lang')
+    if (l === 'es' || l === 'en') setLang(l)
+    fetch('/api/config').then((r) => r.json()).then((c: { providers?: Provider[]; passwordReset?: boolean }) => {
+      setProviders(c.providers ?? []); setCanReset(!!c.passwordReset)
+    }).catch(() => {})
     if (window.location.search) window.history.replaceState(null, '', window.location.pathname + window.location.hash)
   }, [])
 
   const message = (e: { code?: string; message?: string } | null | undefined) => t.auth.errors[e?.code ?? ''] ?? e?.message ?? t.auth.errors.generic
+  const go = (m: Mode) => { if (m !== 'reset') resetPending = false; setMode(m); setErr(''); setNotice('') }
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
-    setBusy(true); setErr('')
+    setBusy(true); setErr(''); setNotice('')
+    if (mode === 'forgot') {
+      const r = await authClient.requestPasswordReset({ email: email.trim(), redirectTo: `/?lang=${lang}` })
+      if (r.error) setErr(message(r.error))
+      else setNotice(t.auth.linkSent)
+      setBusy(false); return
+    }
+    if (mode === 'reset') {
+      const r = await authClient.resetPassword({ newPassword: password, token: resetToken ?? '' })
+      setBusy(false)
+      if (r.error) { setErr(message(r.error)); return }
+      // Every session was revoked, this one included: sign in again with the new password
+      resetPending = false
+      await logout().catch(() => {})
+      setPassword(''); setMode('in'); setNotice(t.auth.passwordChanged)
+      return
+    }
     const r = mode === 'up'
       ? await authClient.signUp.email({ name: name.trim(), email: email.trim(), password })
       : await authClient.signIn.email({ email: email.trim(), password })
@@ -46,6 +76,9 @@ export default function AuthView() {
     if (r?.error) { setErr(message(r.error)); setBusy(false) }
   }
 
+  const tabs = mode === 'in' || mode === 'up'
+  const label = { in: t.auth.signIn, up: t.auth.signUp, forgot: t.auth.sendLink, reset: t.auth.setPassword }[mode]
+
   return (
     <main style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 16 }}>
       <div className="stack" style={{ width: '100%', maxWidth: 440, gap: 16 }}>
@@ -55,17 +88,26 @@ export default function AuthView() {
         </div>
 
         <section className="card" aria-labelledby="auth-h">
-          <div className="stack" style={{ gap: 6 }}>
-            <h1 id="auth-h" style={{ fontSize: 24 }}>{t.auth.tagline}</h1>
-            <p className="small muted">{t.auth.intro}</p>
-          </div>
+          {tabs ? (
+            <div className="stack" style={{ gap: 6 }}>
+              <h1 id="auth-h" style={{ fontSize: 24 }}>{t.auth.tagline}</h1>
+              <p className="small muted">{t.auth.intro}</p>
+            </div>
+          ) : (
+            <div className="stack" style={{ gap: 6 }}>
+              <h1 id="auth-h" style={{ fontSize: 24 }}>{mode === 'forgot' ? t.auth.forgotTitle : t.auth.resetTitle}</h1>
+              <p className="small muted">{mode === 'forgot' ? t.auth.forgotText : t.auth.resetText}</p>
+            </div>
+          )}
 
-          <div className="seg" role="group" aria-label={t.auth.signIn + ' / ' + t.auth.signUp}>
-            <button type="button" aria-pressed={mode === 'in'} onClick={() => { setMode('in'); setErr('') }}>{t.auth.signIn}</button>
-            <button type="button" aria-pressed={mode === 'up'} onClick={() => { setMode('up'); setErr('') }}>{t.auth.signUp}</button>
-          </div>
+          {tabs && (
+            <div className="seg" role="group" aria-label={t.auth.signIn + ' / ' + t.auth.signUp}>
+              <button type="button" aria-pressed={mode === 'in'} onClick={() => go('in')}>{t.auth.signIn}</button>
+              <button type="button" aria-pressed={mode === 'up'} onClick={() => go('up')}>{t.auth.signUp}</button>
+            </div>
+          )}
 
-          {providers.length > 0 && (
+          {tabs && providers.length > 0 && (
             <>
               <div className="stack" style={{ gap: 8 }}>
                 {PROVIDERS.filter((p) => providers.includes(p.id)).map((p) => (
@@ -84,28 +126,37 @@ export default function AuthView() {
                 <input id="name" className="input" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} required maxLength={80} />
               </div>
             )}
-            <div className="field">
-              <label htmlFor="email">{t.auth.email}</label>
-              <input id="email" className="input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={254} />
-            </div>
-            <div className="field">
-              <label htmlFor="password">{t.auth.password}</label>
-              <input id="password" className="input" type="password" autoComplete={mode === 'up' ? 'new-password' : 'current-password'}
-                value={password} onChange={(e) => setPassword(e.target.value)} required minLength={mode === 'up' ? 10 : undefined} maxLength={128}
-                aria-describedby={mode === 'up' ? 'pw-hint' : undefined} />
-              {mode === 'up' && <span id="pw-hint" className="tiny muted">{t.auth.passwordHint}</span>}
-            </div>
+            {mode !== 'reset' && (
+              <div className="field">
+                <label htmlFor="email">{t.auth.email}</label>
+                <input id="email" className="input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={254} />
+              </div>
+            )}
+            {mode !== 'forgot' && (
+              <div className="field">
+                <div className="row-between">
+                  <label htmlFor="password">{mode === 'reset' ? t.auth.newPassword : t.auth.password}</label>
+                  {mode === 'in' && canReset && <button type="button" className="btn-link small" onClick={() => go('forgot')}>{t.auth.forgot}</button>}
+                </div>
+                <input id="password" className="input" type="password" autoComplete={mode === 'in' ? 'current-password' : 'new-password'}
+                  value={password} onChange={(e) => setPassword(e.target.value)} required minLength={mode === 'in' ? undefined : 10} maxLength={128}
+                  aria-describedby={mode === 'in' ? undefined : 'pw-hint'} />
+                {mode !== 'in' && <span id="pw-hint" className="tiny muted">{t.auth.passwordHint}</span>}
+              </div>
+            )}
             {mode === 'up' && (
               <label className="row small" style={{ gap: 10, alignItems: 'flex-start', flexWrap: 'nowrap' }}>
                 <input type="checkbox" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} required style={{ width: 20, height: 20, flex: 'none', marginTop: 2 }} />
                 <span>{t.auth.accept} <a href="#/legal/terminos">{t.auth.terms}</a> {t.auth.and} <a href="#/legal/privacidad">{t.auth.privacy}</a>.</span>
               </label>
             )}
+            {notice && <p role="status" className="callout callout-ok small">{notice}</p>}
             {err && <p role="alert" className="small" style={{ color: 'var(--bad-ink)' }}>{err}</p>}
-            <button className="btn btn-primary btn-block" disabled={busy || (mode === 'up' && !accepted)}>
-              {busy ? t.auth.working : mode === 'up' ? t.auth.signUp : t.auth.signIn}
+            <button className="btn btn-primary btn-block" disabled={busy || (mode === 'up' && !accepted) || (mode === 'forgot' && !!notice)}>
+              {busy ? t.auth.working : label}
             </button>
-            <p className="tiny muted">{t.auth.noReset}{providers.length > 0 ? ' ' + t.auth.oauthReplacesPassword : ''}</p>
+            {!tabs && <button type="button" className="btn btn-ghost btn-block" onClick={() => go('in')}>{t.auth.backToSignIn}</button>}
+            {tabs && <p className="tiny muted">{canReset ? '' : t.auth.noReset + ' '}{providers.length > 0 ? t.auth.oauthReplacesPassword : ''}</p>}
           </form>
         </section>
 

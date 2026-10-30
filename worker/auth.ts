@@ -1,4 +1,6 @@
 import { betterAuth } from 'better-auth'
+import { waitUntil } from 'cloudflare:workers'
+import { resetEmail, resetLang } from './email'
 
 export interface Env {
   ASSETS: Fetcher
@@ -14,7 +16,14 @@ export interface Env {
   DEEPSEEK_CHECK_MODEL: string
   AI_USER_DAILY_LIMIT: string
   AI_GLOBAL_DAILY_LIMIT: string
+  /** Cloudflare Email Service (Workers Paid). Without it there is no password reset. */
+  EMAIL?: SendEmail
+  EMAIL_FROM?: string
+  /** "on" once the sending domain is onboarded in Email Service; until then the reset option stays hidden */
+  PASSWORD_RESET?: string
 }
+
+export const passwordResetEnabled = (env: Env) => env.PASSWORD_RESET === 'on' && !!env.EMAIL && !!env.EMAIL_FROM
 
 export const SESSION_DAYS = 30
 
@@ -62,6 +71,24 @@ export function createAuth(env: Env) {
       minPasswordLength: 10,
       maxPasswordLength: 128,
       password: { hash: hashPassword, verify: verifyPassword },
+      ...(passwordResetEnabled(env) ? {
+        sendResetPassword: async ({ user, url }: { user: { name: string; email: string }; url: string }) => {
+          const lang = resetLang(url)
+          const mail = resetEmail(lang, user.name, url, env.BETTER_AUTH_URL)
+          try {
+            await env.EMAIL!.send({ from: { email: env.EMAIL_FROM!, name: 'CCDV-F Practice' }, to: user.email, ...mail })
+          } catch (e) {
+            // The response never says whether the email exists, so failures only show in the logs
+            console.error('reset email failed', (e as { code?: string }).code ?? (e as Error).message)
+          }
+        },
+        resetPasswordTokenExpiresIn: 3600,
+        // A reset proves the person controls the inbox: sign everyone else out and trust the email
+        revokeSessionsOnPasswordReset: true,
+        onPasswordReset: async ({ user }: { user: { id: string } }) => {
+          await env.DB.prepare('UPDATE "user" SET "emailVerified" = 1 WHERE id = ?').bind(user.id).run()
+        },
+      } : {}),
     },
     socialProviders,
     session: { expiresIn: SESSION_DAYS * 86400, updateAge: 86400 },
@@ -93,10 +120,16 @@ export function createAuth(env: Env) {
         '/sign-in/email': { window: 60, max: 10 },
         '/sign-up/email': { window: 600, max: 10 },
         '/delete-user': { window: 60, max: 3 },
+        '/request-password-reset': { window: 600, max: 5 },
+        '/reset-password': { window: 600, max: 10 },
         '/get-session': false,
       },
     },
-    advanced: { ipAddress: { ipAddressHeaders: ['cf-connecting-ip'] } },
+    advanced: {
+      ipAddress: { ipAddressHeaders: ['cf-connecting-ip'] },
+      // Emails go out after the response, so its timing doesn't reveal whether an address has an account
+      backgroundTasks: { handler: (p: Promise<unknown>) => waitUntil(p) },
+    },
     databaseHooks: {
       user: {
         // The sign-up form requires ticking the terms; OAuth buttons state that continuing accepts them

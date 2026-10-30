@@ -56,11 +56,12 @@ This policy explains which personal data ${I.siteName} (${I.site}) processes, wh
 | IP address and browser (user agent) of each session | When you sign in. |
 | IP address in attempt counters | When you sign in, sign up or delete the account, to slow down attacks. |
 | Number of AI uses per day | When you use the tutor or generate questions. |
+| Your email and a one-time link | Only if you ask to reset your password. |
 | The question you are reviewing, your answer and the messages you write to the tutor | Only if you use the AI tutor and have accepted it. |
 
 ## Purposes and legal bases
 
-1. **Providing the service**: creating and keeping your account, saving your progress and syncing it across devices. Basis: performance of the terms of use you accept when signing up (Art. 6(1)(b) GDPR).
+1. **Providing the service**: creating and keeping your account, saving your progress and syncing it across devices, and sending you a password-reset link when you ask for one. Basis: performance of the terms of use you accept when signing up (Art. 6(1)(b) GDPR).
 2. **Security and abuse prevention**: sessions, limits on sign-in attempts and AI use. Basis: legitimate interest in protecting the service and its users (Art. 6(1)(f) GDPR).
 3. **AI tutor**: sending the question and your messages to the AI provider to get an answer. Basis: your consent (Art. 6(1)(a) GDPR), given the first time you use the tutor and withdrawable at any time in Settings. Withdrawing it does not affect processing carried out before.
 
@@ -68,7 +69,7 @@ There is no advertising, analytics or profiling, no data is sold or shared, and 
 
 ## Who else processes your data
 
-- **Cloudflare, Inc.** hosts the website and the database (Cloudflare Workers and D1). It acts as a processor. It may process data in the US: it participates in the EU-US Data Privacy Framework and its data processing agreement includes standard contractual clauses.
+- **Cloudflare, Inc.** hosts the website and the database (Cloudflare Workers and D1) and sends password-reset emails (Cloudflare Email Service). It acts as a processor. It may process data in the US: it participates in the EU-US Data Privacy Framework and its data processing agreement includes standard contractual clauses.
 - **Google** and **GitHub** (Microsoft), only if you choose to sign in with them. They identify you through their own service and give us your name, email and picture. Their processing is governed by their own policies.
 - **DeepSeek**, the AI provider for the tutor and for question generation, with servers in the **People's Republic of China**. It only receives the bank question, your answer and the messages you write to the tutor. It never receives your name, your email or any identifier of your account.
 
@@ -80,6 +81,7 @@ China has no European Commission adequacy decision, so your data is not protecte
 
 - **Account and progress**: until you delete the account. Deleting it immediately removes all your data from the database.
 - **Sessions** (with their IP and browser): expire after ${I.sessionDays} days without use and are removed by the daily clean-up.
+- **Password-reset links**: expire after 1 hour, work only once and are removed by the daily clean-up.
 - **Per-IP attempt counters**: under 48 hours.
 - **AI usage counters**: 30 days.
 - **Tutor messages**: this service does not keep them on its server. The conversation is stored only on your device and is wiped when you sign out. DeepSeek keeps them under its own policy.
@@ -136,7 +138,8 @@ ${I.siteName} is a **free** practice service for the *Claude Certified Developer
 
 - You must be at least 14 years old.
 - Use an email address that belongs to you. Keep your password secret: you are responsible for what is done with your account.
-- There is no password reset by email. If you forget it, you can sign in with Google or GitHub using the same email. In that case, for security, the previous password is removed.
+- If you forget your password, you can reset it with the link we email you (it expires after 1 hour). Resetting it signs you out everywhere.
+- If you sign in with Google or GitHub using an email that was registered with a password and never verified, that password is removed for security.
 - You can delete your account at any time in Settings.
 
 ## Acceptable use

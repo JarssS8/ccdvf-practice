@@ -18,8 +18,13 @@
     { "binding": "DB", "database_name": "ccdvf-practice", "database_id": "2fba57e6-0a0f-4e70-bcb3-7ad659e88985", "migrations_dir": "migrations" }
   ],
   "triggers": { "crons": ["17 4 * * *"] },
+  // Password-reset emails (Cloudflare Email Service; needs Workers Paid and the domain onboarded for sending)
+  "send_email": [{ "name": "EMAIL" }],
   "vars": {
     "BETTER_AUTH_URL": "https://exam.jarsss8.es",
+    "EMAIL_FROM": "no-reply@jarsss8.es",
+    // "on" only after onboarding jarsss8.es in Compute > Email Service > Email Sending (else sends fail)
+    "PASSWORD_RESET": "off",
     "DEEPSEEK_MODEL": "deepseek-flash",
     "DEEPSEEK_CHECK_MODEL": "deepseek-v4-pro",
     "AI_USER_DAILY_LIMIT": "15",
