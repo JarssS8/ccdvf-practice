@@ -2,10 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuestions } from '../App'
 import { Icon } from '../components/Icon'
 import { Empty, Meter, ScaleBar, ZoneChip } from '../components/ui'
-import { attemptTitle, domainStats, exposures, fmtDate, fmtDuration, fmtNum, pct, PASS_P, readiness } from '../lib/engine'
+import { attemptTitle, domainMisses, domainStats, domainTrends, exposures, fmtDate, fmtDuration, fmtNum, mostMissed, pct, PASS_P, readiness } from '../lib/engine'
+import { DomainMissBars, DomainTrendGrid } from '../components/charts'
+import { localize } from '../lib/content'
+import { startAttempt } from '../lib/actions'
 import { useStore } from '../lib/store'
 import type { Attempt } from '../lib/types'
-import { useLang, useT } from '../i18n'
+import { errorText, useLang, useT } from '../i18n'
 
 function ScoreChart({ points }: { points: Attempt[] }) {
   const t = useT()
@@ -61,9 +64,14 @@ export default function Progress() {
   const lang = useLang()
   const qs = useQuestions()
   const [table, setTable] = useState(false)
+  const [moreMissed, setMoreMissed] = useState(false)
+  const [err, setErr] = useState('')
   const exp = useMemo(() => exposures(data, qs), [data, qs])
   const ready = useMemo(() => readiness(exp, qs), [exp, qs])
   const doms = useMemo(() => domainStats(exp, qs), [exp, qs])
+  const misses = useMemo(() => domainMisses(exp, qs), [exp, qs])
+  const trends = useMemo(() => domainTrends(exp, qs), [exp, qs])
+  const missed = useMemo(() => mostMissed(exp), [exp])
   const done = Object.values(data.attempts).filter((a) => a.status === 'submitted' && a.result).sort((a, b) => a.submittedAt! - b.submittedAt!)
   const examLike = done.filter((a) => !a.feedback)
   const answered = exp.length
@@ -104,6 +112,55 @@ export default function Progress() {
                   </table></div>
                 ) : <ScoreChart points={examLike} />}
             </div>
+          </section>
+
+          <section className="card" aria-labelledby="miss-h">
+            <div className="stack" style={{ gap: 4 }}>
+              <h2 id="miss-h" className="h-section">{t.progress.missTitle}</h2>
+              <p className="small muted">{t.progress.missIntro}</p>
+            </div>
+            <DomainMissBars rows={misses} />
+          </section>
+
+          <section className="card" aria-labelledby="trend-h">
+            <div className="stack" style={{ gap: 4 }}>
+              <h2 id="trend-h" className="h-section">{t.progress.trendTitle}</h2>
+              <p className="small muted">{t.progress.trendIntro}</p>
+            </div>
+            <DomainTrendGrid trends={trends} />
+          </section>
+
+          <section className="card" aria-labelledby="mm-h">
+            <div className="row-between" style={{ alignItems: 'flex-end' }}>
+              <div className="stack" style={{ gap: 4 }}>
+                <h2 id="mm-h" className="h-section">{t.progress.mostMissedTitle}</h2>
+                {missed.length > 0 && <p className="small muted">{t.progress.mostMissedIntro}</p>}
+              </div>
+              {missed.length > 0 && <button className="btn btn-sm btn-primary" onClick={() => setErr(startAttempt('missed') ?? '')}>{t.progress.practiceMissed}</button>}
+            </div>
+            {err && <p role="alert" className="callout callout-bad">{errorText(t, err)}</p>}
+            {missed.length === 0 ? <p className="small muted">{t.progress.noMissed}</p> : (
+              <div className="stack" style={{ gap: 8 }}>
+                {missed.slice(0, moreMissed ? 30 : 6).map((m) => {
+                  const orig = qs.get(m.qid)
+                  if (!orig) return null
+                  const q = localize(orig, lang)
+                  const at = m.lastWrong ? data.attempts[m.lastWrong.attemptId] : undefined
+                  const idx = at ? at.questionIds.indexOf(m.qid) : -1
+                  return (
+                    <a key={m.qid} href={at && idx >= 0 ? `#/review/${at.id}/${idx}` : '#/progress'} className="list-item">
+                      <span className="badge-icon bad" style={{ fontWeight: 700, fontSize: 14 }}>{m.wrong}×</span>
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        <span className="small" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{q.question}</span>
+                        <span className="tiny muted">{t.domains[q.domain]} · {t.progress.missedTimes(m.wrong, m.n)}</span>
+                      </span>
+                      <Icon name="chevronRight" size={18} />
+                    </a>
+                  )
+                })}
+                {!moreMissed && missed.length > 6 && <button className="btn btn-sm btn-ghost" style={{ alignSelf: 'flex-start' }} onClick={() => setMoreMissed(true)}>{t.progress.showMore(Math.min(30, missed.length) - 6)}</button>}
+              </div>
+            )}
           </section>
 
           <section className="card" aria-labelledby="dom-h">

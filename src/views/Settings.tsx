@@ -5,6 +5,8 @@ import { meta } from '../lib/content'
 import { fmtDate } from '../lib/engine'
 import { api, deleteAccount, deviceId, dispatch, exportBackup, logout, now, setAiConsent, sync, useStore } from '../lib/store'
 import { errorText, useLang, useT } from '../i18n'
+import { answersCsv } from '../lib/export'
+import { useQuestions } from '../App'
 
 type Theme = 'auto' | 'light' | 'dark'
 export const applyTheme = (t: Theme) => {
@@ -17,6 +19,7 @@ export default function Settings() {
   const { data, status, pending, lastError } = useStore()
   const t = useT()
   const lang = useLang()
+  const qs = useQuestions()
   const [theme, setTheme] = useState<Theme>(savedTheme)
   const [date, setDate] = useState(data.settings.exam_date?.value ?? '')
   const [confirmText, setConfirmText] = useState('')
@@ -26,11 +29,10 @@ export default function Settings() {
   useEffect(() => { applyTheme(theme); try { localStorage.setItem('ccdvf_theme', theme) } catch { /* ignore */ } }, [theme])
   useEffect(() => setDate(data.settings.exam_date?.value ?? ''), [data.settings.exam_date?.value])
 
-  const download = () => {
-    const blob = new Blob([exportBackup()], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
+  const save = (content: string, type: string, ext: string) => {
+    const url = URL.createObjectURL(new Blob([content], { type }))
     const a = document.createElement('a')
-    a.href = url; a.download = `ccdvf-data-${new Date().toISOString().slice(0, 10)}.json`; a.click()
+    a.href = url; a.download = `ccdvf-${ext === 'csv' ? 'answers' : 'data'}-${new Date().toISOString().slice(0, 10)}.${ext}`; a.click()
     URL.revokeObjectURL(url)
   }
 
@@ -120,8 +122,11 @@ export default function Settings() {
 
       <section className="card" aria-labelledby="dt-h">
         <h2 id="dt-h" className="h-section">{t.settings.yourData}</h2>
-        <p className="small muted">{t.settings.exportText}</p>
-        <button className="btn btn-sm" style={{ alignSelf: 'flex-start' }} onClick={download}><Icon name="download" size={16} />{t.settings.export}</button>
+        <p className="small muted">{t.settings.exportText} {t.settings.exportCsvText}</p>
+        <div className="row">
+          <button className="btn btn-sm" onClick={() => save(exportBackup(), 'application/json', 'json')}><Icon name="download" size={16} />{t.settings.export}</button>
+          <button className="btn btn-sm" onClick={() => save(answersCsv(data, qs, t, lang), 'text/csv;charset=utf-8', 'csv')}><Icon name="download" size={16} />{t.settings.exportCsv}</button>
+        </div>
       </section>
 
       <section className="card" aria-labelledby="ct-h">

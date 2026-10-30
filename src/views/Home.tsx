@@ -162,7 +162,7 @@ export default function Home() {
         <section className="tile span-2 d-domains" aria-labelledby="dom-h" style={{ gap: 4 }}>
           <div className="row-between" style={{ marginBottom: 6 }}>
             <h2 id="dom-h" className="h-section">{t.home.whereToGain}</h2>
-            <a href="#/domains" className="small" style={{ fontWeight: 600 }}>{t.home.seeAll}</a>
+            <a href="#/progress" className="small" style={{ fontWeight: 600 }}>{t.home.seeAll}</a>
           </div>
           {ranked.slice(0, 3).map((d) => (
             <button key={d.name} className="dom-row" onClick={() => start('drill', d.name)} aria-label={t.home.drillAria(t.domains[d.name])}>

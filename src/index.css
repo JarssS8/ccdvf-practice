@@ -313,3 +313,20 @@ dialog::backdrop { background: rgb(14 15 18 / 0.6); }
 .legal-page .prose h2 { font-size: 20px; margin-top: 24px; }
 .legal-page .prose table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .legal-page .prose th, .legal-page .prose td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+
+/* Charts: miss rate per domain (horizontal bars) and per-domain trend small multiples */
+.hbars { display: flex; flex-direction: column; gap: 4px; }
+.hbar-row { display: grid; grid-template-columns: minmax(150px, 38%) 1fr 52px; align-items: center; gap: 12px; padding: 7px 6px; border-radius: 12px; outline-offset: 2px; }
+.hbar-row:hover, .hbar-row:focus-visible { background: var(--surface-2); }
+.hbar-label { font-size: 14px; font-weight: 500; line-height: 1.25; }
+.hbar-track { position: relative; height: 14px; }
+.hbar-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--mark); border-radius: 0 4px 4px 0; min-width: 2px; }
+.hbar-cut { position: absolute; top: -4px; bottom: -4px; border-left: 1.5px dashed var(--ink-2); }
+.hbar-value { font-size: 14px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.hbars figcaption { padding: 6px 6px 0; }
+@media (max-width: 560px) {
+  .hbar-row { grid-template-columns: 1fr 44px; gap: 4px 10px; }
+  .hbar-label { grid-column: 1 / -1; }
+}
+.trend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.trend-card { background: var(--surface-2); border-radius: var(--r-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }

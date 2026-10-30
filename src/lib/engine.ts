@@ -216,6 +216,44 @@ export function domainStats(exp: Exposure[], qs: Map<string, AiQuestion>) {
   return res
 }
 
+/** Every answer so far, per domain: misses, total and the marks a miss costs (miss rate × exam weight). */
+export function domainMisses(exp: Exposure[], qs: Map<string, AiQuestion>) {
+  const res = DOMAINS.map((d) => ({ name: d.name, weight: d.weight, n: 0, wrong: 0 }))
+  const idx = new Map(res.map((r) => [r.name as string, r]))
+  for (const e of exp) {
+    const r = idx.get(qs.get(e.qid)?.domain ?? '')
+    if (!r) continue
+    r.n++
+    if (!e.correct) r.wrong++
+  }
+  return res.map((r) => ({ ...r, rate: r.n ? r.wrong / r.n : 0, cost: r.n ? (r.wrong / r.n) * r.weight : 0 }))
+    .sort((a, b) => (b.n ? 1 : 0) - (a.n ? 1 : 0) || b.cost - a.cost)
+}
+
+/** Per domain, the hit rate over the last `window` answers after each answer: one point per answer, oldest first. */
+export function domainTrends(exp: Exposure[], qs: Map<string, AiQuestion>, window = 10) {
+  return DOMAINS.map((d) => {
+    const hits = exp.filter((e) => qs.get(e.qid)?.domain === d.name).map((e) => ({ at: e.at, ok: e.correct }))
+    const points = hits.map((h, i) => {
+      const slice = hits.slice(Math.max(0, i - window + 1), i + 1)
+      return { at: h.at, p: slice.filter((x) => x.ok).length / slice.length, n: slice.length }
+    })
+    return { name: d.name, points }
+  })
+}
+
+/** Questions you have missed at least once, most misses first (then the lowest hit rate). */
+export function mostMissed(exp: Exposure[]) {
+  const by = new Map<string, { qid: string; n: number; wrong: number; lastWrong: Exposure | null }>()
+  for (const e of exp) {
+    const r = by.get(e.qid) ?? { qid: e.qid, n: 0, wrong: 0, lastWrong: null }
+    r.n++
+    if (!e.correct) { r.wrong++; r.lastWrong = e }
+    by.set(e.qid, r)
+  }
+  return [...by.values()].filter((r) => r.wrong > 0).sort((a, b) => b.wrong - a.wrong || b.wrong / b.n - a.wrong / a.n)
+}
+
 export const pct = (c: number, n: number) => (n ? Math.round((c / n) * 100) : 0)
 export const fmtDuration = (ms: number) => {
   const s = Math.max(0, Math.round(ms / 1000))
