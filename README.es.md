@@ -108,7 +108,7 @@ Abre http://localhost:8787 y crea una cuenta. La base de datos local se guarda e
 | --- | --- |
 | **Entrar con Google** | Google Cloud Console → *Pantalla de consentimiento OAuth* (Externo, **Publicar**) → *Credenciales → ID de cliente OAuth → Aplicación web*. Origen autorizado: tu URL. URI de redirección: `https://<tu-url>/api/auth/callback/google`. Después `npx wrangler secret put GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`. |
 | **Entrar con GitHub** | github.com/settings/developers → *New OAuth App*. Callback URL: `https://<tu-url>/api/auth/callback/github`. Después `npx wrangler secret put GITHUB_CLIENT_ID` y `GITHUB_CLIENT_SECRET`. |
-| **Tutor IA y preguntas IA** | Consigue una clave en platform.deepseek.com y ejecuta `npx wrangler secret put DEEPSEEK_API_KEY`. Ajusta `AI_USER_DAILY_LIMIT` y `AI_GLOBAL_DAILY_LIMIT`. Deja poco saldo prepago en la cuenta: es tu tope real de gasto. |
+| **Tutor IA y preguntas IA** | Consigue una clave en platform.deepseek.com y ejecuta `npx wrangler secret put DEEPSEEK_API_KEY`. Ajusta `AI_USER_DAILY_LIMIT`, `AI_IP_DAILY_LIMIT` y `AI_GLOBAL_DAILY_LIMIT`. Deja poco saldo prepago en la cuenta: es tu tope real de gasto. |
 | **Recuperar contraseña por email** | Necesita Workers Paid. Panel → **Compute → Email Service → Email Sending → Onboard Domain**; después pon `ACCOUNT_RECOVERY` en `"on"` y despliega. |
 
 Cada proveedor de inicio de sesión aparece en la pantalla de entrada en cuanto existen sus dos secretos, sin volver a desplegar.
@@ -123,7 +123,7 @@ Cada proveedor de inicio de sesión aparece en la pantalla de entrada en cuanto 
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | secretos | Entrar con GitHub. |
 | `DEEPSEEK_API_KEY` | secreto | Activa el tutor IA y la generación de preguntas. |
 | `DEEPSEEK_MODEL` / `DEEPSEEK_CHECK_MODEL` | vars | Modelo para escribir y tutorizar, y para la comprobación ciega. |
-| `AI_USER_DAILY_LIMIT` / `AI_GLOBAL_DAILY_LIMIT` | vars | Llamadas de IA por usuario y día / de toda la app por día. |
+| `AI_USER_DAILY_LIMIT` / `AI_IP_DAILY_LIMIT` / `AI_GLOBAL_DAILY_LIMIT` | vars | Llamadas de IA por día por usuario / por red (IP, IPv6 /64) / de toda la app. El límite por red evita que una persona multiplique el límite por usuario con cuentas gratis. |
 | `EMAIL` | binding `send_email` | Cloudflare Email Service. |
 | `EMAIL_FROM` | var | Remitente de los emails de recuperación. |
 | `ACCOUNT_RECOVERY` | var | `"on"` muestra «¿La olvidaste?» (solo tras dar de alta el dominio de envío). |
@@ -140,7 +140,7 @@ Los tests de navegador usan Chromium headless con `playwright-core`; define `CHR
 
 ## Contenido y traducciones
 
-Las preguntas, flashcards, apuntes y novedades se importan de [Amey-Thakur/CLAUDE-CERTIFICATIONS](https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS) con `npm run sync` (espera esta carpeta dentro de un clon de ese repo; si no, usa el contenido ya incluido).
+Las preguntas, flashcards, apuntes y novedades se importan de [Amey-Thakur/CLAUDE-CERTIFICATIONS](https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS) con `npm run sync` (espera esta carpeta dentro de un clon de ese repo). Revisa y haz commit del diff de `src/content/` antes de desplegar: `build` y `deploy` no importan nada y `deploy` se niega a correr con cambios sin commitear en `src/content`.
 
 Las versiones en español están en `src/content/es/`. Cada entrada guarda `src`, la huella del texto inglés del que se tradujo; si el inglés cambia, la app muestra ese elemento en inglés hasta que se actualice la traducción. `npm run sync` avisa de las traducciones desactualizadas; tras corregirlas, ejecuta `node scripts/i18n.mjs stamp`.
 

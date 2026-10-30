@@ -47,5 +47,10 @@ export function useT(): Dict {
 
 /** Server and client error codes → message. Unknown codes are shown as they come. */
 export function errorText(t: Dict, code: string) {
-  return (t.errors as Record<string, string>)[code] ?? code
+  return ownText(t.errors as Record<string, string>, code) ?? code
+}
+
+/** A dictionary entry only if it is the dictionary's own string: `__proto__`, `constructor`… are not messages. */
+export function ownText(dict: Record<string, string>, code: string | null | undefined): string | undefined {
+  return code && Object.hasOwn(dict, code) && typeof dict[code] === 'string' ? dict[code] : undefined
 }

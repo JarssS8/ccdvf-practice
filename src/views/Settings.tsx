@@ -4,7 +4,7 @@ import { LangPicker, SyncBadge } from '../components/ui'
 import { meta } from '../lib/content'
 import { fmtDate } from '../lib/engine'
 import { api, deleteAccount, deviceId, dispatch, exportBackup, logout, now, setAiConsent, sync, useStore } from '../lib/store'
-import { errorText, useLang, useT } from '../i18n'
+import { errorText, ownText, useLang, useT } from '../i18n'
 import { answersCsv } from '../lib/export'
 import { useQuestions } from '../App'
 
@@ -47,7 +47,7 @@ export default function Settings() {
     setBusy(true); setErr('')
     try { await deleteAccount(password || undefined) } catch (e) {
       const code = (e as Error).message
-      setErr(code === 'SESSION_EXPIRED' ? t.settings.deleteFresh : t.auth.errors[code] ?? errorText(t, code))
+      setErr(code === 'SESSION_EXPIRED' ? t.settings.deleteFresh : ownText(t.auth.errors, code) ?? errorText(t, code))
     }
     setBusy(false)
   }

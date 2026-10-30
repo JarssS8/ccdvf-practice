@@ -11,6 +11,10 @@ const bankEs = bankEsJson as Record<string, { question: string; options: Record<
 const notesText = notesJson.cheatSheet + '\n\n' + notesJson.notes
 const LATE_GRACE_MS = 30_000
 const MAX_OPS = 100
+const MAX_ATTEMPTS = 1000 // per user
+const MAX_REVIEWS = 20_000 // per user
+const SETTING_KEYS = new Set(['exam_date'])
+const RESULT_MAX = 4000
 const LETTERS = new Set(['A', 'B', 'C', 'D', 'E'])
 const MODES = new Set(['full', 'quick', 'repo-mock-1', 'repo-mock-2', 'repo-mock-3', 'guide', 'drill', 'missed', 'ai', 'flagged'])
 
@@ -67,7 +71,7 @@ type Op =
   | { opId: string; type: 'setting'; key: string; value: string; updatedAt: number }
   | { opId: string; type: 'aiq.report'; id: string }
 
-interface AttemptState { status: string; deadline: number | null; lease: string }
+interface AttemptState { status: string; deadline: number | null; lease: string; qids: Set<string> }
 
 async function sync(req: Request, env: Env, u: string) {
   const body = await req.json<{ deviceId?: unknown; userId?: unknown; ops?: unknown }>().catch(() => null)
@@ -87,10 +91,17 @@ async function sync(req: Request, env: Env, u: string) {
   const attempts = new Map<string, AttemptState>()
   for (let i = 0; i < ids.length; i += 90) {
     const chunk = ids.slice(i, i + 90)
-    const rows = await env.DB.prepare(`SELECT id, status, deadline, lease_device FROM attempts WHERE user_id = ? AND id IN (${chunk.map(() => '?').join(',')})`)
-      .bind(u, ...chunk).all<{ id: string; status: string; deadline: number | null; lease_device: string }>()
-    for (const r of rows.results) attempts.set(r.id, { status: r.status, deadline: r.deadline, lease: r.lease_device })
+    const rows = await env.DB.prepare(`SELECT id, status, deadline, lease_device, question_ids FROM attempts WHERE user_id = ? AND id IN (${chunk.map(() => '?').join(',')})`)
+      .bind(u, ...chunk).all<{ id: string; status: string; deadline: number | null; lease_device: string; question_ids: string }>()
+    for (const r of rows.results) attempts.set(r.id, { status: r.status, deadline: r.deadline, lease: r.lease_device, qids: new Set(JSON.parse(r.question_ids) as string[]) })
   }
+
+  // Per-user ceilings on what sync can create (the only other bound is ops per request)
+  const needsCounts = ops.some((o) => o?.type === 'attempt.create' || o?.type === 'review')
+  const counts = needsCounts
+    ? await env.DB.prepare('SELECT (SELECT COUNT(*) FROM attempts WHERE user_id = ?) AS a, (SELECT COUNT(*) FROM reviews WHERE user_id = ?) AS r').bind(u, u).first<{ a: number; r: number }>()
+    : { a: 0, r: 0 }
+  let attemptCount = counts?.a ?? 0, reviewCount = counts?.r ?? 0
 
   const stmts: D1PreparedStatement[] = []
   for (const op of ops) {
@@ -102,8 +113,10 @@ async function sync(req: Request, env: Env, u: string) {
           && a.questionIds.every((q) => str(q, 80)) && int(a.seed) && int(a.startedAt) && (a.deadline === null || int(a.deadline))
         if (!valid) { reject(op, 'bad'); break }
         if (attempts.has(a.id)) break
+        if (attemptCount >= MAX_ATTEMPTS) { reject(op, 'quota'); break }
+        attemptCount++
         const lang = a.lang === 'es' ? 'es' : 'en'
-        attempts.set(a.id, { status: 'active', deadline: a.deadline, lease: dev })
+        attempts.set(a.id, { status: 'active', deadline: a.deadline, lease: dev, qids: new Set(a.questionIds) })
         stmts.push(env.DB.prepare(
           `INSERT OR IGNORE INTO attempts (user_id, id, mode, label, lang, feedback, question_ids, seed, started_at, deadline, status, lease_device, updated_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
@@ -122,6 +135,7 @@ async function sync(req: Request, env: Env, u: string) {
         if (!str(op.qid, 80) || !Array.isArray(op.choice) || op.choice.length > 5 || !op.choice.every((l) => LETTERS.has(l)) || !int(op.updatedAt)) { reject(op, 'bad'); break }
         if (!a) { reject(op, 'missing'); break }
         if (a.status !== 'active') { reject(op, 'closed'); break }
+        if (!a.qids.has(op.qid)) { reject(op, 'bad'); break }
         if (a.lease !== dev) { reject(op, 'lease'); break }
         if (a.deadline && op.updatedAt > a.deadline + LATE_GRACE_MS) { reject(op, 'late'); break }
         stmts.push(env.DB.prepare(
@@ -142,7 +156,7 @@ async function sync(req: Request, env: Env, u: string) {
       case 'attempt.submit': {
         const a = attempts.get(op.attemptId)
         const result = JSON.stringify(op.result ?? null)
-        if (!int(op.submittedAt) || result.length > 20_000) { reject(op, 'bad'); break }
+        if (!int(op.submittedAt) || result.length > RESULT_MAX) { reject(op, 'bad'); break }
         if (!a || a.status !== 'active') break
         a.status = 'submitted'
         stmts.push(env.DB.prepare("UPDATE attempts SET status = 'submitted', result = ?, submitted_at = ?, updated_at = ? WHERE user_id = ? AND id = ? AND status = 'active'")
@@ -150,12 +164,14 @@ async function sync(req: Request, env: Env, u: string) {
         break
       }
       case 'review':
+        if (reviewCount >= MAX_REVIEWS) { reject(op, 'quota'); break }
+        reviewCount++
         if (!str(op.id, 64) || !str(op.cardId, 100) || !int(op.rating) || op.rating < 0 || op.rating > 4 || !int(op.reviewedAt)) { reject(op, 'bad'); break }
         stmts.push(env.DB.prepare('INSERT OR IGNORE INTO reviews (user_id, id, card_id, rating, reviewed_at, device_id) VALUES (?, ?, ?, ?, ?, ?)')
           .bind(u, op.id, op.cardId, op.rating, op.reviewedAt, dev))
         break
       case 'setting':
-        if (!str(op.key, 40) || typeof op.value !== 'string' || op.value.length > 500 || !int(op.updatedAt)) { reject(op, 'bad'); break }
+        if (!str(op.key, 40) || !SETTING_KEYS.has(op.key) || typeof op.value !== 'string' || op.value.length > 500 || !int(op.updatedAt)) { reject(op, 'bad'); break }
         stmts.push(env.DB.prepare(
           `INSERT INTO settings (user_id, key, value, updated_at) VALUES (?, ?, ?, ?)
            ON CONFLICT (user_id, key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at WHERE excluded.updated_at > settings.updated_at`,
@@ -175,8 +191,14 @@ async function sync(req: Request, env: Env, u: string) {
 
 // ---------- DeepSeek ----------
 
-/** Reserves `calls` from the user's and the app's daily budget. Returns an error code when either is spent. */
-async function takeAiBudget(env: Env, u: string, calls: number): Promise<string | null> {
+/** The caller's network identity for abuse limits: the IP Cloudflare saw, IPv6 reduced to its /64. */
+function ipKey(req: Request) {
+  const ip = req.headers.get('cf-connecting-ip') ?? 'unknown'
+  return ip.includes(':') ? ip.split(':').slice(0, 4).join(':') : ip
+}
+
+/** Reserves `calls` from the user's, the network's and the app's daily budget. Returns an error code when any is spent. */
+async function takeAiBudget(env: Env, u: string, ip: string, calls: number): Promise<string | null> {
   const day = today()
   const mine = await env.DB.prepare(
     `INSERT INTO ai_usage (user_id, day, requests) VALUES (?, ?, ?)
@@ -185,20 +207,29 @@ async function takeAiBudget(env: Env, u: string, calls: number): Promise<string 
      RETURNING requests`,
   ).bind(u, day, calls, Number(env.AI_USER_DAILY_LIMIT) || 15).first()
   if (!mine) return 'ai_limit'
+  // Free accounts are cheap to mint, so one network cannot take more than its own share of the global pool
+  const net = await env.DB.prepare(
+    `INSERT INTO ai_usage_ip (ip, day, requests) VALUES (?, ?, ?)
+     ON CONFLICT (ip, day) DO UPDATE SET requests = requests + excluded.requests
+     WHERE ai_usage_ip.requests + excluded.requests <= ?
+     RETURNING requests`,
+  ).bind(ip, day, calls, Number(env.AI_IP_DAILY_LIMIT) || 60).first()
+  if (!net) { await refundAi(env, u, ip, calls, { ip: false, global: false }); return 'ai_limit' }
   const all = await env.DB.prepare(
     `INSERT INTO ai_usage_global (day, requests) VALUES (?, ?)
      ON CONFLICT (day) DO UPDATE SET requests = requests + excluded.requests
      WHERE ai_usage_global.requests + excluded.requests <= ?
      RETURNING requests`,
   ).bind(day, calls, Number(env.AI_GLOBAL_DAILY_LIMIT) || 400).first()
-  if (!all) { await refundAi(env, u, calls, false); return 'ai_global_limit' }
+  if (!all) { await refundAi(env, u, ip, calls, { global: false }); return 'ai_global_limit' }
   return null
 }
 
-async function refundAi(env: Env, u: string, calls: number, global = true) {
+async function refundAi(env: Env, u: string, ip: string, calls: number, only: { ip?: boolean; global?: boolean } = {}) {
   const day = today()
   const stmts = [env.DB.prepare('UPDATE ai_usage SET requests = MAX(0, requests - ?) WHERE user_id = ? AND day = ?').bind(calls, u, day)]
-  if (global) stmts.push(env.DB.prepare('UPDATE ai_usage_global SET requests = MAX(0, requests - ?) WHERE day = ?').bind(calls, day))
+  if (only.ip !== false) stmts.push(env.DB.prepare('UPDATE ai_usage_ip SET requests = MAX(0, requests - ?) WHERE ip = ? AND day = ?').bind(calls, ip, day))
+  if (only.global !== false) stmts.push(env.DB.prepare('UPDATE ai_usage_global SET requests = MAX(0, requests - ?) WHERE day = ?').bind(calls, day))
   await env.DB.batch(stmts)
 }
 
@@ -225,7 +256,7 @@ async function deepseekJson<T>(env: Env, model: string, system: string, user: st
       response_format: { type: 'json_object' },
       messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
     })
-    if (!res.ok) throw new Error(`DeepSeek ${res.status}: ${(await res.text()).slice(0, 200)}`)
+    if (!res.ok) { console.error('DeepSeek', res.status, (await res.text()).slice(0, 200)); throw new Error(`DeepSeek ${res.status}`) }
     const data = await res.json<{ choices: { message: { content: string }; finish_reason?: string }[]; usage?: { total_tokens: number } }>()
     await addTokens(env, data.usage?.total_tokens ?? 0)
     const choice = data.choices?.[0]
@@ -258,6 +289,7 @@ async function findQuestion(env: Env, u: string, qid: string, lang: string): Pro
 }
 
 async function tutor(req: Request, env: Env, user: User) {
+  const ip = ipKey(req)
   if (!env.DEEPSEEK_API_KEY) return json({ error: 'ai_disabled' }, 503)
   if (!user.aiConsentAt) return json({ error: 'ai_consent' }, 403)
   const body = await req.json<{ qid?: unknown; seed?: unknown; choice?: unknown; lang?: unknown; messages?: unknown }>().catch(() => null)
@@ -267,7 +299,7 @@ async function tutor(req: Request, env: Env, user: User) {
   const lang = body.lang === 'es' ? 'es' : 'en'
   const found = await findQuestion(env, user.id, body.qid as string, lang)
   if (!found) return json({ error: 'unknown_question' }, 404)
-  const budget = await takeAiBudget(env, user.id, 1)
+  const budget = await takeAiBudget(env, user.id, ip, 1)
   if (budget) return json({ error: budget }, 429)
 
   const { question, choice: shown } = asDisplayed(found, body.seed as number, choice)
@@ -293,7 +325,7 @@ ${notesText.slice(0, 16000)}`
       ...messages.slice(-12).map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content).slice(0, 2000) })),
     ],
   })
-  if (!upstream.ok || !upstream.body) { await refundAi(env, user.id, 1); return json({ error: 'ai_upstream' }, 502) }
+  if (!upstream.ok || !upstream.body) { await refundAi(env, user.id, ip, 1); return json({ error: 'ai_upstream' }, 502) }
   return new Response(upstream.body, { headers: { 'content-type': 'text/event-stream', ...SECURITY_HEADERS } })
 }
 
@@ -325,14 +357,16 @@ function validate(d: Draft, multi: boolean): string | null {
   return null
 }
 
-async function generate(req: Request, env: Env, u: string) {
+async function generate(req: Request, env: Env, user: User) {
+  const u = user.id, ip = ipKey(req)
   if (!env.DEEPSEEK_API_KEY) return json({ error: 'ai_disabled' }, 503)
+  if (!user.aiConsentAt) return json({ error: 'ai_consent' }, 403)
   const body = await req.json<{ domain?: string; count?: number; multi?: boolean }>().catch(() => null)
   const domain = DOMAINS.find((d) => d.name === body?.domain)?.name
   if (!domain) return json({ error: 'unknown_domain' }, 400)
   const count = Math.min(Math.max(Number(body?.count) || 3, 1), 4)
   const multi = !!body?.multi
-  const budget = await takeAiBudget(env, u, 1 + count)
+  const budget = await takeAiBudget(env, u, ip, 1 + count)
   if (budget) return json({ error: budget }, 429)
 
   const examples = bank.filter((q) => q.domain === domain).sort(() => Math.random() - 0.5).slice(0, 2)
@@ -358,17 +392,17 @@ NOTES:
 ${notesText}`
 
   const covered = [...bank, ...existing.results.map((r) => JSON.parse(r.body) as Question)].map((q) => `- ${q.question.slice(0, 170)}`).join('\n')
-  const user = `Write ${count} new items. Style examples (do not copy):\n\n${examples.map((q) => `${q.question}\n${optionText(q)}\nKey: ${q.answer.join(',')}`).join('\n\n')}\n\nAlready in the bank (do not reuse these scenarios):\n${covered}`
+  const userPrompt = `Write ${count} new items. Style examples (do not copy):\n\n${examples.map((q) => `${q.question}\n${optionText(q)}\nKey: ${q.answer.join(',')}`).join('\n\n')}\n\nAlready in the bank (do not reuse these scenarios):\n${covered}`
 
   let drafts: Draft[] = []
   const why: string[] = []
   try {
-    const out = await deepseekJson<{ questions: Draft[] }>(env, env.DEEPSEEK_MODEL, system, user, 8000, why)
+    const out = await deepseekJson<{ questions: Draft[] }>(env, env.DEEPSEEK_MODEL, system, userPrompt, 8000, why)
     drafts = Array.isArray(out?.questions) ? out.questions : []
     if (out && !drafts.length) why.push('the JSON had no "questions"')
   } catch (e) {
     console.error(e)
-    await refundAi(env, u, 1 + count)
+    await refundAi(env, u, ip, 1 + count)
     return json({ error: 'ai_upstream' }, 502)
   }
 
@@ -441,6 +475,16 @@ async function currentUser(auth: Auth, req: Request) {
   return (s?.user as User | undefined) ?? null
 }
 
+const AUTH_PATHS = new Set(['sign-up/email', 'sign-in/email', 'sign-in/social', 'sign-out', 'get-session', 'revoke-sessions', 'delete-user',
+  'callback/google', 'callback/github', 'error'])
+const RESET_PATHS = new Set(['request-password-reset', 'reset-password'])
+
+function authPathAllowed(path: string, env: Env) {
+  if (AUTH_PATHS.has(path)) return true
+  if (!recoveryEnabled(env)) return false
+  return RESET_PATHS.has(path) || /^reset-password\/[A-Za-z0-9]{16,64}$/.test(path)
+}
+
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url)
@@ -453,7 +497,11 @@ export default {
       }
       const auth = getAuth(env)
       // Better Auth checks Origin against trustedOrigins on its own mutating routes
-      if (url.pathname.startsWith('/api/auth/')) return withHeaders(await auth.handler(req))
+      if (url.pathname.startsWith('/api/auth/')) {
+        // Better Auth rate-limits before it resolves routes, one stored row per distinct path: only forward the routes the app uses
+        if (!authPathAllowed(url.pathname.slice('/api/auth/'.length), env)) return json({ error: 'not_found' }, 404)
+        return withHeaders(await auth.handler(req))
+      }
 
       if (req.method !== 'GET' && req.headers.get('origin') !== url.origin) return json({ error: 'origin' }, 403)
       const user = await currentUser(auth, req)
@@ -464,7 +512,7 @@ export default {
         case 'POST /api/sync': return await sync(req, env, user.id)
         case 'POST /api/ai/consent': return await consent(req, env, user.id)
         case 'POST /api/ai/tutor': return await tutor(req, env, user)
-        case 'POST /api/ai/generate': return await generate(req, env, user.id)
+        case 'POST /api/ai/generate': return await generate(req, env, user)
       }
       return json({ error: 'not_found' }, 404)
     } catch (e) {
@@ -481,6 +529,7 @@ export default {
       env.DB.prepare('DELETE FROM "session" WHERE "expiresAt" < ?').bind(new Date().toISOString()),
       env.DB.prepare('DELETE FROM "verification" WHERE "expiresAt" < ?').bind(new Date().toISOString()),
       env.DB.prepare('DELETE FROM ai_usage WHERE day < ?').bind(cutoff),
+      env.DB.prepare('DELETE FROM ai_usage_ip WHERE day < ?').bind(cutoff),
       env.DB.prepare('DELETE FROM ai_usage_global WHERE day < ?').bind(new Date(Date.now() - 90 * 864e5).toISOString().slice(0, 10)),
     ])
   },

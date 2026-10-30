@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 .wrangler
 .dev.vars
+
+.env
+.env.*
+!.dev.vars.example

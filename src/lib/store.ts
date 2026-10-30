@@ -158,7 +158,8 @@ class AuthError extends Error {}
 /** API errors carry the server's code (`ai_limit`, `bad_request`…); the views translate it. */
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, { credentials: 'same-origin', ...init, headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) } })
-  if (res.status === 401) { authed = false; emit(); throw new AuthError('auth') }
+  // The server no longer accepts this session (revoked elsewhere, expired, reset): nothing of that account may stay on the device
+  if (res.status === 401) { forget(); throw new AuthError('auth') }
   const body = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`)
   return body as T
@@ -253,8 +254,11 @@ export function setAiConsent(at: number | null) {
 
 /** Called after Better Auth signs someone in on this page. */
 export async function signedIn() {
-  authed = true
+  // Show nothing from a previously stored account until the server says who this session belongs to
+  authed = null
+  hasSnapshot = false
   await sync()
+  if (authed !== true) { authed = false; emit() }
 }
 
 function forget() {

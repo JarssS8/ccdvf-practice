@@ -6,9 +6,10 @@
   "engines": { "node": ">=24" },
   "scripts": {
     "sync": "node scripts/sync-content.mjs",
+    "predeploy": "git diff --quiet -- src/content || (echo 'src/content has uncommitted changes: review and commit them before deploying' >&2; exit 1)",
     "dev": "vite",
     "dev:worker": "npm run build && wrangler dev",
-    "build": "npm run sync && tsc -b && tsc -p worker && vite build",
+    "build": "tsc -b && tsc -p worker && vite build",
     "lint": "oxlint",
     "test": "vitest run",
     "test:e2e": "node scripts/test-local.mjs",

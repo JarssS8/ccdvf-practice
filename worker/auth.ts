@@ -16,6 +16,7 @@ export interface Env {
   DEEPSEEK_CHECK_MODEL: string
   AI_USER_DAILY_LIMIT: string
   AI_GLOBAL_DAILY_LIMIT: string
+  AI_IP_DAILY_LIMIT: string
   /** Cloudflare Email Service (Workers Paid). Without it there is no password reset. */
   EMAIL?: SendEmail
   EMAIL_FROM?: string
@@ -142,12 +143,18 @@ export function createAuth(env: Env) {
             if (account.providerId === 'credential') return
             const u = await env.DB.prepare('SELECT "emailVerified" AS v FROM "user" WHERE id = ?').bind(account.userId).first<{ v: number }>()
             if (!u || u.v) return
-            // A verified Google/GitHub identity was linked to an unverified password account: whoever set that
-            // password never proved they own the email. Remove it and every session it opened.
+            // Another identity already claims this unverified user: a verified Google/GitHub identity was just linked into it
+            // (Better Auth only links an identity whose email the provider reports as verified). Whoever created the user
+            // never proved they own the email. A fresh OAuth registration has no other identity, so its unverified
+            // state is kept as the provider reported it.
+            const others = await env.DB.prepare('SELECT COUNT(*) AS n FROM "account" WHERE "userId" = ? AND NOT ("providerId" = ? AND "accountId" = ?)')
+              .bind(account.userId, account.providerId, account.accountId).first<{ n: number }>()
+            if (!others?.n) return
+            // Remove every earlier identity (password or OAuth) and its sessions, and every grant it recorded (AI consent)
             await env.DB.batch([
-              env.DB.prepare('DELETE FROM "account" WHERE "userId" = ? AND "providerId" = \'credential\'').bind(account.userId),
+              env.DB.prepare('DELETE FROM "account" WHERE "userId" = ? AND NOT ("providerId" = ? AND "accountId" = ?)').bind(account.userId, account.providerId, account.accountId),
               env.DB.prepare('DELETE FROM "session" WHERE "userId" = ?').bind(account.userId),
-              env.DB.prepare('UPDATE "user" SET "emailVerified" = 1 WHERE id = ?').bind(account.userId),
+              env.DB.prepare('UPDATE "user" SET "emailVerified" = 1, "aiConsentAt" = NULL WHERE id = ?').bind(account.userId),
             ])
           },
         },

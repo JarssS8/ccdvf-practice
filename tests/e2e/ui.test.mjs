@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import { after, before, describe, it } from 'node:test'
-import { BASE, clearRateLimits, lastResetToken, sql, uniqueEmail } from './helpers.mjs'
+import { BASE, client, clearRateLimits, lastResetToken, sql, uniqueEmail } from './helpers.mjs'
 
 const CHROMIUM = process.env.CHROMIUM_PATH ?? '/usr/bin/chromium'
 const skip = !existsSync(CHROMIUM) && `no Chromium at ${CHROMIUM} (set CHROMIUM_PATH)`
@@ -81,6 +81,26 @@ describe('browser', { skip }, () => {
     await page.goto(BASE + '/#/legal/privacidad')
     assert.equal(await page.locator('h1').first().textContent(), 'Privacy policy')
     await page.getByRole('button', { name: 'Español' }).first().click()
+  })
+
+  it('a revoked session wipes the account from the device and a crafted ?error link does not blank the page', async () => {
+    // Revoke every session of this account from "another device", then let this tab discover it
+    const other = client()
+    assert.equal((await other('/api/auth/sign-in/email', { method: 'POST', body: { email, password: PW } })).status, 200)
+    assert.equal((await other('/api/auth/revoke-sessions', { method: 'POST', body: {} })).status, 200)
+    await page.goto(BASE + '/#/settings')
+    await page.getByRole('button', { name: 'Sync now' }).or(page.getByRole('button', { name: 'Sincronizar ahora' })).first().click()
+    await page.waitForSelector('#email')
+    const keys = await page.evaluate(() => Object.keys(localStorage))
+    assert.ok(keys.every((k) => !/^ccdvf_(base|outbox|uid|tutor_|pos_)/.test(k)), keys.join(','))
+    for (const bad of ['__proto__', 'constructor']) {
+      await page.goto(`${BASE}/?error=${bad}#/`)
+      await page.waitForSelector('#email')
+    }
+    await page.goto(BASE + '/#/')
+    await page.fill('#email', email); await page.fill('#password', PW)
+    await page.locator('form button.btn-primary').click()
+    await page.waitForSelector('.topbar')
   })
 
   it('signing out wipes the account from the device', async () => {

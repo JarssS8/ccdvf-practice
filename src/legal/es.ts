@@ -52,7 +52,7 @@ Esta política explica qué datos personales trata ${I.siteName} (${I.site}), pa
 | Identificador de tu cuenta de Google o GitHub, nombre, email y foto de perfil | Solo si entras con Google o GitHub. No se guardan los tokens de acceso de esos servicios. |
 | Progreso de estudio: intentos, respuestas, preguntas marcadas, repasos de tarjetas, fecha de tu examen y preguntas que generes con IA | Mientras usas la app. |
 | Dirección IP y navegador (user-agent) de cada sesión | Al iniciar sesión. |
-| Dirección IP en contadores de intentos | Al iniciar sesión, registrarte o borrar la cuenta, para frenar ataques. |
+| Dirección IP en contadores de intentos y de uso de la IA | Al iniciar sesión, registrarte, borrar la cuenta o usar la IA, para frenar ataques y abusos. |
 | Número de usos diarios de la IA | Al usar el tutor o generar preguntas. |
 | Tu email y un enlace de un solo uso | Solo si pides restablecer la contraseña. |
 | La pregunta que estás repasando, tu respuesta y los mensajes que escribes al tutor | Solo si usas el tutor IA y lo has aceptado. |
@@ -81,7 +81,7 @@ China no cuenta con una decisión de adecuación de la Comisión Europea, de mod
 - **Sesiones** (con su IP y navegador): caducan a los ${I.sessionDays} días sin uso y se borran en la limpieza diaria.
 - **Enlaces de recuperación de contraseña**: caducan en 1 hora, solo sirven una vez y se borran en la limpieza diaria.
 - **Contadores de intentos por IP**: menos de 48 horas.
-- **Contadores de uso de la IA**: 30 días.
+- **Contadores de uso de la IA (por usuario y por IP)**: 30 días.
 - **Mensajes del tutor**: este servicio no los guarda en su servidor. La conversación solo se guarda en tu dispositivo y se borra al cerrar sesión. DeepSeek los conserva según su propia política.
 - **Copias de recuperación**: Cloudflare mantiene un historial de recuperación de la base de datos de hasta 30 días. Pasado ese plazo, los datos borrados desaparecen también de él.
 

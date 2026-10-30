@@ -112,7 +112,7 @@ Open http://localhost:8787 and create an account. The local database lives in `.
 | --- | --- |
 | **Google sign-in** | Google Cloud Console → *OAuth consent screen* (External, **Publish**) → *Credentials → OAuth client ID → Web application*. Authorised origin: your URL. Redirect URI: `https://<your-url>/api/auth/callback/google`. Then `npx wrangler secret put GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`. |
 | **GitHub sign-in** | github.com/settings/developers → *New OAuth App*. Callback URL: `https://<your-url>/api/auth/callback/github`. Then `npx wrangler secret put GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`. |
-| **AI tutor and AI questions** | Get an API key at platform.deepseek.com, then `npx wrangler secret put DEEPSEEK_API_KEY`. Tune `AI_USER_DAILY_LIMIT` and `AI_GLOBAL_DAILY_LIMIT`. Keep the account's prepaid balance low: it is your hard spending cap. |
+| **AI tutor and AI questions** | Get an API key at platform.deepseek.com, then `npx wrangler secret put DEEPSEEK_API_KEY`. Tune `AI_USER_DAILY_LIMIT`, `AI_IP_DAILY_LIMIT` and `AI_GLOBAL_DAILY_LIMIT`. Keep the account's prepaid balance low: it is your hard spending cap. |
 | **Password reset by email** | Needs Workers Paid. Dashboard → **Compute → Email Service → Email Sending → Onboard Domain**, then set `ACCOUNT_RECOVERY` to `"on"` and deploy. |
 
 Each sign-in provider appears on the sign-in screen only when both of its secrets exist; no redeploy needed.
@@ -127,7 +127,7 @@ Each sign-in provider appears on the sign-in screen only when both of its secret
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | secrets | GitHub sign-in. |
 | `DEEPSEEK_API_KEY` | secret | Enables the AI tutor and question generation. |
 | `DEEPSEEK_MODEL` / `DEEPSEEK_CHECK_MODEL` | vars | Model for writing/tutoring and for the blind check. |
-| `AI_USER_DAILY_LIMIT` / `AI_GLOBAL_DAILY_LIMIT` | vars | AI calls per user per day / for the whole app per day. |
+| `AI_USER_DAILY_LIMIT` / `AI_IP_DAILY_LIMIT` / `AI_GLOBAL_DAILY_LIMIT` | vars | AI calls per day per user / per network (IP, IPv6 /64) / for the whole app. The per-network cap stops one person multiplying the per-user cap with free accounts. |
 | `EMAIL` | `send_email` binding | Cloudflare Email Service. |
 | `EMAIL_FROM` | var | Sender address for password-reset emails. |
 | `ACCOUNT_RECOVERY` | var | `"on"` shows "Forgot it?" (only after onboarding the sending domain). |
@@ -164,7 +164,7 @@ Browser tests drive headless Chromium through `playwright-core`; set `CHROMIUM_P
 
 ## Content and translations
 
-The questions, flashcards, notes and news are imported from [Amey-Thakur/CLAUDE-CERTIFICATIONS](https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS) with `npm run sync` (it expects this folder inside a clone of that repo; otherwise the committed content is used).
+The questions, flashcards, notes and news are imported from [Amey-Thakur/CLAUDE-CERTIFICATIONS](https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS) with `npm run sync` (it expects this folder inside a clone of that repo). Review the diff of `src/content/` and commit it before deploying: the imported text becomes the AI tutor's notes and the bank's answer keys.
 
 Spanish versions live in `src/content/es/`. Each entry stores `src`, a hash of the English text it was translated from; when the English changes, the app shows English for that item until the translation is updated. `npm run sync` reports stale translations; after fixing them run `node scripts/i18n.mjs stamp`.
 

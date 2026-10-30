@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { authClient, PROVIDERS, type Provider } from '../lib/auth'
 import { logout, signedIn } from '../lib/store'
-import { setLang, useLang, useT } from '../i18n'
+import { ownText, setLang, useLang, useT } from '../i18n'
 import { LangPicker } from '../components/ui'
 import { LegalLinks } from './Legal'
 
@@ -26,7 +26,7 @@ export default function AuthView() {
   const [notice, setNotice] = useState('')
   const [err, setErr] = useState(() => {
     const code = query.get('error')
-    return code ? t.auth.errors[code] ?? t.auth.errors.generic : ''
+    return code ? ownText(t.auth.errors, code) ?? t.auth.errors.generic : ''
   })
   const [providers, setProviders] = useState<Provider[]>([])
   const [canReset, setCanReset] = useState(false)
@@ -40,7 +40,7 @@ export default function AuthView() {
     if (window.location.search) window.history.replaceState(null, '', window.location.pathname + window.location.hash)
   }, [])
 
-  const message = (e: { code?: string; message?: string } | null | undefined) => t.auth.errors[e?.code ?? ''] ?? e?.message ?? t.auth.errors.generic
+  const message = (e: { code?: string; message?: string } | null | undefined) => ownText(t.auth.errors, e?.code) ?? e?.message ?? t.auth.errors.generic
   const go = (m: Mode) => { if (m !== 'reset') resetPending = false; setMode(m); setErr(''); setNotice('') }
 
   const submit = async (e: FormEvent) => {

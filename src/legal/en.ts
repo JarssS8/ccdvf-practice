@@ -54,7 +54,7 @@ This policy explains which personal data ${I.siteName} (${I.site}) processes, wh
 | Your Google or GitHub account identifier, name, email and profile picture | Only if you sign in with Google or GitHub. Their access tokens are not kept. |
 | Study progress: attempts, answers, flagged questions, flashcard reviews, your exam date and the questions you generate with AI | While you use the app. |
 | IP address and browser (user agent) of each session | When you sign in. |
-| IP address in attempt counters | When you sign in, sign up or delete the account, to slow down attacks. |
+| IP address in attempt and AI-usage counters | When you sign in, sign up, delete the account or use the AI, to slow down attacks and abuse. |
 | Number of AI uses per day | When you use the tutor or generate questions. |
 | Your email and a one-time link | Only if you ask to reset your password. |
 | The question you are reviewing, your answer and the messages you write to the tutor | Only if you use the AI tutor and have accepted it. |
@@ -83,7 +83,7 @@ China has no European Commission adequacy decision, so your data is not protecte
 - **Sessions** (with their IP and browser): expire after ${I.sessionDays} days without use and are removed by the daily clean-up.
 - **Password-reset links**: expire after 1 hour, work only once and are removed by the daily clean-up.
 - **Per-IP attempt counters**: under 48 hours.
-- **AI usage counters**: 30 days.
+- **AI usage counters (per user and per IP)**: 30 days.
 - **Tutor messages**: this service does not keep them on its server. The conversation is stored only on your device and is wiped when you sign out. DeepSeek keeps them under its own policy.
 - **Recovery copies**: Cloudflare keeps a recovery history of the database for up to 30 days. After that, deleted data also disappears from it.
 

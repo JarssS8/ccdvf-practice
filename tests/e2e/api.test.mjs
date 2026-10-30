@@ -62,6 +62,15 @@ describe('API', () => {
     assert.equal(s.reviews.length, 1)
   })
 
+  it('only forwards the auth routes the app uses, so junk paths cannot fill the rate-limit table', async () => {
+    const before = sql('SELECT COUNT(*) AS n FROM "rateLimit"')[0].n
+    for (const p of ['/api/auth/x1', '/api/auth/x2/' + 'a'.repeat(3000), '/api/auth/update-user', '/api/auth/change-password', '/api/auth/sign-in/email/']) {
+      assert.equal((await client()(p)).status, 404, p)
+    }
+    assert.equal(sql('SELECT COUNT(*) AS n FROM "rateLimit"')[0].n, before)
+    assert.equal((await client()('/api/auth/get-session')).status, 200)
+  })
+
   it('keeps users isolated', async () => {
     const s = (await B('/api/state')).json
     assert.equal(s.attempts.length + s.answers.length + s.settings.length + s.reviews.length, 0)
@@ -88,10 +97,21 @@ describe('API', () => {
     assert.equal(foreign.status, 403)
   })
 
+  it('caps what sync can create', async () => {
+    const setting = await A('/api/sync', { method: 'POST', body: { deviceId: 'devA', userId: uidA, ops: [{ opId: 's1', type: 'setting', key: 'anything-else', value: 'x', updatedAt: Date.now() }] } })
+    assert.equal(setting.json.rejected[0]?.reason, 'bad', 'only exam_date is a setting')
+    const stray = await A('/api/sync', { method: 'POST', body: { deviceId: 'devA', userId: uidA, ops: [{ opId: 's2', type: 'answer', attemptId, qid: 'not-in-this-attempt', choice: ['A'], flagged: false, updatedAt: Date.now() }] } })
+    assert.equal(stray.json.rejected[0]?.reason, 'bad', 'answers must belong to the attempt')
+    const big = await A('/api/sync', { method: 'POST', body: { deviceId: 'devA', userId: uidA, ops: [{ opId: 's3', type: 'attempt.submit', attemptId, result: { x: 'y'.repeat(5000) }, submittedAt: Date.now() }] } })
+    assert.equal(big.json.rejected[0]?.reason, 'bad', 'result is capped')
+  })
+
   it('guards the AI tutor: consent, known questions only', async () => {
     const r = await A('/api/ai/tutor', { method: 'POST', body: { qid: Q, seed: 1, choice: ['A'], lang: 'es', messages: [{ role: 'user', content: 'hola' }] } })
     // Locally there is no DeepSeek key; with one, the first refusal is the missing consent
     assert.ok((r.status === 503 && r.json.error === 'ai_disabled') || (r.status === 403 && r.json.error === 'ai_consent'))
+    const g = await A('/api/ai/generate', { method: 'POST', body: { domain: 'Claude Code', count: 1 } })
+    assert.ok((g.status === 503 && g.json.error === 'ai_disabled') || (g.status === 403 && g.json.error === 'ai_consent'), 'generate has the same consent gate as the tutor')
     const c = await A('/api/ai/consent', { method: 'POST', body: { consent: true } })
     assert.ok(c.json.aiConsentAt > 0)
     assert.ok((await A('/api/state')).json.user.aiConsentAt > 0)
