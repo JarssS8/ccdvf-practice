@@ -1,0 +1,47 @@
+{
+ "ehb03m": {
+  "title": "Octubre: los exámenes se publican en japonés",
+  "body": "Las preguntas frecuentes de la certificación ahora indican que «the exam and prep content are available in\nEnglish and Japanese» («el examen y el contenido de preparación están disponibles en\ninglés y japonés»), y documentan cómo pasar una cita ya reservada\nen inglés a la versión japonesa: cancélala en la cuenta de Pearson y\nprograma la japonesa, bajo la misma regla de 48 horas que cualquier otro cambio.\n\n**A quién afecta.** A cualquiera que lea japonés con más comodidad que inglés,\ny a cualquiera que leyera este repositorio antes de que apareciera esta entrada. Tres páginas de aquí\ndecían que el examen era solo en inglés, lo cual era cierto cuando se escribió y ya no\nlo es. Las herramientas de traducción del navegador siguen prohibidas durante la supervisión, así que\nlos idiomas legibles son esos dos y ningún otro.\n\nLa misma sección de las preguntas frecuentes también menciona las restricciones de prestación, ahora recogidas en\n[Disponibilidad](policies.md#availability): no hay supervisión online con OnVUE con un documento de identidad\nde Bielorrusia, Cuba, Corea del Norte, Rusia, Siria o una región restringida de\nUcrania, y la prestación a residentes de Irán está suspendida desde el 8 de septiembre de 2026 por\nla suspensión de la OFAC General License G. Son restricciones de Pearson, así que\ncambian sin que cambie el PDF de la política del examen.",
+  "src": "1iqnehl"
+ },
+ "15term3": {
+  "title": "Octubre: una cuarta ruta de rol y una insignia de Claude Code",
+  "body": "La navegación de Partner Academy ha incorporado dos entradas que no son certificaciones.\n[Claude Forward Deployed Engineer](https://anthropic-partners.skilljar.com/path/claude-fde)\nes una ruta de rol de nueve cursos, tres de los cuales son solo para partners, y la\n[insignia de partner de Claude Code](https://anthropic-partners.skilljar.com/path/partner-badge-claude-code)\nes una ruta de ocho cursos que termina en un proyecto final basado en escenarios. Ambas figuran en\n[Rutas de aprendizaje y cursos](learning-paths.md).\n\n**A quién afecta.** A nadie que se esté preparando para un examen. No existe ninguna certificación de Forward Deployed\nEngineer, y una insignia no es una certificación, así que el programa sigue\nsiendo de cuatro exámenes en tres roles certificados con precios sin cambios. Que una ruta de rol\naparezca en la navegación no es prueba de que haya un examen detrás.\n\nLas dos páginas que describen la insignia no coinciden en su extensión: la ruta dice ocho\ncursos y enumera ocho, el icono de la insignia dice diez.",
+  "src": "1szo0f7"
+ },
+ "1kyg8j7": {
+  "title": "Agosto: la academia se mudó a un nuevo hogar",
+  "body": "`anthropic.com/learn` ahora redirige de forma permanente a\n[academy.claude.com](https://academy.claude.com/), y la academia pública lleva la marca **Claude Academy**. Las URL de los cursos cambiaron de forma con el traslado: un curso\nque estaba en `anthropic.skilljar.com/claude-101` está ahora en\n`academy.claude.com/courses/claude-101`, y varios slugs se renombraron en lugar de\nsimplemente moverse.\n\n**A quién afecta.** A cualquiera que tenga marcadores o siga enlaces de guías\nantiguas. Las páginas anteriores de Skilljar siguen respondiendo, así que no se ha roto nada, pero\nel hogar mantenido es el nuevo.\n\nLas insignias de finalización ya verificadas en `academy.claude.com` antes del traslado\nlo siguen estando.",
+  "src": "zis743"
+ },
+ "884u7m": {
+  "title": "Septiembre: el catálogo creció hasta veintiséis cursos",
+  "body": "Se añadió **Building Effective Human Agent Teams (Beta)**: cinco lecciones y un\ncuestionario sobre cómo llevar a un equipo de la IA de un solo jugador a la multijugador, dirigido a responsables de equipo\ny no a desarrolladores. Emite una insignia de finalización y ningún certificado.\n\n**Introduction to Claude Tag** llegó más tarde en el mes: once lecciones y\nun cuestionario sobre Claude dentro del espacio de trabajo de Slack de un equipo, escrito para la persona que lo usa\nen sus canales y no para el administrador que lo instala. Marcado como beta. También\nemite una insignia de finalización y ningún certificado, por lo que el número de insignias ahora\nsupera al de certificados en cuatro cursos.\n\nPartner Academy también lista **Working with Claude Fable 5.1**, sobre dónde se sitúa ese\nmodelo y cómo migrar a él una implementación de cliente. Devuelve un 404 en la Claude Academy\npública, así que es solo para partners y se recoge en\n[Rutas de aprendizaje](learning-paths.md) en lugar de en las tablas de cursos.\n\n**A quién afecta.** A nadie que vaya a presentarse a un examen. Ninguno de los cursos es obligatorio para ninguna\ncertificación, y ninguno es preparación para el examen. Solo importa si estás\nrecorriendo el catálogo.",
+  "src": "113o4r1"
+ },
+ "52wgq": {
+  "title": "Agosto: el catálogo creció hasta veinticuatro cursos",
+  "body": "Se añadieron dos cursos: **Deploying Claude Enterprise with Confidence**, sobre las\ncinco decisiones de toda la organización que hay detrás de un despliegue, y **AI Fluency for pK-12\nTrain the Trainer**, creado con la American Federation of Teachers.\n\n**A quién afecta.** A nadie que vaya a presentarse a un examen. Ningún curso es obligatorio para ninguna\ncertificación, y las guías lo dicen explícitamente. Solo importa si estás\nrecorriendo el catálogo.",
+  "src": "1b4n8j9"
+ },
+ "g6y6jb": {
+  "title": "31 de agosto: termina el descuento de Global Premier",
+  "body": "Hasta el 31 de agosto de 2026, los partners Global Premier no pagaban nada. Desde el 1 de septiembre\nse aplica el descuento estándar de partner del 50%.\n\n**A quién afecta.** A los partners Global Premier que planeaban presentarse a un examen\nen otoño. Reservar antes de la fecha límite valía la tarifa completa.",
+  "src": "1ef0sh8"
+ },
+ "udb1jr": {
+  "title": "Julio: guías de examen publicadas en la versión 1.0",
+  "body": "Las cuatro guías de examen llevan la versión 1.0, con efecto desde julio de 2026. Son los\ndocumentos de alcance autorizados: los dominios, los pesos, el número de ítems, las\npreguntas de muestra y las reglas de puntuación.\n\n**A quién afecta.** A todo el mundo. Si algo de este sitio discrepa de una guía,\nla guía tiene razón.",
+  "src": "1sqrkwb"
+ },
+ "1anvjum": {
+  "title": "30 de junio: la prestación pasó a Pearson VUE y las insignias a Credly",
+  "body": "El mayor cambio de la historia del programa, y el que tiene la cola más larga.\n\n| Qué cambió | Consecuencia |\n| --- | --- |\n| La prestación de los exámenes pasó a Pearson VUE | La reserva, el cambio de fecha, las comprobaciones de identidad y la experiencia de supervisión se gestionan ahora a través de Pearson |\n| Las insignias pasaron a Credly | Las credenciales se emiten como insignias de Credly en lugar de en la plataforma anterior |\n| Tarifa de Architect Foundations | Subida de 99 a 125 USD |\n| Intentos fallidos previos a la migración | Los intentos fallidos de Architect Foundations anteriores a la migración se borraron, de modo que esos candidatos podían reintentarlo sin periodo de espera |\n| Validez de la credencial | Ampliada de 6 meses a 12, aplicada automáticamente a las credenciales obtenidas antes de la migración, con fecha desde que se obtuvieron originalmente |\n| Registros en curso | Trasladados a Pearson por oleadas |\n| El examen de práctica oficial | Retirado, y no sustituido |\n\n**A quién afecta.** A cualquiera que se registró o se certificó antes del 30 de junio de 2026.\nDos casos aún dan problemas. Si pagaste antes de la migración y nunca\nrecibiste un enlace de Pearson, contacta con\n[certifications-support@anthropic.com](mailto:certifications-support@anthropic.com)\nen lugar de registrarte de nuevo, lo cual te cobra dos veces. Y si una credencial\nprevia a la migración nunca apareció en Credly, puede que el correo de la insignia haya ido a una\ndirección que ya no lees.\n\nEl examen de práctica retirado es el cambio que más notan los candidatos. Ya no hay\nningún examen de práctica oficial. Las preguntas de muestra de cada guía de examen\nson los únicos ítems oficiales que existen.",
+  "src": "15zaas7"
+ },
+ "1a3p9w8": {
+  "title": "25 de junio: se revisó el documento de política del examen",
+  "body": "La actual [Anthropic Certification Exam\nPolicy](official-sources.md) lleva fecha de revisión del 25 de junio de 2026. Regula\nla conducta, la identificación, los objetos prohibidos, la invalidación y las apelaciones.\n\n**A quién afecta.** A todos los que se presentan a un examen. Es corta, y es el\ndocumento que la gente desearía haber leído solo después de que algo sale mal.",
+  "src": "1pqgbfe"
+ }
+}

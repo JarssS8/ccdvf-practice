@@ -1,0 +1,9 @@
+# Local secrets for `wrangler dev`. Copy to .dev.vars (git-ignored) and fill in.
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=http://localhost:8787
+# Optional
+DEEPSEEK_API_KEY=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=

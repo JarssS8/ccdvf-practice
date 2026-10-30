@@ -7,11 +7,15 @@ import { startAttempt } from '../lib/actions'
 import { domainStats, exposures, pct } from '../lib/engine'
 import { addAiQuestions, api, sync, useStore } from '../lib/store'
 import { DOMAINS, type Question } from '../shared/exam'
+import { errorText, useLang, useT } from '../i18n'
+import { fmtNum } from '../lib/engine'
 
 interface GenResult { accepted: Question[]; rejected: { question: string; reason: string }[] }
 
 export default function Domains() {
   const { data } = useStore()
+  const t = useT()
+  const lang = useLang()
   const qs = useQuestions()
   const [err, setErr] = useState('')
   const [genDomain, setGenDomain] = useState<string>(DOMAINS[0].name)
@@ -38,16 +42,16 @@ export default function Domains() {
   return (
     <>
       <div className="stack" style={{ gap: 6 }}>
-        <h1 className="h-page">Por dominio</h1>
-        <p className="muted">Drills de 10 con corrección al momento. Priorizan lo que no has visto y lo que hace más tiempo que no ves.</p>
+        <h1 className="h-page">{t.domainsView.title}</h1>
+        <p className="muted">{t.domainsView.intro}</p>
       </div>
-      {err && <p role="alert" className="callout callout-bad">{err}</p>}
+      {err && <p role="alert" className="callout callout-bad">{errorText(t, err)}</p>}
 
       <section className="card" aria-labelledby="dl-h">
-        <h2 id="dl-h" className="sr-only">Dominios</h2>
+        <h2 id="dl-h" className="sr-only">{t.nav.domains}</h2>
         <div className="scroll-x">
           <table className="data">
-            <thead><tr><th>Dominio</th><th className="num">Peso</th><th className="num">Banco</th><th className="num">Sin ver</th><th>Primer intento</th><th className="num">Últimas 60</th><th><span className="sr-only">Acciones</span></th></tr></thead>
+            <thead><tr><th>{t.domainsView.domain}</th><th className="num">{t.domainsView.weight}</th><th className="num">{t.domainsView.bank}</th><th className="num">{t.domainsView.unseen}</th><th>{t.domainsView.first}</th><th className="num">{t.domainsView.last60}</th><th><span className="sr-only">{t.domainsView.actions}</span></th></tr></thead>
             <tbody>
               {stats.map((d) => {
                 const pool = all.filter((q) => q.domain === d.name && q.source !== 'ai')
@@ -56,23 +60,23 @@ export default function Domains() {
                 const aiN = aiActive.filter((q) => q.domain === d.name).length
                 return (
                   <tr key={d.name}>
-                    <td style={{ fontWeight: 500, minWidth: 180 }}>{d.name}</td>
-                    <td className="num">{d.weight.toLocaleString('es-ES')} %</td>
-                    <td className="num">{groups.size}{aiN ? <span className="muted"> +{aiN} IA</span> : null}</td>
+                    <td style={{ fontWeight: 500, minWidth: 180 }}>{t.domains[d.name]}</td>
+                    <td className="num">{t.common.percent(fmtNum(d.weight, lang))}</td>
+                    <td className="num">{groups.size}{aiN ? <span className="muted"> +{aiN} AI</span> : null}</td>
                     <td className="num">{unseen}</td>
                     <td style={{ minWidth: 140 }}>
                       {d.first.n ? (
                         <div className="stack" style={{ gap: 4 }}>
-                          <span className="mono tiny">{pct(d.first.c, d.first.n)} % · {d.first.c}/{d.first.n}</span>
-                          <Meter value={pct(d.first.c, d.first.n)} bad={d.first.n >= 3 && d.first.c / d.first.n < 0.69} label={`${d.name} primer intento`} />
+                          <span className="mono tiny">{t.common.percent(pct(d.first.c, d.first.n))} · {d.first.c}/{d.first.n}</span>
+                          <Meter value={pct(d.first.c, d.first.n)} bad={d.first.n >= 3 && d.first.c / d.first.n < 0.69} label={t.domainsView.firstAria(t.domains[d.name])} />
                         </div>
-                      ) : <span className="tiny muted">sin datos</span>}
+                      ) : <span className="tiny muted">{t.common.noData}</span>}
                     </td>
-                    <td className="num">{d.recent.n ? `${pct(d.recent.c, d.recent.n)} %` : '—'}</td>
+                    <td className="num">{d.recent.n ? t.common.percent(pct(d.recent.c, d.recent.n)) : '—'}</td>
                     <td>
                       <div className="row" style={{ gap: 6, flexWrap: 'nowrap' }}>
                         <button className="btn btn-sm" onClick={() => setErr(startAttempt('drill', d.name) ?? '')}>Drill</button>
-                        {aiN > 0 && <button className="btn btn-sm btn-ghost" onClick={() => setErr(startAttempt('ai', d.name) ?? '')} aria-label={`Drill IA de ${d.name}`}><Icon name="sparkle" size={16} />IA</button>}
+                        {aiN > 0 && <button className="btn btn-sm btn-ghost" onClick={() => setErr(startAttempt('ai', d.name) ?? '')} aria-label={t.domainsView.aiDrill(t.domains[d.name])}><Icon name="sparkle" size={16} />AI</button>}
                       </div>
                     </td>
                   </tr>
@@ -81,40 +85,37 @@ export default function Domains() {
             </tbody>
           </table>
         </div>
-        <p className="tiny muted">«Banco» cuenta conceptos distintos: las preguntas casi idénticas entre práctica y mocks cuentan una vez.</p>
+        <p className="tiny muted">{t.domainsView.bankNote}</p>
       </section>
 
       <section className="card" aria-labelledby="ai-h">
         <div className="row-between">
-          <h2 id="ai-h" className="h-section row" style={{ gap: 8 }}><span style={{ color: 'var(--accent)', display: 'inline-flex' }}><Icon name="sparkle" /></span>Preguntas nuevas con IA</h2>
-          {data.ai.enabled && <span className="tiny muted mono">{data.ai.usedToday}/{data.ai.dailyLimit} llamadas hoy</span>}
+          <h2 id="ai-h" className="h-section row" style={{ gap: 8 }}><span style={{ color: 'var(--accent)', display: 'inline-flex' }}><Icon name="sparkle" /></span>{t.domainsView.aiTitle}</h2>
+          {data.ai.enabled && <span className="tiny muted mono">{t.domainsView.callsToday(data.ai.usedToday, data.ai.dailyLimit)}</span>}
         </div>
         {!data.ai.enabled ? (
-          <p className="small muted">Sin configurar. Cuando añadas la clave de DeepSeek como secreto de Cloudflare se activará aquí.</p>
+          <p className="small muted">{t.domainsView.aiOff}</p>
         ) : (
           <>
-            <p className="small muted">
-              DeepSeek escribe preguntas a partir de tus apuntes y del temario oficial del dominio. Solo se guardan si pasan todos los filtros: citan literalmente una de esas fuentes, la correcta no es la opción más larga y un segundo modelo, sin ver la clave, llega a la misma respuesta y confirma que encaja en el dominio.
-              Aun así pueden estar mal: no cuentan para tu estimación y puedes reportarlas.
-            </p>
+            <p className="small muted">{t.domainsView.aiText}</p>
             <div className="row" style={{ alignItems: 'flex-end' }}>
               <div className="field" style={{ flex: '1 1 260px' }}>
-                <label htmlFor="gen-d">Dominio</label>
+                <label htmlFor="gen-d">{t.domainsView.domain}</label>
                 <select id="gen-d" className="input" value={genDomain} onChange={(e) => setGenDomain(e.target.value)}>
-                  {DOMAINS.map((d) => <option key={d.name}>{d.name}</option>)}
+                  {DOMAINS.map((d) => <option key={d.name} value={d.name}>{t.domains[d.name]}</option>)}
                 </select>
               </div>
               <label className="row small" style={{ gap: 8, minHeight: 48 }}>
                 <input type="checkbox" checked={multi} onChange={(e) => setMulti(e.target.checked)} style={{ width: 20, height: 20 }} />
-                Incluir respuesta múltiple
+                {t.domainsView.multi}
               </label>
-              <button className="btn btn-primary" onClick={() => void generate()} disabled={busy}>{busy ? 'Generando y verificando…' : 'Generar 4'}</button>
+              <button className="btn btn-primary" onClick={() => void generate()} disabled={busy}>{busy ? t.domainsView.generating : t.domainsView.generate}</button>
             </div>
             {gen && (
               <div className="callout callout-info small" role="status">
-                <strong>{gen.accepted.length} aceptada{gen.accepted.length === 1 ? '' : 's'}, {gen.rejected.length} descartada{gen.rejected.length === 1 ? '' : 's'}.</strong>
+                <strong>{t.domainsView.outcome(gen.accepted.length, gen.rejected.length)}</strong>
                 {gen.rejected.map((r, i) => <span key={i} className="muted">· {r.reason}{r.question ? `: ${r.question}…` : ''}</span>)}
-                {gen.accepted.length > 0 && <button className="btn btn-sm btn-primary" style={{ alignSelf: 'flex-start' }} onClick={() => setErr(startAttempt('ai', genDomain) ?? '')}>Practicarlas</button>}
+                {gen.accepted.length > 0 && <button className="btn btn-sm btn-primary" style={{ alignSelf: 'flex-start' }} onClick={() => setErr(startAttempt('ai', genDomain) ?? '')}>{t.domainsView.practise}</button>}
               </div>
             )}
           </>

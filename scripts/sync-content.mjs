@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
+import { run as checkTranslations } from './i18n.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const repo = join(here, '..', '..')
@@ -18,6 +19,7 @@ const DOMAINS = [
 mkdirSync(out, { recursive: true })
 if (!existsSync(join(repo, 'question-bank.json'))) {
   console.warn('  ! study repo not found next to this folder: keeping the content already in src/content')
+  checkTranslations('check')
   process.exit(0)
 }
 
@@ -139,3 +141,4 @@ write('meta.json', {
 })
 
 console.log(`questions ${questions.length} (${dups} near-duplicate pairs) · flashcards ${flashcards.length} · news ${news.length} · facts verified ${verified}`)
+checkTranslations('check')

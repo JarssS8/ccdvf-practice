@@ -1,0 +1,307 @@
+{
+ "fc-0fe5c271c2": {
+  "front": "Developer – Foundations: código del examen",
+  "back": "CCDV-F",
+  "src": "1tnctkh"
+ },
+ "fc-cca1346aa4": {
+  "front": "Developer – Foundations: cuántas preguntas",
+  "back": "53 preguntas",
+  "src": "s37tz5"
+ },
+ "fc-1c49b2f78c": {
+  "front": "Developer – Foundations: tarifa de lista antes del descuento de partner",
+  "back": "$125",
+  "src": "i60tts"
+ },
+ "fc-1cb14e1ecb": {
+  "front": "Developer – Foundations: dominio de mayor peso y su peso",
+  "back": "Applications and integration, con un 33.1%",
+  "src": "1x0zset"
+ },
+ "fc-0544f7f88b": {
+  "front": "Developer – Foundations: dominio de menor peso y su peso",
+  "back": "Eval, testing, and debugging, con un 2.6%",
+  "src": "1klcqfc"
+ },
+ "fc-4c9bec5775": {
+  "front": "Developer – Foundations: dominios por orden de peso",
+  "back": "Applications and integration 33.1% → Model selection and optimization 16.8% → Agents and workflows 14.7% → Prompt and context engineering 11.0% → Tools and MCPs 10.6% → Security and safety 8.1% → Claude Code 3.1% → Eval, testing, and debugging 2.6%",
+  "src": "jrghz1"
+ },
+ "fc-4228f38d8a": {
+  "front": "Developer – Foundations: a quién va dirigido",
+  "back": "Ingenieros que desarrollan sobre la plataforma Claude",
+  "src": "1ohf7wp"
+ },
+ "fc-91b862de74": {
+  "front": "Developer – Foundations: completa la regla: stop_reason dirige el bucle: ...",
+  "back": "stop_reason dirige el bucle: tool_use ejecuta, end_turn termina.",
+  "src": "9c1q9e"
+ },
+ "fc-d49ca80a43": {
+  "front": "Developer – Foundations: completa la regla: Batches para volumen tolerante a la latencia: ...",
+  "back": "Batches para volumen tolerante a la latencia: mitad de coste, ventana de 24 horas.",
+  "src": "nxpgtd"
+ },
+ "fc-a75e15b46f": {
+  "front": "Developer – Foundations: Primero el prefijo estable, luego cachéalo. ¿Por qué?",
+  "back": "Reduce la latencia y el coste a la vez.",
+  "src": "rbha9r"
+ },
+ "fc-e4cde5bcd6": {
+  "front": "Developer – Foundations: completa la regla: Impón un esquema, ...",
+  "back": "Impón un esquema, valida, reintenta con el error de validación.",
+  "src": "3voxxm"
+ },
+ "fc-5f65bda4d4": {
+  "front": "Developer – Foundations: Camino conocido es un workflow. ¿Por qué?",
+  "back": "El camino desconocido justifica un agente.",
+  "src": "1lddoyt"
+ },
+ "fc-052e6fcffa": {
+  "front": "Developer – Foundations: completa la regla: Los subagentes existen para aislar el contexto, ...",
+  "back": "Los subagentes existen para aislar el contexto, no para añadir potencia.",
+  "src": "14f3wx"
+ },
+ "fc-70d04c4546": {
+  "front": "Developer – Foundations: completa la regla: Fija las versiones del modelo; ...",
+  "back": "Fija las versiones del modelo; las actualizaciones pasan a ser cambios evaluados.",
+  "src": "hd5krs"
+ },
+ "fc-05909d2398": {
+  "front": "Developer – Foundations: completa la regla: La inyección se derrota estructuralmente, ...",
+  "back": "La inyección se derrota estructuralmente, nunca pidiéndolo por favor.",
+  "src": "13zsoha"
+ },
+ "fc-fe20890dd1": {
+  "front": "Developer – Foundations: completa la regla: Una herramienta que el agente no tiene ...",
+  "back": "Una herramienta que el agente no tiene no puede usarse mal.",
+  "src": "vna3j7"
+ },
+ "fc-0477602df0": {
+  "front": "Puntuación para aprobar en todos los exámenes de certificación de Claude",
+  "back": "720 en un rango escalado de 100 a 1,000",
+  "src": "suuidb"
+ },
+ "fc-5316b87583": {
+  "front": "Límite de tiempo en todos los exámenes de certificación de Claude",
+  "back": "120 minutos, con unos 135 minutos de permanencia total en el asiento",
+  "src": "f8tdru"
+ },
+ "fc-609b5c2a0a": {
+  "front": "Cuánto dura la validez de una credencial de Claude",
+  "back": "12 meses desde la fecha en que la obtienes",
+  "src": "lwfmlc"
+ },
+ "fc-4b40ab86e5": {
+  "front": "En qué consiste la renovación a tiempo",
+  "back": "Una evaluación gratuita, a libro abierto y sin supervisión en Anthropic Partner Academy, que se puede repetir tantas veces como haga falta",
+  "src": "z3tj7u"
+ },
+ "fc-de0046c3c7": {
+  "front": "Qué ocurre si una credencial caduca",
+  "back": "Debes aprobar de nuevo el examen completo, con la tarifa completa",
+  "src": "tihvv5"
+ },
+ "fc-25b82082c3": {
+  "front": "Periodos de espera para reintentar tras intentos fallidos",
+  "back": "14 días tras el primero, 30 tras el segundo, 90 tras el tercero",
+  "src": "4rvusn"
+ },
+ "fc-69df6c2f14": {
+  "front": "Máximo de intentos por examen en 12 meses consecutivos",
+  "back": "Cuatro",
+  "src": "1kyqzmp"
+ },
+ "fc-c16f777e56": {
+  "front": "Ventana de cancelación o cambio de fecha gratuitos",
+  "back": "Al menos 24 horas antes de la cita; dentro de ese plazo, se pierde la tarifa",
+  "src": "s4b870"
+ },
+ "fc-c3a6d3b889": {
+  "front": "Quién imparte los exámenes",
+  "back": "Pearson VUE, con supervisión online mediante OnVUE o en un centro de examen",
+  "src": "1w03a3r"
+ },
+ "fc-cedde4630b": {
+  "front": "De dónde procede la insignia digital",
+  "back": "De Credly, por correo electrónico tras aprobar",
+  "src": "18gbnc3"
+ },
+ "fc-09781affbf": {
+  "front": "Qué examen no cuenta para la elegibilidad del nivel de partner",
+  "back": "Claude Certified Associate",
+  "src": "xyek4t"
+ },
+ "fc-76f8a0f68c": {
+  "front": "Descuentos por nivel de partner en las tarifas de examen",
+  "back": "Los partners Select, Preferred y Global Premier reciben un 50% de descuento, aplicado al pagar",
+  "src": "oqo9do"
+ },
+ "fc-b5e9c3d807": {
+  "front": "Cómo se puntúa el examen, en una frase",
+  "back": "Referenciado a criterio: frente a un estándar fijo, no frente a otros candidatos",
+  "src": "1ngfbbv"
+ },
+ "fc-ec078e9e12": {
+  "front": "Qué muestra el informe de puntuación además de aprobado o suspenso",
+  "back": "La puntuación escalada y el porcentaje de aciertos por dominio",
+  "src": "16pg7a4"
+ },
+ "fc-011c93af3f": {
+  "front": "¿Hay un examen de práctica oficial?",
+  "back": "No. El de la plataforma anterior se retiró en la migración a Pearson; las preguntas de muestra de las guías de examen son los únicos ítems oficiales",
+  "src": "z1mryn"
+ },
+ "fc-6362ec7148": {
+  "front": "Cuál es el alcance autorizado de un examen",
+  "back": "El blueprint de su guía oficial del examen; lo que quede fuera no se evalúa",
+  "src": "1meme1c"
+ },
+ "fc-b98b0ddeb7": {
+  "front": "¿Son los exámenes a libro abierto?",
+  "back": "No. Sin notas, documentación, herramientas de traducción ni asistentes de IA",
+  "src": "asn0ds"
+ },
+ "fc-a23a0e0e33": {
+  "front": "Quién puede presentarse actualmente a estos exámenes",
+  "back": "Personas de organizaciones del Claude Partner Network, que se registran con un correo de empresa reconocido",
+  "src": "llkdpi"
+ },
+ "fc-114140b482": {
+  "front": "Cuánto tardan los cambios en el registro de dominios de correo de partner",
+  "back": "De 7 a 10 días, así que resuélvelos antes de la fecha en que planees presentarte",
+  "src": "13ptjph"
+ },
+ "fc-5efea8cfce": {
+  "front": "Qué cubre el NDA del examen",
+  "back": "Preguntas, opciones de respuesta y escenarios, incluyendo explícitamente grupos de estudio y foros online",
+  "src": "1cs27uo"
+ },
+ "fc-30cf0896e2": {
+  "front": "Dónde puedes hacer los cursos oficiales sin una cuenta de partner",
+  "back": "En la Claude Academy pública; todos los cursos son gratuitos allí",
+  "src": "50heep"
+ },
+ "fc-c843d9fbac": {
+  "front": "Glosario: Blueprint",
+  "back": "El esquema de contenidos del examen en cada guía: los dominios evaluados, sus pesos y los objetivos con los que se redactan los ítems. El alcance autorizado del examen",
+  "src": "1xtu2rg"
+ },
+ "fc-f027016441": {
+  "front": "Glosario: Peso del dominio",
+  "back": "La proporción aproximada de ítems puntuables que proceden de un dominio, por ejemplo 33.1% para el dominio Applications and integration del examen Developer",
+  "src": "1qadpnb"
+ },
+ "fc-7d83c0ffc7": {
+  "front": "Glosario: Enunciado de tarea",
+  "back": "Una capacidad numerada dentro de un dominio, usada en la guía de Architect Foundations, con la que se redactan los ítems",
+  "src": "1422jep"
+ },
+ "fc-dc378cc3e0": {
+  "front": "Glosario: MQC",
+  "back": "Candidato mínimamente cualificado: el perfil del examinando más débil que aun así debería aprobar, al que se calibra el estándar de aprobado",
+  "src": "12470nz"
+ },
+ "fc-4292af23a2": {
+  "front": "Glosario: Referenciado a criterio",
+  "back": "Puntuado frente a un estándar fijo en lugar de frente a otros candidatos. No hay curva",
+  "src": "1bnvft7"
+ },
+ "fc-8ee8d006e2": {
+  "front": "Glosario: Puntuación escalada",
+  "back": "La puntuación comunicada en un rango de 100 a 1,000, equiparada para que los resultados sean comparables entre formas del examen de dificultad ligeramente distinta",
+  "src": "fns0r8"
+ },
+ "fc-0f342a105e": {
+  "front": "Glosario: Puntuación de corte",
+  "back": "El umbral de aprobado: 720 escalado, para los cuatro exámenes",
+  "src": "mfnvwb"
+ },
+ "fc-f1539ac91b": {
+  "front": "Glosario: Ítem",
+  "back": "Una pregunta del examen. Los ítems de opción múltiple tienen una mejor respuesta; los de respuesta múltiple indican cuántas respuestas hay que seleccionar",
+  "src": "p59z4e"
+ },
+ "fc-7331a9e02e": {
+  "front": "Glosario: Examen basado en escenarios",
+  "back": "El formato de Architect Foundations: 4 escenarios extraídos de un banco publicado de 6, cada uno de los cuales enmarca un conjunto de ítems",
+  "src": "1ysdmdj"
+ },
+ "fc-f6efb9d583": {
+  "front": "Glosario: Forma del examen",
+  "back": "Una versión concreta ensamblada de un examen; las formas varían ligeramente, y la puntuación escalada lo corrige",
+  "src": "11fr67u"
+ },
+ "fc-39fc56eb7b": {
+  "front": "Glosario: NDA",
+  "back": "El acuerdo de confidencialidad que se acepta antes de empezar el examen: el contenido del examen no puede compartirse, reproducirse ni comentarse, incluidos grupos de estudio y foros",
+  "src": "mguh2o"
+ },
+ "fc-0c0237fc03": {
+  "front": "Glosario: Pearson VUE",
+  "back": "La empresa que imparte los exámenes, online y en centros de examen, desde el 30 de junio de 2026",
+  "src": "1pnbmw5"
+ },
+ "fc-2346fc9a65": {
+  "front": "Glosario: OnVUE",
+  "back": "La aplicación de supervisión online de Pearson, que se ejecuta en tu propio ordenador bajo supervisión remota",
+  "src": "1ndezwj"
+ },
+ "fc-621939f788": {
+  "front": "Glosario: Centro de examen",
+  "back": "Una sede física de Pearson con el equipo proporcionado, la alternativa a la supervisión online",
+  "src": "1ddxxq9"
+ },
+ "fc-926165acf5": {
+  "front": "Glosario: Credly",
+  "back": "La plataforma de insignias digitales que emite la credencial compartible tras aprobar",
+  "src": "zecfk2"
+ },
+ "fc-8af273e7d7": {
+  "front": "Glosario: CPN",
+  "back": "El Claude Partner Network, cuyas organizaciones miembro pueden optar a la certificación",
+  "src": "1dkvlc1"
+ },
+ "fc-4edc0e3f0b": {
+  "front": "Glosario: Nivel de partner",
+  "back": "El nivel de una organización en el CPN: Registered paga el precio de lista; Select, Preferred y Global Premier reciben un 50% de descuento en los exámenes",
+  "src": "15fezeo"
+ },
+ "fc-cecd62a9b4": {
+  "front": "Glosario: Ruta de preparación",
+  "back": "La secuencia de cursos seleccionada en Partner Academy para una certificación concreta",
+  "src": "p6tj4b"
+ },
+ "fc-e43d01ca5a": {
+  "front": "Glosario: Guía del examen",
+  "back": "El PDF oficial de cada certificación: blueprint, preguntas de muestra, políticas y puntuación. El documento de estudio más importante",
+  "src": "tgiedk"
+ },
+ "fc-bb7ea8cacc": {
+  "front": "Glosario: Evaluación de renovación",
+  "back": "La evaluación gratuita, a libro abierto y sin supervisión en Partner Academy que prorroga una credencial 12 meses si se aprueba antes de que caduque",
+  "src": "pytrml"
+ },
+ "fc-fb8ded4aeb": {
+  "front": "Glosario: Caducidad",
+  "back": "Dejar que una credencial expire sin renovarla; recuperarla exige el examen completo con la tarifa completa",
+  "src": "1mvk0nk"
+ },
+ "fc-84d3040bd1": {
+  "front": "Glosario: Apelación",
+  "back": "Una impugnación formal de una decisión o resultado de certificación, presentada ante Pearson en un plazo de 14 días",
+  "src": "176sn36"
+ },
+ "fc-68a1bbe6d5": {
+  "front": "Glosario: Informe de pregunta",
+  "back": "Señalar a Pearson un ítem posiblemente defectuoso; es independiente de una apelación y nunca cuenta en tu contra",
+  "src": "pa8hdc"
+ },
+ "fc-eb707233e4": {
+  "front": "Glosario: Adaptaciones",
+  "back": "Ajustes en la realización del examen por necesidades documentadas, solicitados a través de Pearson y aprobados antes de programar la cita",
+  "src": "1cwa1zg"
+ }
+}

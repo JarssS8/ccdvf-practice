@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useMemo, type ReactNode } from 'react'
 import { Icon } from './components/Icon'
 import { SyncBadge } from './components/ui'
 import { questionIndex } from './lib/content'
 import { useRoute } from './lib/router'
-import { checkSession, login, sync, useStore } from './lib/store'
+import { checkSession, sync, useStore } from './lib/store'
 import { closeExpired } from './lib/actions'
+import { useT } from './i18n'
 import Home from './views/Home'
 import Exams from './views/Exams'
 import ExamView from './views/Exam'
@@ -15,14 +16,16 @@ import Cards from './views/Cards'
 import Notes from './views/Notes'
 import Progress from './views/Progress'
 import Settings from './views/Settings'
+import AuthView from './views/Auth'
+import Legal, { LegalLinks } from './views/Legal'
 
 const NAV = [
-  { path: '', label: 'Inicio', icon: 'home' },
-  { path: 'exams', label: 'Exámenes', icon: 'exam' },
-  { path: 'domains', label: 'Dominios', icon: 'target' },
-  { path: 'cards', label: 'Tarjetas', icon: 'cards' },
-  { path: 'progress', label: 'Progreso', icon: 'chart' },
-]
+  { path: '', key: 'home', icon: 'home' },
+  { path: 'exams', key: 'exams', icon: 'exam' },
+  { path: 'domains', key: 'domains', icon: 'target' },
+  { path: 'cards', key: 'cards', icon: 'cards' },
+  { path: 'progress', key: 'progress', icon: 'chart' },
+] as const
 
 export function useQuestions() {
   const { data } = useStore()
@@ -31,76 +34,57 @@ export function useQuestions() {
 
 function Shell({ section, children }: { section: string; children: ReactNode }) {
   const { status, pending } = useStore()
+  const t = useT()
   const isActive = (p: string) => (p === '' ? section === '' : section === p)
   return (
     <>
-      <a href="#main" className="sr-only">Saltar al contenido</a>
+      <a href="#main" className="sr-only">{t.common.skip}</a>
       <header className="topbar">
         <div className="topbar-inner">
           <a href="#/" className="brand"><span className="brand-mark" aria-hidden="true">CC</span><span className="brand-name">CCDV-F</span></a>
-          <nav className="topnav" aria-label="Principal">
-            {[...NAV, { path: 'notes', label: 'Apuntes', icon: 'book' }].map((n) => (
-              <a key={n.path} href={`#/${n.path}`} aria-current={isActive(n.path) ? 'page' : undefined}>{n.label}</a>
+          <nav className="topnav" aria-label={t.nav.main}>
+            {[...NAV, { path: 'notes', key: 'notes', icon: 'book' } as const].map((n) => (
+              <a key={n.path} href={`#/${n.path}`} aria-current={isActive(n.path) ? 'page' : undefined}>{t.nav[n.key]}</a>
             ))}
           </nav>
           <div className="row" style={{ marginLeft: 'auto', gap: 4, flexWrap: 'nowrap' }}>
             <SyncBadge status={status} pending={pending} onClick={() => void sync()} />
-            <a href="#/notes" className="btn btn-ghost icon-btn mobile-only" aria-label="Apuntes"><Icon name="book" /></a>
-            <a href="#/settings" className="btn btn-ghost icon-btn" aria-label="Ajustes"><Icon name="settings" /></a>
+            <a href="#/notes" className="btn btn-ghost icon-btn mobile-only" aria-label={t.nav.notes}><Icon name="book" /></a>
+            <a href="#/settings" className="btn btn-ghost icon-btn" aria-label={t.nav.settings}><Icon name="settings" /></a>
           </div>
         </div>
       </header>
-      <main id="main" className="page">{children}</main>
-      <nav className="tabbar" aria-label="Principal">
+      <main id="main" className="page">
+        {children}
+        <footer className="site-foot"><LegalLinks /></footer>
+      </main>
+      <nav className="tabbar" aria-label={t.nav.main}>
         {NAV.map((n) => (
-          <a key={n.path} href={`#/${n.path}`} aria-current={isActive(n.path) ? 'page' : undefined}><Icon name={n.icon} size={22} /><span className="tab-label">{n.label}</span></a>
+          <a key={n.path} href={`#/${n.path}`} aria-current={isActive(n.path) ? 'page' : undefined}><Icon name={n.icon} size={22} /><span className="tab-label">{t.nav[n.key]}</span></a>
         ))}
       </nav>
     </>
   )
 }
 
-function Login() {
-  const [pass, setPass] = useState('')
-  const [err, setErr] = useState('')
-  const [busy, setBusy] = useState(false)
-  const submit = async (e: FormEvent) => {
-    e.preventDefault()
-    setBusy(true); setErr('')
-    try { await login(pass) } catch (x) { setErr((x as Error).message === 'auth' ? 'Frase de acceso incorrecta.' : (x as Error).message) }
-    setBusy(false)
-  }
-  return (
-    <main style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 16 }}>
-      <form onSubmit={submit} className="card" style={{ width: '100%', maxWidth: 420 }}>
-        <div className="row"><span className="brand-mark" aria-hidden="true">CC</span><h1 style={{ fontSize: 22 }}>CCDV-F Practice</h1></div>
-        <p className="small muted">Tu progreso vive en tu cuenta de Cloudflare. Entra con tu frase de acceso para sincronizarlo en este dispositivo.</p>
-        <div className="field">
-          <label htmlFor="pass">Frase de acceso</label>
-          <input id="pass" className="input" type="password" autoComplete="current-password" value={pass} onChange={(e) => setPass(e.target.value)} required />
-        </div>
-        {err && <p role="alert" className="small" style={{ color: 'var(--bad-ink)' }}>{err}</p>}
-        <button className="btn btn-primary btn-block" disabled={busy || !pass}>{busy ? 'Entrando…' : 'Entrar'}</button>
-      </form>
-    </main>
-  )
-}
-
 export default function App() {
   const route = useRoute()
+  const t = useT()
   const { authed, hasSnapshot, data } = useStore()
   useEffect(() => { void checkSession() }, [])
   // Timed attempts that ran out anywhere are closed wherever the app is open
   useEffect(() => {
     closeExpired()
-    const t = setInterval(closeExpired, 15_000)
-    return () => clearInterval(t)
+    const id = setInterval(closeExpired, 15_000)
+    return () => clearInterval(id)
   }, [data])
 
-  if (authed === false) return <Login />
-  if (authed === null && !hasSnapshot) return <main style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }} aria-busy="true"><p className="muted">Cargando…</p></main>
-
   const [section = '', id, extra] = route
+  // Legal pages are public: readable before signing up
+  if (section === 'legal') return <Legal page={id ?? 'aviso'} />
+  if (authed === false) return <AuthView />
+  if (authed === null && !hasSnapshot) return <main style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }} aria-busy="true"><p className="muted">{t.common.loading}</p></main>
+
   if (section === 'exam' && id) return <ExamView id={id} />
   if (section === 'review' && id) return <ReviewView id={id} index={Number(extra ?? 0)} />
 

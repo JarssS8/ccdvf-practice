@@ -1,6 +1,7 @@
 // FSRS scheduling replayed from the append-only review log, so every device converges.
 import { createEmptyCard, fsrs, Rating, type Card, type Grade } from 'ts-fsrs'
-import { repoFlashcards, type AiQuestion } from './content'
+import { flashcardText, localize, repoFlashcards, type AiQuestion } from './content'
+import type { Lang } from '../i18n'
 import { isCorrect } from './engine'
 import type { Data } from './store'
 
@@ -10,8 +11,8 @@ export const NEW_PER_DAY = 15
 
 export interface StudyCard { id: string; front: string; back: string; origin: 'repo' | 'missed' | 'added' }
 
-export function deck(data: Data, qs: Map<string, AiQuestion>): StudyCard[] {
-  const cards: StudyCard[] = repoFlashcards.map((c) => ({ id: c.id, front: c.front, back: c.back, origin: 'repo' }))
+export function deck(data: Data, qs: Map<string, AiQuestion>, lang: Lang): StudyCard[] {
+  const cards: StudyCard[] = repoFlashcards.map((c) => ({ id: c.id, ...flashcardText(c, lang), origin: 'repo' }))
   const addedIds = new Set(data.reviews.filter((r) => r.rating === ADDED).map((r) => r.cardId))
   const missed = new Set<string>()
   for (const a of Object.values(data.answers)) {
@@ -19,8 +20,9 @@ export function deck(data: Data, qs: Map<string, AiQuestion>): StudyCard[] {
     if (q && a.choice.length && data.attempts[a.attemptId]?.status === 'submitted' && !isCorrect(q, a.choice)) missed.add(q.id)
   }
   for (const qid of new Set([...missed, ...[...addedIds].filter((id) => id.startsWith('q:')).map((id) => id.slice(2))])) {
-    const q = qs.get(qid)
-    if (!q) continue
+    const orig = qs.get(qid)
+    if (!orig) continue
+    const q = localize(orig, lang)
     const key = q.answer.map((l) => `${l}. ${q.options[l]}`).join('\n')
     cards.push({ id: 'q:' + q.id, front: q.question, back: `${key}\n\n${q.rationale}`, origin: missed.has(qid) ? 'missed' : 'added' })
   }

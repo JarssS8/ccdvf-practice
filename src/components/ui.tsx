@@ -5,6 +5,7 @@ import { Icon } from './Icon'
 import { PASS_P, type Estimate } from '../lib/engine'
 import { EXAM } from '../shared/exam'
 import type { SyncStatus } from '../lib/store'
+import { LANGS, setLang, useLang, useT } from '../i18n'
 
 export function Meter({ value, bad, label }: { value: number; bad?: boolean; label: string }) {
   return (
@@ -16,6 +17,7 @@ export function Meter({ value, bad, label }: { value: number; bad?: boolean; lab
 
 /** 100–1000 scale with the 95% interval, the point estimate and the 720 cut. */
 export function ScaleBar({ est }: { est: Estimate }) {
+  const t = useT()
   const pos = (p: number) => `${p * 100}%`
   return (
     <div className="stack" style={{ gap: 8 }}>
@@ -26,7 +28,7 @@ export function ScaleBar({ est }: { est: Estimate }) {
       </div>
       <div className="row-between tiny muted">
         <span>{EXAM.scaleMin}</span>
-        <span style={{ fontWeight: 600, color: 'var(--ink)' }}>Corte {EXAM.passScaled}</span>
+        <span style={{ fontWeight: 600, color: 'var(--ink)' }}>{t.ui.cut(EXAM.passScaled)}</span>
         <span>{EXAM.scaleMax}</span>
       </div>
     </div>
@@ -34,22 +36,24 @@ export function ScaleBar({ est }: { est: Estimate }) {
 }
 
 export function ZoneChip({ zone }: { zone: Estimate['zone'] }) {
-  if (zone === 'likely') return <span className="chip chip-ok"><Icon name="check" size={14} stroke={2.4} />Zona de aprobado</span>
-  if (zone === 'below') return <span className="chip chip-bad"><Icon name="alert" size={14} />Por debajo del corte</span>
-  return <span className="chip chip-accent"><Icon name="target" size={14} />En el límite</span>
+  const t = useT()
+  if (zone === 'likely') return <span className="chip chip-ok"><Icon name="check" size={14} stroke={2.4} />{t.ui.likely}</span>
+  if (zone === 'below') return <span className="chip chip-bad"><Icon name="alert" size={14} />{t.ui.below}</span>
+  return <span className="chip chip-accent"><Icon name="target" size={14} />{t.ui.borderline}</span>
 }
 
 export function SyncBadge({ status, pending, onClick }: { status: SyncStatus; pending: number; onClick?: () => void }) {
+  const t = useT()
   const map: Record<SyncStatus, { icon: string; text: string; color: string }> = {
-    synced: { icon: 'check', text: 'Sincronizado', color: 'var(--ok)' },
-    syncing: { icon: 'refresh', text: 'Sincronizando…', color: 'var(--muted)' },
-    pending: { icon: 'cloud', text: `${pending} cambio${pending === 1 ? '' : 's'} sin subir`, color: 'var(--muted)' },
-    offline: { icon: 'cloudOff', text: pending ? `Sin conexión · ${pending} pendientes` : 'Sin conexión', color: 'var(--bad)' },
-    error: { icon: 'alert', text: 'Error al sincronizar', color: 'var(--bad)' },
+    synced: { icon: 'check', text: t.sync.synced, color: 'var(--ok)' },
+    syncing: { icon: 'refresh', text: t.sync.syncing, color: 'var(--muted)' },
+    pending: { icon: 'cloud', text: t.sync.pending(pending), color: 'var(--muted)' },
+    offline: { icon: 'cloudOff', text: t.sync.offline(pending), color: 'var(--bad)' },
+    error: { icon: 'alert', text: t.sync.error, color: 'var(--bad)' },
   }
   const s = map[status]
   return (
-    <button type="button" className="btn btn-ghost btn-sm" onClick={onClick} aria-label={`${s.text}. Sincronizar ahora`} title="Sincronizar ahora" style={{ color: 'var(--muted)', fontWeight: 500 }}>
+    <button type="button" className="btn btn-ghost btn-sm" onClick={onClick} aria-label={`${s.text}. ${t.sync.now}`} title={t.sync.now} style={{ color: 'var(--muted)', fontWeight: 500 }}>
       <span style={{ color: s.color, display: 'inline-flex' }}><Icon name={s.icon} size={16} /></span>
       <span className="tiny">{s.text}</span>
     </button>
@@ -73,6 +77,16 @@ export function Empty({ icon, title, children }: { icon: string; title: string; 
       <span className="badge-icon"><Icon name={icon} /></span>
       <strong>{title}</strong>
       {children && <div className="small muted" style={{ maxWidth: 420 }}>{children}</div>}
+    </div>
+  )
+}
+
+export function LangPicker() {
+  const lang = useLang()
+  const t = useT()
+  return (
+    <div className="seg" role="group" aria-label={t.common.language}>
+      {LANGS.map((l) => <button key={l.id} type="button" lang={l.id} aria-pressed={lang === l.id} onClick={() => setLang(l.id)}>{l.label}</button>)}
     </div>
   )
 }

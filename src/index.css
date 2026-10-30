@@ -12,7 +12,7 @@
   --tile-lime: #CDEB52; --tile-pink: #FFC9D6; --tile-lilac: #D9D0FF; --tile-sun: #FFE9A8; --on-tile: #14161A;
   --nav-bg: #14161A; --nav-fg: #E4E5E8;
   --r-xl: 28px; --r-lg: 22px; --r-md: 16px;
-  --font: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font: 'Inter Variable', Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --display: 'Bricolage Grotesque', var(--font);
   --mono: var(--font);
   color-scheme: light;
@@ -145,7 +145,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .btn-primary:hover { background: #1F3FE0; }
 .btn-ink { background: var(--ink); color: var(--bg); box-shadow: none; }
 .btn-ink:hover { background: var(--ink-2); }
-.btn-hero { background: #FFFFFF; color: #14161A; box-shadow: none; }
+.btn-hero, .tile-blue a.btn-hero { background: #FFFFFF; color: #14161A; box-shadow: none; }
 .btn-hero:hover { background: #ECE9E1; }
 .btn-hero-ghost { background: transparent; color: #FFFFFF; box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.6); }
 .btn-hero-ghost:hover { background: rgb(255 255 255 / 0.12); }
@@ -302,3 +302,14 @@ dialog::backdrop { background: rgb(14 15 18 / 0.6); }
 
 .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .chart-tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 13px; padding: 6px 12px; border-radius: 12px; white-space: nowrap; transform: translate(-50%, calc(-100% - 10px)); }
+
+/* Legal footer, auth divider, legal pages */
+.site-foot { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; padding: 28px 8px 8px; font-size: 13px; color: var(--muted); text-align: center; }
+.site-foot a { color: var(--muted); }
+.site-foot a:hover { color: var(--ink); }
+.site-foot .note { flex-basis: 100%; font-size: 12px; }
+.rule { flex: 1; height: 1px; background: var(--line); }
+.legal-page { max-width: 760px; margin: 0 auto; padding: 16px 16px 48px; }
+.legal-page .prose h2 { font-size: 20px; margin-top: 24px; }
+.legal-page .prose table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.legal-page .prose th, .legal-page .prose td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }

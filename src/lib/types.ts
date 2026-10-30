@@ -26,7 +26,8 @@ export interface Attempt {
   submittedAt?: number
   result?: AttemptResult
   leaseDevice?: string
-  label?: string
+  label?: string // drilled domain, or `from:<mode>` for a review of one attempt's misses
+  lang?: 'es' | 'en'
 }
 
 export interface Answer { attemptId: string; qid: string; choice: Letter[]; flagged: boolean; updatedAt: number }

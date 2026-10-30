@@ -1,24 +1,25 @@
 import { useState } from 'react'
 import { Markdown, REPO_BASE } from '../components/ui'
-import { meta, news, notes } from '../lib/content'
+import { meta, newsFor, notesFor } from '../lib/content'
 import { fmtDate } from '../lib/engine'
+import { useLang, useT } from '../i18n'
 
-const TABS = [
-  { id: 'cheat', label: 'Cheat sheet' },
-  { id: 'notes', label: 'Apuntes' },
-  { id: 'news', label: 'Novedades' },
-] as const
+const TABS = ['cheat', 'notes', 'news'] as const
 
 export default function Notes() {
-  const [tab, setTab] = useState<(typeof TABS)[number]['id']>('cheat')
+  const t = useT()
+  const lang = useLang()
+  const notes = notesFor(lang)
+  const news = newsFor(lang)
+  const [tab, setTab] = useState<(typeof TABS)[number]>('cheat')
   return (
     <>
       <div className="row-between" style={{ alignItems: 'flex-end' }}>
-        <h1 className="h-page">Apuntes</h1>
-        <p className="tiny muted">Del repo · sincronizado {fmtDate(Date.parse(meta.syncedAt))}{meta.factsVerified ? ` · datos verificados ${meta.factsVerified}` : ''}</p>
+        <h1 className="h-page">{t.notesView.title}</h1>
+        <p className="tiny muted">{t.notesView.meta(fmtDate(Date.parse(meta.syncedAt), lang), meta.factsVerified)}</p>
       </div>
-      <div className="seg" role="group" aria-label="Sección">
-        {TABS.map((t) => <button key={t.id} aria-pressed={tab === t.id} onClick={() => setTab(t.id)}>{t.label}</button>)}
+      <div className="seg" role="group" aria-label={t.notesView.section}>
+        {TABS.map((id) => <button key={id} aria-pressed={tab === id} onClick={() => setTab(id)}>{t.notesView.tabs[id]}</button>)}
       </div>
       <div className="card">
         {tab === 'cheat' && <Markdown source={notes.cheatSheet} />}

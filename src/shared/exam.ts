@@ -48,3 +48,57 @@ export function domainQuotas(total: number): Record<string, number> {
     .forEach((r) => { out[r.name]++ })
   return out
 }
+
+// ---------- option order (shared so the Worker sees a question exactly as the viewer does) ----------
+
+export function mulberry32(seed: number) {
+  let a = seed >>> 0
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0
+    let t = a
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+/** FNV-1a, 32 bit. Also marks which English text a translation was made from. */
+export const hash = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0 }
+export const textHash = (s: string) => hash(s).toString(36)
+
+export function shuffle<T>(xs: T[], rnd: () => number) {
+  const a = [...xs]
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] }
+  return a
+}
+
+const LETTERS: Letter[] = ['A', 'B', 'C', 'D', 'E']
+
+/** Display order of a question's original option letters for this attempt (the bank's keys follow fixed patterns). */
+export function optionOrder(q: Pick<Question, 'id' | 'options'>, seed: number): Letter[] {
+  const keys = LETTERS.filter((l) => q.options[l] != null)
+  return shuffle(keys, mulberry32(seed ^ hash(q.id)))
+}
+export const displayLetter = (i: number) => LETTERS[i]
+
+/** Rationales cite options as "(B)" or "(A, C)" by original letter; rewrite them to the shuffled display letters. */
+export function relabel(text: string, q: Question, seed: number) {
+  const order = optionOrder(q, seed)
+  const map = (l: string) => { const i = order.indexOf(l as Letter); return i < 0 ? l : displayLetter(i) }
+  return text.replace(/\(([A-E](?:,\s*[A-E])*)\)/g, (_, inner: string) => `(${inner.split(/,\s*/).map(map).sort().join(', ')})`)
+}
+
+/** The question as the viewer sees it (shuffled order, display letters): what the tutor must talk about. */
+export function asDisplayed(q: Question, seed: number, choice: Letter[]) {
+  const order = optionOrder(q, seed)
+  const to = (l: Letter) => displayLetter(order.indexOf(l))
+  const options: Question['options'] = {}
+  order.forEach((orig, i) => { options[displayLetter(i)] = q.options[orig] })
+  return {
+    question: { ...q, options, answer: q.answer.map(to).sort(), rationale: relabel(q.rationale, q, seed) },
+    choice: choice.map(to).sort(),
+  }
+}
+
+/** Translation fingerprint of a question's English text. */
+export const questionHash = (q: Pick<Question, 'question' | 'options' | 'rationale'>) => textHash(JSON.stringify([q.question, q.options, q.rationale]))

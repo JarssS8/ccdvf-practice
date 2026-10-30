@@ -1,35 +1,10 @@
-import { DOMAINS, EXAM, domainQuotas, type Letter, type Question } from '../shared/exam'
+import { DOMAINS, EXAM, domainQuotas, mulberry32, shuffle, type Letter, type Question } from '../shared/exam'
 import { groupOf, type AiQuestion } from './content'
+import { getLang, type Dict, type Lang } from '../i18n'
 import type { Data } from './store'
 import type { Answer, Attempt, AttemptResult, Mode } from './types'
 
-// ---------- randomness ----------
-
-export function mulberry32(seed: number) {
-  let a = seed >>> 0
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0
-    let t = a
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
-const hash = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0 }
-function shuffle<T>(xs: T[], rnd: () => number) {
-  const a = [...xs]
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] }
-  return a
-}
-
-const LETTERS: Letter[] = ['A', 'B', 'C', 'D', 'E']
-
-/** Display order of a question's original option letters for this attempt (the bank's keys follow fixed patterns). */
-export function optionOrder(q: Question, seed: number): Letter[] {
-  const keys = LETTERS.filter((l) => q.options[l] != null)
-  return shuffle(keys, mulberry32(seed ^ hash(q.id)))
-}
-export const displayLetter = (i: number) => LETTERS[i]
+export { displayLetter, optionOrder } from '../shared/exam'
 
 export const isCorrect = (q: Question, choice: Letter[] | undefined) =>
   !!choice && choice.length === q.answer.length && q.answer.every((l) => choice.includes(l))
@@ -58,20 +33,27 @@ export function exposures(data: Data, qs: Map<string, AiQuestion>): Exposure[] {
 
 // ---------- building attempts ----------
 
-export interface ModeSpec { mode: Mode; title: string; detail: string; items: number; minutes: number | null; feedback: boolean }
+export interface ModeSpec { items: number; minutes: number | null; feedback: boolean }
 
-export const MODES: Record<Mode, Omit<ModeSpec, 'mode'>> = {
-  full: { title: 'Mock completo', detail: `${EXAM.items} preguntas · ${EXAM.minutes} min · condiciones de examen`, items: EXAM.items, minutes: EXAM.minutes, feedback: false },
-  quick: { title: 'Mock rápido', detail: '15 preguntas · 34 min · mismo ritmo que el real', items: 15, minutes: 34, feedback: false },
-  'repo-mock-1': { title: 'Mock 1 del repo', detail: '15 preguntas · 30 min', items: 15, minutes: 30, feedback: false },
-  'repo-mock-2': { title: 'Mock 2 del repo', detail: '15 preguntas · 30 min', items: 15, minutes: 30, feedback: false },
-  'repo-mock-3': { title: 'Mock 3 del repo', detail: '15 preguntas · 30 min', items: 15, minutes: 30, feedback: false },
-  guide: { title: 'Ejemplos de la guía oficial', detail: '3 preguntas · corrección al momento', items: 3, minutes: null, feedback: true },
-  drill: { title: 'Drill por dominio', detail: '10 preguntas · corrección al momento', items: 10, minutes: null, feedback: true },
-  missed: { title: 'Repaso de falladas', detail: 'Lo que fallaste la última vez · corrección al momento', items: 15, minutes: null, feedback: true },
-  ai: { title: 'Preguntas IA', detail: 'Banco generado por IA · corrección al momento', items: 10, minutes: null, feedback: true },
-  flagged: { title: 'Marcadas', detail: 'Preguntas que marcaste para revisar', items: 20, minutes: null, feedback: true },
+// Titles and descriptions live in the dictionaries (t.modes)
+export const MODES: Record<Mode, ModeSpec> = {
+  full: { items: EXAM.items, minutes: EXAM.minutes, feedback: false },
+  quick: { items: 15, minutes: 34, feedback: false },
+  'repo-mock-1': { items: 15, minutes: 30, feedback: false },
+  'repo-mock-2': { items: 15, minutes: 30, feedback: false },
+  'repo-mock-3': { items: 15, minutes: 30, feedback: false },
+  guide: { items: 3, minutes: null, feedback: true },
+  drill: { items: 10, minutes: null, feedback: true },
+  missed: { items: 15, minutes: null, feedback: true },
+  ai: { items: 10, minutes: null, feedback: true },
+  flagged: { items: 20, minutes: null, feedback: true },
 }
+
+/** Simulations of the real exam: always in English, interface included. */
+export const EXAM_MODES: Mode[] = ['full', 'quick', 'repo-mock-1', 'repo-mock-2', 'repo-mock-3', 'guide']
+export const isExamMode = (m: Mode) => EXAM_MODES.includes(m)
+/** Language an attempt is shown in: exams in English, everything else in the language it was started in. */
+export const attemptLang = (a: Pick<Attempt, 'mode' | 'lang'>): Lang => (isExamMode(a.mode) ? 'en' : a.lang ?? getLang())
 
 /** Questions ordered by how stale they are for you: never seen first, then oldest seen, ties random. */
 function byFreshness(pool: AiQuestion[], exp: Exposure[], rnd: () => number) {
@@ -102,7 +84,7 @@ export function latestByQuestion(data: Data) {
   return latest
 }
 
-export function buildAttempt(mode: Mode, data: Data, qs: Map<string, AiQuestion>, opts: { domain?: string; fromAttempt?: string; now: number }): Omit<Attempt, 'status'> | { error: string } {
+export function buildAttempt(mode: Mode, data: Data, qs: Map<string, AiQuestion>, opts: { domain?: string; fromAttempt?: string; now: number }): Omit<Attempt, 'status'> | { error: 'no_missed' | 'no_questions' } {
   const spec = MODES[mode]
   const seed = (Math.random() * 2 ** 32) >>> 0
   const rnd = mulberry32(seed)
@@ -134,7 +116,7 @@ export function buildAttempt(mode: Mode, data: Data, qs: Map<string, AiQuestion>
   } else if (mode === 'missed' && opts.fromAttempt) {
     // The misses of one attempt, all of them
     const src = data.attempts[opts.fromAttempt]
-    label = src ? `de ${attemptTitle(src)}` : undefined
+    label = src ? `from:${src.mode}` : undefined
     chosen = shuffle((src?.questionIds ?? []).map((id) => qs.get(id)!).filter((q) => q && !isCorrect(q, data.answers[`${src!.id}|${q.id}`]?.choice)), rnd)
   } else if (mode === 'missed') {
     const latest = latestByQuestion(data)
@@ -144,9 +126,9 @@ export function buildAttempt(mode: Mode, data: Data, qs: Map<string, AiQuestion>
     chosen = shuffle(all.filter((q) => flagged.has(q.id)), rnd).slice(0, spec.items)
   }
 
-  if (!chosen.length) return { error: mode === 'missed' ? 'No hay preguntas falladas que repasar.' : 'No hay preguntas para este modo todavía.' }
+  if (!chosen.length) return { error: mode === 'missed' ? 'no_missed' : 'no_questions' }
   return {
-    id: crypto.randomUUID(), mode, label, feedback: spec.feedback, seed,
+    id: crypto.randomUUID(), mode, label, lang: isExamMode(mode) ? 'en' : getLang(), feedback: spec.feedback, seed,
     questionIds: chosen.map((q) => q.id), startedAt: opts.now,
     deadline: spec.minutes ? opts.now + spec.minutes * 60_000 : null,
   }
@@ -240,9 +222,13 @@ export const fmtDuration = (ms: number) => {
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60
   return h ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : `${m}:${String(sec).padStart(2, '0')}`
 }
-export const fmtDate = (ms: number) => new Date(ms).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+export const locale = (lang: Lang = getLang()) => (lang === 'es' ? 'es-ES' : 'en-GB')
+export const fmtDate = (ms: number, lang?: Lang) => new Date(ms).toLocaleDateString(locale(lang), { day: '2-digit', month: 'short', year: 'numeric' })
+export const fmtNum = (n: number, lang?: Lang) => n.toLocaleString(locale(lang))
 
-export function attemptTitle(a: Attempt) {
-  const base = MODES[a.mode]?.title ?? a.mode
-  return a.label ? `${base} · ${a.label}` : base
+export function attemptTitle(a: Pick<Attempt, 'mode' | 'label'>, t: Dict) {
+  const base = t.modes[a.mode]?.title ?? a.mode
+  if (!a.label) return base
+  if (a.label.startsWith('from:')) return `${base} · ${t.common.fromAttempt(t.modes[a.label.slice(5) as Mode]?.title ?? a.label.slice(5))}`
+  return `${base} · ${t.domains[a.label] ?? a.label}`
 }
