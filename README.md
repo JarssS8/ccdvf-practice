@@ -178,7 +178,7 @@ To add a language: copy `src/i18n/es.ts`, translate it, register it in `src/i18n
 - Strict Content-Security-Policy (no third-party scripts, styles or fonts), HSTS, `frame-ancestors 'none'`.
 - No OAuth access tokens are stored. Signing in with Google/GitHub on an email that someone registered with an unverified password removes that password and its sessions; a password reset does the same.
 
-Found a vulnerability? Please email the address in the app's legal notice instead of opening a public issue.
+Found a vulnerability? Please follow [SECURITY.md](SECURITY.md) (private report) instead of opening a public issue.
 
 ## Contributing
 

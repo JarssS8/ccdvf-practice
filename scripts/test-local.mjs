@@ -23,8 +23,9 @@ if (!process.argv.includes('--no-build')) run('npm', ['run', 'build'])
 run('npx', ['wrangler', 'd1', 'migrations', 'apply', 'ccdvf-practice', '--local', '--persist-to', persist])
 
 const log = openSync(devLog, 'w')
-const dev = spawn('npx', ['wrangler', 'dev', '--port', PORT, '--local-upstream', `localhost:${PORT}`, '--persist-to', persist,
-  '--var', `BETTER_AUTH_URL:${BASE}`, '--var', 'ACCOUNT_RECOVERY:on', '--var', `BETTER_AUTH_SECRET:${randomBytes(32).toString('base64')}`],
+// The test entry wraps the real Worker and mocks Google's token endpoint and DeepSeek (see tests/e2e/harness/worker.ts)
+const dev = spawn('npx', ['wrangler', 'dev', 'tests/e2e/harness/worker.ts', '--port', PORT, '--local-upstream', `localhost:${PORT}`, '--persist-to', persist,
+  '--var', `BETTER_AUTH_URL:${BASE}`, '--var', 'ACCOUNT_RECOVERY:on', '--var', 'DEEPSEEK_API_KEY:dummy-not-a-real-key', '--var', 'GOOGLE_CLIENT_ID:dummy-google-client', '--var', 'GOOGLE_CLIENT_SECRET:dummy-google-secret', '--var', `BETTER_AUTH_SECRET:${randomBytes(32).toString('base64')}`],
 { cwd: root, stdio: ['ignore', log, log], detached: true })
 const stop = () => { try { process.kill(-dev.pid, 'SIGTERM') } catch { /* already gone */ } }
 process.on('exit', stop)

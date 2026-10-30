@@ -154,7 +154,7 @@ Para añadir un idioma: copia `src/i18n/es.ts`, tradúcelo, regístralo en `src/
 - Content-Security-Policy estricta (sin scripts, estilos ni fuentes de terceros), HSTS y `frame-ancestors 'none'`.
 - No se guardan tokens de acceso OAuth. Si alguien registró un email ajeno con contraseña sin verificar, entrar con Google/GitHub con ese email elimina esa contraseña y sus sesiones; restablecer la contraseña hace lo mismo.
 
-¿Has encontrado una vulnerabilidad? Escribe al email del aviso legal de la app en lugar de abrir un issue público.
+¿Has encontrado una vulnerabilidad? Sigue [SECURITY.md](SECURITY.md) (aviso privado) en lugar de abrir un issue público.
 
 ## Contribuir
 
