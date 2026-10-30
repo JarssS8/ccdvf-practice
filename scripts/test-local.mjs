@@ -24,7 +24,7 @@ run('npx', ['wrangler', 'd1', 'migrations', 'apply', 'ccdvf-practice', '--local'
 
 const log = openSync(devLog, 'w')
 const dev = spawn('npx', ['wrangler', 'dev', '--port', PORT, '--local-upstream', `localhost:${PORT}`, '--persist-to', persist,
-  '--var', `BETTER_AUTH_URL:${BASE}`, '--var', 'PASSWORD_RESET:on', '--var', `BETTER_AUTH_SECRET:${randomBytes(32).toString('base64')}`],
+  '--var', `BETTER_AUTH_URL:${BASE}`, '--var', 'ACCOUNT_RECOVERY:on', '--var', `BETTER_AUTH_SECRET:${randomBytes(32).toString('base64')}`],
 { cwd: root, stdio: ['ignore', log, log], detached: true })
 const stop = () => { try { process.kill(-dev.pid, 'SIGTERM') } catch { /* already gone */ } }
 process.on('exit', stop)

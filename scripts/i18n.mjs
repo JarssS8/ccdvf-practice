@@ -29,7 +29,8 @@ export function run(mode) {
     if (!t) { missing++; continue }
     if (Object.keys(t.options ?? {}).sort().join() !== Object.keys(x.options).sort().join()) issues.push(`${x.id}: option letters differ`)
     if (stamp && !t.src) t.src = questionHash(x)
-    t.src === questionHash(x) ? fresh++ : stale++
+    if (t.src === questionHash(x)) fresh++
+    else stale++
   }
 
   const f = read('flashcards.json'), fes = read('es/flashcards.json')
@@ -37,7 +38,8 @@ export function run(mode) {
     const t = fes[x.id]
     if (!t) { missing++; continue }
     if (stamp && !t.src) t.src = cardHash(x)
-    t.src === cardHash(x) ? fresh++ : stale++
+    if (t.src === cardHash(x)) fresh++
+    else stale++
   }
 
   const n = read('notes.json'), nes = read('es/notes.json')
@@ -46,7 +48,8 @@ export function run(mode) {
     if (!t) { missing++; continue }
     if (fences(t.text) !== fences(n[k]) || rows(t.text) !== rows(n[k])) issues.push(`notes.${k}: code fences or table rows differ`)
     if (stamp && !t.src) t.src = textHash(n[k])
-    t.src === textHash(n[k]) ? fresh++ : stale++
+    if (t.src === textHash(n[k])) fresh++
+    else stale++
   }
 
   const w = read('news.json'), wes = read('es/news.json')
@@ -54,7 +57,8 @@ export function run(mode) {
     const t = wes[newsKey(x)]
     if (!t) { missing++; continue }
     if (stamp && !t.src) t.src = newsHash(x)
-    t.src === newsHash(x) ? fresh++ : stale++
+    if (t.src === newsHash(x)) fresh++
+    else stale++
   }
 
   if (stamp) { write('es/questions.json', qes); write('es/flashcards.json', fes); write('es/notes.json', nes); write('es/news.json', wes) }

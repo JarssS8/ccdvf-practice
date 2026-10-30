@@ -24,7 +24,7 @@ describe('API', () => {
     const r = await client()('/api/config')
     assert.equal(r.status, 200)
     assert.ok(Array.isArray(r.json.providers))
-    assert.equal(r.json.passwordReset, true)
+    assert.equal(r.json.recovery, true)
   })
 
   it('needs a session for app data', async () => {

@@ -24,7 +24,7 @@
     "BETTER_AUTH_URL": "https://exam.jarsss8.es",
     "EMAIL_FROM": "no-reply@jarsss8.es",
     // "on" only after onboarding jarsss8.es in Compute > Email Service > Email Sending (else sends fail)
-    "PASSWORD_RESET": "off",
+    "ACCOUNT_RECOVERY": "off",
     "DEEPSEEK_MODEL": "deepseek-flash",
     "DEEPSEEK_CHECK_MODEL": "deepseek-v4-pro",
     "AI_USER_DAILY_LIMIT": "15",

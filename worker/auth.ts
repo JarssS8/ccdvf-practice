@@ -20,10 +20,10 @@ export interface Env {
   EMAIL?: SendEmail
   EMAIL_FROM?: string
   /** "on" once the sending domain is onboarded in Email Service; until then the reset option stays hidden */
-  PASSWORD_RESET?: string
+  ACCOUNT_RECOVERY?: string
 }
 
-export const passwordResetEnabled = (env: Env) => env.PASSWORD_RESET === 'on' && !!env.EMAIL && !!env.EMAIL_FROM
+export const recoveryEnabled = (env: Env) => env.ACCOUNT_RECOVERY === 'on' && !!env.EMAIL && !!env.EMAIL_FROM
 
 export const SESSION_DAYS = 30
 
@@ -71,7 +71,7 @@ export function createAuth(env: Env) {
       minPasswordLength: 10,
       maxPasswordLength: 128,
       password: { hash: hashPassword, verify: verifyPassword },
-      ...(passwordResetEnabled(env) ? {
+      ...(recoveryEnabled(env) ? {
         sendResetPassword: async ({ user, url }: { user: { name: string; email: string }; url: string }) => {
           const lang = resetLang(url)
           const mail = resetEmail(lang, user.name, url, env.BETTER_AUTH_URL)

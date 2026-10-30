@@ -3,7 +3,7 @@ import notesJson from '../src/content/notes.json'
 import bankJson from '../src/content/questions.json'
 import bankEsJson from '../src/content/es/questions.json'
 import blueprintJson from '../src/content/blueprint.json'
-import { createAuth, passwordResetEnabled, type Auth, type Env } from './auth'
+import { createAuth, recoveryEnabled, type Auth, type Env } from './auth'
 
 const bank = bankJson as Question[]
 const bankById = new Map(bank.map((q) => [q.id, q]))
@@ -449,7 +449,7 @@ export default {
     try {
       if (url.pathname === '/api/config' && req.method === 'GET') {
         const providers = [env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET && 'google', env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET && 'github'].filter(Boolean)
-        return json({ providers, passwordReset: passwordResetEnabled(env) })
+        return json({ providers, recovery: recoveryEnabled(env) })
       }
       const auth = getAuth(env)
       // Better Auth checks Origin against trustedOrigins on its own mutating routes

@@ -34,8 +34,8 @@ export default function AuthView() {
   useEffect(() => {
     const l = query.get('lang')
     if (l === 'es' || l === 'en') setLang(l)
-    fetch('/api/config').then((r) => r.json()).then((c: { providers?: Provider[]; passwordReset?: boolean }) => {
-      setProviders(c.providers ?? []); setCanReset(!!c.passwordReset)
+    fetch('/api/config').then((r) => r.json()).then((c: { providers?: Provider[]; recovery?: boolean }) => {
+      setProviders(c.providers ?? []); setCanReset(!!c.recovery)
     }).catch(() => {})
     if (window.location.search) window.history.replaceState(null, '', window.location.pathname + window.location.hash)
   }, [])

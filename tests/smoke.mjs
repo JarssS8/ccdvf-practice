@@ -22,7 +22,7 @@ async function call(path, { method = 'GET', body, raw = false } = {}) {
 const html = await fetch(BASE + '/')
 ok(html.ok && !!html.headers.get('content-security-policy'), 'home page with CSP')
 const cfg = await call('/api/config')
-ok(cfg.status === 200, `config: providers ${JSON.stringify(cfg.json.providers)}, password reset ${cfg.json.passwordReset}`)
+ok(cfg.status === 200, `config: providers ${JSON.stringify(cfg.json.providers)}, email recovery ${cfg.json.recovery}`)
 
 for (const provider of cfg.json.providers ?? []) {
   const r = await call('/api/auth/sign-in/social', { method: 'POST', body: { provider, callbackURL: '/' } })
