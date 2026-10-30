@@ -4,6 +4,12 @@ updates:
     directory: /
     schedule: { interval: weekly }
     open-pull-requests-limit: 5
+    ignore:
+      # Types follow the Node major we run (24), and TypeScript stays on the reviewed 6.0 line until moved on purpose
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       dev-tooling:
         dependency-type: development
