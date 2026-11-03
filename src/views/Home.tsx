@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { ScaleBar, ZoneChip } from '../components/ui'
-import { useQuestions } from '../App'
-import { newsFor, repoQuestions } from '../lib/content'
+import { useCertQuestions, useQuestions } from '../App'
+import { newsFor, questionsOf } from '../lib/content'
 import { activeAttempt, discardAttempt, startAttempt } from '../lib/actions'
-import { attemptTitle, domainStats, exposures, fmtDate, fmtDuration, fmtNum, isCorrect, latestByQuestion, locale, pct, readiness } from '../lib/engine'
+import { examDateOf, useCert } from '../lib/cert'
+import { SCALE } from '../shared/certs'
+import { attemptTitle, attemptsOf, domainStats, exposures, fmtDate, fmtDuration, fmtNum, isCorrect, latestByQuestion, locale, pct, readiness, resultOf } from '../lib/engine'
 import { deck, queue, schedule } from '../lib/srs'
 import { now, useStore } from '../lib/store'
 import { errorText, useLang, useT } from '../i18n'
@@ -15,30 +17,35 @@ export default function Home() {
   const lang = useLang()
   const fmt = (n: number) => fmtNum(n, lang)
   const news = newsFor(lang)
-  const qs = useQuestions()
+  const cert = useCert()
+  const all = useQuestions()
+  const qs = useCertQuestions()
   const [err, setErr] = useState('')
 
-  const exp = useMemo(() => exposures(data, qs), [data, qs])
-  const ready = useMemo(() => readiness(exp, qs), [exp, qs])
-  const domains = useMemo(() => domainStats(exp, qs), [exp, qs])
-  const cards = useMemo(() => { const s = schedule(data, new Date(now())); const q = queue(deck(data, qs, lang), s); return q.due.length + q.fresh.length }, [data, qs, lang])
+  const exp = useMemo(() => exposures(data, qs, cert), [data, qs, cert])
+  const ready = useMemo(() => readiness(exp, qs, cert), [exp, qs, cert])
+  const domains = useMemo(() => domainStats(exp, qs, cert), [exp, qs, cert])
+  const cards = useMemo(() => { const s = schedule(data, new Date(now())); const q = queue(deck(data, qs, lang, cert), s); return q.due.length + q.fresh.length }, [data, qs, lang, cert])
   const missed = useMemo(() => {
     let n = 0
-    for (const [qid, a] of latestByQuestion(data)) { const q = qs.get(qid); if (q && !isCorrect(q, a.choice)) n++ }
+    for (const [qid, a] of latestByQuestion(data, cert)) { const q = qs.get(qid); if (q && !isCorrect(q, a.choice)) n++ }
     return n
-  }, [data, qs])
-  const aiN = data.aiQuestions.filter((q) => !q.reported).length
-  const submitted = Object.values(data.attempts).filter((a) => a.status === 'submitted')
+  }, [data, qs, cert])
+  const aiN = [...qs.values()].filter((q) => q.source === 'ai' && !q.reported).length
+  const submitted = attemptsOf(data, cert).filter((a) => a.status === 'submitted')
   const last = [...submitted].sort((a, b) => (b.submittedAt ?? 0) - (a.submittedAt ?? 0))[0]
-  const active = activeAttempt()
-  const examDate = data.settings.exam_date?.value
+  const lastResult = last && resultOf(last, data, all)
+  const active = activeAttempt(cert)
+  const examDate = examDateOf(data, cert)
   const daysLeft = examDate ? Math.ceil((new Date(examDate + 'T09:00').getTime() - now()) / 864e5) : null
 
   // Where an extra right answer is worth most: (share you still miss) × (weight in the exam)
-  const poolSize = (name: string) => new Set(repoQuestions.filter((q) => q.domain === name).map((q) => q.dupGroup ?? q.id)).size
-  const ranked = useMemo(() => domains
-    .map((d) => ({ ...d, gain: d.first.n ? (1 - d.first.c / d.first.n) * d.weight : d.weight, pool: poolSize(d.name) }))
-    .sort((a, b) => b.gain - a.gain), [domains])
+  const ranked = useMemo(() => {
+    const poolSize = (name: string) => new Set(questionsOf(cert).filter((q) => q.domain === name).map((q) => q.dupGroup ?? q.id)).size
+    return domains
+      .map((d) => ({ ...d, gain: d.first.n ? (1 - d.first.c / d.first.n) * d.weight : d.weight, pool: poolSize(d.name) }))
+      .sort((a, b) => b.gain - a.gain)
+  }, [domains, cert])
   const focus = ranked.find((d) => d.pool >= 3)
 
   const start = (mode: Parameters<typeof startAttempt>[0], domain?: string) => setErr(startAttempt(mode, domain) ?? '')
@@ -48,7 +55,7 @@ export default function Home() {
     <>
       <div className="stack" style={{ gap: 6 }}>
         <h1 className="h-page">{t.home.today}</h1>
-        <p className="small muted">{t.home.examLine}</p>
+        <p className="small muted">{t.home.examLine(cert.name, cert.items, cert.minutes, SCALE.pass)}</p>
       </div>
 
       {err && <p role="alert" className="callout callout-bad">{errorText(t, err)}</p>}
@@ -68,7 +75,7 @@ export default function Home() {
             ) : submitted.length === 0 || !focus ? (
               <>
                 <h2 id="next-h" className="h-tile">{t.home.firstMock}</h2>
-                <p className="muted">{t.home.firstMockText}</p>
+                <p className="muted">{t.home.firstMockText(cert.items, cert.minutes)}</p>
               </>
             ) : (
               <>
@@ -176,15 +183,15 @@ export default function Home() {
           ))}
         </section>
 
-        {last && last.result ? (
+        {last && lastResult ? (
           <a className="tile tile-sun tile-link span-2 d-last" href={`#/results/${last.id}`} style={{ justifyContent: 'space-between', gap: 16 }}>
             <span className="small" style={{ fontWeight: 500 }}>{t.home.lastAttempt} · {fmtDate(last.submittedAt ?? last.startedAt, lang)}</span>
             <span className="row-between" style={{ alignItems: 'flex-end' }}>
               <span>
                 <span className="h-tile" style={{ display: 'block' }}>{attemptTitle(last, t)}</span>
-                <span className="small muted">{t.home.correctOf(last.result.correct, last.result.total)}</span>
+                <span className="small muted">{t.home.correctOf(lastResult.correct, lastResult.total)}</span>
               </span>
-              <span className="big-number">{t.common.percent(pct(last.result.correct, last.result.total))}</span>
+              <span className="big-number">{t.common.percent(pct(lastResult.correct, lastResult.total))}</span>
             </span>
           </a>
         ) : (

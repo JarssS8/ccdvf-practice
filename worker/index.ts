@@ -1,19 +1,42 @@
-import { DOMAINS, asDisplayed, questionHash, type Question, type Letter } from '../src/shared/exam'
-import notesJson from '../src/content/notes.json'
-import bankJson from '../src/content/questions.json'
+import { asDisplayed, questionHash, type Question, type Letter } from '../src/shared/exam'
+import { CERTS, DEFAULT_CERT, certById, certOfDomain, certOfExamDateKey, certOfQuestion, hasDomain, isCertId, type CertDef } from '../src/shared/certs'
 import bankEsJson from '../src/content/es/questions.json'
-import blueprintJson from '../src/content/blueprint.json'
+import aoQuestions from '../src/content/associate-foundations/questions.json'
+import aoNotes from '../src/content/associate-foundations/notes.json'
+import aoBlueprint from '../src/content/associate-foundations/blueprint.json'
+import dvQuestions from '../src/content/developer-foundations/questions.json'
+import dvNotes from '../src/content/developer-foundations/notes.json'
+import dvBlueprint from '../src/content/developer-foundations/blueprint.json'
+import afQuestions from '../src/content/architect-foundations/questions.json'
+import afNotes from '../src/content/architect-foundations/notes.json'
+import afBlueprint from '../src/content/architect-foundations/blueprint.json'
+import apQuestions from '../src/content/architect-professional/questions.json'
+import apNotes from '../src/content/architect-professional/notes.json'
+import apBlueprint from '../src/content/architect-professional/blueprint.json'
 import { createAuth, recoveryEnabled, type Auth, type Env } from './auth'
 
-const bank = bankJson as Question[]
-const bankById = new Map(bank.map((q) => [q.id, q]))
+// Per certification: its bank, its study notes (tutor context and the generator's grounding) and its official blueprint
+interface Material { bank: Question[]; notes: string; blueprint: Record<string, string>; grounding: string }
+const norm = (s: string) => s.toLowerCase().replace(/[*_`>#\[\]()]/g, '').replace(/\s+/g, ' ').trim()
+const material = (bank: unknown, notes: { cheatSheet: string; notes: string }, blueprint: Record<string, string>): Material => {
+  const text = notes.cheatSheet + '\n\n' + notes.notes
+  // Quotes may come from the notes or the official blueprint text
+  return { bank: bank as Question[], notes: text, blueprint, grounding: norm(text + '\n' + Object.values(blueprint).join('\n')) }
+}
+const MATERIAL = new Map<string, Material>([
+  ['associate-foundations', material(aoQuestions, aoNotes, aoBlueprint)],
+  ['developer-foundations', material(dvQuestions, dvNotes, dvBlueprint)],
+  ['architect-foundations', material(afQuestions, afNotes, afBlueprint)],
+  ['architect-professional', material(apQuestions, apNotes, apBlueprint)],
+])
+const materialOf = (cert: CertDef) => MATERIAL.get(cert.id)!
+const bankById = new Map(CERTS.flatMap((c) => materialOf(c).bank).map((q) => [q.id, q]))
 const bankEs = bankEsJson as Record<string, { question: string; options: Record<string, string>; rationale: string; src?: string }>
-const notesText = notesJson.cheatSheet + '\n\n' + notesJson.notes
 const LATE_GRACE_MS = 30_000
 const MAX_OPS = 100
 const MAX_ATTEMPTS = 1000 // per user
 const MAX_REVIEWS = 20_000 // per user
-const SETTING_KEYS = new Set(['exam_date'])
+const DATE = /^\d{4}-\d{2}-\d{2}$/
 const RESULT_MAX = 4000
 const LETTERS = new Set(['A', 'B', 'C', 'D', 'E'])
 const MODES = new Set(['full', 'quick', 'repo-mock-1', 'repo-mock-2', 'repo-mock-3', 'guide', 'drill', 'missed', 'ai', 'flagged'])
@@ -62,7 +85,7 @@ async function state(env: Env, user: User) {
 }
 
 type Op =
-  | { opId: string; type: 'attempt.create'; attempt: { id: string; mode: string; label?: string; lang?: string; feedback: boolean; questionIds: string[]; seed: number; startedAt: number; deadline: number | null } }
+  | { opId: string; type: 'attempt.create'; attempt: { id: string; cert?: string; mode: string; label?: string; lang?: string; feedback: boolean; questionIds: string[]; seed: number; startedAt: number; deadline: number | null } }
   | { opId: string; type: 'answer'; attemptId: string; qid: string; choice: Letter[]; flagged: boolean; updatedAt: number }
   | { opId: string; type: 'attempt.lease'; attemptId: string }
   | { opId: string; type: 'attempt.discard'; attemptId: string }
@@ -109,7 +132,9 @@ async function sync(req: Request, env: Env, u: string) {
     switch (op.type) {
       case 'attempt.create': {
         const a = op.attempt
-        const valid = a && str(a.id, 64) && MODES.has(a.mode) && (a.label == null || str(a.label, 120)) && Array.isArray(a.questionIds) && a.questionIds.length <= 100
+        // Clients from before certifications send none: those attempts are Developer's
+        const cert = a?.cert ?? DEFAULT_CERT
+        const valid = a && str(a.id, 64) && isCertId(cert) && MODES.has(a.mode) && (a.label == null || str(a.label, 120)) && Array.isArray(a.questionIds) && a.questionIds.length <= 100
           && a.questionIds.every((q) => str(q, 80)) && int(a.seed) && int(a.startedAt) && (a.deadline === null || int(a.deadline))
         if (!valid) { reject(op, 'bad'); break }
         if (attempts.has(a.id)) break
@@ -118,9 +143,9 @@ async function sync(req: Request, env: Env, u: string) {
         const lang = a.lang === 'es' ? 'es' : 'en'
         attempts.set(a.id, { status: 'active', deadline: a.deadline, lease: dev, qids: new Set(a.questionIds) })
         stmts.push(env.DB.prepare(
-          `INSERT OR IGNORE INTO attempts (user_id, id, mode, label, lang, feedback, question_ids, seed, started_at, deadline, status, lease_device, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
-        ).bind(u, a.id, a.mode, a.label ?? null, lang, a.feedback ? 1 : 0, JSON.stringify(a.questionIds), a.seed, a.startedAt, a.deadline, dev, now))
+          `INSERT OR IGNORE INTO attempts (user_id, id, cert, mode, label, lang, feedback, question_ids, seed, started_at, deadline, status, lease_device, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
+        ).bind(u, a.id, cert, a.mode, a.label ?? null, lang, a.feedback ? 1 : 0, JSON.stringify(a.questionIds), a.seed, a.startedAt, a.deadline, dev, now))
         break
       }
       case 'attempt.lease': {
@@ -171,7 +196,7 @@ async function sync(req: Request, env: Env, u: string) {
           .bind(u, op.id, op.cardId, op.rating, op.reviewedAt, dev))
         break
       case 'setting':
-        if (!str(op.key, 40) || !SETTING_KEYS.has(op.key) || typeof op.value !== 'string' || op.value.length > 500 || !int(op.updatedAt)) { reject(op, 'bad'); break }
+        if (!str(op.key, 40) || !settingValid(op.key, op.value) || !int(op.updatedAt)) { reject(op, 'bad'); break }
         stmts.push(env.DB.prepare(
           `INSERT INTO settings (user_id, key, value, updated_at) VALUES (?, ?, ?, ?)
            ON CONFLICT (user_id, key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at WHERE excluded.updated_at > settings.updated_at`,
@@ -187,6 +212,13 @@ async function sync(req: Request, env: Env, u: string) {
   }
   if (stmts.length) await env.DB.batch(stmts)
   return json({ ok: true, rejected, serverNow: now })
+}
+
+/** The only settings stored: the certification chosen, and one exam date per certification (empty clears it). */
+function settingValid(key: string, value: unknown) {
+  if (typeof value !== 'string') return false
+  if (key === 'cert') return isCertId(value)
+  return certOfExamDateKey(key) !== null && (value === '' || DATE.test(value))
 }
 
 // ---------- DeepSeek ----------
@@ -279,7 +311,7 @@ async function findQuestion(env: Env, u: string, qid: string, lang: string): Pro
     const row = await env.DB.prepare('SELECT body FROM ai_questions WHERE user_id = ? AND id = ?').bind(u, qid).first<{ body: string }>()
     q = row ? (JSON.parse(row.body) as Question) : null
   }
-  const t = q && lang === 'es' ? bankEs[q.id] : undefined
+  const t = q && lang === 'es' && Object.hasOwn(bankEs, q.id) ? bankEs[q.id] : undefined
   if (q && t && t.src === questionHash(q)) {
     const options: Question['options'] = {}
     for (const k of Object.keys(q.options) as Letter[]) options[k] = t.options[k] ?? q.options[k]
@@ -303,9 +335,10 @@ async function tutor(req: Request, env: Env, user: User) {
   if (budget) return json({ error: budget }, 429)
 
   const { question, choice: shown } = asDisplayed(found, body.seed as number, choice)
+  const cert = certById(certOfQuestion(found))
   const intro = lang === 'es'
-    ? 'Eres tutor para el examen Claude Certified Developer – Foundations. Responde en español, breve (máx. 150 palabras), directo y técnico.\nBasa tus explicaciones en la explicación del banco y en los apuntes. Si algo no está en ellos y no estás seguro, dilo: no inventes funcionalidades de la API de Claude.\nSeñala la pista del enunciado que decide la respuesta. Habla solo de esta pregunta y del temario del examen; si te piden otra cosa, recondúcelo.'
-    : 'You are a tutor for the Claude Certified Developer – Foundations exam. Answer in English, briefly (max 150 words), directly and technically.\nBase your explanations on the bank rationale and the notes. If something is not in them and you are not sure, say so: do not invent Claude API features.\nPoint out the clue in the stem that decides the answer. Only discuss this question and the exam syllabus; if asked for anything else, steer back.'
+    ? `Eres tutor para el examen ${cert.name}. Responde en español, breve (máx. 150 palabras), directo y técnico.\nBasa tus explicaciones en la explicación del banco y en los apuntes. Si algo no está en ellos y no estás seguro, dilo: no inventes funcionalidades de Claude.\nSeñala la pista del enunciado que decide la respuesta. Habla solo de esta pregunta y del temario del examen; si te piden otra cosa, recondúcelo.`
+    : `You are a tutor for the ${cert.name} exam. Answer in English, briefly (max 150 words), directly and technically.\nBase your explanations on the bank rationale and the notes. If something is not in them and you are not sure, say so: do not invent Claude features.\nPoint out the clue in the stem that decides the answer. Only discuss this question and the exam syllabus; if asked for anything else, steer back.`
   const system = `${intro}
 
 QUESTION (${question.domain}):
@@ -316,7 +349,7 @@ Student answer: ${shown.length ? shown.join(', ') : 'blank'}
 Bank rationale: ${question.rationale}
 
 NOTES:
-${notesText.slice(0, 16000)}`
+${materialOf(cert).notes.slice(0, 16000)}`
 
   const upstream = await deepseek(env, {
     model: env.DEEPSEEK_MODEL, stream: true, max_tokens: 700, temperature: 0.3, thinking: { type: 'disabled' },
@@ -330,15 +363,12 @@ ${notesText.slice(0, 16000)}`
 }
 
 // Generation with guards: grounded quote, similar option lengths, blind second-model check, dedupe.
-const norm = (s: string) => s.toLowerCase().replace(/[*_`>#\[\]()]/g, '').replace(/\s+/g, ' ').trim()
-// Quotes may come from the notes or the official blueprint text
-const notesNorm = norm(notesText + '\n' + Object.values(blueprintJson as Record<string, string>).join('\n'))
 const tokenSet = (s: string) => new Set(s.toLowerCase().match(/[a-z0-9]{3,}/g) ?? [])
 const jaccard = (a: Set<string>, b: Set<string>) => { let i = 0; for (const t of a) if (b.has(t)) i++; return i / (a.size + b.size - i || 1) }
 
 interface Draft { question: string; options: Record<string, string>; answer: string[]; select: number; rationale: string; evidence: string }
 
-function validate(d: Draft, multi: boolean): string | null {
+function validate(d: Draft, multi: boolean, grounding: string): string | null {
   if (!d || typeof d.question !== 'string' || d.question.length < 40) return 'stem'
   const keys = Object.keys(d.options ?? {})
   if (keys.join('') !== 'ABCD' || keys.some((k) => typeof d.options[k] !== 'string' || d.options[k].length < 8)) return 'options'
@@ -353,7 +383,7 @@ function validate(d: Draft, multi: boolean): string | null {
     if (correctLen === sorted[0] && correctLen > sorted[1] * 1.15) return 'the key is the longest option'
   }
   if (typeof d.rationale !== 'string' || d.rationale.length < 60) return 'rationale'
-  if (typeof d.evidence !== 'string' || norm(d.evidence).length < 20 || !notesNorm.includes(norm(d.evidence))) return `quote not found in notes or blueprint: “${String(d.evidence).slice(0, 120)}”`
+  if (typeof d.evidence !== 'string' || norm(d.evidence).length < 20 || !grounding.includes(norm(d.evidence))) return `quote not found in notes or blueprint: “${String(d.evidence).slice(0, 120)}”`
   return null
 }
 
@@ -361,21 +391,29 @@ async function generate(req: Request, env: Env, user: User) {
   const u = user.id, ip = ipKey(req)
   if (!env.DEEPSEEK_API_KEY) return json({ error: 'ai_disabled' }, 503)
   if (!user.aiConsentAt) return json({ error: 'ai_consent' }, 403)
-  const body = await req.json<{ domain?: string; count?: number; multi?: boolean }>().catch(() => null)
-  const domain = DOMAINS.find((d) => d.name === body?.domain)?.name
-  if (!domain) return json({ error: 'unknown_domain' }, 400)
+  const body = await req.json<{ cert?: unknown; domain?: unknown; count?: number; multi?: boolean }>().catch(() => null)
+  // Tabs opened before certifications send only the domain, which names its certification
+  const certId = body?.cert === undefined ? certOfDomain(typeof body?.domain === 'string' ? body.domain : '') : body.cert
+  if (!isCertId(certId)) return json({ error: 'unknown_domain' }, 400)
+  const cert = certById(certId)
+  if (!hasDomain(cert, body?.domain)) return json({ error: 'unknown_domain' }, 400)
+  const domain = body!.domain as string
+  const { bank, notes: notesText, blueprint: blueprints, grounding } = materialOf(cert)
   const count = Math.min(Math.max(Number(body?.count) || 3, 1), 4)
   const multi = !!body?.multi
   const budget = await takeAiBudget(env, u, ip, 1 + count)
   if (budget) return json({ error: budget }, 429)
 
   const examples = bank.filter((q) => q.domain === domain).sort(() => Math.random() - 0.5).slice(0, 2)
+  // Only this certification's own questions: they are what a new item must not repeat
   const existing = await env.DB.prepare('SELECT body FROM ai_questions WHERE user_id = ?').bind(u).all<{ body: string }>()
-  const known = [...bank, ...existing.results.map((r) => JSON.parse(r.body) as Question)].map((q) => tokenSet(q.question))
+  const mine = existing.results.map((r) => JSON.parse(r.body) as Question).filter((q) => certOfQuestion(q) === cert.id)
+  const known = [...bank, ...mine].map((q) => tokenSet(q.question))
 
-  const blueprint = (blueprintJson as Record<string, string>)[domain] ?? ''
-  const system = `You write exam items for the Claude Certified Developer – Foundations certification, domain "${domain}".
-Official blueprint for this domain (every item must test one of these task statements; if the deciding skill belongs to another domain, such as security, MCP or prompting, do not write that item):
+  const blueprint = Object.hasOwn(blueprints, domain) ? blueprints[domain] : ''
+  const others = cert.domains.filter((d) => d.name !== domain).map((d) => d.name).join('; ')
+  const system = `You write exam items for the ${cert.name} certification, domain "${domain}".
+Official blueprint for this domain (every item must test one of these task statements; if the deciding skill belongs to another domain of this exam (${others}), do not write that item):
 ${blueprint}
 
 Output json only, shaped exactly like:
@@ -391,7 +429,7 @@ Rules:
 NOTES:
 ${notesText}`
 
-  const covered = [...bank, ...existing.results.map((r) => JSON.parse(r.body) as Question)].map((q) => `- ${q.question.slice(0, 170)}`).join('\n')
+  const covered = [...bank, ...mine].map((q) => `- ${q.question.slice(0, 170)}`).join('\n')
   const userPrompt = `Write ${count} new items. Style examples (do not copy):\n\n${examples.map((q) => `${q.question}\n${optionText(q)}\nKey: ${q.answer.join(',')}`).join('\n\n')}\n\nAlready in the bank (do not reuse these scenarios):\n${covered}`
 
   let drafts: Draft[] = []
@@ -410,7 +448,7 @@ ${notesText}`
   const rejected: { question: string; reason: string }[] = why.map((reason) => ({ question: '', reason: `DeepSeek: ${reason}` }))
   const candidates: Draft[] = []
   for (const d of drafts.slice(0, count)) {
-    const reason = validate(d, multi)
+    const reason = validate(d, multi, grounding)
     if (reason) { rejected.push({ question: d?.question?.slice(0, 80) ?? '', reason }); continue }
     const t = tokenSet(d.question)
     if (known.some((k) => jaccard(k, t) >= 0.5) || candidates.some((c) => jaccard(tokenSet(c.question), t) >= 0.5)) {
@@ -424,7 +462,7 @@ ${notesText}`
     const reasons: string[] = []
     try {
       const r = await deepseekJson<{ answer: string[]; fits_domain: boolean }>(env, env.DEEPSEEK_CHECK_MODEL,
-        `You are taking a certification exam about building with Claude. Answer the item. Then judge whether the skill that decides it is covered by this blueprint for the domain "${domain}":
+        `You are taking the ${cert.name} exam. Answer the item. Then judge whether the skill that decides it is covered by this blueprint for the domain "${domain}":
 ${blueprint}
 Reply in json: {"answer":["<letter>"],"fits_domain":true} with exactly the number of letters the item asks for.`,
         `${d.question}\n${optionText(d as unknown as Question)}\nSelect ${d.select}.`, 6000, reasons, true)
@@ -441,7 +479,7 @@ Reply in json: {"answer":["<letter>"],"fits_domain":true} with exactly the numbe
     if (check.fits_domain === false) { rejected.push({ question: d.question.slice(0, 80), reason: 'does not fit the domain blueprint' }); continue }
 
     const q: Question = {
-      id: 'ai-' + crypto.randomUUID().slice(0, 12), source: 'ai', domain,
+      id: 'ai-' + crypto.randomUUID().slice(0, 12), source: 'ai', cert: cert.id, domain,
       question: d.question, options: d.options, answer: d.answer as Letter[], rationale: d.rationale, evidence: d.evidence,
     }
     inserts.push(env.DB.prepare('INSERT INTO ai_questions (user_id, id, domain, body, created_at) VALUES (?, ?, ?, ?, ?)').bind(u, q.id, domain, JSON.stringify(q), Date.now()))

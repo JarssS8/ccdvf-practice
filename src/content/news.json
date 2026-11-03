@@ -1,6 +1,11 @@
 [
  {
   "year": "2026",
+  "title": "October: the catalog grew to twenty-seven courses",
+  "body": "**Tool use with the Messages API** was added, on\n[Claude Academy](https://academy.claude.com/courses/tool-use-with-the-messages-api)\nand on the Partner Academy platform product page. It is for people whose tool\nuse already runs and breaks in specific ways: wrong tool choice, rejected\ncalls, stalled responses, input tokens that grow with every tool result. Eight\nmain lessons, one problem each, worked through a fictional consultancy, with no\ncode written on the page. A graded quiz issues a completion badge, and\nClaude Platform 101 is named as the prerequisite.\n\n**Who this affects.** Developer – Foundations and Architect candidates, since\ntool use sits in the heavy domains of both. It is not listed as prep for any\nexam, so the exam guides remain the authoritative scope.\n\nFound by the daily catalog check, which reads the union of the Academy listing\npages: the published count went to twenty-seven while this repository\ndocumented twenty-six."
+ },
+ {
+  "year": "2026",
   "title": "October: the exams are published in Japanese",
   "body": "The certification FAQ now states that \"the exam and prep content are available in\nEnglish and Japanese\", and documents how to move an appointment already booked\nin English onto the Japanese version: cancel it in the Pearson account and\nschedule the Japanese one, under the same 48-hour rule as any other change.\n\n**Who this affects.** Anyone who reads Japanese more comfortably than English,\nand anyone who read this repository before this entry appeared. Three pages here\nsaid the exam was English only, which was true when it was written and is not\ntrue now. Browser translation tools are still prohibited during proctoring, so\nthe readable languages are those two and no others.\n\nThe same FAQ section also names the delivery restrictions, now recorded under\n[Availability](policies.md#availability): no OnVUE online proctoring on an ID\nfrom Belarus, Cuba, North Korea, Russia, Syria or a restricted region of\nUkraine, and delivery to residents of Iran suspended from 8 September 2026 under\nthe OFAC General License G suspension. These are Pearson's restrictions, so they\nmove without the exam policy PDF moving."
  },

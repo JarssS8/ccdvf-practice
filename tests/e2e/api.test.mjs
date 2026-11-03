@@ -172,3 +172,68 @@ describe('API', () => {
     assert.equal(res.headers.get('x-content-type-options'), 'nosniff')
   })
 })
+
+describe('API: certifications', () => {
+  const C = client()
+  let uid
+  const sync = async (ops) => (await C('/api/sync', { method: 'POST', body: { deviceId: 'devC', userId: uid, ops } })).json
+  const create = (opId, id, extra) => ({ opId, type: 'attempt.create', attempt: { id, mode: 'drill', feedback: true, questionIds: ['architect-foundations-practice-1'], seed: 1, startedAt: Date.now(), deadline: null, ...extra } })
+
+  before(async () => {
+    clearRateLimits()
+    assert.equal((await C('/api/auth/sign-up/email', { method: 'POST', body: { name: 'Cert', email: uniqueEmail('cert'), password: PW } })).status, 200)
+    uid = (await C('/api/state')).json.user.id
+  })
+
+  it('stores the certification of each attempt; older clients that send none are Developer', async () => {
+    const af = crypto.randomUUID(), legacy = crypto.randomUUID()
+    const r = await sync([create('k1', af, { cert: 'architect-foundations' }), create('k2', legacy, { questionIds: [Q] })])
+    assert.deepEqual(r.rejected, [])
+    const rows = Object.fromEntries((await C('/api/state')).json.attempts.map((a) => [a.id, a.cert]))
+    assert.equal(rows[af], 'architect-foundations')
+    assert.equal(rows[legacy], 'developer-foundations')
+  })
+
+  it('rejects unknown certifications, including prototype names', async () => {
+    const r = await sync(['nope', '__proto__', 'constructor', 42].map((cert, i) => create('u' + i, crypto.randomUUID(), { cert })))
+    assert.deepEqual(r.rejected.map((x) => x.reason), ['bad', 'bad', 'bad', 'bad'])
+  })
+
+  it('accepts only the chosen certification and one well-formed exam date per certification', async () => {
+    const at = Date.now()
+    const set = (opId, key, value) => ({ opId, type: 'setting', key, value, updatedAt: at })
+    const r = await sync([
+      set('g1', 'cert', 'architect-professional'), set('g2', 'exam_date:architect-professional', '2027-02-01'), set('g3', 'exam_date', '2026-12-24'), set('g4', 'exam_date:associate-foundations', ''),
+      set('b1', 'cert', '__proto__'), set('b2', 'exam_date:__proto__', '2027-01-01'), set('b3', 'exam_date:developer-foundations', '2027-01-01'), set('b4', 'exam_date:architect-foundations', 'next week'), set('b5', 'exam_date', '<script>'),
+    ])
+    assert.deepEqual(r.rejected.map((x) => x.opId).sort(), ['b1', 'b2', 'b3', 'b4', 'b5'])
+    const s = Object.fromEntries((await C('/api/state')).json.settings.map((x) => [x.key, x.value]))
+    assert.deepEqual(s, { cert: 'architect-professional', 'exam_date:architect-professional': '2027-02-01', exam_date: '2026-12-24', 'exam_date:associate-foundations': '' })
+  })
+
+  it('the tutor and the generator speak about the question\'s own certification', async () => {
+    assert.ok((await C('/api/ai/consent', { method: 'POST', body: { consent: true } })).json.aiConsentAt > 0)
+    const t = await C('/api/ai/tutor', { method: 'POST', raw: true, body: { qid: 'architect-professional-practice-1', seed: 3, choice: ['A'], lang: 'en', messages: [{ role: 'user', content: 'why?' }] } })
+    assert.equal(t.status, 200)
+    await t.text()
+    let systems = (await client()('/api/__test/deepseek-systems')).json
+    assert.match(systems.at(-1), /tutor for the Claude Certified Architect – Professional exam/)
+
+    const g = await C('/api/ai/generate', { method: 'POST', body: { cert: 'associate-foundations', domain: 'Prompting and Task Execution', count: 1 } })
+    assert.equal(g.status, 200, JSON.stringify(g.json))
+    assert.equal(g.json.accepted.length, 1, JSON.stringify(g.json.rejected))
+    assert.equal(g.json.accepted[0].cert, 'associate-foundations')
+    systems = (await client()('/api/__test/deepseek-systems')).json
+    const gen = systems.findLast((x) => x.startsWith('You write exam items'))
+    assert.match(gen, /Claude Certified Associate – Foundations certification, domain "Prompting and Task Execution"/)
+    assert.doesNotMatch(gen, /Developer – Foundations certification/)
+    assert.match(systems.at(-1), /You are taking the Claude Certified Associate – Foundations exam/)
+
+    // A domain of another certification, or none at all, is not accepted; an old tab that sends only a domain still works
+    assert.equal((await C('/api/ai/generate', { method: 'POST', body: { cert: 'associate-foundations', domain: 'Claude Code', count: 1 } })).json.error, 'unknown_domain')
+    assert.equal((await C('/api/ai/generate', { method: 'POST', body: { cert: '__proto__', domain: 'Integration', count: 1 } })).json.error, 'unknown_domain')
+    const old = await C('/api/ai/generate', { method: 'POST', body: { domain: 'Claude Code', count: 1 } })
+    assert.equal(old.status, 200)
+    assert.match((await client()('/api/__test/deepseek-systems')).json.findLast((x) => x.startsWith('You write exam items')), /Developer – Foundations certification, domain "Claude Code"/)
+  })
+})

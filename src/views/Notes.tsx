@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Markdown, REPO_BASE } from '../components/ui'
-import { meta, newsFor, notesFor } from '../lib/content'
+import { Markdown, REPO_ROOT, repoBase } from '../components/ui'
+import { metaOf, newsFor, notesFor } from '../lib/content'
+import { useCert } from '../lib/cert'
 import { fmtDate } from '../lib/engine'
 import { useLang, useT } from '../i18n'
 
@@ -9,7 +10,9 @@ const TABS = ['cheat', 'notes', 'news'] as const
 export default function Notes() {
   const t = useT()
   const lang = useLang()
-  const notes = notesFor(lang)
+  const cert = useCert()
+  const meta = metaOf(cert)
+  const notes = notesFor(cert, lang)
   const news = newsFor(lang)
   const [tab, setTab] = useState<(typeof TABS)[number]>('cheat')
   return (
@@ -22,14 +25,14 @@ export default function Notes() {
         {TABS.map((id) => <button key={id} aria-pressed={tab === id} onClick={() => setTab(id)}>{t.notesView.tabs[id]}</button>)}
       </div>
       <div className="card">
-        {tab === 'cheat' && <Markdown source={notes.cheatSheet} />}
-        {tab === 'notes' && <Markdown source={notes.notes} />}
+        {tab === 'cheat' && <Markdown source={notes.cheatSheet} base={repoBase(cert)} />}
+        {tab === 'notes' && <Markdown source={notes.notes} base={repoBase(cert)} />}
         {tab === 'news' && (
           <div className="stack" style={{ gap: 28 }}>
             {news.map((n) => (
               <article key={n.title} className="stack" style={{ gap: 8 }}>
                 <h2 className="h-section" style={{ fontSize: 19 }}>{n.title} · {n.year}</h2>
-                <Markdown source={n.body} base={new URL('../guide/', REPO_BASE).href} />
+                <Markdown source={n.body} base={`${REPO_ROOT}guide/`} />
               </article>
             ))}
           </div>

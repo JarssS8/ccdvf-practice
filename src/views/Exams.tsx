@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Icon } from '../components/Icon'
 import { activeAttempt, discardAttempt, startAttempt } from '../lib/actions'
-import { attemptTitle } from '../lib/engine'
+import { attemptTitle, attemptsOf, modeSpec } from '../lib/engine'
+import { guideCount } from '../lib/content'
+import { useCert } from '../lib/cert'
 import { errorText, useT } from '../i18n'
 import { useStore } from '../lib/store'
 import type { Mode } from '../lib/types'
@@ -15,8 +17,11 @@ export default function Exams() {
   const { data } = useStore()
   const t = useT()
   const [err, setErr] = useState('')
-  const active = activeAttempt()
-  const count = (m: Mode) => Object.values(data.attempts).filter((a) => a.mode === m && a.status === 'submitted').length
+  const cert = useCert()
+  const active = activeAttempt(cert)
+  const mine = attemptsOf(data, cert)
+  const count = (m: Mode) => mine.filter((a) => a.mode === m && a.status === 'submitted').length
+  const detail = (m: Mode) => { const spec = modeSpec(m, cert); return t.modes[m].detail(spec.items, spec.minutes ?? 0) }
 
   return (
     <>
@@ -41,13 +46,13 @@ export default function Exams() {
             <p className="small muted">{t.exams.sections[si].note}</p>
           </div>
           <div className="grid-modes">
-            {modes.map((m) => (
+            {modes.filter((m) => m !== 'guide' || guideCount(cert) > 0).map((m) => (
               <button key={m} type="button" className={`tile-link ${TONE[m] ?? ''}`} onClick={() => setErr(startAttempt(m) ?? '')}>
                 <span className="row-between" style={{ width: '100%' }}>
                   <strong>{t.modes[m].title}</strong>
                   {count(m) > 0 && <span className="chip">{t.exams.done(count(m))}</span>}
                 </span>
-                <span className="small muted" style={{ minHeight: 42 }}>{t.modes[m].detail}</span>
+                <span className="small muted" style={{ minHeight: 42 }}>{detail(m)}</span>
                 <span className="row small" style={{ fontWeight: 700, gap: 6, marginTop: 'auto' }}>{t.exams.start}<Icon name="arrowRight" size={16} /></span>
               </button>
             ))}

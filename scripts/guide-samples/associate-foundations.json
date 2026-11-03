@@ -1,0 +1,44 @@
+[
+ {
+  "id": "associate-foundations-guide-1",
+  "source": "guide",
+  "domain": "Output Evaluation and Validation",
+  "question": "An associate asks Claude to summarize a new regulation, and Claude produces a confident summary citing a specific subsection number. Before sending the summary to the compliance team, what is the most appropriate action?",
+  "options": {
+   "A": "Send it as-is, since Claude expressed high confidence.",
+   "B": "Verify the cited subsection against the official regulation text before sharing.",
+   "C": "Ask Claude to rate its own confidence and send it if the rating is high.",
+   "D": "Reword the summary to sound more formal, then send it."
+  },
+  "answer": "B",
+  "rationale": "Language models can fabricate specific-looking details such as citation numbers, a hallucination. Validating factual claims, especially citations bound for a compliance audience, against an authoritative source is the diligence step required. Self-reported confidence (A, C) is not a reliable accuracy signal, and reformatting (D) does not address correctness."
+ },
+ {
+  "id": "associate-foundations-guide-2",
+  "source": "guide",
+  "domain": "Product and Model Selection",
+  "question": "An associate needs to generate a high volume of short customer-reply drafts where speed and cost matter more than deep reasoning. Which choice best fits the task?",
+  "options": {
+   "A": "Use the most capable, highest-cost model for every reply to maximize quality.",
+   "B": "Use a faster, lower-cost model suited to straightforward, high-volume tasks.",
+   "C": "Disable all product features to reduce cost.",
+   "D": "Switch to a different AI platform."
+  },
+  "answer": "B",
+  "rationale": "Aligning model selection with task requirements means matching a faster, lower-cost model to straightforward, high-volume work, reserving the most capable model for complex reasoning. Always using the top model (A) wastes the cost and latency budget; disabling features (C) or switching platforms (D) does not address the trade-off."
+ },
+ {
+  "id": "associate-foundations-guide-3",
+  "source": "guide",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "A project manager wants to upload a spreadsheet containing customer names and account numbers so Claude can analyze trends. Organizational policy restricts sharing regulated personal data. What is the most appropriate action?",
+  "options": {
+   "A": "Upload the file as-is, since the analysis is internal.",
+   "B": "Remove or anonymize the personal identifiers before uploading, consistent with policy.",
+   "C": "Upload the file but instruct Claude not to retain it.",
+   "D": "Skip the analysis entirely."
+  },
+  "answer": "B",
+  "rationale": "Applying data-sensitivity and privacy safeguards means redacting or anonymizing regulated identifiers before use, so the analysis can proceed without exposing protected data. Uploading as-is (A) violates policy; instructing the model not to retain data (C) does not satisfy the policy control; abandoning the task (D) is unnecessary when anonymization enables it."
+ }
+]

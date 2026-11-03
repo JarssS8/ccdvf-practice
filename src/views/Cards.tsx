@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Rating, type Grade } from 'ts-fsrs'
-import { useQuestions } from '../App'
+import { useCertQuestions } from '../App'
+import { useCert } from '../lib/cert'
 import { Empty } from '../components/ui'
 import { deck, NEW_PER_DAY, preview, queue, schedule } from '../lib/srs'
 import { dispatch, now, useStore } from '../lib/store'
@@ -18,9 +19,10 @@ export default function Cards() {
   const { data } = useStore()
   const t = useT()
   const lang = useLang()
-  const qs = useQuestions()
+  const cert = useCert()
+  const qs = useCertQuestions()
   const [shown, setShown] = useState(false)
-  const cards = useMemo(() => deck(data, qs, lang), [data, qs, lang])
+  const cards = useMemo(() => deck(data, qs, lang, cert), [data, qs, lang, cert])
   const s = useMemo(() => schedule(data, new Date(now())), [data])
   const q = useMemo(() => queue(cards, s), [cards, s])
   const current = q.due[0] ?? q.fresh[0]

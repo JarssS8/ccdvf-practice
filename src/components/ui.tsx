@@ -3,7 +3,7 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { Icon } from './Icon'
 import { PASS_P, type Estimate } from '../lib/engine'
-import { EXAM } from '../shared/exam'
+import { SCALE, type CertDef } from '../shared/certs'
 import type { SyncStatus } from '../lib/store'
 import { LANGS, setLang, useLang, useT } from '../i18n'
 
@@ -27,9 +27,9 @@ export function ScaleBar({ est }: { est: Estimate }) {
         <div className="point" style={{ left: pos(est.p) }} />
       </div>
       <div className="row-between tiny muted">
-        <span>{EXAM.scaleMin}</span>
-        <span style={{ fontWeight: 600, color: 'var(--ink)' }}>{t.ui.cut(EXAM.passScaled)}</span>
-        <span>{EXAM.scaleMax}</span>
+        <span>{SCALE.min}</span>
+        <span style={{ fontWeight: 600, color: 'var(--ink)' }}>{t.ui.cut(SCALE.pass)}</span>
+        <span>{SCALE.max}</span>
       </div>
     </div>
   )
@@ -60,9 +60,11 @@ export function SyncBadge({ status, pending, onClick }: { status: SyncStatus; pe
   )
 }
 
-export const REPO_BASE = 'https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS/blob/main/developer-foundations/'
+export const REPO_ROOT = 'https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS/blob/main/'
+/** The certification's folder in the study repo, where its notes' relative links point. */
+export const repoBase = (cert: CertDef) => `${REPO_ROOT}${cert.id}/`
 
-export function Markdown({ source, base = REPO_BASE }: { source: string; base?: string }) {
+export function Markdown({ source, base = REPO_ROOT }: { source: string; base?: string }) {
   const html = useMemo(() => {
     const clean = DOMPurify.sanitize(marked.parse(source, { async: false }) as string)
     // Relative links point into the upstream repo

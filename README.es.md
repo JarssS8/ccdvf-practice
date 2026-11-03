@@ -1,6 +1,6 @@
-# CCDV-F Practice
+# Claude Cert Practice
 
-**App gratuita y de código abierto para preparar el examen _Claude Certified Developer – Foundations_ (CCDV-F).** Simulacros cronometrados, drills por dominio, flashcards con repetición espaciada, tutor IA y gráficos de dónde pierdes puntos, en español e inglés y sincronizada entre tus dispositivos.
+**App gratuita y de código abierto para preparar los cuatro exámenes de certificación de Claude: _Associate – Foundations_ (CCAO-F), _Developer – Foundations_ (CCDV-F), _Architect – Foundations_ (CCAR-F) y _Architect – Professional_ (CCAR-P).** Eliges una al registrarte y cambias cuando quieras desde la barra superior; cada una guarda su propio progreso, tarjetas y fecha de examen. Simulacros cronometrados, drills por dominio, flashcards con repetición espaciada, tutor IA y gráficos de dónde pierdes puntos, en español e inglés y sincronizada entre tus dispositivos.
 
 **Pruébala:** https://exam.jarsss8.es · **English:** [README.md](README.md)
 
@@ -15,7 +15,7 @@
 
 | | |
 | --- | --- |
-| **Simulacros** | Mock completo de 53 preguntas y 120 minutos repartido como el temario real, mock rápido de 15 y los tres mocks del repo. Siempre en inglés, como el examen. |
+| **Simulacros** | Mock completo con la longitud real (60, 53, 60 o 63 preguntas, 120 minutos) repartido como cada temario, mock rápido de 15 al ritmo real, los tres mocks del repo y los ejemplos de la guía oficial. Siempre en inglés, como el examen. |
 | **Drills por dominio** | 10 preguntas de un dominio con corrección y explicación al momento, priorizando lo que no has visto. |
 | **Preparación estimada** | Un rango de 100 a 1000 calculado solo con tus *primeros* intentos, reponderado por dominio, con el corte en 720. |
 | **Gráficos** | Dónde fallas más (por puntos perdidos), evolución por dominio, preguntas que más fallas e historial de mocks. |
@@ -140,7 +140,7 @@ Los tests de navegador usan Chromium headless con `playwright-core`; define `CHR
 
 ## Contenido y traducciones
 
-Las preguntas, flashcards, apuntes y novedades se importan de [Amey-Thakur/CLAUDE-CERTIFICATIONS](https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS) con `npm run sync` (espera esta carpeta dentro de un clon de ese repo). Revisa y haz commit del diff de `src/content/` antes de desplegar: `build` y `deploy` no importan nada y `deploy` se niega a correr con cambios sin commitear en `src/content`.
+Las preguntas, flashcards, apuntes y novedades se importan de [Amey-Thakur/CLAUDE-CERTIFICATIONS](https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS) con `npm run sync` (espera esta carpeta dentro de un clon de ese repo), una carpeta por certificación en `src/content/<cert-id>/`. Las certificaciones (códigos, longitud, dominios y pesos) se declaran una sola vez en `src/shared/certs.ts`; los ejemplos de las guías oficiales están en `scripts/guide-samples/<cert-id>.json`. Revisa y haz commit del diff de `src/content/` antes de desplegar: `build` y `deploy` no importan nada y `deploy` se niega a correr con cambios sin commitear en `src/content`.
 
 Las versiones en español están en `src/content/es/`. Cada entrada guarda `src`, la huella del texto inglés del que se tradujo; si el inglés cambia, la app muestra ese elemento en inglés hasta que se actualice la traducción. `npm run sync` avisa de las traducciones desactualizadas; tras corregirlas, ejecuta `node scripts/i18n.mjs stamp`.
 

@@ -1,0 +1,1415 @@
+[
+ {
+  "id": "associate-foundations-practice-1",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Output Evaluation and Validation",
+  "question": "Claude summarizes a vendor contract for you and states that the termination clause requires 60 days' notice, citing section 14.2. You are about to send the summary to your legal team. What should you do first?",
+  "options": {
+   "A": "Check section 14.2 of the contract and confirm the notice period before sending",
+   "B": "Send it, since Claude cited a specific section",
+   "C": "Ask Claude how confident it is and send if the confidence is high",
+   "D": "Rephrase the summary in more formal language, then send"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Specific-looking citations can be fabricated, and material bound for legal review requires verification against the source document. A specific citation is not evidence of accuracy (B), self-reported confidence is not a reliability signal (C), and rewording does nothing about correctness (D)."
+ },
+ {
+  "id": "associate-foundations-practice-2",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Output Evaluation and Validation",
+  "question": "You ask Claude to draft a competitive analysis, and the output presents market share figures for three competitors without sources. The figures look plausible. What is the appropriate handling?",
+  "options": {
+   "A": "Include the figures, since plausibility is sufficient for internal documents",
+   "B": "Verify each figure against a market research source and keep only what checks out, with citations",
+   "C": "Delete the figures and note that no market data was available",
+   "D": "Ask Claude to regenerate until the numbers stabilize across runs"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Unsourced quantitative claims are a classic hallucination surface; the professional move is verification against an authoritative source, keeping what survives. Plausibility is not accuracy (A), deleting everything discards genuinely verifiable material (C), and consistency across regenerations does not establish truth (D)."
+ },
+ {
+  "id": "associate-foundations-practice-3",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Prompting and Task Execution",
+  "question": "You need Claude to produce a quarterly report from meeting notes, a spreadsheet summary, and last quarter's report. The first attempt misses the required structure and tone. What is the most effective next step?",
+  "options": {
+   "A": "Retry the identical prompt, since outputs vary between runs",
+   "B": "Switch to the most capable model and resend the same prompt",
+   "C": "Rewrite the prompt to state the role, the required sections in order, the tone, and attach last quarter's report as a format example",
+   "D": "Break the work into forty single-sentence prompts"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Structure, explicit constraints, and an example of the target format are the most effective fixes for a formatting and tone miss. Re-rolling (A) leaves the deficiency in place, a larger model does not learn unstated requirements (B), and over-fragmentation destroys coherence (D)."
+ },
+ {
+  "id": "associate-foundations-practice-4",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Prompting and Task Execution",
+  "question": "A colleague's prompt asks Claude to \"analyze our customer feedback and fix the problems.\" The output is generic. Which revision best applies task decomposition?",
+  "options": {
+   "A": "Add \"be specific and detailed\" to the prompt",
+   "B": "Ask the same question three times and merge the answers",
+   "C": "Paste more feedback into the same prompt",
+   "D": "Ask first for a categorized list of complaint themes with counts, then for the top three by frequency, then for a proposed action per theme"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Decomposition turns a vague compound request into a sequence of verifiable steps, each with a concrete output. Vague intensifiers (A) do not add structure, repetition (B) multiplies the vagueness, and more input without more structure (C) usually worsens focus."
+ },
+ {
+  "id": "associate-foundations-practice-5",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Product and Model Selection",
+  "question": "Your team drafts hundreds of short, routine customer replies daily, and cost and speed matter more than nuance. Occasionally a complex escalation needs careful reasoning. What is the sound model strategy?",
+  "options": {
+   "A": "Use the most capable model for everything to maximize quality",
+   "B": "Use the fastest, lowest-cost model for routine replies and switch to a more capable model for the complex escalations",
+   "C": "Use the fastest model for everything, including escalations",
+   "D": "Alternate models randomly to balance the load"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "wastes cost and latency budget on routine work; **C** underserves exactly the cases that need depth; **D** matches nothing to anything. **B** aligns model choice with task requirements in both directions, which is the tested judgment."
+ },
+ {
+  "id": "associate-foundations-practice-6",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "Your monthly close process involves collecting figures, drafting a variance commentary, and formatting a board pack. You want Claude to help durably, not just once. What is the strongest approach?",
+  "options": {
+   "A": "Create a Project with the commentary conventions and prior packs as knowledge, plus instructions for the structure, and run each close inside it",
+   "B": "Paste everything into a fresh chat each month and ask for the pack",
+   "C": "Ask Claude to do the whole close autonomously, including pulling the figures",
+   "D": "Use Claude only for spellchecking the final pack"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Durable, repeated workflows belong in a Project where instructions and knowledge persist and improve. Re-pasting monthly (B) rebuilds context by hand every time, full autonomy over financial figures without review (C) ignores appropriate-use judgment, and spellchecking (D) forfeits the actual value."
+ },
+ {
+  "id": "associate-foundations-practice-7",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "A department head asks you whether Claude could \"handle our customer onboarding.\" What is the right first move?",
+  "options": {
+   "A": "Say yes and start building immediately",
+   "B": "Map the onboarding steps, identify which involve drafting, summarizing, or lookup that Claude does well, and which need human judgment or system access it does not have",
+   "C": "Say no, since onboarding involves customer data",
+   "D": "Forward the question to Anthropic support"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "The Associate's core skill is translating a business ask into a realistic division of labor: where Claude adds value, where humans stay, and what the limits are. Unqualified yes (A) and unqualified no (C) both skip the analysis, and support (D) does not know your process."
+ },
+ {
+  "id": "associate-foundations-practice-8",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Configuration and Knowledge Management",
+  "question": "Your team's Project answers policy questions from an uploaded handbook. HR publishes a new handbook version. What must happen for the Project to stay trustworthy?",
+  "options": {
+   "A": "Nothing; Claude will find the new version on its own",
+   "B": "Add the new handbook alongside the old one so both are available",
+   "C": "Replace the outdated handbook in the Project knowledge and spot-check answers against the new version",
+   "D": "Tell users to mention the new version in every prompt"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Project knowledge is maintained, not self-updating; stale sources are a quality defect the configurer owns. Claude does not fetch your internal documents on its own (A), keeping both versions invites contradictory answers (B), and pushing the burden onto every user (D) is not maintenance."
+ },
+ {
+  "id": "associate-foundations-practice-9",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "You want Claude to analyze churn patterns in an export that includes customer names, emails, and account numbers. Company policy forbids sharing personal data with external tools. What is the correct action?",
+  "options": {
+   "A": "Upload the file, since churn analysis is an internal purpose",
+   "B": "Upload it but instruct Claude to ignore the personal columns",
+   "C": "Abandon the analysis",
+   "D": "Remove or pseudonymize the identifying columns first, then upload and analyze"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Make the task compliant, then do it: the identifiers are not needed for pattern analysis. Purpose does not override policy (A), an instruction to ignore data is not a control because the data still left the boundary (B), and abandoning the work (C) is unnecessary when anonymization enables it."
+ },
+ {
+  "id": "associate-foundations-practice-10",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Troubleshooting and Optimization",
+  "question": "A prompt that worked well for weeks now produces off-target answers after your team added many new documents to the Project. What is the best first diagnostic?",
+  "options": {
+   "A": "Check whether the newly added knowledge is diluting or contradicting the sources the answers should draw from",
+   "B": "Rewrite the prompt from scratch",
+   "C": "Switch to a larger model",
+   "D": "Delete the Project and start over"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The change that coincided with the regression is the first suspect: new knowledge can crowd out or conflict with the relevant sources. Rewriting the prompt (B), upgrading the model (C), or rebuilding everything (D) all treat symptoms before diagnosing the actual change.",
+  "dupGroup": "associate-foundations-practice-10"
+ },
+ {
+  "id": "associate-foundations-practice-11",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Output Evaluation and Validation",
+  "question": "Claude produces a competitor comparison table where one row is marked “data unavailable” and the rest are filled in. A colleague asks you to delete the empty row so the table looks complete. What is the right response?",
+  "options": {
+   "A": "Delete the row, since an incomplete table undermines confidence",
+   "B": "Keep the row and its label, because the gap is itself a finding the reader needs",
+   "C": "Fill the row with a reasonable estimate and mark it as approximate",
+   "D": "Ask Claude to search harder until every row is populated"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "A declared gap is information: it tells the reader where the analysis is thin. Deleting it (A) hides a limitation, an unmarked estimate (C) manufactures data, and pressing the model to fill the cell (D) invites fabrication rather than retrieval."
+ },
+ {
+  "id": "associate-foundations-practice-12",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Output Evaluation and Validation",
+  "question": "Two runs of the same prompt give different figures for the same metric. Which conclusion is supported?",
+  "options": {
+   "A": "The higher figure is more likely correct because the model found more evidence",
+   "B": "The figures should be averaged to reduce variance",
+   "C": "Neither figure is established, and the metric must be checked against the source",
+   "D": "The prompt is fine and the model needs a longer context window"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Disagreement between runs shows the figure is not grounded in a reliable source, so neither is established. Preferring the larger number (A) is arbitrary, averaging (B) treats two unverified numbers as measurements, and context length (D) is unrelated to whether the figure is true."
+ },
+ {
+  "id": "associate-foundations-practice-13",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Output Evaluation and Validation",
+  "question": "You ask Claude to extract every payment term from a 40-page contract. The output lists four terms, cleanly formatted. What is the first check?",
+  "options": {
+   "A": "Confirm the formatting is consistent across the four entries",
+   "B": "Ask Claude whether it found all of them",
+   "C": "Run it again at a higher temperature to surface more terms",
+   "D": "Read the contract's payment sections to confirm no term was omitted"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Extraction fails by omission more often than by error, and a tidy output gives no signal about completeness. Formatting (A) is cosmetic, self-report (B) is not evidence, and temperature (C) changes phrasing rather than recall."
+ },
+ {
+  "id": "associate-foundations-practice-14",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Output Evaluation and Validation",
+  "question": "A summary you commissioned states a conclusion that contradicts your own reading of the source. What should you do?",
+  "options": {
+   "A": "Locate the passage the conclusion rests on and compare it against both readings",
+   "B": "Defer to the summary, since the model read the whole document",
+   "C": "Defer to your reading and treat the summary as wrong",
+   "D": "Ask a colleague which of the two sounds more plausible"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The disagreement is resolvable by returning to the passage in question, which settles it on evidence. Deferring either way (B, C) decides without checking, and canvassing opinion (D) substitutes plausibility for the source."
+ },
+ {
+  "id": "associate-foundations-practice-15",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Output Evaluation and Validation",
+  "question": "Claude produces a well-argued recommendation with no citations, on a topic where you have no expertise. What is the appropriate use of it?",
+  "options": {
+   "A": "Adopt it, since the reasoning is internally consistent",
+   "B": "Treat it as a hypothesis to test against sources before acting",
+   "C": "Discard it, because unsourced output has no value",
+   "D": "Ask for citations and adopt whatever comes back"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Unsourced reasoning is a starting point, useful for structuring an enquiry but not for deciding. Internal consistency is not accuracy (A), the reasoning may still be useful (C), and citations produced on demand need the same verification as the claim (D)."
+ },
+ {
+  "id": "associate-foundations-practice-16",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "A team wants Claude to draft weekly customer health summaries from support tickets, CRM notes, and usage data. Which design detail matters most for the output to stay useful over months?",
+  "options": {
+   "A": "Choosing the largest available model",
+   "B": "Running the summary daily instead of weekly",
+   "C": "Defining what a health summary must contain and keeping that definition in one place the team maintains",
+   "D": "Letting each team member write their own prompt"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "A stable, maintained definition of the deliverable is what keeps output consistent as people and inputs change. Model size (A) does not fix an undefined task, higher frequency (B) multiplies an unclear output, and per-person prompts (D) guarantee drift."
+ },
+ {
+  "id": "associate-foundations-practice-17",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "Which task in a monthly reporting process is the weakest candidate for delegation to Claude?",
+  "options": {
+   "A": "Drafting the narrative summary from agreed figures",
+   "B": "Reformatting last month's report into the new template",
+   "C": "Extracting the top five variances from a spreadsheet export",
+   "D": "Deciding which underperforming account to escalate to the executive team"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "The escalation decision carries accountability and depends on relationships and context the model does not hold. Drafting (A), reformatting (B), and extraction (C) are all bounded tasks with checkable output."
+ },
+ {
+  "id": "associate-foundations-practice-18",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "A process works well for one analyst and poorly for three others using the same prompt. What is the most likely cause?",
+  "options": {
+   "A": "The prompt relies on context the first analyst supplies without noticing",
+   "B": "The other three need a more capable model",
+   "C": "The task is unsuitable for Claude",
+   "D": "The other three are using shorter inputs"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "One person succeeding with the same prompt usually means they are contributing unstated context, such as knowing which file to attach or what good looks like. A model change (B) does not supply missing context, the task clearly works (C), and input length (D) is a symptom rather than a cause."
+ },
+ {
+  "id": "associate-foundations-practice-19",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "When is it appropriate to keep a human approval step in an otherwise automated Claude workflow?",
+  "options": {
+   "A": "Always, since automation is inherently risky",
+   "B": "When the action is hard to reverse or carries external consequences",
+   "C": "Only while the workflow is new, then remove it",
+   "D": "Never, because approval steps defeat the purpose of automation"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Approval earns its cost where a mistake is expensive or hard to undo. Blanket approval (A) and blanket removal (D) both ignore the specific risk, and a time-based rule (C) removes the check regardless of what the action does."
+ },
+ {
+  "id": "associate-foundations-practice-20",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "A colleague proposes pasting a customer list into a prompt to draft personalised outreach. What is the correct handling?",
+  "options": {
+   "A": "Proceed, since the prompt is not stored anywhere permanent",
+   "B": "Ask Claude to keep the names confidential",
+   "C": "Remove or replace identifying details before drafting, and reattach them afterwards",
+   "D": "Proceed but delete the conversation afterwards"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Working on anonymised data and reattaching identifiers afterwards achieves the task without exposing the personal data. Assumptions about storage (A) are not a control, an instruction to the model (B) is not a safeguard, and deleting afterwards (D) does not undo the disclosure."
+ },
+ {
+  "id": "associate-foundations-practice-21",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "Which statement about instructing a model not to do something is accurate?",
+  "options": {
+   "A": "An instruction in the prompt is an enforceable control",
+   "B": "Instructions are enforceable if placed in a system prompt",
+   "C": "Instructions are enforceable if repeated several times",
+   "D": "An instruction shapes behavior but does not guarantee it, so controls belong outside the prompt"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Prompt instructions influence behavior and are not guarantees, so anything that must hold is enforced in the surrounding system. Placement (B) and repetition (C) change the strength of the steer, not its nature, and treating it as enforcement (A) is the error the question tests."
+ },
+ {
+  "id": "associate-foundations-practice-22",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "A regulated report drafted with Claude is about to be filed. What is the reviewer accountable for?",
+  "options": {
+   "A": "The accuracy and compliance of the filed document, regardless of how it was drafted",
+   "B": "Confirming that Claude was used according to policy",
+   "C": "Confirming the prompt included the relevant regulations",
+   "D": "Recording which model version produced the draft"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Accountability sits with the person who files, and the tool used does not transfer it. Policy compliance (B), prompt content (C), and version records (D) are all reasonable practices that do not replace responsibility for the document."
+ },
+ {
+  "id": "associate-foundations-practice-23",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "When is disclosing that AI assisted a piece of work most clearly warranted?",
+  "options": {
+   "A": "Whenever any AI tool touched the work at any stage",
+   "B": "When the audience's judgment of the work depends on how it was produced",
+   "C": "Only when the output is published externally",
+   "D": "Only when a written policy requires it"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Disclosure matters where provenance would change how a reader weighs the work. A universal rule (A) makes the signal meaningless, and confining it to external publication (C) or written policy (D) misses internal cases where it genuinely matters."
+ },
+ {
+  "id": "associate-foundations-practice-24",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Prompting and Task Execution",
+  "question": "A prompt produces output that is accurate but consistently too long. What is the most reliable fix?",
+  "options": {
+   "A": "Add “be concise” to the prompt",
+   "B": "Ask for a summary of the output afterwards",
+   "C": "State the limit in concrete terms, such as a word count or a number of bullet points",
+   "D": "Use a smaller model"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Concrete limits are checkable and reproducible in a way that adjectives are not. “Be concise” (A) is interpreted differently each run, summarising afterwards (B) adds a step and a second failure point, and a smaller model (D) trades accuracy for brevity."
+ },
+ {
+  "id": "associate-foundations-practice-25",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Prompting and Task Execution",
+  "question": "You need output in a specific structure every time so it can be pasted into a template. What is the most effective technique?",
+  "options": {
+   "A": "Describing the structure in prose at the end of the prompt",
+   "B": "Asking for the output to be well organized",
+   "C": "Requesting the output twice and taking the better one",
+   "D": "Providing a filled example of the exact structure you want"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "An example specifies the target unambiguously and is the strongest available signal for format. Prose description (A) leaves room for interpretation, a vague request (B) leaves more, and generating twice (C) does not define the target at all."
+ },
+ {
+  "id": "associate-foundations-practice-26",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Prompting and Task Execution",
+  "question": "A long prompt with many rules produces output that follows some rules and ignores others. What should you try first?",
+  "options": {
+   "A": "Separating the task into stages so each output is checked before the next",
+   "B": "Repeating the ignored rules in capitals",
+   "C": "Moving all the rules to the top of the prompt",
+   "D": "Adding a rule that says all rules must be followed"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Splitting the work reduces how much must hold at once and gives a checkpoint between stages. Emphasis (B), ordering (C), and a meta-rule (D) all leave the same load in a single step."
+ },
+ {
+  "id": "associate-foundations-practice-27",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Prompting and Task Execution",
+  "question": "Which detail most improves a prompt asking Claude to review a document?",
+  "options": {
+   "A": "Stating that the review should be thorough",
+   "B": "Stating what the review is for and what would count as a problem",
+   "C": "Attaching several similar documents for comparison",
+   "D": "Asking for the review as a numbered list"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Purpose and criteria tell the model what to look for, which is what a review depends on. Thoroughness (A) is unmeasurable, extra documents (C) add noise without criteria, and formatting (D) shapes presentation rather than substance."
+ },
+ {
+  "id": "associate-foundations-practice-28",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Product and Model Selection",
+  "question": "A task involves reading a 200-page report once and answering a single question. Which consideration should lead the choice?",
+  "options": {
+   "A": "The cheapest model available, since the task runs once",
+   "B": "Whether the model supports the fastest response time",
+   "C": "Whether the model can hold and reason over the whole document reliably",
+   "D": "Whether the task can be split across several small models"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "The binding constraint is reliable comprehension across a long document, which is what the choice must satisfy. Cost (A) and speed (B) matter only among models that can do the task, and splitting (D) risks losing the cross-document reasoning the question needs."
+ },
+ {
+  "id": "associate-foundations-practice-29",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Product and Model Selection",
+  "question": "When does working in a Claude project make more sense than an API integration?",
+  "options": {
+   "A": "When the volume is high and predictable",
+   "B": "When the output must be inserted into another system automatically",
+   "C": "When the task must run on a schedule",
+   "D": "When the work is exploratory and done by people rather than systems"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Projects suit human, iterative work where the context is curated and reused by people. High volume (A), programmatic handoff (B), and scheduling (C) all describe system integration, which is what the API is for."
+ },
+ {
+  "id": "associate-foundations-practice-30",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Product and Model Selection",
+  "question": "A team asks whether to move to a larger model because outputs are inconsistent. What should be established first?",
+  "options": {
+   "A": "Whether the inconsistency comes from the prompt and the inputs rather than the model",
+   "B": "The cost difference between the two models",
+   "C": "Whether the larger model is available in their region",
+   "D": "How much faster the current model is"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Inconsistency usually traces to an underspecified task or variable inputs, which a larger model does not fix. Cost (B), availability (C), and speed (D) are inputs to a decision that has not yet been shown to be the right one."
+ },
+ {
+  "id": "associate-foundations-practice-31",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Configuration and Knowledge Management",
+  "question": "What belongs in a project's knowledge rather than in individual prompts?",
+  "options": {
+   "A": "The specific question being asked today",
+   "B": "Material that every conversation in the project should be able to draw on",
+   "C": "The preferred output length for one report",
+   "D": "A one-off document being reviewed this week"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Project knowledge holds what recurs, so each conversation starts from the same base. Today's question (A), a single formatting preference (C), and a one-off document (D) all belong in the prompt that needs them."
+ },
+ {
+  "id": "associate-foundations-practice-32",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Configuration and Knowledge Management",
+  "question": "A project's answers have grown vaguer as more documents were added. What is the likely cause?",
+  "options": {
+   "A": "The model version changed",
+   "B": "The project has too few documents to ground answers",
+   "C": "The knowledge now holds overlapping or outdated material competing with the right sources",
+   "D": "The prompts have become too specific"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Accumulated, unmaintained knowledge dilutes retrieval, and the symptom is exactly this drift toward vagueness. A version change (A) is unrelated to what was added, and both too few documents (B) and overly specific prompts (D) contradict the described trend."
+ },
+ {
+  "id": "associate-foundations-practice-33",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Configuration and Knowledge Management",
+  "question": "How should project knowledge be treated as the underlying material changes?",
+  "options": {
+   "A": "It updates automatically from the source systems",
+   "B": "It only needs review when answers are visibly wrong",
+   "C": "It should be rebuilt from scratch each quarter",
+   "D": "It must be maintained deliberately, because it does not update itself"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Project knowledge is a curated copy and stays as accurate as the person maintaining it. It does not sync (A), waiting for visible errors (B) means acting after the damage, and periodic rebuilds (C) are wasteful and still unscheduled against real change."
+ },
+ {
+  "id": "associate-foundations-practice-34",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Troubleshooting and Optimization",
+  "question": "A workflow that has run reliably for months begins returning off-target output. What is the first diagnostic step?",
+  "options": {
+   "A": "Establish what changed: the inputs, the configuration, or the knowledge",
+   "B": "Rewrite the prompt from scratch",
+   "C": "Switch to a different model",
+   "D": "Increase the amount of context supplied"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "A working system that degrades points to a change, and identifying it is faster and safer than rebuilding. Rewriting (B), switching models (C), and adding context (D) all alter the system before the cause is known."
+ },
+ {
+  "id": "associate-foundations-practice-35",
+  "cert": "associate-foundations",
+  "source": "practice",
+  "domain": "Troubleshooting and Optimization",
+  "question": "Output quality is acceptable but the process takes too long to be worth using. What should be examined first?",
+  "options": {
+   "A": "Whether a faster model would meet the quality bar",
+   "B": "Whether the slow part is the model or the human steps around it",
+   "C": "Whether the prompt can be shortened",
+   "D": "Whether the task should be abandoned"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Locating the actual delay comes before optimising anything, and in practice the surrounding steps often dominate. Changing the model (A) or the prompt (C) assumes the model is the bottleneck, and abandoning (D) discards a process that already produces acceptable output."
+ },
+ {
+  "id": "associate-foundations-mock1-1",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Output Evaluation and Validation",
+  "question": "A colleague shares a Claude-drafted policy summary that reads well and cites three internal documents by name. What is the appropriate review step before it circulates to the whole department?",
+  "options": {
+   "A": "Circulate it, since the named sources demonstrate grounding",
+   "B": "Ask Claude to double-check its own work and circulate if it agrees",
+   "C": "Confirm each named document exists and says what the summary claims",
+   "D": "Add a disclaimer that the summary was AI-generated and circulate"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Named sources can be fabricated; verification against the actual documents is the diligence step. Self-checking (B) is not independent evidence, and a disclaimer (D) does not make content correct"
+ },
+ {
+  "id": "associate-foundations-mock1-2",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Prompting and Task Execution",
+  "question": "You need a first draft of a stakeholder update from a long project log. Which prompt is most likely to produce a usable draft on the first attempt?",
+  "options": {
+   "A": "\"Summarize this project log.\"",
+   "B": "\"Write something good about this project log for my boss.\"",
+   "C": "\"Summarize this project log. Be detailed and thorough and professional.\"",
+   "D": "\"You are writing a weekly update for non-technical executives. From the log, produce: status in one line, three progress items, two risks with owners, and next week's focus. Keep it under 200 words.\""
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Role, audience, explicit structure, and length constraints are what turn a vague request into a usable draft. Intensifiers like \"detailed and thorough\" (C) add no structure"
+ },
+ {
+  "id": "associate-foundations-mock1-3",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Product and Model Selection",
+  "question": "A workflow drafts hundreds of routine appointment confirmations each day. Latency and cost dominate; the language is formulaic. Which choice fits?",
+  "options": {
+   "A": "A fast, low-cost model, reserving a more capable one for exceptions",
+   "B": "The most capable model, for consistency",
+   "C": "Whichever model is newest",
+   "D": "Alternate between models to spread cost"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Match the model tier to the work: fast and cheap for formulaic volume, capable for exceptions"
+ },
+ {
+  "id": "associate-foundations-mock1-4",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Configuration and Knowledge Management",
+  "question": "Your team's Project answers questions from a product manual. Users report confident answers about a feature that was removed last quarter. What is the most likely cause?",
+  "options": {
+   "A": "The model needs retraining",
+   "B": "The Project's knowledge still contains the outdated manual",
+   "C": "Users are asking the questions wrong",
+   "D": "The context window is too small"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Project knowledge is maintained by you; stale documents produce confidently outdated answers"
+ },
+ {
+  "id": "associate-foundations-mock1-5",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "Legal asks you to analyze a spreadsheet of support tickets containing customer names and email addresses. Your organization prohibits sending personal data to external tools. What do you do?",
+  "options": {
+   "A": "Upload it, since legal requested the analysis",
+   "B": "Upload it and ask Claude to disregard the personal columns",
+   "C": "Strip or pseudonymize the personal columns, then analyze what remains",
+   "D": "Tell legal the analysis is not possible"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Make the task compliant, then do it. A requester's seniority does not override policy, and instructing the model to ignore data does not un-send it"
+ },
+ {
+  "id": "associate-foundations-mock1-6",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Prompting and Task Execution",
+  "question": "Claude produces a five-paragraph answer when you needed three bullet points, twice in a row. What is the most effective adjustment?",
+  "options": {
+   "A": "Ask again and hope for variation",
+   "B": "Switch to a more capable model",
+   "C": "Manually reformat each response",
+   "D": "State the format explicitly, including the number of bullets and their maximum length"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Format failures are fixed by stating the format, not by re-rolling or upgrading the model"
+ },
+ {
+  "id": "associate-foundations-mock1-7",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Output Evaluation and Validation",
+  "question": "Which of these is the strongest signal that a Claude-generated claim needs verification before use?",
+  "options": {
+   "A": "The claim is a specific number, date, or citation that would matter if wrong",
+   "B": "The answer is long",
+   "C": "The answer was produced quickly",
+   "D": "The answer uses technical vocabulary"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Specific, consequential details are the highest-risk surface for fabrication. Length, speed, and vocabulary carry no accuracy signal"
+ },
+ {
+  "id": "associate-foundations-mock1-8",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "A manager wants to know whether Claude can \"replace our weekly reporting process.\" What is the most useful response?",
+  "options": {
+   "A": "Yes, automation is what AI is for",
+   "B": "A breakdown of which reporting steps Claude can draft or summarize, which need human judgment or system access, and what the review step would be",
+   "C": "No, reporting requires human oversight",
+   "D": "A recommendation to hire a consultant"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "The valued skill is a realistic division of labor with a review step, not a yes or a no"
+ },
+ {
+  "id": "associate-foundations-mock1-9",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Configuration and Knowledge Management",
+  "question": "You are configuring a Project that several colleagues will use for consistent client communications. What belongs in the Project instructions rather than in each individual prompt?",
+  "options": {
+   "A": "The specific client's name for today's message",
+   "B": "Today's date",
+   "C": "The house tone, required disclaimers, and the standard structure of a client message",
+   "D": "The colleague's personal writing preferences"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Durable, shared conventions belong in instructions; per-message specifics belong in the prompt"
+ },
+ {
+  "id": "associate-foundations-mock1-10",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Output Evaluation and Validation",
+  "question": "A summary Claude produced omits a material caveat that appears in the source document. What does this failure mode illustrate?",
+  "options": {
+   "A": "Hallucination through fabricated detail",
+   "B": "A context window limit",
+   "C": "A prompt injection attack",
+   "D": "Omission, which requires reading the source rather than only reviewing the output"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Omission is as damaging as fabrication and is only visible if you read the source, not just the output"
+ },
+ {
+  "id": "associate-foundations-mock1-11",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Troubleshooting and Optimization",
+  "question": "Your prompt worked well last month and now returns weaker results after your team added twelve documents to the Project's knowledge. What is the first thing to investigate?",
+  "options": {
+   "A": "Whether the new documents are diluting or contradicting the sources the answers should use",
+   "B": "Whether the model changed",
+   "C": "Whether colleagues are using different browsers",
+   "D": "Whether the prompt should be longer"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Diagnose the change that coincided with the regression before rewriting anything",
+  "dupGroup": "associate-foundations-practice-10"
+ },
+ {
+  "id": "associate-foundations-mock1-12",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "For which task is a Project with persistent instructions and knowledge clearly better than a one-off chat?",
+  "options": {
+   "A": "Asking for a synonym",
+   "B": "A monthly report that follows the same structure and draws on the same reference documents",
+   "C": "Checking a single fact",
+   "D": "Rewriting one email"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Repeated work with stable context and structure is exactly what Projects are for"
+ },
+ {
+  "id": "associate-foundations-mock1-13",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Output Evaluation and Validation",
+  "question": "Which practice best reduces the risk of sharing an inaccurate Claude output with a customer?",
+  "options": {
+   "A": "Reading the output for tone before sending",
+   "B": "Sending it with a note that AI assisted",
+   "C": "Verifying the claims that would cause harm if wrong, then having a second person review customer-facing material",
+   "D": "Using the largest available model"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Verification of consequential claims plus human review for customer-facing material. Model size is not a control"
+ },
+ {
+  "id": "associate-foundations-mock1-14",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "You want Claude to help redesign a slow approval process rather than just speed up its current steps. Which prompt direction fits that goal?",
+  "options": {
+   "A": "\"Make our approval process faster.\"",
+   "B": "\"Automate our approvals.\"",
+   "C": "\"What do other companies do for approvals?\"",
+   "D": "\"Here are the current approval steps and where delays occur. Propose two redesigns: one that keeps the current structure and one that reorders or removes steps, with the tradeoffs of each.\""
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Process redesign requires giving Claude the current steps, the pain points, and asking for alternatives with tradeoffs"
+ },
+ {
+  "id": "associate-foundations-mock1-15",
+  "cert": "associate-foundations",
+  "source": "mock-1",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "Which situation most clearly calls for escalating to a technical colleague rather than solving it yourself?",
+  "options": {
+   "A": "A request to connect Claude directly to the company's internal order database through an integration",
+   "B": "A prompt that needs better structure",
+   "C": "An output with the wrong tone",
+   "D": "A Project that needs its knowledge updated"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "System integrations belong to the Developer and Architect scope; recognizing that boundary is an Associate competency"
+ },
+ {
+  "id": "associate-foundations-mock2-1",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Output Evaluation and Validation",
+  "question": "Claude returns a policy answer that matches your expectation exactly, with no citation. What does the match tell you?",
+  "options": {
+   "A": "The answer is confirmed, since it agrees with your understanding",
+   "B": "The answer is probably correct but should be reworded",
+   "C": "Nothing about accuracy, because agreement with an expectation is not evidence",
+   "D": "The model has read the policy document"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Agreement with what you already believed is the easiest error to miss, since nothing prompts a check. Neither confirmation (A), rewording (B), nor an assumption about retrieval (D) establishes that the claim is true"
+ },
+ {
+  "id": "associate-foundations-mock2-2",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Output Evaluation and Validation",
+  "question": "A colleague asks Claude to check its own earlier answer, and it confirms the answer. How much weight does the confirmation carry?",
+  "options": {
+   "A": "None on its own, because the check is not independent of the thing being checked",
+   "B": "Substantial, because the model reviewed its own reasoning",
+   "C": "Substantial if the confirmation is detailed",
+   "D": "It depends on the model used"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Self-review is not an independent source and cannot establish correctness. Detail (C) and model choice (D) do not make a self-check independent"
+ },
+ {
+  "id": "associate-foundations-mock2-3",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Output Evaluation and Validation",
+  "question": "A report drafted with Claude contains one figure you cannot verify from any available source. What is the appropriate handling before circulation?",
+  "options": {
+   "A": "Circulate it with a general disclaimer about AI assistance",
+   "B": "Keep the figure and mark it as an estimate",
+   "C": "Ask Claude to provide a source and keep whatever it returns",
+   "D": "Remove the figure and note that it could not be verified"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "An unverifiable claim should not be presented as fact, and a labeled gap is honest. A blanket disclaimer (A) does not address the specific figure, an unfounded estimate (B) misrepresents it, and a citation produced on demand (C) needs the same verification"
+ },
+ {
+  "id": "associate-foundations-mock2-4",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "Which of these is the strongest candidate to hand to Claude in a monthly close process?",
+  "options": {
+   "A": "Approving the final journal entries",
+   "B": "Drafting the variance commentary from figures that are already agreed",
+   "C": "Deciding which variances require investigation",
+   "D": "Signing off the reconciliation"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Drafting from agreed inputs is bounded and checkable. Approval (A), sign-off (D), and the decision about what to investigate (C) all carry accountability"
+ },
+ {
+  "id": "associate-foundations-mock2-5",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "A workflow produces good output but nobody uses it. What should be examined first?",
+  "options": {
+   "A": "Whether the model should be upgraded",
+   "B": "Whether the output arrives where the work actually happens, in a form people can act on",
+   "C": "Whether the prompt is long enough",
+   "D": "Whether more people need training"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Adoption usually fails on fit with the existing process rather than on output quality. Model (A) and prompt length (C) address quality that is already acceptable, and training (D) treats a symptom"
+ },
+ {
+  "id": "associate-foundations-mock2-6",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "A team wants to paste anonymised customer feedback into Claude for theme analysis. What remains a risk after names are removed?",
+  "options": {
+   "A": "Nothing, since anonymisation removes the risk entirely",
+   "B": "The model may store the text permanently",
+   "C": "Theme analysis is unreliable on anonymised data",
+   "D": "Free text can still identify people through specific details, so review before sending is still needed"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Removing names does not remove identifying detail from free text, which is why a review step remains. Treating anonymisation as complete (A) is the error tested, and neither storage assumptions (B) nor reliability (C) is the governance issue here"
+ },
+ {
+  "id": "associate-foundations-mock2-7",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "Who should decide whether a Claude-assisted output is fit to send to a customer?",
+  "options": {
+   "A": "The person accountable for the customer relationship",
+   "B": "Whoever wrote the prompt",
+   "C": "The model, if asked to assess its own output",
+   "D": "Nobody, if the workflow was approved in advance"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Accountability for the outgoing communication decides the question. Prompt authorship (B) is incidental, self-assessment (C) is not independent, and prior approval of a workflow (D) does not review this instance"
+ },
+ {
+  "id": "associate-foundations-mock2-8",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Prompting and Task Execution",
+  "question": "A prompt works well until the input document is much longer than usual, when quality drops. What is the most likely explanation?",
+  "options": {
+   "A": "The model became less capable",
+   "B": "The prompt is too short",
+   "C": "The relevant material is now competing with far more surrounding text",
+   "D": "Longer documents always produce worse output"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Dilution across a much longer input is the usual cause of this pattern. The model has not changed (A), prompt length (B) is not the variable that changed, and length alone is not determinative (D)"
+ },
+ {
+  "id": "associate-foundations-mock2-9",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Prompting and Task Execution",
+  "question": "You want the same analysis applied to fifty documents with consistent output. What matters most?",
+  "options": {
+   "A": "Using the largest model available",
+   "B": "Processing the documents in one conversation",
+   "C": "Reviewing only a sample of the outputs",
+   "D": "Fixing the prompt and the required output structure, and applying both unchanged to every document"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Consistency across a set comes from holding the instruction and the output shape constant. Model size (A) does not create consistency, one long conversation (B) invites drift, and sampling (C) is a review policy rather than a design"
+ },
+ {
+  "id": "associate-foundations-mock2-10",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Product and Model Selection",
+  "question": "A task must return an answer within a second for an interactive interface, and the work is simple classification. What follows?",
+  "options": {
+   "A": "Use the most capable model to be safe",
+   "B": "Batch the requests",
+   "C": "Use the smallest model that meets the accuracy requirement, since latency is the binding constraint",
+   "D": "Increase the context supplied"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "With a hard latency requirement and a simple task, the smallest sufficient model is the fit. The most capable model (A) spends latency for accuracy that is not needed, batching (B) breaks interactivity, and more context (D) adds cost and time"
+ },
+ {
+  "id": "associate-foundations-mock2-11",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Product and Model Selection",
+  "question": "What is the correct reading of a model's published benchmark score when choosing for a specific business task?",
+  "options": {
+   "A": "It predicts performance on your task",
+   "B": "It is a general signal that does not substitute for evaluating on your own task",
+   "C": "It is irrelevant",
+   "D": "It determines the price you should expect to pay"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Benchmarks indicate general capability and cannot stand in for measurement on the actual task. Treating them as predictive (A) or irrelevant (C) are both wrong, and they do not set price (D)"
+ },
+ {
+  "id": "associate-foundations-mock2-12",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Configuration and Knowledge Management",
+  "question": "Two teams keep separate copies of the same reference documents in their own projects. What is the main risk?",
+  "options": {
+   "A": "The copies drift apart, and the two teams begin answering the same question differently",
+   "B": "Higher storage cost",
+   "C": "Slower responses",
+   "D": "The model becomes confused between projects"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Duplicated knowledge diverges as each copy is maintained separately, producing inconsistent answers. Storage (B) and speed (C) are minor, and projects do not leak into one another (D)"
+ },
+ {
+  "id": "associate-foundations-mock2-13",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Configuration and Knowledge Management",
+  "question": "What is the right first step when setting up a project for a recurring task?",
+  "options": {
+   "A": "Decide what the task needs to know every time, and add only that",
+   "B": "Upload every document the team owns",
+   "C": "Write the longest possible instruction",
+   "D": "Add documents as questions come up, without review"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "A deliberate, minimal base keeps retrieval sharp and is maintainable. Uploading everything (B) and accumulating without review (D) both dilute, and instruction length (C) is not the question"
+ },
+ {
+  "id": "associate-foundations-mock2-14",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Troubleshooting and Optimization",
+  "question": "A user reports that Claude gave a wrong answer, but you cannot reproduce it. What is the most useful next step?",
+  "options": {
+   "A": "Assume the user made an error",
+   "B": "Obtain the exact prompt, inputs, and configuration they used",
+   "C": "Increase the model size for everyone",
+   "D": "Add a warning to the interface"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Reproduction depends on the exact conditions, and gathering them is the only way to diagnose. Dismissing the report (A) discards the signal, and a model change (C) or a warning (D) acts before the cause is known"
+ },
+ {
+  "id": "associate-foundations-mock2-15",
+  "cert": "associate-foundations",
+  "source": "mock-2",
+  "domain": "Troubleshooting and Optimization",
+  "question": "Output quality varies between runs of an identical prompt on identical input. What does this indicate?",
+  "options": {
+   "A": "The system is broken",
+   "B": "The temperature must be zero for all tasks",
+   "C": "Some variation is expected, and the task needs constraints tight enough that the variation does not matter",
+   "D": "The input must be shortened"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Generation is not deterministic, so the design must tolerate variation within acceptable bounds. Treating it as breakage (A) misreads normal behavior, a universal temperature rule (B) is too blunt, and input length (D) is unrelated"
+ },
+ {
+  "id": "associate-foundations-mock3-1",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Output Evaluation and Validation",
+  "question": "A summary cites a statistic that turns out to be correct. Does that validate the rest of the summary?",
+  "options": {
+   "A": "Yes, one verified claim indicates the whole is reliable",
+   "B": "Yes, if the statistic was the hardest claim",
+   "C": "No, each material claim needs its own check",
+   "D": "Only if the source was named"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Verification does not generalise from one claim to the others. Treating it as a proxy for the whole (A, B) is the error tested, and naming a source (D) does not verify the remaining claims"
+ },
+ {
+  "id": "associate-foundations-mock3-2",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Output Evaluation and Validation",
+  "question": "Claude declines to answer part of a request and explains why. How should this be read?",
+  "options": {
+   "A": "As information about a limit or a policy that is worth understanding before proceeding",
+   "B": "As a failure that should be worked around",
+   "C": "As a sign the prompt was too long",
+   "D": "As a reason to switch models"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "A refusal with a reason is a signal about the task, not an obstacle to route around. Working around it (B) ignores the reason, and neither prompt length (C) nor model choice (D) is indicated"
+ },
+ {
+  "id": "associate-foundations-mock3-3",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Output Evaluation and Validation",
+  "question": "You need to know whether a long report supports a specific conclusion. What is the most reliable approach?",
+  "options": {
+   "A": "Ask for a summary and read that",
+   "B": "Ask whether the report supports the conclusion",
+   "C": "Ask for a confidence score",
+   "D": "Ask for the passages that bear on the conclusion, then read those passages yourself"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Retrieving the evidence and reading it keeps the judgment with you. A summary (A) and a direct verdict (B) hand the judgment to the model, and a confidence score (C) is not evidence"
+ },
+ {
+  "id": "associate-foundations-mock3-4",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "A manual process takes four hours and produces a document nobody reads. What should happen before automating it?",
+  "options": {
+   "A": "Automate it, since four hours is significant",
+   "B": "Establish whether the document is needed at all",
+   "C": "Automate it and measure adoption afterwards",
+   "D": "Split it across more people"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Automating unnecessary work makes waste faster. Proceeding regardless (A, C) skips the question, and redistributing it (D) does not address whether it is needed"
+ },
+ {
+  "id": "associate-foundations-mock3-5",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Workflow Integration and Solution Design",
+  "question": "Which sequencing is correct when introducing Claude to a recurring team process?",
+  "options": {
+   "A": "Automate the whole process, then refine",
+   "B": "Start with the step that is bounded and checkable, prove it, then extend",
+   "C": "Start with the hardest step, since it has most value",
+   "D": "Let each person adopt it however they prefer"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "A bounded first step produces evidence and trust cheaply. Full automation first (A) risks everything at once, the hardest step (C) is the least likely to succeed early, and uncoordinated adoption (D) produces drift"
+ },
+ {
+  "id": "associate-foundations-mock3-6",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "A policy forbids sending customer data to external services. A colleague asks Claude to summarise a customer email. What applies?",
+  "options": {
+   "A": "Nothing, because summarising is not sending",
+   "B": "The policy only if the customer is named",
+   "C": "Nothing, because the output stays internal",
+   "D": "The policy, since the email is customer data"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Submitting the content is the act the policy governs. Framing it as summarising (A) or by where the output goes (C) misreads the policy, and it is not limited to named individuals (B)"
+ },
+ {
+  "id": "associate-foundations-mock3-7",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "What is the correct response to a request that a model output be presented as human-written to a customer?",
+  "options": {
+   "A": "Decline to misrepresent it, and raise the disclosure question with whoever owns the relationship",
+   "B": "Comply, since the customer cares about quality not provenance",
+   "C": "Comply if the output was heavily edited",
+   "D": "Comply and record the decision internally"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Actively misrepresenting provenance is the issue, and it belongs to the person accountable for the relationship. Editing (C) and internal records (D) do not make the representation true, and quality (B) is not the point"
+ },
+ {
+  "id": "associate-foundations-mock3-8",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Prompting and Task Execution",
+  "question": "A prompt asks for a recommendation and gets a balanced discussion instead. What is the most likely cause?",
+  "options": {
+   "A": "The model is incapable of recommending",
+   "B": "The temperature is too high",
+   "C": "The prompt did not state that a single recommendation with a reason was required",
+   "D": "The input was too short"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Output shape follows the instruction, and no decision was requested. Incapability (A) is not the issue, and neither temperature (B) nor input length (D) determines whether a recommendation is given"
+ },
+ {
+  "id": "associate-foundations-mock3-9",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Prompting and Task Execution",
+  "question": "What is the most effective way to get output pitched at the right level for a specific audience?",
+  "options": {
+   "A": "Ask for it to be clear",
+   "B": "Ask for a shorter response",
+   "C": "Ask for simpler words",
+   "D": "Name the audience and what they already know"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Naming the reader and their prior knowledge is what calibrates level. Clarity (A), length (B), and vocabulary (C) are consequences rather than the instruction"
+ },
+ {
+  "id": "associate-foundations-mock3-10",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Product and Model Selection",
+  "question": "A colleague uses the largest model for every task including formatting. What should you point out?",
+  "options": {
+   "A": "Nothing, capability is never wasted",
+   "B": "That the largest model is less accurate on simple tasks",
+   "C": "That matching the model to the work saves cost without losing anything on simple tasks",
+   "D": "That formatting should be done manually"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Fit-to-task is the principle, and simple work does not benefit from extra capability. Capability is not free (A), larger models are not less accurate on simple tasks (B), and manual work (D) is not the alternative"
+ },
+ {
+  "id": "associate-foundations-mock3-11",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Product and Model Selection",
+  "question": "When does the choice of interface matter more than the choice of model?",
+  "options": {
+   "A": "Never, the model determines the outcome",
+   "B": "When the obstacle is how people supply context and act on output, not the quality of the answer",
+   "C": "Only for very large teams",
+   "D": "Only when cost is constrained"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Where adoption or context-supply is the bottleneck, interface dominates. Treating the model as decisive (A) misses that, and neither team size (C) nor cost (D) defines the case"
+ },
+ {
+  "id": "associate-foundations-mock3-12",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Configuration and Knowledge Management",
+  "question": "What is the risk of adding a document to project knowledge without removing the version it replaces?",
+  "options": {
+   "A": "Both versions can be drawn on, producing answers that mix current and superseded material",
+   "B": "Storage cost",
+   "C": "Slower responses",
+   "D": "The project will refuse to answer"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Superseded material remains retrievable and contradicts the current version. Storage (B) and speed (C) are minor, and the project does not refuse (D)"
+ },
+ {
+  "id": "associate-foundations-mock3-13",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Configuration and Knowledge Management",
+  "question": "Which is the better test of whether something belongs in project knowledge?",
+  "options": {
+   "A": "Whether every conversation in the project would benefit from it",
+   "B": "Whether it is long enough to be worth uploading",
+   "C": "Whether it was recently created",
+   "D": "Whether it is confidential"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Recurrence across conversations is what distinguishes shared knowledge from prompt content. Length (B), recency (C), and sensitivity (D) are unrelated to that test"
+ },
+ {
+  "id": "associate-foundations-mock3-14",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Troubleshooting and Optimization",
+  "question": "A previously reliable prompt now returns shorter answers than before. What is worth checking first?",
+  "options": {
+   "A": "Whether the model is deprecated",
+   "B": "Whether the input or the instructions changed, including anything added to the project",
+   "C": "Whether the network is slow",
+   "D": "Whether the account has hit a limit"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "A behavioral change points to a change in inputs or configuration. Deprecation (A), network (C), and limits (D) produce errors rather than shorter answers"
+ },
+ {
+  "id": "associate-foundations-mock3-15",
+  "cert": "associate-foundations",
+  "source": "mock-3",
+  "domain": "Troubleshooting and Optimization",
+  "question": "Someone reports that Claude is wrong about a fact that it stated correctly last week. What is the most useful first question?",
+  "options": {
+   "A": "Which model did you use",
+   "B": "How long was the conversation",
+   "C": "What exactly did you ask, and what did it reply",
+   "D": "Have you tried again"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "The exact exchange is what makes the claim examinable. Model (A), length (B), and retrying (D) may matter later but none of them establishes what happened"
+ },
+ {
+  "id": "associate-foundations-guide-1",
+  "cert": "associate-foundations",
+  "source": "guide",
+  "domain": "Output Evaluation and Validation",
+  "question": "An associate asks Claude to summarize a new regulation, and Claude produces a confident summary citing a specific subsection number. Before sending the summary to the compliance team, what is the most appropriate action?",
+  "options": {
+   "A": "Send it as-is, since Claude expressed high confidence.",
+   "B": "Verify the cited subsection against the official regulation text before sharing.",
+   "C": "Ask Claude to rate its own confidence and send it if the rating is high.",
+   "D": "Reword the summary to sound more formal, then send it."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Language models can fabricate specific-looking details such as citation numbers, a hallucination. Validating factual claims, especially citations bound for a compliance audience, against an authoritative source is the diligence step required. Self-reported confidence (A, C) is not a reliable accuracy signal, and reformatting (D) does not address correctness."
+ },
+ {
+  "id": "associate-foundations-guide-2",
+  "cert": "associate-foundations",
+  "source": "guide",
+  "domain": "Product and Model Selection",
+  "question": "An associate needs to generate a high volume of short customer-reply drafts where speed and cost matter more than deep reasoning. Which choice best fits the task?",
+  "options": {
+   "A": "Use the most capable, highest-cost model for every reply to maximize quality.",
+   "B": "Use a faster, lower-cost model suited to straightforward, high-volume tasks.",
+   "C": "Disable all product features to reduce cost.",
+   "D": "Switch to a different AI platform."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Aligning model selection with task requirements means matching a faster, lower-cost model to straightforward, high-volume work, reserving the most capable model for complex reasoning. Always using the top model (A) wastes the cost and latency budget; disabling features (C) or switching platforms (D) does not address the trade-off."
+ },
+ {
+  "id": "associate-foundations-guide-3",
+  "cert": "associate-foundations",
+  "source": "guide",
+  "domain": "Governance, Risk, and Responsible Use",
+  "question": "A project manager wants to upload a spreadsheet containing customer names and account numbers so Claude can analyze trends. Organizational policy restricts sharing regulated personal data. What is the most appropriate action?",
+  "options": {
+   "A": "Upload the file as-is, since the analysis is internal.",
+   "B": "Remove or anonymize the personal identifiers before uploading, consistent with policy.",
+   "C": "Upload the file but instruct Claude not to retain it.",
+   "D": "Skip the analysis entirely."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Applying data-sensitivity and privacy safeguards means redacting or anonymizing regulated identifiers before use, so the analysis can proceed without exposing protected data. Uploading as-is (A) violates policy; instructing the model not to retain data (C) does not satisfy the policy control; abandoning the task (D) is unnecessary when anonymization enables it."
+ }
+]

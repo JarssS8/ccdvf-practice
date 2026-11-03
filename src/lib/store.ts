@@ -2,6 +2,7 @@
 // The visible state is the snapshot with the outbox replayed on top; the server applies newest-wins.
 import { useSyncExternalStore } from 'react'
 import type { Letter } from '../shared/exam'
+import { isCertId } from '../shared/certs'
 import type { AiQuestion } from './content'
 import type { Answer, Attempt, AttemptResult, Review, Setting } from './types'
 import { authClient } from './auth'
@@ -18,7 +19,7 @@ export interface Data {
   ai: { enabled: boolean; usedToday: number; dailyLimit: number }
 }
 
-type NewAttempt = Pick<Attempt, 'id' | 'mode' | 'label' | 'lang' | 'feedback' | 'questionIds' | 'seed' | 'startedAt' | 'deadline'>
+type NewAttempt = Pick<Attempt, 'id' | 'cert' | 'mode' | 'label' | 'lang' | 'feedback' | 'questionIds' | 'seed' | 'startedAt' | 'deadline'>
 export type Op = { opId: string } & (
   | { type: 'attempt.create'; attempt: NewAttempt }
   | { type: 'answer'; attemptId: string; qid: string; choice: Letter[]; flagged: boolean; updatedAt: number }
@@ -36,7 +37,7 @@ export type SyncStatus = 'synced' | 'pending' | 'syncing' | 'offline' | 'error'
 const emptyData = (): Data => ({ user: null, attempts: {}, answers: {}, reviews: [], aiQuestions: [], settings: {}, ai: { enabled: false, usedToday: 0, dailyLimit: 0 } })
 
 // Per-account keys, so a shared device never mixes two people's progress
-const LS = { uid: 'ccdvf_uid', offset: 'ccdvf_offset', device: 'ccdvf_device', base: (u: string) => `ccdvf_base:${u}`, outbox: (u: string) => `ccdvf_outbox:${u}` }
+const LS = { uid: 'ccdvf_uid', offset: 'ccdvf_offset', device: 'ccdvf_device', base: (u: string) => `ccdvf_base:${u}`, outbox: (u: string) => `ccdvf_outbox:${u}`, cert: (u: string) => `ccdvf_cert:${u}` }
 const load = <T,>(k: string, fallback: T): T => {
   try { const v = localStorage.getItem(k); return v ? (JSON.parse(v) as T) : fallback } catch { return fallback }
 }
@@ -48,7 +49,7 @@ for (const k of ['ccdvf_base', 'ccdvf_outbox']) drop(k)
 
 /** Removes every per-account trace on this device (snapshot, outbox, tutor chats, exam positions). */
 function purgeLocal(uid: string | null) {
-  if (uid) { drop(LS.base(uid)); drop(LS.outbox(uid)) }
+  if (uid) { drop(LS.base(uid)); drop(LS.outbox(uid)); drop(LS.cert(uid)) }
   drop(LS.uid)
   try {
     for (const k of Object.keys(localStorage)) if (k.startsWith('ccdvf_tutor_') || k.startsWith('ccdvf_pos_')) localStorage.removeItem(k)
@@ -65,6 +66,9 @@ let uid: string | null = load(LS.uid, null)
 let base: Data = uid ? load(LS.base(uid), emptyData()) : emptyData()
 let hasSnapshot = !!(uid && base.user)
 let outbox: Op[] = uid ? load(LS.outbox(uid), []) : []
+// The certification this device is studying. The synced `cert` setting only seeds devices that have not chosen,
+// so picking one on the phone never moves an exam that is open on the laptop.
+let certLocal: string | null = uid ? load<string | null>(LS.cert(uid), null) : null
 let offset: number = load(LS.offset, 0)
 let status: SyncStatus = outbox.length ? 'pending' : 'synced'
 let authed: boolean | null = null
@@ -135,7 +139,7 @@ function fromServer(s: Row): Data {
   d.user = s.user as Account
   for (const r of s.attempts as Row[]) {
     d.attempts[r.id as string] = {
-      id: r.id as string, mode: r.mode as Attempt['mode'], label: (r.label as string) ?? undefined, lang: r.lang === 'es' ? 'es' : 'en', feedback: !!r.feedback,
+      id: r.id as string, cert: isCertId(r.cert) ? r.cert : undefined, mode: r.mode as Attempt['mode'], label: (r.label as string) ?? undefined, lang: r.lang === 'es' ? 'es' : 'en', feedback: !!r.feedback,
       questionIds: parse(r.question_ids, []), seed: r.seed as number, startedAt: r.started_at as number,
       deadline: (r.deadline as number) ?? null, status: r.status as Attempt['status'],
       submittedAt: (r.submitted_at as number) ?? undefined, result: parse(r.result, undefined), leaseDevice: (r.lease_device as string) ?? undefined,
@@ -176,6 +180,7 @@ function adopt(next: string) {
   save(LS.uid, uid)
   base = load(LS.base(uid), emptyData())
   outbox = load(LS.outbox(uid), [])
+  certLocal = load<string | null>(LS.cert(uid), null)
 }
 
 export function sync(): Promise<void> {
@@ -209,7 +214,7 @@ export function sync(): Promise<void> {
     } catch (e) {
       const msg = (e as Error).message
       if (e instanceof AuthError) status = 'error'
-      else if (msg === 'user_mismatch') { purgeLocal(uid); uid = null; base = emptyData(); outbox = []; hasSnapshot = false; authed = null; status = 'synced'; void sync() }
+      else if (msg === 'user_mismatch') { purgeLocal(uid); uid = null; base = emptyData(); outbox = []; certLocal = null; hasSnapshot = false; authed = null; status = 'synced'; void sync() }
       else if (e instanceof TypeError || !navigator.onLine) status = 'offline'
       else { status = 'error'; lastError = msg }
     } finally {
@@ -239,6 +244,15 @@ export function dispatch(input: OpInput) {
   schedule(op.type === 'answer' ? 800 : 50)
 }
 
+/** Studies `cert` on this device from now on, and makes it the account's default for devices that have not chosen. */
+export function chooseCert(cert: string) {
+  if (!uid || !isCertId(cert)) return
+  certLocal = cert
+  save(LS.cert(uid), cert)
+  if (data.settings.cert?.value !== cert) dispatch({ type: 'setting', key: 'cert', value: cert, updatedAt: now() })
+  else emit()
+}
+
 export function addAiQuestions(qs: AiQuestion[]) {
   base = { ...base, aiQuestions: [...base.aiQuestions, ...qs] }
   if (uid) save(LS.base(uid), base)
@@ -263,7 +277,7 @@ export async function signedIn() {
 
 function forget() {
   purgeLocal(uid)
-  uid = null; base = emptyData(); outbox = []; hasSnapshot = false; authed = false
+  uid = null; base = emptyData(); outbox = []; certLocal = null; hasSnapshot = false; authed = false
   recompute()
 }
 
@@ -303,7 +317,8 @@ const getVersion = () => version
 
 export function useStore() {
   useSyncExternalStore(subscribe, getVersion)
-  return { data, status, authed, hasSnapshot, pending: outbox.length, lastError }
+  return { data, status, authed, hasSnapshot, pending: outbox.length, lastError, certLocal }
 }
 
 export const getData = () => data
+export const getLocalCert = () => certLocal

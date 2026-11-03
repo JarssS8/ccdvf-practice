@@ -14,7 +14,7 @@ ${I.siteName} es un proyecto personal, gratuito y sin ánimo de lucro: no tiene 
 
 ## Objeto
 
-Esta web ofrece material de práctica para preparar el examen *Claude Certified Developer – Foundations*: simulacros, ejercicios por dominio, tarjetas de repaso, apuntes y un tutor de IA.
+Esta web ofrece material de práctica para preparar los exámenes de certificación de Claude (*Associate – Foundations*, *Developer – Foundations*, *Architect – Foundations* y *Architect – Professional*): simulacros, ejercicios por dominio, tarjetas de repaso, apuntes y un tutor de IA.
 
 ## Sin relación con Anthropic
 
@@ -50,7 +50,7 @@ Esta política explica qué datos personales trata ${I.siteName} (${I.site}), pa
 | Nombre y email | Al crear la cuenta. |
 | Contraseña | Solo si te registras con email. Nunca se guarda en claro: se guarda una huella irreversible (PBKDF2-SHA256 con sal). |
 | Identificador de tu cuenta de Google o GitHub, nombre, email y foto de perfil | Solo si entras con Google o GitHub. No se guardan los tokens de acceso de esos servicios. |
-| Progreso de estudio: intentos, respuestas, preguntas marcadas, repasos de tarjetas, fecha de tu examen y preguntas que generes con IA | Mientras usas la app. |
+| Progreso de estudio: intentos, respuestas, preguntas marcadas, repasos de tarjetas, la certificación que eliges, la fecha de examen de cada certificación y preguntas que generes con IA | Mientras usas la app. |
 | Dirección IP y navegador (user-agent) de cada sesión | Al iniciar sesión. |
 | Dirección IP en contadores de intentos y de uso de la IA | Al iniciar sesión, registrarte, borrar la cuenta o usar la IA, para frenar ataques y abusos. |
 | Número de usos diarios de la IA | Al usar el tutor o generar preguntas. |
@@ -130,7 +130,7 @@ Al **cerrar sesión** se borran la cookie de sesión y los datos locales de tu c
   terminos: `
 ## Qué es
 
-${I.siteName} es un servicio **gratuito** de práctica para el examen *Claude Certified Developer – Foundations*, ofrecido por ${I.owner} como proyecto personal. Al crear una cuenta aceptas estos términos y la [política de privacidad](#/legal/privacidad).
+${I.siteName} es un servicio **gratuito** de práctica para los exámenes de certificación de Claude (*Associate – Foundations*, *Developer – Foundations*, *Architect – Foundations* y *Architect – Professional*), ofrecido por ${I.owner} como proyecto personal. Al crear una cuenta aceptas estos términos y la [política de privacidad](#/legal/privacidad).
 
 ## Tu cuenta
 

@@ -16,6 +16,8 @@ export interface AttemptResult {
 
 export interface Attempt {
   id: string
+  /** Certification id; absent on attempts stored before there was more than one (those are Developer's). */
+  cert?: string
   mode: Mode
   feedback: boolean
   questionIds: string[]

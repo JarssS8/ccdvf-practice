@@ -1,5 +1,6 @@
-import { DOMAINS, EXAM, domainQuotas, mulberry32, shuffle, type Letter, type Question } from '../shared/exam'
-import { groupOf, type AiQuestion } from './content'
+import { mulberry32, shuffle, type Letter, type Question } from '../shared/exam'
+import { SCALE, certById, certOfAttempt, domainQuotas, quickMinutes, type CertDef } from '../shared/certs'
+import { groupOf, guideCount, inCert, type AiQuestion } from './content'
 import { getLang, type Dict, type Lang } from '../i18n'
 import type { Data } from './store'
 import type { Answer, Attempt, AttemptResult, Mode } from './types'
@@ -13,10 +14,13 @@ export const isCorrect = (q: Question, choice: Letter[] | undefined) =>
 
 export interface Exposure { qid: string; group: string; attemptId: string; at: number; correct: boolean; firstOfGroup: boolean; feedback: boolean }
 
-/** Every answered question in submitted attempts, oldest first; firstOfGroup marks the first time a concept was seen. */
-export function exposures(data: Data, qs: Map<string, AiQuestion>): Exposure[] {
+/** Attempts of one certification (older ones carry none and are Developer's). */
+export const attemptsOf = (data: Data, cert: CertDef) => Object.values(data.attempts).filter((a) => certOfAttempt(a) === cert.id)
+
+/** Every answered question in the certification's submitted attempts, oldest first; firstOfGroup marks the first time a concept was seen. */
+export function exposures(data: Data, qs: Map<string, AiQuestion>, cert: CertDef): Exposure[] {
   const out: Exposure[] = []
-  const attempts = Object.values(data.attempts).filter((a) => a.status === 'submitted').sort((a, b) => a.startedAt - b.startedAt)
+  const attempts = attemptsOf(data, cert).filter((a) => a.status === 'submitted').sort((a, b) => a.startedAt - b.startedAt)
   const seen = new Set<string>()
   for (const a of attempts) {
     for (const qid of a.questionIds) {
@@ -35,10 +39,10 @@ export function exposures(data: Data, qs: Map<string, AiQuestion>): Exposure[] {
 
 export interface ModeSpec { items: number; minutes: number | null; feedback: boolean }
 
-// Titles and descriptions live in the dictionaries (t.modes)
-export const MODES: Record<Mode, ModeSpec> = {
-  full: { items: EXAM.items, minutes: EXAM.minutes, feedback: false },
-  quick: { items: 15, minutes: 34, feedback: false },
+// Titles and descriptions live in the dictionaries (t.modes); the real-exam modes follow the certification
+const MODES: Record<Mode, ModeSpec> = {
+  full: { items: 0, minutes: null, feedback: false },
+  quick: { items: 15, minutes: null, feedback: false },
   'repo-mock-1': { items: 15, minutes: 30, feedback: false },
   'repo-mock-2': { items: 15, minutes: 30, feedback: false },
   'repo-mock-3': { items: 15, minutes: 30, feedback: false },
@@ -47,6 +51,13 @@ export const MODES: Record<Mode, ModeSpec> = {
   missed: { items: 15, minutes: null, feedback: true },
   ai: { items: 10, minutes: null, feedback: true },
   flagged: { items: 20, minutes: null, feedback: true },
+}
+
+export function modeSpec(mode: Mode, cert: CertDef): ModeSpec {
+  if (mode === 'full') return { items: cert.items, minutes: cert.minutes, feedback: false }
+  if (mode === 'quick') return { ...MODES.quick, minutes: quickMinutes(cert) }
+  if (mode === 'guide') return { ...MODES.guide, items: guideCount(cert) }
+  return MODES[mode]
 }
 
 /** Simulations of the real exam: always in English, interface included. */
@@ -73,31 +84,34 @@ function pickDistinct(sorted: AiQuestion[], n: number, used: Set<string>) {
   return out
 }
 
-export function latestByQuestion(data: Data) {
+export function latestByQuestion(data: Data, cert: CertDef) {
   const latest = new Map<string, Answer>()
   for (const a of Object.values(data.answers)) {
     const att = data.attempts[a.attemptId]
-    if (!att || att.status !== 'submitted' || !a.choice.length) continue
+    if (!att || att.status !== 'submitted' || !a.choice.length || certOfAttempt(att) !== cert.id) continue
     const prev = latest.get(a.qid)
     if (!prev || a.updatedAt > prev.updatedAt) latest.set(a.qid, a)
   }
   return latest
 }
 
-export function buildAttempt(mode: Mode, data: Data, qs: Map<string, AiQuestion>, opts: { domain?: string; fromAttempt?: string; now: number }): Omit<Attempt, 'status'> | { error: 'no_missed' | 'no_questions' } {
-  const spec = MODES[mode]
+export function buildAttempt(mode: Mode, data: Data, index: Map<string, AiQuestion>, opts: { cert: CertDef; domain?: string; fromAttempt?: string; now: number }): Omit<Attempt, 'status'> | { error: 'no_missed' | 'no_questions' } {
+  const { cert } = opts
+  const spec = modeSpec(mode, cert)
   const seed = (Math.random() * 2 ** 32) >>> 0
   const rnd = mulberry32(seed)
+  // Only this certification's questions, whatever else the index holds
+  const qs = inCert(index, cert)
   const all = [...qs.values()].filter((q) => !(q as AiQuestion).reported)
   const repo = all.filter((q) => q.source !== 'ai')
-  const exp = exposures(data, qs)
+  const exp = exposures(data, qs, cert)
   let chosen: AiQuestion[] = []
   let label: string | undefined
 
   if (mode === 'full' || mode === 'quick') {
-    const quotas = domainQuotas(spec.items)
+    const quotas = domainQuotas(cert, spec.items)
     const used = new Set<string>()
-    for (const d of DOMAINS) chosen.push(...pickDistinct(byFreshness(repo.filter((q) => q.domain === d.name), exp, rnd), quotas[d.name], used))
+    for (const d of cert.domains) chosen.push(...pickDistinct(byFreshness(repo.filter((q) => q.domain === d.name), exp, rnd), quotas[d.name], used))
     // A domain without enough distinct questions is topped up from the freshest of the rest
     if (chosen.length < spec.items) chosen.push(...pickDistinct(byFreshness(repo, exp, rnd), spec.items - chosen.length, used))
     chosen = shuffle(chosen, rnd)
@@ -115,20 +129,20 @@ export function buildAttempt(mode: Mode, data: Data, qs: Map<string, AiQuestion>
     chosen = byFreshness(pool, exp, rnd).slice(0, spec.items)
   } else if (mode === 'missed' && opts.fromAttempt) {
     // The misses of one attempt, all of them
-    const src = data.attempts[opts.fromAttempt]
+    const src = Object.hasOwn(data.attempts, opts.fromAttempt) ? data.attempts[opts.fromAttempt] : undefined
     label = src ? `from:${src.mode}` : undefined
     chosen = shuffle((src?.questionIds ?? []).map((id) => qs.get(id)!).filter((q) => q && !isCorrect(q, data.answers[`${src!.id}|${q.id}`]?.choice)), rnd)
   } else if (mode === 'missed') {
-    const latest = latestByQuestion(data)
+    const latest = latestByQuestion(data, cert)
     chosen = shuffle(all.filter((q) => { const a = latest.get(q.id); return a && !isCorrect(q, a.choice) }), rnd).slice(0, spec.items)
   } else if (mode === 'flagged') {
-    const flagged = new Set(Object.values(data.answers).filter((a) => a.flagged).map((a) => a.qid))
+    const flagged = new Set(Object.values(data.answers).filter((a) => a.flagged && data.attempts[a.attemptId] && certOfAttempt(data.attempts[a.attemptId]) === cert.id).map((a) => a.qid))
     chosen = shuffle(all.filter((q) => flagged.has(q.id)), rnd).slice(0, spec.items)
   }
 
   if (!chosen.length) return { error: mode === 'missed' ? 'no_missed' : 'no_questions' }
   return {
-    id: crypto.randomUUID(), mode, label, lang: isExamMode(mode) ? 'en' : getLang(), feedback: spec.feedback, seed,
+    id: crypto.randomUUID(), cert: cert.id, mode, label, lang: isExamMode(mode) ? 'en' : getLang(), feedback: spec.feedback, seed,
     questionIds: chosen.map((q) => q.id), startedAt: opts.now,
     deadline: spec.minutes ? opts.now + spec.minutes * 60_000 : null,
   }
@@ -137,7 +151,7 @@ export function buildAttempt(mode: Mode, data: Data, qs: Map<string, AiQuestion>
 // ---------- scoring ----------
 
 export function scoreAttempt(a: Attempt, data: Data, qs: Map<string, AiQuestion>, at: number): AttemptResult {
-  const prior = exposures({ ...data, attempts: Object.fromEntries(Object.entries(data.attempts).filter(([, x]) => x.status === 'submitted' && x.startedAt < a.startedAt)) }, qs)
+  const prior = exposures({ ...data, attempts: Object.fromEntries(Object.entries(data.attempts).filter(([, x]) => x.status === 'submitted' && x.startedAt < a.startedAt)) }, qs, certById(certOfAttempt(a)))
   const seenGroups = new Set(prior.map((e) => e.group))
   const r: AttemptResult = { total: a.questionIds.length, correct: 0, blank: 0, flagged: 0, fresh: 0, freshCorrect: 0, timeUsedMs: Math.min(at, a.deadline ?? at) - a.startedAt, byDomain: {} }
   for (const qid of a.questionIds) {
@@ -162,8 +176,8 @@ export function scoreAttempt(a: Attempt, data: Data, qs: Map<string, AiQuestion>
 export interface Estimate { n: number; p: number; lo: number; hi: number; scaled: number; scaledLo: number; scaledHi: number; zone: 'below' | 'borderline' | 'likely' }
 
 /** Linear map of proportion correct onto 100–1000. The real raw→scaled conversion is not published. */
-export const toScaled = (p: number) => Math.round(EXAM.scaleMin + (EXAM.scaleMax - EXAM.scaleMin) * p)
-export const PASS_P = (EXAM.passScaled - EXAM.scaleMin) / (EXAM.scaleMax - EXAM.scaleMin)
+export const toScaled = (p: number) => Math.round(SCALE.min + (SCALE.max - SCALE.min) * p)
+export const PASS_P = (SCALE.pass - SCALE.min) / (SCALE.max - SCALE.min)
 
 export function estimate(correct: number, n: number): Estimate | null {
   if (n < 1) return null
@@ -180,7 +194,7 @@ export function estimate(correct: number, n: number): Estimate | null {
 }
 
 /** Readiness from first exposures to repo questions only, re-weighted to the blueprint. */
-export function readiness(exp: Exposure[], qs: Map<string, AiQuestion>) {
+export function readiness(exp: Exposure[], qs: Map<string, AiQuestion>, cert: CertDef) {
   const first = exp.filter((e) => e.firstOfGroup && qs.get(e.qid)?.source !== 'ai')
   if (!first.length) return null
   const by: Record<string, { n: number; c: number }> = {}
@@ -195,7 +209,7 @@ export function readiness(exp: Exposure[], qs: Map<string, AiQuestion>) {
   // Shrink each domain toward the overall rate, then weight by the blueprint
   const k = 3
   let p = 0
-  for (const d of DOMAINS) {
+  for (const d of cert.domains) {
     const t = by[d.name] ?? { n: 0, c: 0 }
     p += (d.weight / 100) * ((t.c + k * overall) / (t.n + k))
   }
@@ -203,8 +217,8 @@ export function readiness(exp: Exposure[], qs: Map<string, AiQuestion>) {
   return est && { ...est, by }
 }
 
-export function domainStats(exp: Exposure[], qs: Map<string, AiQuestion>) {
-  const res = DOMAINS.map((d) => ({ name: d.name, weight: d.weight, first: { n: 0, c: 0 }, recent: { n: 0, c: 0 } }))
+export function domainStats(exp: Exposure[], qs: Map<string, AiQuestion>, cert: CertDef) {
+  const res = cert.domains.map((d) => ({ name: d.name, weight: d.weight, first: { n: 0, c: 0 }, recent: { n: 0, c: 0 } }))
   const idx = new Map<string, (typeof res)[number]>(res.map((r) => [r.name, r]))
   const recentCut = exp.length - 60
   exp.forEach((e, i) => {
@@ -217,8 +231,8 @@ export function domainStats(exp: Exposure[], qs: Map<string, AiQuestion>) {
 }
 
 /** Every answer so far, per domain: misses, total and the marks a miss costs (miss rate × exam weight). */
-export function domainMisses(exp: Exposure[], qs: Map<string, AiQuestion>) {
-  const res = DOMAINS.map((d) => ({ name: d.name, weight: d.weight, n: 0, wrong: 0 }))
+export function domainMisses(exp: Exposure[], qs: Map<string, AiQuestion>, cert: CertDef) {
+  const res = cert.domains.map((d) => ({ name: d.name, weight: d.weight, n: 0, wrong: 0 }))
   const idx = new Map(res.map((r) => [r.name as string, r]))
   for (const e of exp) {
     const r = idx.get(qs.get(e.qid)?.domain ?? '')
@@ -231,8 +245,8 @@ export function domainMisses(exp: Exposure[], qs: Map<string, AiQuestion>) {
 }
 
 /** Per domain, the hit rate over the last `window` answers after each answer: one point per answer, oldest first. */
-export function domainTrends(exp: Exposure[], qs: Map<string, AiQuestion>, window = 10) {
-  return DOMAINS.map((d) => {
+export function domainTrends(exp: Exposure[], qs: Map<string, AiQuestion>, cert: CertDef, window = 10) {
+  return cert.domains.map((d) => {
     const hits = exp.filter((e) => qs.get(e.qid)?.domain === d.name).map((e) => ({ at: e.at, ok: e.correct }))
     const points = hits.map((h, i) => {
       const slice = hits.slice(Math.max(0, i - window + 1), i + 1)
@@ -269,4 +283,13 @@ export function attemptTitle(a: Pick<Attempt, 'mode' | 'label'>, t: Dict) {
   if (!a.label) return base
   if (a.label.startsWith('from:')) return `${base} · ${t.common.fromAttempt(t.modes[a.label.slice(5) as Mode]?.title ?? a.label.slice(5))}`
   return `${base} · ${t.domains[a.label] ?? a.label}`
+}
+
+/** The stored result, recomputed when it was scored by a client that could not resolve the attempt's questions. */
+export function resultOf(a: Attempt, data: Data, qs: Map<string, AiQuestion>): AttemptResult | undefined {
+  const r = a.result
+  if (!r) return r
+  const counted = Object.values(r.byDomain ?? {}).reduce((s, d) => s + d.n, 0)
+  const known = a.questionIds.filter((id) => qs.has(id)).length
+  return counted < known ? scoreAttempt(a, data, qs, a.submittedAt ?? a.startedAt) : r
 }

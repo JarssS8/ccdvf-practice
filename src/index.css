@@ -70,6 +70,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); min-height: 44px; }
 .brand-mark { width: 36px; height: 36px; border-radius: 12px; background: var(--nav-bg); color: var(--tile-lime); display: grid; place-items: center; font: 700 14px var(--display); }
 .brand-name { font: 700 18px var(--display); letter-spacing: -0.02em; }
+.brand { gap: 8px; }
+.brand-home { display: flex; min-height: 44px; align-items: center; text-decoration: none; border-radius: 12px; }
+/* The certification being studied, as a pill that opens the switcher */
+.brand-switch {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px 0 16px; border: 0; border-radius: 999px;
+  background: var(--surface); color: var(--ink); font: 700 16px var(--display); letter-spacing: -0.02em; cursor: pointer;
+  transition: background 150ms ease-out;
+}
+.brand-switch:hover { background: var(--track); }
 .topnav { display: flex; gap: 2px; padding: 4px; border-radius: 999px; background: var(--surface); margin: 0 auto 0 12px; }
 .topnav a { text-decoration: none; color: var(--ink-2); font-weight: 500; font-size: 15px; padding: 9px 16px; border-radius: 999px; transition: background 150ms ease-out; }
 .topnav a:hover { background: var(--surface-2); }
@@ -209,6 +218,9 @@ a.list-item:hover, button.list-item:hover { background: var(--track); }
 .seg { display: inline-flex; padding: 4px; gap: 4px; flex-wrap: wrap; border-radius: 999px; background: var(--surface-2); }
 .seg button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; cursor: pointer; font-weight: 500; font-size: 14px; }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); font-weight: 600; }
+/* Four certification codes on one row, phones included */
+.seg-certs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 440px; }
+.seg-certs button { padding: 0 6px; white-space: nowrap; }
 
 table.data { width: 100%; border-collapse: collapse; font-size: 14px; }
 table.data th { text-align: left; font-weight: 600; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
@@ -274,6 +286,40 @@ table.data td.num, table.data th.num { text-align: right; white-space: nowrap; f
 dialog { border: 0; border-radius: var(--r-xl); padding: 0; max-width: min(560px, calc(100vw - 32px)); width: 100%; background: var(--surface); color: var(--ink); box-shadow: 0 24px 70px rgb(0 0 0 / 0.35); }
 dialog::backdrop { background: rgb(14 15 18 / 0.6); }
 .dialog-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; max-height: 80dvh; overflow-y: auto; }
+
+/* ---------- certification switcher (popover on desktop, floating sheet on phones) ---------- */
+dialog.cert-dialog { position: fixed; margin: 0; inset: 66px auto auto max(16px, calc((100vw - 1200px) / 2 + 24px)); width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 82px); overflow-y: auto; box-shadow: 0 24px 70px rgb(0 0 0 / 0.22); }
+dialog.cert-dialog::backdrop { background: transparent; }
+.cert-panel { padding: 16px; display: flex; flex-direction: column; gap: 4px; }
+.cert-panel .eyebrow { margin: 0; }
+.cert-opt { display: flex; align-items: center; gap: 12px; padding: 10px 12px; min-height: 64px; width: 100%; border: 0; border-radius: var(--r-md); background: transparent; color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+.cert-opt:hover, .cert-opt[aria-current="true"] { background: var(--bg); }
+.cert-sq { width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0; display: grid; place-items: center; font: 700 13px var(--display); color: var(--on-tile); }
+.cert-txt { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.cert-name { font-weight: 600; font-size: 15.5px; line-height: 1.3; }
+/* Not .tiny: the top bar hides .tiny on phones, and the dialog lives inside it */
+.cert-meta { font-size: 13px; color: var(--muted); margin: 0; }
+.cert-tick { width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--bg); display: grid; place-items: center; flex-shrink: 0; }
+@media (max-width: 860px) {
+  dialog.cert-dialog { inset: auto 16px calc(16px + env(safe-area-inset-bottom)) 16px; width: auto; max-width: none; box-shadow: 0 24px 70px rgb(0 0 0 / 0.35); }
+  dialog.cert-dialog::backdrop { background: rgb(14 15 18 / 0.6); }
+  .cert-opt { min-height: 68px; }
+}
+
+/* ---------- first-run certification picker ---------- */
+.pick-page { max-width: 960px; padding-top: 32px; gap: 28px; }
+.pick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.pick-tile { min-height: 200px; justify-content: space-between; gap: 32px; padding: 24px; color: var(--on-tile); }
+.pick-tile .eyebrow { color: rgb(20 22 26 / 0.78); font-weight: 700; }
+.pick-tile .muted { color: rgb(20 22 26 / 0.78); }
+.pick-go { width: 46px; height: 46px; border-radius: 50%; background: #14161A; color: #FFFFFF; display: grid; place-items: center; flex-shrink: 0; }
+@media (max-width: 640px) {
+  .pick-page { padding-top: 12px; gap: 20px; }
+  .pick-grid { grid-template-columns: 1fr; gap: 12px; }
+  .pick-tile { min-height: 0; gap: 12px; padding: 18px 18px 20px 20px; }
+  .pick-go { width: 40px; height: 40px; }
+  .pick-tile .h-tile { font-size: 22px; }
+}
 
 /* ---------- tutor ---------- */
 .bubble { max-width: 90%; padding: 10px 16px; border-radius: 20px; font-size: 15px; white-space: pre-wrap; }

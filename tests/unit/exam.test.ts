@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { asDisplayed, displayLetter, domainQuotas, DOMAINS, EXAM, optionOrder, questionHash, relabel, type Question } from '../../src/shared/exam'
+import { asDisplayed, displayLetter, optionOrder, questionHash, relabel, type Question } from '../../src/shared/exam'
+import { CERTS, DEFAULT_CERT, certById, certOfAttempt, certOfDomain, certOfExamDateKey, certOfQuestion, domainQuotas, examDateKey, isCertId, quickMinutes } from '../../src/shared/certs'
 
 const q: Question = {
   id: 'q-1', source: 'practice', domain: 'Claude Code', question: 'Which one?',
@@ -40,11 +41,39 @@ describe('displayed question', () => {
 })
 
 describe('exam facts', () => {
-  it('domain weights add up to 100%', () => {
-    expect(DOMAINS.reduce((s, d) => s + d.weight, 0)).toBeCloseTo(100, 5)
+  it('every certification: weights add up to 100% and quotas fill the requested number of items', () => {
+    for (const c of CERTS) {
+      expect(c.domains.reduce((s, d) => s + d.weight, 0)).toBeCloseTo(100, 5)
+      for (const n of [3, 15, c.items]) expect(Object.values(domainQuotas(c, n)).reduce((a, b) => a + b, 0)).toBe(n)
+    }
   })
-  it('quotas fill the requested number of items', () => {
-    for (const n of [3, 15, EXAM.items]) expect(Object.values(domainQuotas(n)).reduce((a, b) => a + b, 0)).toBe(n)
+  it('the four exams as the guides publish them', () => {
+    expect(CERTS.map((c) => [c.code, c.items, c.minutes])).toEqual([['CCAO-F', 60, 120], ['CCDV-F', 53, 120], ['CCAR-F', 60, 120], ['CCAR-P', 63, 120]])
+    expect(new Set(CERTS.map((c) => c.id)).size).toBe(4)
+    expect(quickMinutes(certById('developer-foundations'))).toBe(34)
+    expect(quickMinutes(certById('architect-foundations'))).toBe(30)
+  })
+  it('a domain name belongs to exactly one certification', () => {
+    const all = CERTS.flatMap((c) => c.domains.map((d) => d.name))
+    expect(new Set(all).size).toBe(all.length)
+    for (const c of CERTS) for (const d of c.domains) expect(certOfDomain(d.name)).toBe(c.id)
+  })
+  it('untrusted ids never resolve through the prototype', () => {
+    for (const id of ['__proto__', 'constructor', 'toString', '', 'developer']) expect(isCertId(id)).toBe(false)
+    expect(certById('__proto__').id).toBe(DEFAULT_CERT)
+    expect(certOfExamDateKey('exam_date:__proto__')).toBeNull()
+    expect(certOfExamDateKey('exam_date:developer-foundations')).toBeNull()
+  })
+  it('older rows without a certification are Developer', () => {
+    expect(certOfAttempt({})).toBe(DEFAULT_CERT)
+    expect(certOfAttempt({ cert: 'architect-professional' })).toBe('architect-professional')
+    expect(certOfQuestion({ domain: 'Integration' })).toBe('architect-professional')
+    expect(certOfQuestion({ domain: 'Something new' })).toBe(DEFAULT_CERT)
+  })
+  it('exam date keys: Developer keeps its old key, the others get their own', () => {
+    for (const c of CERTS) expect(certOfExamDateKey(examDateKey(c.id))).toBe(c.id)
+    expect(examDateKey(DEFAULT_CERT)).toBe('exam_date')
+    expect(examDateKey('associate-foundations')).toBe('exam_date:associate-foundations')
   })
   it('the translation fingerprint changes with the English text', () => {
     expect(questionHash(q)).toBe(questionHash({ ...q }))

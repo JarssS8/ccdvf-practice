@@ -1,18 +1,21 @@
 import { questionIndex } from './content'
-import { buildAttempt, scoreAttempt } from './engine'
+import { attemptsOf, buildAttempt, scoreAttempt } from './engine'
+import { currentCert } from './cert'
 import { go } from './router'
 import { dispatch, getData, now } from './store'
+import type { CertDef } from '../shared/certs'
 import type { Attempt, Mode } from './types'
 
-export function activeAttempt(): Attempt | undefined {
-  return Object.values(getData().attempts).filter((a) => a.status === 'active').sort((a, b) => b.startedAt - a.startedAt)[0]
+/** The newest unfinished attempt of a certification (the one being studied unless given). */
+export function activeAttempt(cert: CertDef = currentCert()): Attempt | undefined {
+  return attemptsOf(getData(), cert).filter((a) => a.status === 'active').sort((a, b) => b.startedAt - a.startedAt)[0]
 }
 
-/** Starts a new attempt; returns an error message when the mode has no questions. */
+/** Starts a new attempt in the certification being studied; returns an error message when the mode has no questions. */
 export function startAttempt(mode: Mode, domain?: string, fromAttempt?: string): string | null {
   const data = getData()
   const qs = questionIndex(data.aiQuestions)
-  const a = buildAttempt(mode, data, qs, { domain, fromAttempt, now: now() })
+  const a = buildAttempt(mode, data, qs, { cert: currentCert(), domain, fromAttempt, now: now() })
   if ('error' in a) return a.error
   dispatch({ type: 'attempt.create', attempt: a })
   go(`/exam/${a.id}`)

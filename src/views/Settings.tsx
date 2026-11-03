@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { LangPicker, SyncBadge } from '../components/ui'
-import { meta } from '../lib/content'
+import { metaOf } from '../lib/content'
+import { examDateOf, useCert } from '../lib/cert'
+import { CERTS, examDateKey, type CertDef } from '../shared/certs'
 import { fmtDate } from '../lib/engine'
-import { api, deleteAccount, deviceId, dispatch, exportBackup, logout, now, setAiConsent, sync, useStore } from '../lib/store'
+import { api, chooseCert, deleteAccount, deviceId, dispatch, exportBackup, logout, now, setAiConsent, sync, useStore } from '../lib/store'
 import { errorText, ownText, useLang, useT } from '../i18n'
 import { answersCsv } from '../lib/export'
 import { useQuestions } from '../App'
@@ -15,19 +17,32 @@ export const applyTheme = (t: Theme) => {
 }
 export const savedTheme = (): Theme => { try { return (localStorage.getItem('ccdvf_theme') as Theme) || 'auto' } catch { return 'auto' } }
 
+function ExamDateField({ cert, saved }: { cert: CertDef; saved: string }) {
+  const t = useT()
+  const [date, setDate] = useState(saved)
+  return (
+    <div className="field" style={{ maxWidth: 320 }}>
+      <label htmlFor="exam-date">{t.settings.examDate} · {cert.code}</label>
+      <input id="exam-date" type="date" className="input" value={date} onChange={(e) => setDate(e.target.value)}
+        onBlur={() => { if (date !== saved) dispatch({ type: 'setting', key: examDateKey(cert.id), value: date, updatedAt: now() }) }} />
+      <span className="tiny muted">{t.settings.examDateNote}</span>
+    </div>
+  )
+}
+
 export default function Settings() {
   const { data, status, pending, lastError } = useStore()
   const t = useT()
   const lang = useLang()
   const qs = useQuestions()
+  const cert = useCert()
+  const meta = metaOf(cert)
   const [theme, setTheme] = useState<Theme>(savedTheme)
-  const [date, setDate] = useState(data.settings.exam_date?.value ?? '')
   const [confirmText, setConfirmText] = useState('')
   const [password, setPassword] = useState('')
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   useEffect(() => { applyTheme(theme); try { localStorage.setItem('ccdvf_theme', theme) } catch { /* ignore */ } }, [theme])
-  useEffect(() => setDate(data.settings.exam_date?.value ?? ''), [data.settings.exam_date?.value])
 
   const save = (content: string, type: string, ext: string) => {
     const url = URL.createObjectURL(new Blob([content], { type }))
@@ -75,12 +90,12 @@ export default function Settings() {
 
       <section className="card" aria-labelledby="ex-h">
         <h2 id="ex-h" className="h-section">{t.settings.exam}</h2>
-        <div className="field" style={{ maxWidth: 320 }}>
-          <label htmlFor="exam-date">{t.settings.examDate}</label>
-          <input id="exam-date" type="date" className="input" value={date} onChange={(e) => setDate(e.target.value)}
-            onBlur={() => { if (date !== (data.settings.exam_date?.value ?? '')) dispatch({ type: 'setting', key: 'exam_date', value: date, updatedAt: now() }) }} />
-          <span className="tiny muted">{t.settings.examDateNote}</span>
+        <div className="seg seg-certs" role="group" aria-label={t.cert.title}>
+          {CERTS.map((c) => <button key={c.id} aria-pressed={c.id === cert.id} onClick={() => chooseCert(c.id)}>{c.code}</button>)}
         </div>
+        <span className="tiny muted">{cert.name}. {t.cert.settingsText}</span>
+        {/* Keyed by certification and stored date: switching, or a change from another device, shows the right date at once */}
+        <ExamDateField key={`${cert.id}|${examDateOf(data, cert) ?? ''}`} cert={cert} saved={examDateOf(data, cert) ?? ''} />
       </section>
 
       <section className="card" aria-labelledby="th-h">

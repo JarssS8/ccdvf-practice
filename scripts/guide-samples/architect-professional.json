@@ -1,0 +1,44 @@
+[
+ {
+  "id": "architect-professional-guide-1",
+  "source": "guide",
+  "domain": "Integration",
+  "question": "A team exposes a customer-support agent that can read tickets, draft replies, issue refunds, and delete user accounts. Support staff only ever need to read tickets and draft replies. Applying least-privilege principles, which change best reduces risk?",
+  "options": {
+   "A": "Add logging to the refund and delete tools so misuse can be audited later.",
+   "B": "Remove the refund and delete tools from the agent's configuration entirely.",
+   "C": "Keep all tools but add a confirmation prompt before refunds and deletions.",
+   "D": "Replace the agent with a larger model that follows instructions more reliably."
+  },
+  "answer": "B",
+  "rationale": "Least privilege means removing capabilities the role does not require, eliminating the attack surface rather than monitoring or guarding it. Logging (A) and confirmations (C) are detective/compensating controls, not removal of unnecessary privilege; model size (D) is unrelated to authorization scope."
+ },
+ {
+  "id": "architect-professional-guide-2",
+  "source": "guide",
+  "domain": "Claude Models, Prompting & Context Engineering",
+  "question": "An application sends the same 8,000-token system prompt and policy document on every request, followed by a short, varying user message. Latency and cost are both concerns. Which optimization most directly addresses both?",
+  "options": {
+   "A": "Truncate the policy document to the first 1,000 tokens.",
+   "B": "Switch to the smallest available model regardless of task fit.",
+   "C": "Place the static system prompt and policy before the dynamic content and enable prompt caching.",
+   "D": "Move the policy document into a few-shot example block."
+  },
+  "answer": "C",
+  "rationale": "Ordering stable content first and enabling prompt caching lets repeated prefixes be reused, reducing both time-to-first-token and per-request cost without discarding required context. Truncation (A) loses needed policy; downsizing blindly (B) risks quality; relocating to few-shot (D) does not create a cacheable, reusable prefix."
+ },
+ {
+  "id": "architect-professional-guide-3",
+  "source": "guide",
+  "domain": "Evaluation, Testing & Optimization",
+  "question": "A RAG system suddenly returns confident but incorrect answers after a document refresh, while latency and model version are unchanged. What is the most likely first place to investigate?",
+  "options": {
+   "A": "The model weights have silently changed.",
+   "B": "The retrieval/indexing step is returning irrelevant or stale chunks.",
+   "C": "The temperature setting is too low.",
+   "D": "The context window has shrunk."
+  },
+  "answer": "B",
+  "rationale": "Confident-but-wrong answers following a document refresh, with model and latency unchanged, point to retrieval feeding the model poor context, for example a broken re-index or mismatched embeddings. The other options would not be triggered specifically by a document refresh."
+ }
+]

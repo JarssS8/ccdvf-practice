@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { en } from '../../src/i18n/en'
 import { es } from '../../src/i18n/es'
-import { DOMAINS } from '../../src/shared/exam'
+import { CERTS } from '../../src/shared/certs'
 import { run } from '../../scripts/i18n.mjs'
 
 type Tree = Record<string, unknown>
@@ -27,7 +27,7 @@ describe('dictionaries', () => {
     expect(empty).toEqual([])
   })
   it('every exam domain has a label in both languages', () => {
-    for (const d of DOMAINS) {
+    for (const d of CERTS.flatMap((c) => c.domains)) {
       expect(en.domains[d.name]).toBeTruthy()
       expect(es.domains[d.name]).toBeTruthy()
     }

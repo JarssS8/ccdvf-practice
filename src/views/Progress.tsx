@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useQuestions } from '../App'
+import { useCertQuestions, useQuestions } from '../App'
+import { useCert } from '../lib/cert'
 import { Icon } from '../components/Icon'
 import { Empty, Meter, ScaleBar, ZoneChip } from '../components/ui'
-import { attemptTitle, domainMisses, domainStats, domainTrends, exposures, fmtDate, fmtDuration, fmtNum, mostMissed, pct, PASS_P, readiness } from '../lib/engine'
+import { attemptTitle, attemptsOf, domainMisses, domainStats, domainTrends, exposures, resultOf, fmtDate, fmtDuration, fmtNum, mostMissed, pct, PASS_P, readiness } from '../lib/engine'
 import { DomainMissBars, DomainTrendGrid } from '../components/charts'
 import { localize } from '../lib/content'
 import { startAttempt } from '../lib/actions'
@@ -62,17 +63,20 @@ export default function Progress() {
   const { data } = useStore()
   const t = useT()
   const lang = useLang()
-  const qs = useQuestions()
+  const cert = useCert()
+  const all = useQuestions()
+  const qs = useCertQuestions()
   const [table, setTable] = useState(false)
   const [moreMissed, setMoreMissed] = useState(false)
   const [err, setErr] = useState('')
-  const exp = useMemo(() => exposures(data, qs), [data, qs])
-  const ready = useMemo(() => readiness(exp, qs), [exp, qs])
-  const doms = useMemo(() => domainStats(exp, qs), [exp, qs])
-  const misses = useMemo(() => domainMisses(exp, qs), [exp, qs])
-  const trends = useMemo(() => domainTrends(exp, qs), [exp, qs])
+  const exp = useMemo(() => exposures(data, qs, cert), [data, qs, cert])
+  const ready = useMemo(() => readiness(exp, qs, cert), [exp, qs, cert])
+  const doms = useMemo(() => domainStats(exp, qs, cert), [exp, qs, cert])
+  const misses = useMemo(() => domainMisses(exp, qs, cert), [exp, qs, cert])
+  const trends = useMemo(() => domainTrends(exp, qs, cert), [exp, qs, cert])
   const missed = useMemo(() => mostMissed(exp), [exp])
-  const done = Object.values(data.attempts).filter((a) => a.status === 'submitted' && a.result).sort((a, b) => a.submittedAt! - b.submittedAt!)
+  const done = attemptsOf(data, cert).filter((a) => a.status === 'submitted' && a.result)
+    .map((a) => ({ ...a, result: resultOf(a, data, all) })).sort((a, b) => a.submittedAt! - b.submittedAt!)
   const examLike = done.filter((a) => !a.feedback)
   const answered = exp.length
   const firstSeen = exp.filter((e) => e.firstOfGroup).length

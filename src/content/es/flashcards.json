@@ -303,5 +303,250 @@
   "front": "Glosario: Adaptaciones",
   "back": "Ajustes en la realización del examen por necesidades documentadas, solicitados a través de Pearson y aprobados antes de programar la cita",
   "src": "1cwa1zg"
+ },
+ "fc-f32d0aeccb": {
+  "front": "Associate – Foundations: código del examen",
+  "back": "CCAO-F",
+  "src": "1omwqu3"
+ },
+ "fc-9ac8aa474b": {
+  "front": "Associate – Foundations: cuántas preguntas",
+  "back": "60 preguntas",
+  "src": "18azgqv"
+ },
+ "fc-94b968fb60": {
+  "front": "Associate – Foundations: tarifa de lista antes del descuento de partner",
+  "back": "$99",
+  "src": "tzahhg"
+ },
+ "fc-dc698029cd": {
+  "front": "Associate – Foundations: dominio de mayor peso y su peso",
+  "back": "Output evaluation, con un 21%",
+  "src": "1bn66b0"
+ },
+ "fc-11ba272e7d": {
+  "front": "Associate – Foundations: dominio de menor peso y su peso",
+  "back": "Troubleshooting, con un 10%",
+  "src": "1b8167q"
+ },
+ "fc-bd8345f684": {
+  "front": "Associate – Foundations: dominios por orden de peso",
+  "back": "Output evaluation 21% → Workflow integration 16% → Governance and risk 15% → Prompting 14% → Product and model choice 12% → Configuration 12% → Troubleshooting 10%",
+  "src": "1am8pwj"
+ },
+ "fc-1d2ae59636": {
+  "front": "Associate – Foundations: a quién va dirigido",
+  "back": "Consultores, comerciales y responsables de entrega",
+  "src": "1lpji5a"
+ },
+ "fc-c076b51984": {
+  "front": "Associate – Foundations: Verifica todo lo que sea específico y con consecuencias. ¿Por qué?",
+  "back": "La confianza no es una prueba.",
+  "src": "h3k2da"
+ },
+ "fc-bca63dcfed": {
+  "front": "Associate – Foundations: La omisión también es un fallo. ¿Por qué?",
+  "back": "Lee la fuente, no solo la salida.",
+  "src": "wu9gfi"
+ },
+ "fc-6d88b277aa": {
+  "front": "Associate – Foundations: Anonimiza y luego analiza. ¿Por qué?",
+  "back": "Las instrucciones no son un control.",
+  "src": "7k92b0"
+ },
+ "fc-0941e0a58a": {
+  "front": "Associate – Foundations: completa la regla: Ajusta el modelo a la ...",
+  "back": "Ajusta el modelo a la tarea en ambos sentidos.",
+  "src": "i0a7gl"
+ },
+ "fc-d922055cc7": {
+  "front": "Associate – Foundations: completa la regla: La estructura gana a los intensificadores: ...",
+  "back": "La estructura gana a los intensificadores: rol, secciones, restricciones, ejemplo.",
+  "src": "q90cbg"
+ },
+ "fc-55e86a9f71": {
+  "front": "Associate – Foundations: completa la regla: Los Projects guardan lo que se repite; ...",
+  "back": "Los Projects guardan lo que se repite; los prompts, lo que cambia.",
+  "src": "1spgwwr"
+ },
+ "fc-fe1fb17a3e": {
+  "front": "Associate – Foundations: completa la regla: El conocimiento del Project lo mantienes tú, ...",
+  "back": "El conocimiento del Project lo mantienes tú; no se actualiza solo.",
+  "src": "phqaik"
+ },
+ "fc-1ea755703c": {
+  "front": "Associate – Foundations: completa la regla: Diagnostica qué ha cambiado ...",
+  "back": "Diagnostica qué ha cambiado antes de reescribir nada.",
+  "src": "ltw45k"
+ },
+ "fc-2c0a6f5f8a": {
+  "front": "Associate – Foundations: completa la regla: Escala las integraciones de sistemas al ...",
+  "back": "Escala las integraciones de sistemas al ámbito de Developer y Architect.",
+  "src": "ayokmq"
+ },
+ "fc-cdde949504": {
+  "front": "Architect – Foundations: código del examen",
+  "back": "CCAR-F",
+  "src": "15hiupd"
+ },
+ "fc-c529bd520f": {
+  "front": "Architect – Foundations: cuántos ítems",
+  "back": "60 ítems",
+  "src": "1138tyc"
+ },
+ "fc-f68dcfde39": {
+  "front": "Architect – Foundations: tarifa de lista antes del descuento de partner",
+  "back": "$125",
+  "src": "9exlcn"
+ },
+ "fc-85803ad169": {
+  "front": "Architect – Foundations: dominio con más peso y su porcentaje",
+  "back": "Agentic architecture, con un 27%",
+  "src": "6x7uqs"
+ },
+ "fc-4d6415e23a": {
+  "front": "Architect – Foundations: dominio con menos peso y su porcentaje",
+  "back": "Context and reliability, con un 15%",
+  "src": "5tmq8s"
+ },
+ "fc-2204bb8dc3": {
+  "front": "Architect – Foundations: dominios por orden de peso",
+  "back": "Agentic architecture 27% → Claude Code workflows 20% → Prompting, structured output 20% → Tool design and MCP 18% → Context and reliability 15%",
+  "src": "3pur4e"
+ },
+ "fc-f183972796": {
+  "front": "Architect – Foundations: a quién va dirigido",
+  "back": "Arquitectos que construyen sistemas de producción",
+  "src": "1kdh3do"
+ },
+ "fc-4072741bd6": {
+  "front": "Architect – Foundations: completa la regla: Los bucles de agente necesitan una terminación diseñada, ...",
+  "back": "Los bucles de agente necesitan una terminación diseñada, no un presupuesto de tokens.",
+  "src": "al49gz"
+ },
+ "fc-ac6845b9c8": {
+  "front": "Architect – Foundations: completa la regla: Escala ante lagunas de política ...",
+  "back": "Escala ante lagunas de política y falta de progreso.",
+  "src": "vdwvwd"
+ },
+ "fc-16bfb7fd92": {
+  "front": "Architect – Foundations: completa la regla: Errores estructurados: ...",
+  "back": "Errores estructurados: una categoría y un indicador de reintentable.",
+  "src": "icna82"
+ },
+ "fc-04c04f7a61": {
+  "front": "Architect – Foundations: Las descripciones de las herramientas son el mecanismo de selección. ¿Por qué?",
+  "back": "Diferéncialas.",
+  "src": "1ccv4jj"
+ },
+ "fc-46c3c1001d": {
+  "front": "Architect – Foundations: completa la regla: Los límites estrictos pertenecen a la capa de herramientas, ...",
+  "back": "Los límites estrictos pertenecen a la capa de herramientas, nunca a un prompt.",
+  "src": "4cau1p"
+ },
+ "fc-982fd5e56f": {
+  "front": "Architect – Foundations: completa la regla: Jerarquía de CLAUDE.md, ...",
+  "back": "Jerarquía de CLAUDE.md, con reglas por ruta para el contexto condicional.",
+  "src": "15282us"
+ },
+ "fc-3801d726c1": {
+  "front": "Architect – Foundations: completa la regla: CI significa headless: ...",
+  "back": "CI significa headless: modo print, salida JSON, un esquema.",
+  "src": "x73wh2"
+ },
+ "fc-d797e58e84": {
+  "front": "Architect – Foundations: completa la regla: Los subagentes devuelven hallazgos; ...",
+  "back": "Los subagentes devuelven hallazgos; los documentos en bruto se quedan en el borde.",
+  "src": "1934i4f"
+ },
+ "fc-64dd187d08": {
+  "front": "Architect – Foundations: completa la regla: La procedencia debe sobrevivir ...",
+  "back": "La procedencia debe sobrevivir a cada traspaso.",
+  "src": "mhqfa6"
+ },
+ "fc-8b5d28096b": {
+  "front": "Cuántos escenarios presenta Architect Foundations y de cuántos",
+  "back": "Cuatro, extraídos de un banco publicado de seis",
+  "src": "tu1pqe"
+ },
+ "fc-a1f47d407d": {
+  "front": "Architect – Professional: código del examen",
+  "back": "CCAR-P",
+  "src": "16hsq38"
+ },
+ "fc-c66eb61259": {
+  "front": "Architect – Professional: cuántas preguntas",
+  "back": "63 preguntas",
+  "src": "exy93s"
+ },
+ "fc-bff5b48a46": {
+  "front": "Architect – Professional: tarifa de lista antes del descuento de partner",
+  "back": "$175",
+  "src": "nxfrjv"
+ },
+ "fc-6e8074c20d": {
+  "front": "Architect – Professional: dominio de mayor peso y su peso",
+  "back": "Integration, con un 19%",
+  "src": "1l2h2pi"
+ },
+ "fc-6a99d6ddbe": {
+  "front": "Architect – Professional: dominio de menor peso y su peso",
+  "back": "Developer enablement, con un 7%",
+  "src": "j6a1ad"
+ },
+ "fc-6c58dd8b56": {
+  "front": "Architect – Professional: dominios por orden de peso",
+  "back": "Integration 19% → Solution design 17% → Evaluation and testing 16% → Governance and risk 14% → Stakeholders, lifecycle 14% → Models and prompting 13% → Developer enablement 7%",
+  "src": "1vapp88"
+ },
+ "fc-e5d676f4c1": {
+  "front": "Architect – Professional: a quién va dirigido",
+  "back": "Arquitectos que gobiernan sistemas a escala",
+  "src": "flhtjs"
+ },
+ "fc-99ae94526d": {
+  "front": "Architect – Professional: completa la regla: Sube por la escalera de patrones solo cuando ...",
+  "back": "Sube por la escalera de patrones solo cuando el peldaño inferior no aguanta.",
+  "src": "1htdviq"
+ },
+ "fc-f37593527a": {
+  "front": "Architect – Professional: completa la regla: Mínimo privilegio significa quitar, ...",
+  "back": "Mínimo privilegio significa quitar, no monitorizar.",
+  "src": "a6ud1r"
+ },
+ "fc-e8368a99d5": {
+  "front": "Architect – Professional: completa la regla: La degradación del retrieval tras un cambio en los datos ...",
+  "back": "La degradación del retrieval tras un cambio en los datos es un problema de índice.",
+  "src": "1qjmb04"
+ },
+ "fc-41a65be1d6": {
+  "front": "Architect – Professional: completa la regla: La calidad subjetiva se mide con ...",
+  "back": "La calidad subjetiva se mide con rúbricas y conjuntos etiquetados.",
+  "src": "1m762vn"
+ },
+ "fc-bf13136c96": {
+  "front": "Architect – Professional: completa la regla: Los cambios de prompt son cambios de producción: ...",
+  "back": "Los cambios de prompt son cambios de producción: regresión y luego A/B.",
+  "src": "2op682"
+ },
+ "fc-d6b04466d0": {
+  "front": "Architect – Professional: completa la regla: El cumplimiento normativo se aplica antes de que ...",
+  "back": "El cumplimiento normativo se aplica antes de que los datos crucen la frontera.",
+  "src": "1q6vku5"
+ },
+ "fc-5e5bf8bac0": {
+  "front": "Architect – Professional: completa la regla: Dirige la revisión humana según ...",
+  "back": "Dirige la revisión humana según la confianza y la consecuencia.",
+  "src": "8k5mkk"
+ },
+ "fc-477d0bc011": {
+  "front": "Architect – Professional: completa la regla: Presenta números segmentados, ...",
+  "back": "Presenta números segmentados y honestos, nunca un promedio halagador.",
+  "src": "1byxum3"
+ },
+ "fc-0d3293070c": {
+  "front": "Architect – Professional: completa la regla: La observabilidad captura trazas, ...",
+  "back": "La observabilidad captura trazas, no solo salidas.",
+  "src": "dl05gt"
  }
 }

@@ -43,5 +43,10 @@
   "title": "25 de junio: se revisó el documento de política del examen",
   "body": "La actual [Anthropic Certification Exam\nPolicy](official-sources.md) lleva fecha de revisión del 25 de junio de 2026. Regula\nla conducta, la identificación, los objetos prohibidos, la invalidación y las apelaciones.\n\n**A quién afecta.** A todos los que se presentan a un examen. Es corta, y es el\ndocumento que la gente desearía haber leído solo después de que algo sale mal.",
   "src": "1pqgbfe"
+ },
+ "1ap8vc0": {
+  "title": "Octubre: el catálogo crece a veintisiete cursos",
+  "body": "**Tool use with the Messages API** se ha añadido en\n[Claude Academy](https://academy.claude.com/courses/tool-use-with-the-messages-api)\ny en la página de producto de la plataforma Partner Academy. Es para quien ya tiene el tool\nuse funcionando y le falla de formas concretas: elección de herramienta equivocada, llamadas\nrechazadas, respuestas que se atascan, tokens de entrada que crecen con cada resultado de herramienta. Ocho\nlecciones principales, un problema en cada una, resueltas sobre una consultora ficticia, sin\nescribir código en la página. Un cuestionario evaluado emite una insignia de finalización, y\nClaude Platform 101 figura como requisito previo.\n\n**A quién afecta.** A quien prepare Developer – Foundations o Architect, porque\nel tool use está en los dominios de más peso de ambos. No figura como preparación para ningún\nexamen, así que las guías de examen siguen siendo el alcance de referencia.\n\nLo detectó la comprobación diaria del catálogo, que lee la unión de las páginas de listado de\nAcademy: el número publicado pasó a veintisiete mientras este repositorio\ndocumentaba veintiséis.",
+  "src": "9ki64r"
  }
 }

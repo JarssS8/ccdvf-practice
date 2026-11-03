@@ -61,7 +61,7 @@ export function createAuth(env: Env) {
   if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) socialProviders.github = { clientId: env.GITHUB_CLIENT_ID, clientSecret: env.GITHUB_CLIENT_SECRET }
 
   return betterAuth({
-    appName: 'CCDV-F Practice',
+    appName: 'Claude Cert Practice',
     baseURL: env.BETTER_AUTH_URL,
     basePath: '/api/auth',
     secret: env.BETTER_AUTH_SECRET,
@@ -77,7 +77,7 @@ export function createAuth(env: Env) {
           const lang = resetLang(url)
           const mail = resetEmail(lang, user.name, url, env.BETTER_AUTH_URL)
           try {
-            await env.EMAIL!.send({ from: { email: env.EMAIL_FROM!, name: 'CCDV-F Practice' }, to: user.email, ...mail })
+            await env.EMAIL!.send({ from: { email: env.EMAIL_FROM!, name: 'Claude Cert Practice' }, to: user.email, ...mail })
           } catch (e) {
             // The response never says whether the email exists, so failures only show in the logs
             console.error('reset email failed', (e as { code?: string }).code ?? (e as Error).message)

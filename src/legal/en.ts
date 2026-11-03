@@ -16,7 +16,7 @@ ${I.siteName} is a personal, free, non-profit project: no advertising, no charge
 
 ## Purpose
 
-This website offers practice material for the *Claude Certified Developer – Foundations* exam: mock exams, domain drills, review flashcards, notes and an AI tutor.
+This website offers practice material for the Claude certification exams (*Associate – Foundations*, *Developer – Foundations*, *Architect – Foundations* and *Architect – Professional*): mock exams, domain drills, review flashcards, notes and an AI tutor.
 
 ## Not affiliated with Anthropic
 
@@ -52,7 +52,7 @@ This policy explains which personal data ${I.siteName} (${I.site}) processes, wh
 | Name and email | When you create the account. |
 | Password | Only if you sign up with email. Never stored in plain text: only an irreversible salted hash (PBKDF2-SHA256). |
 | Your Google or GitHub account identifier, name, email and profile picture | Only if you sign in with Google or GitHub. Their access tokens are not kept. |
-| Study progress: attempts, answers, flagged questions, flashcard reviews, your exam date and the questions you generate with AI | While you use the app. |
+| Study progress: attempts, answers, flagged questions, flashcard reviews, the certification you choose, an exam date per certification and the questions you generate with AI | While you use the app. |
 | IP address and browser (user agent) of each session | When you sign in. |
 | IP address in attempt and AI-usage counters | When you sign in, sign up, delete the account or use the AI, to slow down attacks and abuse. |
 | Number of AI uses per day | When you use the tutor or generate questions. |
@@ -132,7 +132,7 @@ These cookies and this storage are **exempt from consent** (Art. 22(2) of Spanis
   terminos: note + `
 ## What it is
 
-${I.siteName} is a **free** practice service for the *Claude Certified Developer – Foundations* exam, offered by ${I.owner} as a personal project. By creating an account you accept these terms and the [privacy policy](#/legal/privacidad).
+${I.siteName} is a **free** practice service for the Claude certification exams (*Associate – Foundations*, *Developer – Foundations*, *Architect – Foundations* and *Architect – Professional*), offered by ${I.owner} as a personal project. By creating an account you accept these terms and the [privacy policy](#/legal/privacidad).
 
 ## Your account
 

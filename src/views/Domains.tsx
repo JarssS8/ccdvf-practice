@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
-import { useQuestions } from '../App'
+import { useCertQuestions } from '../App'
 import { Icon } from '../components/Icon'
 import { Meter } from '../components/ui'
 import { groupOf } from '../lib/content'
 import { startAttempt } from '../lib/actions'
 import { domainStats, exposures, pct } from '../lib/engine'
 import { addAiQuestions, api, sync, useStore } from '../lib/store'
-import { DOMAINS, type Question } from '../shared/exam'
+import type { Question } from '../shared/exam'
+import { hasDomain } from '../shared/certs'
+import { useCert } from '../lib/cert'
 import { errorText, useLang, useT } from '../i18n'
 import { fmtNum } from '../lib/engine'
 
@@ -16,14 +18,17 @@ export default function Domains() {
   const { data } = useStore()
   const t = useT()
   const lang = useLang()
-  const qs = useQuestions()
+  const cert = useCert()
+  const qs = useCertQuestions()
   const [err, setErr] = useState('')
-  const [genDomain, setGenDomain] = useState<string>(DOMAINS[0].name)
+  const [picked, setGenDomain] = useState<string>(cert.domains[0].name)
+  // After switching certification the previous pick is not one of its domains
+  const genDomain = hasDomain(cert, picked) ? picked : cert.domains[0].name
   const [multi, setMulti] = useState(false)
   const [busy, setBusy] = useState(false)
   const [gen, setGen] = useState<GenResult | null>(null)
-  const exp = useMemo(() => exposures(data, qs), [data, qs])
-  const stats = useMemo(() => domainStats(exp, qs), [exp, qs])
+  const exp = useMemo(() => exposures(data, qs, cert), [data, qs, cert])
+  const stats = useMemo(() => domainStats(exp, qs, cert), [exp, qs, cert])
   const seen = useMemo(() => new Set(exp.map((e) => e.group)), [exp])
   const all = [...qs.values()]
   const aiActive = all.filter((q) => q.source === 'ai' && !q.reported)
@@ -31,7 +36,7 @@ export default function Domains() {
   const generate = async () => {
     setBusy(true); setErr(''); setGen(null)
     try {
-      const r = await api<GenResult>('/api/ai/generate', { method: 'POST', body: JSON.stringify({ domain: genDomain, count: 4, multi }) })
+      const r = await api<GenResult>('/api/ai/generate', { method: 'POST', body: JSON.stringify({ cert: cert.id, domain: genDomain, count: 4, multi }) })
       addAiQuestions(r.accepted)
       void sync()
       setGen(r)
@@ -102,7 +107,7 @@ export default function Domains() {
               <div className="field" style={{ flex: '1 1 260px' }}>
                 <label htmlFor="gen-d">{t.domainsView.domain}</label>
                 <select id="gen-d" className="input" value={genDomain} onChange={(e) => setGenDomain(e.target.value)}>
-                  {DOMAINS.map((d) => <option key={d.name} value={d.name}>{t.domains[d.name]}</option>)}
+                  {cert.domains.map((d) => <option key={d.name} value={d.name}>{t.domains[d.name]}</option>)}
                 </select>
               </div>
               <label className="row small" style={{ gap: 8, minHeight: 48 }}>

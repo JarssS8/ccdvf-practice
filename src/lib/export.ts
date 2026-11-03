@@ -1,6 +1,7 @@
 import type { Dict, Lang } from '../i18n'
 import { localize, type AiQuestion } from './content'
 import { attemptTitle, isCorrect } from './engine'
+import { certById, certOfAttempt } from '../shared/certs'
 import type { Data } from './store'
 import type { Letter } from '../shared/exam'
 
@@ -13,7 +14,7 @@ export function answersCsv(data: Data, qs: Map<string, AiQuestion>, t: Dict, lan
     return /[";,\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }
   const c = t.settings.csv
-  const rows: (string | number)[][] = [[c.date, c.attempt, c.mode, c.domain, c.question_id, c.question, c.your_answer, c.correct_answer, c.correct, c.flagged]]
+  const rows: (string | number)[][] = [[c.date, c.certification, c.attempt, c.mode, c.domain, c.question_id, c.question, c.your_answer, c.correct_answer, c.correct, c.flagged]]
   const answers = Object.values(data.answers).filter((a) => a.choice.length && data.attempts[a.attemptId]).sort((a, b) => a.updatedAt - b.updatedAt)
   for (const a of answers) {
     const at = data.attempts[a.attemptId]
@@ -22,7 +23,7 @@ export function answersCsv(data: Data, qs: Map<string, AiQuestion>, t: Dict, lan
     const q = localize(orig, lang)
     const text = (ls: Letter[]) => ls.map((l) => q.options[l] ?? l).join(' | ')
     rows.push([
-      new Date(a.updatedAt).toISOString().slice(0, 16).replace('T', ' '),
+      new Date(a.updatedAt).toISOString().slice(0, 16).replace('T', ' '), certById(certOfAttempt(at)).code,
       at.id.slice(0, 8), attemptTitle(at, t), t.domains[q.domain] ?? q.domain, q.id, q.question,
       text(a.choice), text(q.answer), isCorrect(q, a.choice) ? c.yes : c.no, a.flagged ? c.yes : c.no,
     ])

@@ -28,13 +28,19 @@ describe('browser', { skip }, () => {
 
   it('signs up in Spanish', async () => {
     await page.goto(BASE + '/')
-    assert.match(await page.locator('h1').first().textContent(), /Práctica para Claude/)
+    assert.match(await page.locator('h1').first().textContent(), /Práctica para las certificaciones de Claude/)
     await page.getByRole('button', { name: 'Crear cuenta' }).first().click()
     await page.fill('#name', 'UI'); await page.fill('#email', email); await page.fill('#password', PW)
     await page.locator('input[type=checkbox]').check()
     await page.locator('form button.btn-primary').click()
-    await page.waitForSelector('.topbar')
+    // A new account picks what to prepare first
+    await page.waitForSelector('.pick-grid')
+    assert.equal(await page.locator('h1').first().textContent(), '¿Qué certificación vas a preparar?')
+    assert.equal(await page.locator('.pick-tile').count(), 4)
+    await page.getByRole('button', { name: 'Preparar Claude Certified Developer – Foundations' }).click()
+    await page.waitForSelector('.tabbar')
     assert.equal(await page.locator('h1').first().textContent(), 'Hoy')
+    assert.match(await page.locator('.brand-switch').textContent(), /CCDV-F/)
   })
 
   it('runs exam simulations in English', async () => {
@@ -73,6 +79,49 @@ describe('browser', { skip }, () => {
     const csv = readFileSync(await dl.path(), 'utf8')
     assert.equal(csv.charCodeAt(0), 0xfeff)
     assert.equal(csv.trim().split('\r\n').length, 11)
+  })
+
+  it('switches certification from the top bar without mixing progress', async () => {
+    await page.goto(BASE + '/#/')
+    await page.getByRole('button', { name: /Certificación: CCDV-F/ }).click()
+    await page.waitForSelector('dialog.cert-dialog[open]')
+    assert.equal(await page.locator('dialog.cert-dialog[open] .cert-opt').count(), 4)
+    await page.locator('dialog.cert-dialog[open] .cert-opt', { hasText: 'Architect – Foundations' }).click()
+    await page.waitForFunction(() => !document.querySelector('dialog.cert-dialog[open]'))
+    assert.match(await page.locator('.brand-switch').textContent(), /CCAR-F/)
+    assert.match(await page.locator('main p.small').first().textContent(), /Architect – Foundations · 60 preguntas · 120 min/)
+    assert.equal(await page.locator('h2#next-h').textContent(), 'Tu primer mock completo')
+
+    await page.goto(BASE + '/#/domains')
+    await page.waitForSelector('table.data')
+    assert.equal(await page.locator('table.data tbody tr').count(), 5)
+    await page.goto(BASE + '/#/exams')
+    assert.match(await page.locator('.grid-modes').first().textContent(), /60 preguntas · 120 min/)
+    assert.match(await page.locator('body').textContent(), /12 preguntas · corrección al momento/)
+
+    // Exam date: one per certification
+    await page.goto(BASE + '/#/settings')
+    await page.fill('#exam-date', '2027-01-15')
+    await page.locator('#exam-date').blur()
+    await page.getByRole('button', { name: 'CCDV-F', exact: true }).click()
+    await page.waitForFunction(() => /CCDV-F/.test(document.querySelector('.brand-switch')?.textContent ?? ''))
+    assert.equal(await page.locator('label[for=exam-date]').textContent(), 'Fecha del examen · CCDV-F')
+    assert.equal(await page.inputValue('#exam-date'), '')
+
+    // Developer's progress is where it was
+    await page.goto(BASE + '/#/progress')
+    await page.waitForSelector('.hbar-row')
+    assert.equal(await page.locator('.hbar-row').count(), 8)
+
+    const uid = sql(`SELECT id FROM "user" WHERE email = '${email}'`)[0].id
+    let rows = []
+    for (let i = 0; i < 20; i++) {
+      rows = sql(`SELECT key, value FROM settings WHERE user_id = '${uid}' ORDER BY key`)
+      if (rows.some((r) => r.key === 'exam_date:architect-foundations') && rows.some((r) => r.key === 'cert' && r.value === 'developer-foundations')) break
+      await page.waitForTimeout(250)
+    }
+    assert.deepEqual(rows, [{ key: 'cert', value: 'developer-foundations' }, { key: 'exam_date:architect-foundations', value: '2027-01-15' }])
+    await page.goto(BASE + '/#/settings')
   })
 
   it('switches language and opens the public legal pages', async () => {

@@ -5,15 +5,19 @@ import app from '../../../worker/index'
 import type { Env } from '../../../worker/auth'
 
 const deepseekCalls: string[] = []
+const deepseekSystems: string[] = []
 const b64u = (o: unknown) => btoa(JSON.stringify(o)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_')
 const realFetch = globalThis.fetch
 
 globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
   const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
   if (url.startsWith('https://api.deepseek.com/')) {
-    const body = JSON.parse(String(init?.body)) as { messages: { role: string; content: string }[] }
+    const body = JSON.parse(String(init?.body)) as { stream?: boolean; messages: { role: string; content: string }[] }
     deepseekCalls.push(body.messages.filter((m) => m.role === 'user').map((m) => m.content).join(' | '))
-    return new Response('data: {"choices":[{"delta":{"content":"mock tutor reply"}}]}\n\ndata: [DONE]\n\n', { headers: { 'content-type': 'text/event-stream' } })
+    const system = body.messages.find((m) => m.role === 'system')?.content ?? ''
+    deepseekSystems.push(system)
+    if (body.stream) return new Response('data: {"choices":[{"delta":{"content":"mock tutor reply"}}]}\n\ndata: [DONE]\n\n', { headers: { 'content-type': 'text/event-stream' } })
+    return Response.json({ choices: [{ message: { content: JSON.stringify(jsonReply(system)) }, finish_reason: 'stop' }], usage: { total_tokens: 1 } })
   }
   if (url.startsWith('https://oauth2.googleapis.com/token')) {
     const form = new URLSearchParams(typeof init?.body === 'string' ? init.body : input instanceof Request ? await input.clone().text() : String(init?.body))
@@ -26,9 +30,24 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
   return realFetch(input as RequestInfo, init)
 }) as typeof fetch
 
+/** JSON-mode answers: one well-formed item quoting the notes it was given, and a blind check that agrees with its key. */
+function jsonReply(system: string) {
+  if (system.startsWith('You write exam items')) {
+    const notes = system.slice(system.indexOf('NOTES:') + 6)
+    const evidence = notes.match(/[A-Za-z][A-Za-z ,]{59}/)?.[0] ?? ''
+    return { questions: [{
+      question: 'A team running a production assistant sees an unexpected result after a configuration change. Which action fits best?',
+      options: { A: 'Roll back every recent change at once', B: 'Compare the change against the guidance', C: 'Ignore it until users complain twice', D: 'Rewrite the assistant from the ground up' },
+      answer: ['B'], select: 1, rationale: 'B checks the change against the documented guidance, which isolates the cause; the other options either skip diagnosis or overreact to a single anomaly.', evidence,
+    }] }
+  }
+  return { answer: ['B'], fits_domain: true }
+}
+
 export default {
   async fetch(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     if (new URL(req.url).pathname === '/api/__test/deepseek-calls') return Response.json(deepseekCalls)
+    if (new URL(req.url).pathname === '/api/__test/deepseek-systems') return Response.json(deepseekSystems)
     return app.fetch(req, env, ctx as never)
   },
   scheduled: app.scheduled,

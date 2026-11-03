@@ -1,0 +1,1594 @@
+[
+ {
+  "id": "architect-foundations-practice-1",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "Your support agent resolves most tickets but sometimes loops indefinitely, re-calling lookup_order on the same order. What is the correct structural fix?",
+  "options": {
+   "A": "Raise max_tokens so the loop has room to finish",
+   "B": "Remove the lookup_order tool",
+   "C": "Add explicit loop-termination conditions: cap tool iterations, detect repeated identical calls, and route to escalate_to_human when progress stalls",
+   "D": "Lower the temperature"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Agent loops need engineered termination: iteration budgets, repeated-call detection, and an escalation path when the agent cannot progress. Token budget (A) delays the symptom, removing a needed tool (B) breaks resolution, and temperature (D) does not bound iteration."
+ },
+ {
+  "id": "architect-foundations-practice-2",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Tool Design & MCP Integration",
+  "question": "process_refund currently accepts any amount. Support policy caps agent-initiated refunds at $200; larger refunds need a human. Where does that rule belong?",
+  "options": {
+   "A": "In the system prompt, phrased firmly",
+   "B": "In the model's reasoning, since it reads the policy",
+   "C": "In quarterly staff training",
+   "D": "Enforced in the tool layer: the tool rejects amounts over the cap with a structured error, and a hook or the tool itself routes larger cases to escalation"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Hard policy limits are enforced deterministically at the tool boundary, not requested of the model. Prompt phrasing (A) and model reasoning (B) are probabilistic where the requirement is absolute, and training (C) does not constrain the agent at all."
+ },
+ {
+  "id": "architect-foundations-practice-3",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "Your coordinator delegates to search, analysis, and report subagents. Final reports cite sources that do not support their claims, though each subagent behaves sensibly alone. What is the most likely architectural cause?",
+  "options": {
+   "A": "Provenance is lost at handoffs: findings and their sources are not passed together in a structured form, so the report writer pairs claims with citations by guesswork",
+   "B": "The report subagent's model is too small",
+   "C": "The web is unreliable",
+   "D": "Too many subagents are running in parallel"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "In multi-agent pipelines, provenance survives only if the handoff format carries claim and source together. That failure mode produces exactly this symptom while every stage looks locally fine. Model size (B), source quality (C), and parallelism (D) do not explain correct facts paired with wrong citations."
+ },
+ {
+  "id": "architect-foundations-practice-4",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Context Management & Reliability",
+  "question": "The analysis subagent returns 30,000-token document dumps to the coordinator, which then fails on context limits. What is the right fix?",
+  "options": {
+   "A": "Give the coordinator a bigger context window",
+   "B": "Have subagents return structured extracts, findings with citations and confidence, while full documents stay in the subagent's context or a scratchpad file",
+   "C": "Have the coordinator drop the oldest messages silently",
+   "D": "Run the analysis twice and keep the shorter answer"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Context isolation is the point of subagent delegation: raw bulk stays at the edge, distilled results travel. A larger window (A) postpones the failure, silent dropping (C) loses arbitrary information, and rerunning (D) changes nothing structural.",
+  "dupGroup": "architect-foundations-practice-4"
+ },
+ {
+  "id": "architect-foundations-practice-5",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "Your monorepo has frontend and backend directories with different conventions, and one team-wide rule about commit style. Where does each piece of configuration belong?",
+  "options": {
+   "A": "Everything in one root CLAUDE.md",
+   "B": "Each engineer's personal user-level CLAUDE.md",
+   "C": "The commit rule in the project-level CLAUDE.md; the per-area conventions in path-scoped rules under .claude/rules/ that load only when matching files are touched",
+   "D": "A wiki page linked from the README"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "The hierarchy exists for exactly this: shared rules at project scope, conditional conventions path-scoped so context is spent only where relevant. One root file (A) loads everything everywhere, personal files (B) diverge per engineer, and a wiki (D) never reaches the model.",
+  "dupGroup": "architect-foundations-practice-5"
+ },
+ {
+  "id": "architect-foundations-practice-6",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "Your CI job runs Claude Code to review pull requests, and the pipeline must parse the results mechanically. Which invocation is correct?",
+  "options": {
+   "A": "Interactive mode with a human copying the output into CI",
+   "B": "Plan mode, which is safer for automation",
+   "C": "A shell script that greps the human-readable transcript",
+   "D": "Non-interactive mode with -p, with --output-format json and a schema so the review arrives as machine-readable, validated output"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Headless CI use is what -p with JSON output and a schema is for: deterministic invocation, parseable results. A human in the loop (A) is not CI, plan mode (B) is a review gate for interactive work rather than an output format, and grepping prose (C) breaks on the first wording change.",
+  "dupGroup": "architect-foundations-practice-6"
+ },
+ {
+  "id": "architect-foundations-practice-7",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "The automated reviewer flags dozens of trivial style nits per pull request, and engineers have started ignoring it. Which change addresses the false-positive problem the way the blueprint suggests?",
+  "options": {
+   "A": "Define explicit review criteria in the prompt: what to flag, what to ignore, and a severity bar, with a few worked examples of in-scope and out-of-scope findings",
+   "B": "Run the review twice and post only findings that appear both times",
+   "C": "Cap the reviewer at three findings per pull request",
+   "D": "Route all findings to a channel nobody reads"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Precision comes from explicit criteria and few-shot examples that draw the boundary between signal and noise. Double-running (B) filters randomness but not systematic nit-picking, an arbitrary cap (C) drops real findings on bad days, and (D) is surrender.",
+  "dupGroup": "architect-foundations-practice-7"
+ },
+ {
+  "id": "architect-foundations-practice-8",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "Invoices sometimes lack a purchase-order number, and your extraction schema must handle that honestly while catching real misses. What is the right schema design?",
+  "options": {
+   "A": "Make every field required so nothing is missed",
+   "B": "Make purchase_order nullable, so absence is recorded as null, and validate that it is present whenever the document type requires it",
+   "C": "Make everything optional to avoid validation errors",
+   "D": "Have the model invent a plausible number when one is missing"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Schema design encodes reality: genuinely optional data is nullable, and conditional requirements are validated downstream. All-required (A) forces fabrication or failure on legitimate documents, all-optional (C) blinds you to true misses, and invention (D) is data corruption."
+ },
+ {
+  "id": "architect-foundations-practice-9",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Context Management & Reliability",
+  "question": "Your pipeline reports 98% field accuracy, measured on the documents the schema validated cleanly. An auditor calls the number misleading. Why?",
+  "options": {
+   "A": "Accuracy should be measured only on the hardest documents",
+   "B": "98% is below industry standard",
+   "C": "Validation-clean documents are a biased sample: the honest measure comes from a labeled sample drawn across all documents, including ones that failed or barely passed validation",
+   "D": "Field accuracy is not a real metric"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Measuring only where the system already succeeded inflates the estimate; calibration requires a labeled sample representative of the full input stream. Hardest-only (A) biases in the opposite direction, the standard claim (B) is invented, and (D) is false."
+ },
+ {
+  "id": "architect-foundations-practice-10",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Tool Design & MCP Integration",
+  "question": "Your codebase-exploration agent has get_file_contents, read_source, and fetch_file tools that all read files, and it frequently picks poorly among them. What is the correct fix?",
+  "options": {
+   "A": "Add a fourth, better file-reading tool",
+   "B": "Fine-tune the model on the tool list",
+   "C": "Randomize which tool the harness dispatches",
+   "D": "Consolidate to one file-reading tool, or give the survivors sharply differentiated descriptions that state exactly when each applies"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Tool selection runs on descriptions; overlapping tools with vague descriptions produce dithering. Consolidation or sharp differentiation is the documented cure. Adding overlap (A) worsens it, fine-tuning (B) is disproportionate, and randomization (C) institutionalizes the confusion."
+ },
+ {
+  "id": "architect-foundations-practice-11",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "A support workflow resolves tickets by looking up an account, checking entitlement, and drafting a reply, always in that order. Which architecture is correct?",
+  "options": {
+   "A": "A deterministic pipeline that calls the model at each defined step",
+   "B": "A single agent that decides each step at runtime",
+   "C": "Three agents that negotiate the order between them",
+   "D": "One prompt containing all three steps"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "A known, fixed sequence should be encoded rather than rediscovered on every run, which makes it cheaper, faster, and testable step by step. Runtime decisions (B, C) add nondeterminism for no gain, and one prompt (D) removes the checkpoints between steps."
+ },
+ {
+  "id": "architect-foundations-practice-12",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "What is the strongest justification for splitting work across subagents?",
+  "options": {
+   "A": "The task has many steps",
+   "B": "Separate lines of work each need their own context, and mixing them degrades both",
+   "C": "Subagents are faster than a single agent",
+   "D": "The output must be assembled from several sections"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Subagents exist to isolate context, so the case for them is contamination between concerns rather than volume. Step count (A) and sectioned output (D) suit a workflow, and delegation usually adds latency rather than removing it (C)."
+ },
+ {
+  "id": "architect-foundations-practice-13",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "An agent loops between two tools without converging. What is the most appropriate first control?",
+  "options": {
+   "A": "Increase the context window so it can see more history",
+   "B": "Switch to a larger model",
+   "C": "Impose a step ceiling and define the terminating condition explicitly",
+   "D": "Remove one of the two tools"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Non-termination is bounded by an explicit stop condition and a hard ceiling, which contains cost and makes the failure visible. More context (A) and a larger model (B) do not guarantee convergence, and removing a tool (D) may break the task."
+ },
+ {
+  "id": "architect-foundations-practice-14",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "Which property most increases the operational risk of an agentic design?",
+  "options": {
+   "A": "It calls more than one model",
+   "B": "It produces structured output",
+   "C": "It runs longer than a minute",
+   "D": "It takes irreversible actions without a checkpoint"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Reversibility governs the cost of being wrong, which is the dominant risk in autonomous execution. Multiple models (A), structure (B), and duration (C) affect cost and complexity rather than blast radius."
+ },
+ {
+  "id": "architect-foundations-practice-15",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "How should an agentic system handle a step whose result it cannot verify?",
+  "options": {
+   "A": "Surface the unverifiable step for human confirmation before acting on it",
+   "B": "Proceed, since the model is usually right",
+   "C": "Retry the step until two runs agree",
+   "D": "Log the step and continue"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "An unverifiable result is exactly where human judgment belongs, before it is acted upon. Assuming correctness (B) and logging without stopping (D) both act on unchecked output, and agreement across runs (C) establishes consistency rather than truth."
+ },
+ {
+  "id": "architect-foundations-practice-16",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "A team proposes an agent for a task where every input is well formed and every rule is known. What should the architect recommend?",
+  "options": {
+   "A": "An agent, for future flexibility",
+   "B": "A deterministic implementation, reserving model calls for the genuinely ambiguous parts",
+   "C": "An agent with a low step limit",
+   "D": "A multi-agent design for separation of concerns"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Known rules over well-formed input are code, and using a model there buys nondeterminism at a price. Speculative flexibility (A), a constrained agent (C), and multiple agents (D) all keep the cost without the need."
+ },
+ {
+  "id": "architect-foundations-practice-17",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "What most improves the debuggability of an agentic system in production?",
+  "options": {
+   "A": "Reducing the number of tools",
+   "B": "Using a single model for every step",
+   "C": "Recording the inputs, tool calls, and outputs of each step as a trace",
+   "D": "Increasing the step limit"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "A per-step trace is what makes a nondeterministic run reconstructable after the fact. Fewer tools (A) and one model (B) simplify without explaining, and a higher ceiling (D) makes failures longer rather than clearer.",
+  "dupGroup": "architect-foundations-practice-17"
+ },
+ {
+  "id": "architect-foundations-practice-18",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "Where should conventions that apply to everyone working in a repository be recorded?",
+  "options": {
+   "A": "In each developer's personal settings",
+   "B": "In the pull request template",
+   "C": "In a pinned chat message",
+   "D": "In a CLAUDE.md committed to the repository"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Committed project memory is versioned, reviewable, and shared, which is what a team convention requires. Personal settings (A) do not propagate, and templates (B) and messages (C) are not read as working context.",
+  "dupGroup": "architect-foundations-practice-18"
+ },
+ {
+  "id": "architect-foundations-practice-19",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "What distinguishes work suited to headless mode?",
+  "options": {
+   "A": "It is well defined and repeatable, so it can run unattended in automation",
+   "B": "It is complex and needs close supervision",
+   "C": "It requires many tools",
+   "D": "It produces a long output"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Headless execution suits bounded, repeatable work where no one is watching. Supervision (B) argues for interactive use, and tool count (C) and output length (D) do not determine suitability."
+ },
+ {
+  "id": "architect-foundations-practice-20",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "A skill and a subagent could both address a need. What decides between them?",
+  "options": {
+   "A": "Skills are always preferable",
+   "B": "Whether the need is reusable know-how or an isolated line of work with its own context",
+   "C": "Whether the task is long",
+   "D": "Whether the repository already has a CLAUDE.md"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "The two solve different problems: a skill packages reusable procedure, a subagent isolates context. A blanket preference (A), duration (C), and existing files (D) do not address that distinction."
+ },
+ {
+  "id": "architect-foundations-practice-21",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "What is the correct use of a hook in a Claude Code workflow?",
+  "options": {
+   "A": "To hold instructions the model should follow",
+   "B": "To store project context",
+   "C": "To enforce a deterministic action at a defined point, independently of the model",
+   "D": "To define which model is used"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Hooks run as code at fixed points, so they enforce rather than request. Instructions (A) and context (B) belong in project memory, and model choice (D) is configuration.",
+  "dupGroup": "architect-foundations-practice-21"
+ },
+ {
+  "id": "architect-foundations-practice-22",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "Claude Code performs well for one engineer and inconsistently across the team. What is the most likely cause?",
+  "options": {
+   "A": "The others need more capable machines",
+   "B": "The repository is too large",
+   "C": "The others are using different terminals",
+   "D": "The working conventions live in one person's local setup rather than in the repository"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Context that is not committed does not travel, which produces exactly this asymmetry. Hardware (A), repository size (B), and terminal choice (C) do not explain a difference in output quality."
+ },
+ {
+  "id": "architect-foundations-practice-23",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "A pipeline requires output that always validates against a schema. What is the correct approach?",
+  "options": {
+   "A": "Declare the schema as a tool the model must call, and validate on receipt",
+   "B": "Ask for the schema in the prompt and validate afterwards",
+   "C": "Ask for JSON and repair malformed output in code",
+   "D": "Use a lower temperature"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "A declared schema makes the structure part of the contract rather than a request, and validation on receipt closes the loop. Prompt requests (B), downstream repair (C), and temperature (D) all leave the shape to chance.",
+  "dupGroup": "architect-foundations-practice-23"
+ },
+ {
+  "id": "architect-foundations-practice-24",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "Extraction is accurate for common cases and fails on rare formats. What is the most effective response?",
+  "options": {
+   "A": "Raise the temperature to encourage flexibility",
+   "B": "Add examples covering the rare formats and define what to return when a field is absent",
+   "C": "Switch to a larger model",
+   "D": "Ask the model to try harder on unusual inputs"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Rare cases fail because they are unspecified, and examples plus an explicit absent-field rule specify them. Temperature (A) adds variance, a larger model (C) is not aimed at the gap, and exhortation (D) is not a specification.",
+  "dupGroup": "architect-foundations-practice-24"
+ },
+ {
+  "id": "architect-foundations-practice-25",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "What should a schema define for a field the source document may not contain?",
+  "options": {
+   "A": "Nothing, since the model will omit it",
+   "B": "A default value that looks plausible",
+   "C": "An explicit representation for absence, so a missing value is distinguishable from an unfilled one",
+   "D": "A free-text field for notes"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Absence must be representable, or downstream code cannot tell a genuine gap from a failure. Silent omission (A) is ambiguous, plausible defaults (B) fabricate data, and a notes field (D) does not make the state machine-readable.",
+  "dupGroup": "architect-foundations-practice-25"
+ },
+ {
+  "id": "architect-foundations-practice-26",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "Which practice most improves consistency across a long-running structured extraction job?",
+  "options": {
+   "A": "Randomising the order of documents",
+   "B": "Increasing the output token limit",
+   "C": "Running each document twice",
+   "D": "Fixing the prompt, the schema, and the model version, and recording them with the output"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Consistency requires that the things that shape output are pinned and recorded, so results remain comparable and reproducible. Ordering (A) is irrelevant, the token cap (B) affects length, and duplicate runs (C) measure variance without removing it."
+ },
+ {
+  "id": "architect-foundations-practice-27",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "A prompt mixes the instruction, the data, and the output format in continuous prose. What is the first improvement?",
+  "options": {
+   "A": "Separate the sections so the instruction, the input, and the required format are distinguishable",
+   "B": "Shorten it",
+   "C": "Move it into the system prompt",
+   "D": "Add emphasis to the format requirement"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Structure lets the model tell instruction from data, which is the most common source of confusion in long prompts. Shortening (B) may remove needed detail, relocation (C) does not clarify, and emphasis (D) does not separate."
+ },
+ {
+  "id": "architect-foundations-practice-28",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Tool Design & MCP Integration",
+  "question": "What is the strongest indicator that a tool surface needs redesign?",
+  "options": {
+   "A": "It contains more than ten tools",
+   "B": "The model regularly selects a tool that cannot accomplish the request",
+   "C": "The tools return JSON",
+   "D": "The tools are implemented across several services"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Repeated wrong selection is evidence that the tools are not distinguishable from their descriptions, which is a design fault. Tool count (A), return format (C), and implementation topology (D) are not themselves problems.",
+  "dupGroup": "architect-foundations-practice-28"
+ },
+ {
+  "id": "architect-foundations-practice-29",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Tool Design & MCP Integration",
+  "question": "How should a tool that performs an irreversible action be designed?",
+  "options": {
+   "A": "With a description warning the model to be careful",
+   "B": "So that it requires more parameters",
+   "C": "So that authorisation and confirmation are enforced outside the model",
+   "D": "So that it is declared last"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Irreversibility is controlled by the surrounding system, because a prompt-level warning is a request rather than a guarantee. Extra parameters (B) and ordering (D) do not constrain authority.",
+  "dupGroup": "architect-foundations-practice-29"
+ },
+ {
+  "id": "architect-foundations-practice-30",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Tool Design & MCP Integration",
+  "question": "A tool returns a large payload that consumes most of the context window. What is the right change?",
+  "options": {
+   "A": "Increase the context window",
+   "B": "Summarise the payload with a second model call",
+   "C": "Call the tool less often",
+   "D": "Return only what the task needs, with a way to request more detail"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Tools should return task-relevant results rather than everything available, which keeps context for reasoning. A larger window (A) postpones the problem, a second call (B) adds cost and a failure point, and calling less often (C) does not change the payload."
+ },
+ {
+  "id": "architect-foundations-practice-31",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Tool Design & MCP Integration",
+  "question": "What belongs in a tool's description?",
+  "options": {
+   "A": "What the tool does, when to use it, and what its parameters mean",
+   "B": "The implementation language and framework",
+   "C": "The service level agreement",
+   "D": "The name of the team that owns it"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The description is the model's selection guide, so it must answer purpose, applicability, and parameters. Implementation detail (B), service levels (C), and ownership (D) are irrelevant to the choice."
+ },
+ {
+  "id": "architect-foundations-practice-32",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Context Management & Reliability",
+  "question": "A long agentic run degrades in quality as it proceeds. What is the most likely cause?",
+  "options": {
+   "A": "The model version changed mid-run",
+   "B": "Context has accumulated until relevant material competes with stale material",
+   "C": "The temperature was set too low",
+   "D": "The tools became slower"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Progressive degradation over a long run is the signature of context accumulation and drift. Versions do not change mid-run (A), low temperature (C) reduces variety rather than quality, and tool latency (D) does not affect correctness.",
+  "dupGroup": "architect-foundations-practice-32"
+ },
+ {
+  "id": "architect-foundations-practice-33",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Context Management & Reliability",
+  "question": "What is the right way to carry state across a compaction boundary?",
+  "options": {
+   "A": "Rely on the model to remember what mattered",
+   "B": "Increase the context window so compaction is never needed",
+   "C": "Write the decisions and constraints that must persist into an explicit summary that is carried forward",
+   "D": "Restart the task after compaction"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Persistence must be deliberate, because compaction is lossy by design. Relying on recall (A) is unreliable, a larger window (B) only delays the boundary, and restarting (D) discards the work.",
+  "dupGroup": "architect-foundations-practice-33"
+ },
+ {
+  "id": "architect-foundations-practice-34",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Context Management & Reliability",
+  "question": "Which measure most improves reliability for a workflow that must not silently produce wrong output?",
+  "options": {
+   "A": "A larger model",
+   "B": "A longer prompt",
+   "C": "More examples in the prompt",
+   "D": "A validation step that can reject output and trigger a defined fallback"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Reliability against silent failure requires detection and a defined response, which is what validation with a fallback provides. Model size (A), prompt length (B), and examples (C) improve the average case without catching the bad one."
+ },
+ {
+  "id": "architect-foundations-practice-35",
+  "cert": "architect-foundations",
+  "source": "practice",
+  "domain": "Context Management & Reliability",
+  "question": "What should be measured to know whether a production agentic system is healthy?",
+  "options": {
+   "A": "Task success against a defined criterion, plus the rate and shape of failures",
+   "B": "Total tokens consumed",
+   "C": "Average response time",
+   "D": "The number of tool calls per run"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Health is defined by whether the system accomplishes the task and how it fails when it does not. Tokens (B), latency (C), and call counts (D) are cost and behavior signals that say nothing about correctness."
+ },
+ {
+  "id": "architect-foundations-mock1-1",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Context Management & Reliability",
+  "question": "The agent occasionally answers billing questions using an order it looked up three turns earlier for a different customer. What is the architectural fix?",
+  "options": {
+   "A": "Increase the context window",
+   "B": "Scope each conversation's context to one customer and clear or isolate prior lookups when the subject changes",
+   "C": "Remove the lookup_order tool",
+   "D": "Instruct the model to be careful about customer identity"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Cross-customer contamination is a context-scoping defect, not a window-size problem"
+ },
+ {
+  "id": "architect-foundations-mock1-2",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Tool Design & MCP Integration",
+  "question": "process_refund fails intermittently because the billing backend times out. What should the tool return so the agent can behave sensibly?",
+  "options": {
+   "A": "An empty string",
+   "B": "A message asking the user to try later",
+   "C": "A structured error with a category and a retryable flag, so the agent can retry or escalate deliberately",
+   "D": "The exception stack trace"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Structured errors with categories and retryable flags are what let an agent recover deliberately"
+ },
+ {
+  "id": "architect-foundations-mock1-3",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Context Management & Reliability",
+  "question": "Which condition should route a ticket to escalate_to_human rather than continue autonomous resolution?",
+  "options": {
+   "A": "The customer writes in a language the agent supports",
+   "B": "The order is more than thirty days old",
+   "C": "The conversation exceeds five turns",
+   "D": "The request falls outside documented policy, or the agent cannot make progress after a bounded number of attempts"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Policy gaps and lack of progress are the documented escalation triggers; turn counts and order age are not"
+ },
+ {
+  "id": "architect-foundations-mock1-4",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Tool Design & MCP Integration",
+  "question": "The agent sometimes calls get_customer when it should call lookup_order. What is the most effective change?",
+  "options": {
+   "A": "Rewrite both tool descriptions so each states precisely when it applies and how it differs from the other",
+   "B": "Reorder the tools in the configuration",
+   "C": "Merge them into one tool with a mode flag",
+   "D": "Increase the model's temperature"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Tool selection runs on descriptions, so differentiation is the fix for confusion between similar tools"
+ },
+ {
+  "id": "architect-foundations-mock1-5",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "Backend conventions should apply only when backend files are touched. Where do they belong?",
+  "options": {
+   "A": "In the root CLAUDE.md so they are always available",
+   "B": "In a path-scoped rule under .claude/rules/ with frontmatter matching backend paths",
+   "C": "In each engineer's user-level configuration",
+   "D": "In the repository wiki"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Path-scoped rules load conditionally, which is exactly the stated requirement",
+  "dupGroup": "architect-foundations-practice-5"
+ },
+ {
+  "id": "architect-foundations-mock1-6",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "When is plan mode the appropriate choice over direct execution?",
+  "options": {
+   "A": "For every change, since planning is always safer",
+   "B": "Only when the model is unfamiliar with the language",
+   "C": "When the change is large or risky enough that a human should review the approach before edits are made",
+   "D": "When the context window is nearly full"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Plan mode is a human review gate for approach, warranted by risk rather than universally"
+ },
+ {
+  "id": "architect-foundations-mock1-7",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "A repeated multi-step review procedure should be available to the whole team as a single invocation. What is the right mechanism?",
+  "options": {
+   "A": "A shared document describing the steps",
+   "B": "A longer CLAUDE.md",
+   "C": "A saved chat transcript",
+   "D": "A custom slash command or skill committed to the repository"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Repeatable team procedures belong in committed commands or skills, not prose"
+ },
+ {
+  "id": "architect-foundations-mock1-8",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Context Management & Reliability",
+  "question": "Subagents return full source documents to the coordinator, which then exceeds its context limit. What is the correct design change?",
+  "options": {
+   "A": "Have subagents return structured findings with citations while raw sources stay at the edge or in a scratchpad",
+   "B": "Give the coordinator a larger model",
+   "C": "Reduce the number of subagents to one",
+   "D": "Truncate each document to its first page"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Delegation exists to keep bulk at the edge and move distilled results",
+  "dupGroup": "architect-foundations-practice-4"
+ },
+ {
+  "id": "architect-foundations-mock1-9",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Context Management & Reliability",
+  "question": "Final reports attribute claims to the wrong sources even though each subagent is individually accurate. What is the likely cause?",
+  "options": {
+   "A": "The synthesis model is too small",
+   "B": "The handoff format does not carry claim and source together, so provenance is lost between stages",
+   "C": "The search subagent returns too many results",
+   "D": "Reports are generated before analysis completes"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Provenance survives handoffs only when the format carries claim and source together"
+ },
+ {
+  "id": "architect-foundations-mock1-10",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Context Management & Reliability",
+  "question": "A subagent fails permanently on one source. What should the coordinator receive?",
+  "options": {
+   "A": "Nothing, so the report proceeds",
+   "B": "A silent retry loop until it succeeds",
+   "C": "A propagated error with enough context to decide between retry, exclusion with a noted gap, or abort",
+   "D": "A generic failure flag with no detail"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Errors must propagate with enough context for the coordinator to choose a recovery path"
+ },
+ {
+  "id": "architect-foundations-mock1-11",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "The reviewer must emit results a pipeline can parse. Which invocation is correct?",
+  "options": {
+   "A": "Interactive session with output redirected to a log",
+   "B": "Plan mode with an approval step",
+   "C": "A cron job that emails the transcript",
+   "D": "Non-interactive print mode with JSON output and a schema"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "CI requires non-interactive invocation with structured, schema-validated output",
+  "dupGroup": "architect-foundations-practice-6"
+ },
+ {
+  "id": "architect-foundations-mock1-12",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "Reviews flag many low-value style nits and engineers now ignore them. Which change addresses this?",
+  "options": {
+   "A": "Define explicit review criteria and a severity bar in the prompt, with examples of in-scope and out-of-scope findings",
+   "B": "Post findings to a separate channel",
+   "C": "Run the review only on large pull requests",
+   "D": "Cap output at five findings"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Precision comes from explicit criteria and examples that draw the signal boundary",
+  "dupGroup": "architect-foundations-practice-7"
+ },
+ {
+  "id": "architect-foundations-mock1-13",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "Some invoices legitimately lack a delivery date. How should the schema express this?",
+  "options": {
+   "A": "Make the field required and let extraction fail",
+   "B": "Make the field nullable so absence is recorded explicitly, with conditional validation where the document type requires it",
+   "C": "Omit the field from the schema",
+   "D": "Default it to today's date"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Nullable fields record legitimate absence; required fields force fabrication or failure"
+ },
+ {
+  "id": "architect-foundations-mock1-14",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "Which loop gives the most reliable extraction output?",
+  "options": {
+   "A": "Generate, then manually review every record",
+   "B": "Generate three times and take the majority",
+   "C": "Enforce a JSON schema through tool use, validate, and on failure retry with the validation error provided to the model",
+   "D": "Generate with temperature zero and accept the result"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Schema enforcement plus a validation-retry loop is the reliability pattern the guide describes"
+ },
+ {
+  "id": "architect-foundations-mock1-15",
+  "cert": "architect-foundations",
+  "source": "mock-1",
+  "domain": "Context Management & Reliability",
+  "question": "Your team reports 97% accuracy measured only on records that passed validation. Why is that number misleading?",
+  "options": {
+   "A": "Accuracy should be measured per field, not per record",
+   "B": "97% is too low to report",
+   "C": "Validation and accuracy are unrelated",
+   "D": "It excludes the failures, so it measures where the system already succeeded rather than the true rate across all documents"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Measuring only validated records is a biased sample; calibration needs coverage of all documents"
+ },
+ {
+  "id": "architect-foundations-mock2-1",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "A pipeline has four steps whose order never varies and whose outputs are each checkable. What should it be?",
+  "options": {
+   "A": "An agent that plans each run",
+   "B": "Four agents, one per step",
+   "C": "A deterministic workflow with model calls at defined points",
+   "D": "A single prompt covering all four steps"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "A known fixed order is encoded rather than rediscovered, which is cheaper and testable per step. Runtime planning (A, B) adds nondeterminism, and one prompt (D) removes the checkpoints"
+ },
+ {
+  "id": "architect-foundations-mock2-2",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "What is the principal cost of introducing a subagent?",
+  "options": {
+   "A": "It loses the context the parent held unless the handoff carries it explicitly",
+   "B": "It requires a larger model",
+   "C": "It cannot use tools",
+   "D": "It doubles token cost in every case"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Delegation buys isolation and pays in context, which is why handoffs must be explicit. A subagent does not require a larger model (B), can use tools (C), and cost varies with the work (D)"
+ },
+ {
+  "id": "architect-foundations-mock2-3",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "An autonomous step would modify production data. What does the architecture require?",
+  "options": {
+   "A": "A more capable model",
+   "B": "A longer system prompt describing caution",
+   "C": "A retry policy",
+   "D": "A checkpoint where a person authorises the action, or a reversible mechanism"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Irreversible external effects need an authorisation boundary or reversibility, enforced outside the model. Capability (A), instruction (B), and retries (C) do not bound the consequence"
+ },
+ {
+  "id": "architect-foundations-mock2-4",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "What most helps diagnose an agentic failure after the fact?",
+  "options": {
+   "A": "The final output alone",
+   "B": "A trace of each step's inputs, tool calls, and outputs",
+   "C": "The total token count",
+   "D": "The model version"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "A per-step trace reconstructs a nondeterministic run, which is what diagnosis needs. The final output (A), token totals (C), and version (D) do not show where it diverged",
+  "dupGroup": "architect-foundations-practice-17"
+ },
+ {
+  "id": "architect-foundations-mock2-5",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "Where should repository-wide conventions for Claude Code live?",
+  "options": {
+   "A": "In each developer's local configuration",
+   "B": "In a CLAUDE.md committed to the repository",
+   "C": "In the team's chat channel",
+   "D": "In the CI configuration only"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Committed project memory is shared, versioned, and reviewed with the code. Local configuration (A) does not propagate, chat (C) is not read as context, and CI (D) covers automation rather than interactive work",
+  "dupGroup": "architect-foundations-practice-18"
+ },
+ {
+  "id": "architect-foundations-mock2-6",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "Which task is best suited to headless Claude Code in CI?",
+  "options": {
+   "A": "Exploratory debugging of an unfamiliar failure",
+   "B": "Designing a new module's architecture",
+   "C": "Pair programming with a developer",
+   "D": "A repeatable, well-specified check that runs on every pull request"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Headless execution suits bounded, repeatable work that runs unattended. Exploration (A), design (B), and pairing (C) all depend on a person in the loop"
+ },
+ {
+  "id": "architect-foundations-mock2-7",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "What is a hook for?",
+  "options": {
+   "A": "Running a deterministic action at a defined point, independently of the model",
+   "B": "Storing reusable instructions",
+   "C": "Holding project context",
+   "D": "Selecting the model"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Hooks execute as code at fixed points, which is how a guarantee is enforced. Instructions (B) and context (C) belong in project memory, and model choice (D) is configuration",
+  "dupGroup": "architect-foundations-practice-21"
+ },
+ {
+  "id": "architect-foundations-mock2-8",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "A pipeline needs output that always conforms to a fixed shape. What is the correct mechanism?",
+  "options": {
+   "A": "Requesting the shape in the prompt and parsing the result",
+   "B": "Post-processing prose with regular expressions",
+   "C": "Declaring the shape as a schema the model must satisfy, and validating on receipt",
+   "D": "Lowering the temperature"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "A declared schema makes the shape a contract rather than a request, and validation closes the loop. Prompt requests (A), text parsing (B), and temperature (D) leave the shape to chance",
+  "dupGroup": "architect-foundations-practice-23"
+ },
+ {
+  "id": "architect-foundations-mock2-9",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "How should a schema handle a value the source may not contain?",
+  "options": {
+   "A": "Omit the field silently",
+   "B": "Supply a plausible default",
+   "C": "Return an empty string in all cases",
+   "D": "Define an explicit representation for absence"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Absence must be representable so a genuine gap is distinguishable from a failure. Silent omission (A) is ambiguous, a plausible default (B) fabricates, and an empty string (C) conflates absence with an empty value",
+  "dupGroup": "architect-foundations-practice-25"
+ },
+ {
+  "id": "architect-foundations-mock2-10",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "Extraction succeeds on typical inputs and fails on unusual ones. What is the most effective response?",
+  "options": {
+   "A": "Raise the temperature",
+   "B": "Use a larger model",
+   "C": "Add examples covering the unusual formats and state what to return when a field is missing",
+   "D": "Ask the model to be careful with unusual inputs"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "The unusual cases fail because they were never specified, and examples plus a missing-value rule specify them. Temperature (A) adds variance, model size (B) is not aimed at the gap, and exhortation (D) is not specification",
+  "dupGroup": "architect-foundations-practice-24"
+ },
+ {
+  "id": "architect-foundations-mock2-11",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Tool Design & MCP Integration",
+  "question": "What is the clearest sign that a tool surface needs redesign rather than better prompting?",
+  "options": {
+   "A": "It exposes more than five tools",
+   "B": "The model repeatedly selects a tool that cannot satisfy the request",
+   "C": "The tools are implemented in different services",
+   "D": "The tools return large payloads"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Repeated wrong selection indicates the tools are not distinguishable from their descriptions, which is a design fault. Tool count (A) and implementation topology (C) are not faults, and payload size (D) is a separate problem",
+  "dupGroup": "architect-foundations-practice-28"
+ },
+ {
+  "id": "architect-foundations-mock2-12",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Tool Design & MCP Integration",
+  "question": "How should a tool that deletes records be constrained?",
+  "options": {
+   "A": "By enforcing authorisation and scope outside the model",
+   "B": "By a description warning the model to use it carefully",
+   "C": "By requiring more parameters",
+   "D": "By declaring it last among the tools"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Destructive capability is bounded by the surrounding system, since a description is a request rather than a control. Extra parameters (C) and ordering (D) do not limit authority",
+  "dupGroup": "architect-foundations-practice-29"
+ },
+ {
+  "id": "architect-foundations-mock2-13",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Tool Design & MCP Integration",
+  "question": "An MCP integration exposes an entire database through one general query tool. What is the architectural concern?",
+  "options": {
+   "A": "The model's authority is unbounded, and least privilege cannot be applied",
+   "B": "It will be slow",
+   "C": "It uses too many tokens",
+   "D": "It cannot return structured output"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "A single unrestricted tool removes the ability to scope what the model may reach. Speed (B) and tokens (C) are secondary, and structured output (D) is achievable either way"
+ },
+ {
+  "id": "architect-foundations-mock2-14",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Context Management & Reliability",
+  "question": "Quality degrades steadily through a long agentic run. What is the most likely cause?",
+  "options": {
+   "A": "The model version changed mid-run",
+   "B": "Accumulated context has diluted the material that matters",
+   "C": "The temperature is too low",
+   "D": "The tools have become slower"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Progressive degradation over a long run is the signature of context accumulation. Versions do not change mid-run (A), low temperature (C) reduces variety rather than quality, and tool latency (D) does not affect correctness",
+  "dupGroup": "architect-foundations-practice-32"
+ },
+ {
+  "id": "architect-foundations-mock2-15",
+  "cert": "architect-foundations",
+  "source": "mock-2",
+  "domain": "Context Management & Reliability",
+  "question": "What must happen for state to survive a compaction boundary?",
+  "options": {
+   "A": "Nothing, the model retains what matters",
+   "B": "The context window must be enlarged",
+   "C": "The decisions and constraints that must persist are written into an explicit carried-forward summary",
+   "D": "The run must restart"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Compaction is lossy, so persistence must be deliberate. Relying on recall (A) is unreliable, a larger window (B) only moves the boundary, and restarting (D) discards the work",
+  "dupGroup": "architect-foundations-practice-33"
+ },
+ {
+  "id": "architect-foundations-mock3-1",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "An agentic design calls the same expensive tool repeatedly with identical arguments. What does this indicate?",
+  "options": {
+   "A": "Healthy retry behavior",
+   "B": "The tool is too fast",
+   "C": "The agent is not retaining or reusing the result, which points at the state design",
+   "D": "The model is too capable"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Repeating an identical call means the prior result is not available to the agent, which is a state problem. It is not retry behavior (A), and neither tool speed (B) nor capability (D) explains it"
+ },
+ {
+  "id": "architect-foundations-mock3-2",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "What determines whether two lines of work belong in separate subagents?",
+  "options": {
+   "A": "Whether each needs context the other would pollute",
+   "B": "Their combined length",
+   "C": "Whether they use different tools",
+   "D": "Whether they can run in parallel"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Context isolation is the reason subagents exist. Length (B), tool difference (C), and parallelism (D) can all be handled within one context"
+ },
+ {
+  "id": "architect-foundations-mock3-3",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "Which design most reduces the cost of a wrong autonomous decision?",
+  "options": {
+   "A": "A larger model",
+   "B": "A longer prompt",
+   "C": "More tools",
+   "D": "Making the action reversible, or gating it behind confirmation"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Reversibility and gating bound the consequence, which is what the risk is. Capability (A), prompt length (B), and tools (C) affect the chance of error rather than its cost"
+ },
+ {
+  "id": "architect-foundations-mock3-4",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "A CLAUDE.md has grown to several thousand lines. What is the likely effect?",
+  "options": {
+   "A": "Better results, because more context is available",
+   "B": "The instructions that matter compete with material that no longer applies",
+   "C": "No effect, since it is read once",
+   "D": "Faster responses"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Project memory is context and dilutes like any other. More is not automatically better (A), it is not free (C), and it does not speed anything up (D)"
+ },
+ {
+  "id": "architect-foundations-mock3-5",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "What should be true of a skill before it is committed to a shared repository?",
+  "options": {
+   "A": "It is long enough to be useful",
+   "B": "It encodes a procedure the team genuinely repeats, and it is reviewable",
+   "C": "It is written by the most senior engineer",
+   "D": "It covers every edge case"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "A shared skill is justified by genuine repetition and must be reviewable like code. Length (A), authorship (C), and exhaustiveness (D) do not establish that"
+ },
+ {
+  "id": "architect-foundations-mock3-6",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "Why is committed configuration preferable to per-developer configuration for team conventions?",
+  "options": {
+   "A": "It is faster to load",
+   "B": "It uses less context",
+   "C": "It cannot be overridden",
+   "D": "It is versioned, reviewed, and applies to everyone including automation"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Shared, reviewed, versioned context is what makes a convention hold across people and CI. Speed (A) and context size (B) are not the reason, and it can still be overridden locally (C)"
+ },
+ {
+  "id": "architect-foundations-mock3-7",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "A schema-validated response fails validation once in every few hundred calls. What is the correct handling?",
+  "options": {
+   "A": "Define a fallback path: retry, then fail explicitly rather than passing invalid data on",
+   "B": "Ignore it, since the rate is low",
+   "C": "Disable validation to avoid the failures",
+   "D": "Increase the output token limit"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "A rare failure still needs a defined path, and silently passing invalid data is the outcome to prevent. Ignoring it (B) and disabling validation (C) do exactly that, and the token limit (D) is not the cause"
+ },
+ {
+  "id": "architect-foundations-mock3-8",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "What is the advantage of validating structured output at the boundary rather than downstream?",
+  "options": {
+   "A": "It is cheaper",
+   "B": "It removes the need for a schema",
+   "C": "The failure is caught where it can still be retried or rejected, before it contaminates later steps",
+   "D": "It improves model accuracy"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Catching at the boundary contains the fault. It is not primarily a cost question (A), the schema is what makes it possible (B), and it does not change the model's accuracy (D)"
+ },
+ {
+  "id": "architect-foundations-mock3-9",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "A structured extraction must record where in the source each value came from. What does this require?",
+  "options": {
+   "A": "A larger model",
+   "B": "A longer prompt",
+   "C": "A second extraction pass",
+   "D": "The schema to include a provenance field the model must populate"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Anything the output must carry has to be part of the declared shape. Model size (A) and prompt length (B) do not create a field, and a second pass (C) is unnecessary if the schema asks for it"
+ },
+ {
+  "id": "architect-foundations-mock3-10",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Tool Design & MCP Integration",
+  "question": "Two tools do nearly the same thing with different names. What is the architectural fault?",
+  "options": {
+   "A": "Duplication of code",
+   "B": "Higher latency",
+   "C": "The model has no reliable basis for choosing between them",
+   "D": "Increased token cost"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Ambiguity at the point of selection is the fault, because the model chooses from descriptions. Code duplication (A), latency (B), and cost (D) are secondary consequences"
+ },
+ {
+  "id": "architect-foundations-mock3-11",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Tool Design & MCP Integration",
+  "question": "What should a tool do when given arguments it cannot satisfy?",
+  "options": {
+   "A": "Return the closest result it can",
+   "B": "Return a clear error stating what was wrong, so the model can correct the call",
+   "C": "Return an empty result",
+   "D": "Raise an exception that terminates the run"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "An informative error keeps the model able to adapt. A closest-guess (A) and an empty result (C) are silently wrong, and terminating (D) discards a recoverable run"
+ },
+ {
+  "id": "architect-foundations-mock3-12",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Tool Design & MCP Integration",
+  "question": "An MCP tool exposes a write operation that the use case never needs. What should happen?",
+  "options": {
+   "A": "Remove it, because unused authority is unnecessary risk",
+   "B": "Leave it, since it may be useful later",
+   "C": "Document that it should not be used",
+   "D": "Rename it to discourage use"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Authority that is not needed should not be granted. Retaining it for possible future use (B), documenting (C), or renaming (D) all leave the capability reachable"
+ },
+ {
+  "id": "architect-foundations-mock3-13",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Context Management & Reliability",
+  "question": "What is the earliest reliable signal that context management has failed in a long run?",
+  "options": {
+   "A": "The agent begins repeating work or contradicting earlier decisions",
+   "B": "The run takes longer than expected",
+   "C": "Token cost rises",
+   "D": "A tool returns an error"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Repetition and self-contradiction are the behavioral signature of lost state. Duration (B) and cost (C) rise for many reasons, and a tool error (D) is unrelated"
+ },
+ {
+  "id": "architect-foundations-mock3-14",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Context Management & Reliability",
+  "question": "Why is a defined success criterion necessary for a reliable agentic system?",
+  "options": {
+   "A": "It reduces token cost",
+   "B": "Without it there is no way to tell completion from failure, so the system cannot stop correctly or be measured",
+   "C": "It makes the prompt shorter",
+   "D": "It is required by the platform"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Termination and measurement both depend on a definition of done. Cost (A), prompt length (C), and platform requirements (D) are not the reason"
+ },
+ {
+  "id": "architect-foundations-mock3-15",
+  "cert": "architect-foundations",
+  "source": "mock-3",
+  "domain": "Context Management & Reliability",
+  "question": "A reliability requirement says wrong output must never reach the user unnoticed. What does the design need?",
+  "options": {
+   "A": "A more capable model",
+   "B": "More examples in the prompt",
+   "C": "A detection step with a defined action when it fires",
+   "D": "A longer context window"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Preventing silent error requires detection plus a response. Capability (A), examples (B), and context (D) improve the average case without catching the bad one"
+ },
+ {
+  "id": "architect-foundations-guide-1",
+  "cert": "architect-foundations",
+  "source": "guide",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "Scenario: Customer Support Resolution Agent. Production data shows that in 12% of cases, your agent skips get_customer entirely and calls lookup_order using only the customer's stated name, occasionally leading to misidentified accounts and incorrect refunds. What change would most effectively address this reliability issue?",
+  "options": {
+   "A": "Add a programmatic prerequisite that blocks lookup_order and process_refund calls until get_customer has returned a verified customer ID.",
+   "B": "Enhance the system prompt to state that customer verification via get_customer is mandatory before any order operations.",
+   "C": "Add few-shot examples showing the agent always calling get_customer first, even when customers volunteer order details.",
+   "D": "Implement a routing classifier that analyzes each request and enables only the subset of tools appropriate for that request type."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "When a specific tool sequence is required for critical business logic (like verifying customer identity before processing refunds), programmatic enforcement provides deterministic guarantees that prompt-based approaches cannot. Options B and C rely on probabilistic LLM compliance, which is insufficient when errors have financial consequences. Option D addresses tool availability rather than tool ordering, which is not the actual problem."
+ },
+ {
+  "id": "architect-foundations-guide-2",
+  "cert": "architect-foundations",
+  "source": "guide",
+  "domain": "Tool Design & MCP Integration",
+  "question": "Scenario: Customer Support Resolution Agent. Production logs show the agent frequently calls get_customer when users ask about orders (e.g., \"check my order #12345\"), instead of calling lookup_order. Both tools have minimal descriptions (\"Retrieves customer information\" / \"Retrieves order details\") and accept similar identifier formats. What's the most effective first step to improve tool selection reliability?",
+  "options": {
+   "A": "Add few-shot examples to the system prompt demonstrating correct tool selection patterns, with 5-8 examples showing order-related queries routing to lookup_order.",
+   "B": "Expand each tool's description to include input formats it handles, example queries, edge cases, and boundaries explaining when to use it versus similar tools.",
+   "C": "Implement a routing layer that parses user input before each turn and pre-selects the appropriate tool based on detected keywords and identifier patterns.",
+   "D": "Consolidate both tools into a single lookup_entity tool that accepts any identifier and internally determines which backend to query."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Tool descriptions are the primary mechanism LLMs use for tool selection. When descriptions are minimal, models lack the context to differentiate between similar tools. Option B directly addresses this root cause with a low-effort, high-leverage fix. Few-shot examples (A) add token overhead without fixing the underlying issue. A routing layer (C) is over-engineered and bypasses the LLM's natural language understanding. Consolidating tools (D) is a valid architectural choice but requires more effort than a \"first step\" warrants when the immediate problem is inadequate descriptions."
+ },
+ {
+  "id": "architect-foundations-guide-3",
+  "cert": "architect-foundations",
+  "source": "guide",
+  "domain": "Context Management & Reliability",
+  "question": "Scenario: Customer Support Resolution Agent. Your agent achieves 55% first-contact resolution, well below the 80% target. Logs show it escalates straightforward cases (standard damage replacements with photo evidence) while attempting to autonomously handle complex situations requiring policy exceptions. What's the most effective way to improve escalation calibration?",
+  "options": {
+   "A": "Add explicit escalation criteria to your system prompt with few-shot examples demonstrating when to escalate versus resolve autonomously.",
+   "B": "Have the agent self-report a confidence score (1-10) before each response and automatically route requests to humans when confidence falls below a threshold.",
+   "C": "Deploy a separate classifier model trained on historical tickets to predict which requests need escalation before the main agent begins processing.",
+   "D": "Implement sentiment analysis to detect customer frustration levels and automatically escalate when negative sentiment exceeds a threshold."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Adding explicit escalation criteria with few-shot examples directly addresses the root cause: unclear decision boundaries. This is the proportionate first response before adding infrastructure. Option B fails because LLM self-reported confidence is poorly calibrated; the agent is already incorrectly confident on hard cases. Option C is over-engineered, requiring labeled data and ML infrastructure when prompt optimization hasn't been tried. Option D solves a different problem entirely; sentiment doesn't correlate with case complexity, which is the actual issue."
+ },
+ {
+  "id": "architect-foundations-guide-4",
+  "cert": "architect-foundations",
+  "source": "guide",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "Scenario: Code Generation with Claude Code. You want to create a custom /review slash command that runs your team's standard code review checklist. This command should be available to every developer when they clone or pull the repository. Where should you create this command file?",
+  "options": {
+   "A": "In the .claude/commands/ directory in the project repository",
+   "B": "In ~/.claude/commands/ in each developer's home directory",
+   "C": "In the CLAUDE.md file at the project root",
+   "D": "In a .claude/config.json file with a commands array"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Project-scoped custom slash commands should be stored in the .claude/commands/ directory within the repository. These commands are version-controlled and automatically available to all developers when they clone or pull the repo. Option B (~/.claude/commands/) is for personal commands that aren't shared via version control. Option C (CLAUDE.md) is for project instructions and context, not command definitions. Option D describes a configuration mechanism that doesn't exist in Claude Code."
+ },
+ {
+  "id": "architect-foundations-guide-5",
+  "cert": "architect-foundations",
+  "source": "guide",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "Scenario: Code Generation with Claude Code. You've been assigned to restructure the team's monolithic application into microservices. This will involve changes across dozens of files and requires decisions about service boundaries and module dependencies. Which approach should you take?",
+  "options": {
+   "A": "Enter plan mode to explore the codebase, understand dependencies, and design an implementation approach before making changes.",
+   "B": "Start with direct execution and make changes incrementally, letting the implementation reveal the natural service boundaries.",
+   "C": "Use direct execution with comprehensive upfront instructions detailing exactly how each service should be structured.",
+   "D": "Begin in direct execution mode and only switch to plan mode if you encounter unexpected complexity during implementation."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Plan mode is designed for complex tasks involving large-scale changes, multiple valid approaches, and architectural decisions, exactly what monolith-to-microservices restructuring requires. It enables safe codebase exploration and design before committing to changes. Option B risks costly rework when dependencies are discovered late. Option C assumes you already know the right structure without exploring the code. Option D ignores that the complexity is already stated in the requirements, not something that might emerge later."
+ },
+ {
+  "id": "architect-foundations-guide-6",
+  "cert": "architect-foundations",
+  "source": "guide",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "Scenario: Code Generation with Claude Code. Your codebase has distinct areas with different coding conventions: React components use functional style with hooks, API handlers use async/await with specific error handling, and database models follow a repository pattern. Test files are spread throughout the codebase alongside the code they test (e.g., Button.test.tsx next to Button.tsx), and you want all tests to follow the same conventions regardless of location. What's the most maintainable way to ensure Claude automatically applies the correct conventions when generating code?",
+  "options": {
+   "A": "Create rule files in .claude/rules/ with YAML frontmatter specifying glob patterns to conditionally apply conventions based on file paths",
+   "B": "Consolidate all conventions in the root CLAUDE.md file under headers for each area, relying on Claude to infer which section applies",
+   "C": "Create skills in .claude/skills/ for each code type that include the relevant conventions in their SKILL.md files",
+   "D": "Place a separate CLAUDE.md file in each subdirectory containing that area's specific conventions"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Option A is correct because .claude/rules/ with glob patterns (e.g., **/*.test.tsx) allows conventions to be automatically applied based on file paths regardless of directory location, essential for test files spread throughout the codebase. Option B relies on inference rather than explicit matching, making it unreliable. Option C requires manual skill invocation or relies on Claude choosing to load them, contradicting the need for deterministic \"automatic\" application based on file paths. Option D can't easily handle files spread across many directories since CLAUDE.md files are directory-bound."
+ },
+ {
+  "id": "architect-foundations-guide-7",
+  "cert": "architect-foundations",
+  "source": "guide",
+  "domain": "Agentic Architecture & Orchestration",
+  "question": "Scenario: Multi-Agent Research System. After running the system on the topic \"impact of AI on creative industries,\" you observe that each subagent completes successfully: the web search agent finds relevant articles, the document analysis agent summarizes papers correctly, and the synthesis agent produces coherent output. However, the final reports cover only visual arts, completely missing music, writing, and film production. When you examine the coordinator's logs, you see it decomposed the topic into three subtasks: \"AI in digital art creation,\" \"AI in graphic design,\" and \"AI in photography.\" What is the most likely root cause?",
+  "options": {
+   "A": "The synthesis agent lacks instructions for identifying coverage gaps in the findings it receives from other agents.",
+   "B": "The coordinator agent's task decomposition is too narrow, resulting in subagent assignments that don't cover all relevant domains of the topic.",
+   "C": "The web search agent's queries are not comprehensive enough and need to be expanded to cover more creative industry sectors.",
+   "D": "The document analysis agent is filtering out sources related to non-visual creative industries due to overly restrictive relevance criteria."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "The coordinator's logs reveal the root cause directly: it decomposed \"creative industries\" into only visual arts subtasks (digital art, graphic design, photography), completely omitting music, writing, and film. The subagents executed their assigned tasks correctly; the problem is what they were assigned. Options A, C, and D incorrectly blame downstream agents that are working correctly within their assigned scope."
+ },
+ {
+  "id": "architect-foundations-guide-8",
+  "cert": "architect-foundations",
+  "source": "guide",
+  "domain": "Context Management & Reliability",
+  "question": "Scenario: Multi-Agent Research System. The web search subagent times out while researching a complex topic. You need to design how this failure information flows back to the coordinator agent. Which error propagation approach best enables intelligent recovery?",
+  "options": {
+   "A": "Return structured error context to the coordinator including the failure type, the attempted query, any partial results, and potential alternative approaches.",
+   "B": "Implement automatic retry logic with exponential backoff within the subagent, returning a generic \"search unavailable\" status only after all retries are exhausted.",
+   "C": "Catch the timeout within the subagent and return an empty result set marked as successful.",
+   "D": "Propagate the timeout exception directly to a top-level handler that terminates the entire research workflow."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Structured error context gives the coordinator the information it needs to make intelligent recovery decisions: whether to retry with a modified query, try an alternative approach, or proceed with partial results. Option B's generic status hides valuable context from the coordinator, preventing informed decisions. Option C suppresses the error by marking failure as success, which prevents any recovery and risks incomplete research outputs. Option D terminates the entire workflow unnecessarily when recovery strategies could succeed."
+ },
+ {
+  "id": "architect-foundations-guide-9",
+  "cert": "architect-foundations",
+  "source": "guide",
+  "domain": "Tool Design & MCP Integration",
+  "question": "Scenario: Multi-Agent Research System. During testing, you observe that the synthesis agent frequently needs to verify specific claims while combining findings. Currently, when verification is needed, the synthesis agent returns control to the coordinator, which invokes the web search agent, then re-invokes synthesis with results. This adds 2-3 round trips per task and increases latency by 40%. Your evaluation shows that 85% of these verifications are simple fact-checks (dates, names, statistics) while 15% require deeper investigation. What's the most effective approach to reduce overhead while maintaining system reliability?",
+  "options": {
+   "A": "Give the synthesis agent a scoped verify_fact tool for simple lookups, while complex verifications continue delegating to the web search agent through the coordinator.",
+   "B": "Have the synthesis agent accumulate all verification needs and return them as a batch to the coordinator at the end of its pass, which then sends them all to the web search agent at once.",
+   "C": "Give the synthesis agent access to all web search tools so it can handle any verification need directly without round-trips through the coordinator.",
+   "D": "Have the web search agent proactively cache extra context around each source during initial research, anticipating what the synthesis agent might need to verify."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Option A applies the principle of least privilege by giving the synthesis agent only what it needs for the 85% common case (simple fact verification) while preserving the existing coordination pattern for complex cases. Option B's batching approach creates blocking dependencies since synthesis steps may depend on earlier verified facts. Option C over-provisions the synthesis agent, violating separation of concerns. Option D relies on speculative caching that cannot reliably predict what the synthesis agent will need to verify."
+ },
+ {
+  "id": "architect-foundations-guide-10",
+  "cert": "architect-foundations",
+  "source": "guide",
+  "domain": "Claude Code Configuration & Workflows",
+  "question": "Scenario: Claude Code for Continuous Integration. Your pipeline script runs claude \"Analyze this pull request for security issues\" but the job hangs indefinitely. Logs indicate Claude Code is waiting for interactive input. What's the correct approach to run Claude Code in an automated pipeline?",
+  "options": {
+   "A": "Add the -p flag: claude -p \"Analyze this pull request for security issues\"",
+   "B": "Set the environment variable CLAUDE_HEADLESS=true before running the command",
+   "C": "Redirect stdin from /dev/null: claude \"Analyze this pull request for security issues\" < /dev/null",
+   "D": "Add the --batch flag: claude --batch \"Analyze this pull request for security issues\""
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The -p (or --print) flag is the documented way to run Claude Code in non-interactive mode. It processes the prompt, outputs the result to stdout, and exits without waiting for user input, exactly what CI/CD pipelines require. The other options reference non-existent features (CLAUDE_HEADLESS environment variable, --batch flag) or use Unix workarounds that don't properly address Claude Code's command syntax."
+ },
+ {
+  "id": "architect-foundations-guide-11",
+  "cert": "architect-foundations",
+  "source": "guide",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "Scenario: Claude Code for Continuous Integration. Your team wants to reduce API costs for automated analysis. Currently, real-time Claude calls power two workflows: (1) a blocking pre-merge check that must complete before developers can merge, and (2) a technical debt report generated overnight for review the next morning. Your manager proposes switching both to the Message Batches API for its 50% cost savings. How should you evaluate this proposal?",
+  "options": {
+   "A": "Use batch processing for the technical debt reports only; keep real-time calls for pre-merge checks.",
+   "B": "Switch both workflows to batch processing with status polling to check for completion.",
+   "C": "Keep real-time calls for both workflows to avoid batch result ordering issues.",
+   "D": "Switch both to batch processing with a timeout fallback to real-time if batches take too long."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The Message Batches API offers 50% cost savings but has processing times up to 24 hours with no guaranteed latency SLA. This makes it unsuitable for blocking pre-merge checks where developers wait for results, but ideal for overnight batch jobs like technical debt reports. Option B is wrong because relying on \"often faster\" completion isn't acceptable for blocking workflows. Option C reflects a misconception: batch results can be correlated using custom_id fields. Option D adds unnecessary complexity when the simpler solution is matching each API to its appropriate use case."
+ },
+ {
+  "id": "architect-foundations-guide-12",
+  "cert": "architect-foundations",
+  "source": "guide",
+  "domain": "Prompt Engineering & Structured Output",
+  "question": "Scenario: Claude Code for Continuous Integration. A pull request modifies 14 files across the stock tracking module. Your single-pass review analyzing all files together produces inconsistent results: detailed feedback for some files but superficial comments for others, obvious bugs missed, and contradictory feedback, flagging a pattern as problematic in one file while approving identical code elsewhere in the same PR. How should you restructure the review?",
+  "options": {
+   "A": "Split into focused passes: analyze each file individually for local issues, then run a separate integration-focused pass examining cross-file data flow.",
+   "B": "Require developers to split large PRs into smaller submissions of 3-4 files before the automated review runs.",
+   "C": "Switch to a higher-tier model with a larger context window to give all 14 files adequate attention in one pass.",
+   "D": "Run three independent review passes on the full PR and only flag issues that appear in at least two of the three runs."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Splitting reviews into focused passes directly addresses the root cause: attention dilution when processing many files at once. File-by-file analysis ensures consistent depth, while a separate integration pass catches cross-file issues. Option B shifts burden to developers without improving the system. Option C misunderstands that larger context windows don't solve attention quality issues. Option D would actually suppress detection of real bugs by requiring consensus on issues that may only be caught intermittently."
+ }
+]

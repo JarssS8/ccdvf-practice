@@ -1,7 +1,7 @@
 {
-  "name": "CCDV-F Practice",
-  "short_name": "CCDV-F",
-  "description": "Práctica para Claude Certified Developer – Foundations",
+  "name": "Claude Cert Practice",
+  "short_name": "Cert Practice",
+  "description": "Práctica para las certificaciones de Claude",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F4F5F7",

@@ -1,6 +1,6 @@
-# CCDV-F Practice
+# Claude Cert Practice
 
-**A free, open-source study app for the _Claude Certified Developer – Foundations_ (CCDV-F) exam.** Timed mock exams, domain drills, spaced-repetition flashcards, an AI tutor and charts of where you lose marks — in English and Spanish, synced across your devices.
+**A free, open-source study app for the four Claude certification exams: _Associate – Foundations_ (CCAO-F), _Developer – Foundations_ (CCDV-F), _Architect – Foundations_ (CCAR-F) and _Architect – Professional_ (CCAR-P).** Pick one when you sign up and switch from the top bar at any time; each keeps its own progress, flashcards and exam date. Timed mock exams, domain drills, spaced-repetition flashcards, an AI tutor and charts of where you lose marks — in English and Spanish, synced across your devices.
 
 **Try it:** https://exam.jarsss8.es · **Español:** [README.es.md](README.es.md)
 
@@ -19,7 +19,7 @@
 
 | | |
 | --- | --- |
-| **Mock exams** | Full 53-question / 120-minute mocks weighted like the real blueprint, a 15-question quick mock and the repo's three mocks. Always in English, like the real exam. |
+| **Mock exams** | Full mocks with the real length (60, 53, 60 or 63 questions, 120 minutes) weighted like each blueprint, a 15-question quick mock at the real pace, the repo's three mocks and the official guide's samples. Always in English, like the real exam. |
 | **Domain drills** | 10 questions from one domain with instant feedback and an explanation, favouring what you have not seen. |
 | **Readiness estimate** | A 100–1000 range from your *first* attempts only, re-weighted by domain, with the 720 pass mark. |
 | **Charts** | Where you miss most (by marks lost), trend per domain, most-missed questions, history of mocks. |
@@ -164,7 +164,7 @@ Browser tests drive headless Chromium through `playwright-core`; set `CHROMIUM_P
 
 ## Content and translations
 
-The questions, flashcards, notes and news are imported from [Amey-Thakur/CLAUDE-CERTIFICATIONS](https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS) with `npm run sync` (it expects this folder inside a clone of that repo). Review the diff of `src/content/` and commit it before deploying: the imported text becomes the AI tutor's notes and the bank's answer keys.
+The questions, flashcards, notes and news are imported from [Amey-Thakur/CLAUDE-CERTIFICATIONS](https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS) with `npm run sync` (it expects this folder inside a clone of that repo), one folder per certification in `src/content/<cert-id>/`. The certifications themselves (codes, length, domains and weights) are declared once in `src/shared/certs.ts`; the official guide samples live in `scripts/guide-samples/<cert-id>.json`. Review the diff of `src/content/` and commit it before deploying: the imported text becomes the AI tutor's notes and the bank's answer keys.
 
 Spanish versions live in `src/content/es/`. Each entry stores `src`, a hash of the English text it was translated from; when the English changes, the app shows English for that item until the translation is updated. `npm run sync` reports stale translations; after fixing them run `node scripts/i18n.mjs stamp`.
 

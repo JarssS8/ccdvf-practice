@@ -12,6 +12,7 @@ const paths: Record<string, string> = {
   arrowRight: 'M5 12h14M13 6l6 6-6 6',
   chevronLeft: 'M15 18l-6-6 6-6',
   chevronRight: 'M9 18l6-6-6-6',
+  chevronDown: 'M6 9l6 6 6-6',
   clock: 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM12 9v4l2 2M9 2h6',
   flag: 'M4 22V4M4 4h12l-2 4 2 4H4',
   sparkle: 'M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4zM19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z',

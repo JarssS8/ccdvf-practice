@@ -1,7 +1,9 @@
 import { useEffect, useMemo, type ReactNode } from 'react'
 import { Icon } from './components/Icon'
 import { SyncBadge } from './components/ui'
-import { questionIndex } from './lib/content'
+import { CertSwitcher } from './components/CertSwitcher'
+import { inCert, questionIndex } from './lib/content'
+import { useCert, useNeedsCertPick } from './lib/cert'
 import { useRoute } from './lib/router'
 import { checkSession, sync, useStore } from './lib/store'
 import { closeExpired } from './lib/actions'
@@ -17,6 +19,7 @@ import Notes from './views/Notes'
 import Progress from './views/Progress'
 import Settings from './views/Settings'
 import AuthView, { isResetPending } from './views/Auth'
+import CertPick from './views/CertPick'
 import Legal, { LegalLinks } from './views/Legal'
 
 const NAV = [
@@ -27,21 +30,33 @@ const NAV = [
   { path: 'progress', key: 'progress', icon: 'chart' },
 ] as const
 
+/** Every question of every certification by id: what an attempt needs to resolve its questions. */
 export function useQuestions() {
   const { data } = useStore()
   return useMemo(() => questionIndex(data.aiQuestions), [data.aiQuestions])
 }
 
+/** The questions of the certification being studied. */
+export function useCertQuestions() {
+  const qs = useQuestions()
+  const cert = useCert()
+  return useMemo(() => inCert(qs, cert), [qs, cert])
+}
+
 function Shell({ section, children }: { section: string; children: ReactNode }) {
   const { status, pending } = useStore()
   const t = useT()
+  const cert = useCert()
   const isActive = (p: string) => (p === '' ? section === '' : section === p)
   return (
     <>
       <a href="#main" className="sr-only">{t.common.skip}</a>
       <header className="topbar">
         <div className="topbar-inner">
-          <a href="#/" className="brand"><span className="brand-mark" aria-hidden="true">CC</span><span className="brand-name">CCDV-F</span></a>
+          <div className="brand">
+            <a href="#/" className="brand-home" aria-label={`${t.common.appName} · ${t.nav.home}`}><span className="brand-mark" aria-hidden="true" style={{ color: cert.tint }}>CC</span></a>
+            <CertSwitcher />
+          </div>
           <nav className="topnav" aria-label={t.nav.main}>
             {[...NAV, { path: 'notes', key: 'notes', icon: 'book' } as const].map((n) => (
               <a key={n.path} href={`#/${n.path}`} aria-current={isActive(n.path) ? 'page' : undefined}>{t.nav[n.key]}</a>
@@ -71,6 +86,7 @@ export default function App() {
   const route = useRoute()
   const t = useT()
   const { authed, hasSnapshot, data } = useStore()
+  const needsPick = useNeedsCertPick()
   useEffect(() => { void checkSession() }, [])
   // Timed attempts that ran out anywhere are closed wherever the app is open
   useEffect(() => {
@@ -84,6 +100,9 @@ export default function App() {
   if (section === 'legal') return <Legal page={id ?? 'aviso'} />
   if (authed === false || isResetPending()) return <AuthView />
   if (authed === null && !hasSnapshot) return <main style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }} aria-busy="true"><p className="muted">{t.common.loading}</p></main>
+
+  // A new account chooses what to prepare before anything else
+  if (needsPick) return <CertPick />
 
   if (section === 'exam' && id) return <ExamView id={id} />
   if (section === 'review' && id) return <ReviewView id={id} index={Number(extra ?? 0)} />

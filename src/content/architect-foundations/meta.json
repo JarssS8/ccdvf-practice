@@ -1,0 +1,17 @@
+{
+ "exam": "architect-foundations",
+ "syncedAt": "2026-11-03T16:18:13.472Z",
+ "factsVerified": "2026-11-01",
+ "counts": {
+  "questions": 92,
+  "flashcards": 62,
+  "guide": 12,
+  "distinct": {
+   "Agentic Architecture & Orchestration": 17,
+   "Claude Code Configuration & Workflows": 17,
+   "Prompt Engineering & Structured Output": 14,
+   "Tool Design & MCP Integration": 14,
+   "Context Management & Reliability": 16
+  }
+ }
+}

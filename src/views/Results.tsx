@@ -3,9 +3,9 @@ import { useQuestions } from '../App'
 import { Icon } from '../components/Icon'
 import { Empty, Meter, ScaleBar, ZoneChip } from '../components/ui'
 import { startAttempt } from '../lib/actions'
-import { attemptTitle, estimate, fmtDate, fmtDuration, isCorrect, pct } from '../lib/engine'
+import { attemptTitle, estimate, fmtDate, fmtDuration, isCorrect, pct, resultOf } from '../lib/engine'
 import { useStore } from '../lib/store'
-import { DOMAINS, EXAM } from '../shared/exam'
+import { SCALE, certById, certOfAttempt } from '../shared/certs'
 import { localize } from '../lib/content'
 import { errorText, useLang, useT } from '../i18n'
 
@@ -20,7 +20,9 @@ export default function Results({ id, timeout }: { id: string; timeout?: boolean
   if (a.status !== 'submitted' || !a.result) {
     return <div className="stack"><h1 className="h-page">{t.results.inProgress}</h1><a className="btn btn-primary" href={`#/exam/${a.id}`} style={{ alignSelf: 'flex-start' }}>{t.common.continue}</a></div>
   }
-  const r = a.result
+  // The attempt's own certification, whichever one is being studied now
+  const cert = certById(certOfAttempt(a))
+  const r = resultOf(a, data, qs) ?? a.result
   const timedOut = timeout || (!!a.deadline && a.submittedAt === a.deadline)
   const repeat = r.fresh < r.total
   const est = estimate(r.correct, r.total)
@@ -39,7 +41,7 @@ export default function Results({ id, timeout }: { id: string; timeout?: boolean
   const headline = !exam || !est ? t.results.done : t.results[est.zone]
 
   // Weakest first, so the list reads as "what to work on"
-  const domainRows = DOMAINS.filter((d) => r.byDomain[d.name])
+  const domainRows = cert.domains.filter((d) => r.byDomain[d.name])
     .map((d) => ({ ...d, t: r.byDomain[d.name] }))
     .sort((x, y) => (1 - y.t.c / y.t.n) * y.weight - (1 - x.t.c / x.t.n) * x.weight)
 
@@ -59,7 +61,7 @@ export default function Results({ id, timeout }: { id: string; timeout?: boolean
         </div>
         <p style={{ fontSize: 18, color: 'var(--ink-2)' }}>
           {t.results.youGot} <strong style={{ color: 'var(--ink)' }}>{t.results.of(r.correct, r.total)}</strong> ({t.common.percent(pct(r.correct, r.total))})
-          {est && exam && <>. {t.results.equals} <strong style={{ color: 'var(--ink)' }}>{est.scaledLo}–{est.scaledHi}</strong> {t.results.outOf(EXAM.scaleMax, EXAM.passScaled)}</>}
+          {est && exam && <>. {t.results.equals} <strong style={{ color: 'var(--ink)' }}>{est.scaledLo}–{est.scaledHi}</strong> {t.results.outOf(SCALE.max, SCALE.pass)}</>}
           {!exam && t.results.drillNoScore}
         </p>
         {est && exam && (
@@ -103,7 +105,7 @@ export default function Results({ id, timeout }: { id: string; timeout?: boolean
         </div>
         <div className="tile tile-pink" style={{ justifyContent: 'space-between', minHeight: 150 }}>
           <span className="small" style={{ fontWeight: 500 }}>{t.results.flaggedBlank}</span>
-          <span><span className="big-number" style={{ display: 'block' }}>{r.flagged} · {r.blank}</span><span className="small">{t.results.realPace((EXAM.minutes / EXAM.items).toFixed(2))}</span></span>
+          <span><span className="big-number" style={{ display: 'block' }}>{r.flagged} · {r.blank}</span><span className="small">{t.results.realPace((cert.minutes / cert.items).toFixed(2))}</span></span>
         </div>
 
         <section className="tile span-2" aria-labelledby="bd-h" style={{ gap: 8 }}>
