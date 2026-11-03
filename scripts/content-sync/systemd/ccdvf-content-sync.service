@@ -1,0 +1,9 @@
+[Unit]
+Description=Claude Cert Practice: bring study-repo changes to exam.jarsss8.es (translate, test, merge, deploy)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env bash "/home/jars/Projects/CLAUDE-CERTIFICATIONS/practice-app/scripts/content-sync/auto.sh"
+TimeoutStartSec=45min
