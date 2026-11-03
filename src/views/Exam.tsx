@@ -63,7 +63,7 @@ function Attempt({ id }: { id: string }) {
         setAnnounce(t.exam.minutesLeft(m))
       }
     }
-    if (remaining <= 0) { submitAttempt(a.id); go(`/results/${a.id}/timeout`, true) }
+    if (remaining <= 0) { void submitAttempt(a.id).catch(() => {}); go(`/results/${a.id}/timeout`, true) }
   }, [remaining, a, t])
 
   useEffect(() => {
@@ -93,7 +93,7 @@ function Attempt({ id }: { id: string }) {
   const flaggedCount = a ? a.questionIds.filter((x) => data.answers[`${a.id}|${x}`]?.flagged).length : 0
 
   const openSubmit = () => submitRef.current?.showModal()
-  const finish = () => { if (!a) return; submitAttempt(a.id); go(`/results/${a.id}`, true) }
+  const finish = () => { if (!a) return; void submitAttempt(a.id).catch(() => {}); go(`/results/${a.id}`, true) }
 
   // Keyboard: 1-5 / A-E choose, ←/→ or J/K move, F flags, Enter checks or advances
   useEffect(() => {

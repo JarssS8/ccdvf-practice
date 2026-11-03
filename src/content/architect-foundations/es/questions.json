@@ -1,0 +1,1014 @@
+{
+ "architect-foundations-practice-1": {
+  "question": "Tu agente de soporte resuelve la mayoría de los tickets, pero a veces entra en un bucle infinito y vuelve a llamar a lookup_order sobre el mismo pedido. ¿Cuál es la corrección estructural adecuada?",
+  "options": {
+   "A": "Aumentar max_tokens para que el bucle tenga margen para terminar",
+   "B": "Eliminar la herramienta lookup_order",
+   "C": "Añadir condiciones explícitas de terminación del bucle: limitar las iteraciones de herramientas, detectar llamadas idénticas repetidas y derivar a escalate_to_human cuando no haya progreso",
+   "D": "Bajar la temperature"
+  },
+  "rationale": "Los bucles de un agente necesitan una terminación diseñada: presupuestos de iteraciones, detección de llamadas repetidas y una vía de escalado cuando el agente no puede avanzar. El presupuesto de tokens (A) solo retrasa el síntoma, eliminar una herramienta necesaria (B) rompe la resolución, y la temperature (D) no acota las iteraciones.",
+  "src": "10nje67"
+ },
+ "architect-foundations-practice-2": {
+  "question": "process_refund acepta ahora cualquier importe. La política de soporte limita los reembolsos iniciados por el agente a 200 $; los mayores requieren a una persona. ¿Dónde debe ir esa regla?",
+  "options": {
+   "A": "En el system prompt, redactada con firmeza",
+   "B": "En el razonamiento del modelo, ya que lee la política",
+   "C": "En la formación trimestral del personal",
+   "D": "Aplicada en la capa de herramientas: la herramienta rechaza los importes por encima del límite con un error estructurado, y un hook o la propia herramienta deriva los casos mayores a escalado"
+  },
+  "rationale": "Los límites estrictos de política se aplican de forma determinista en la frontera de la herramienta, no se le piden al modelo. La redacción del prompt (A) y el razonamiento del modelo (B) son probabilísticos cuando el requisito es absoluto, y la formación (C) no restringe al agente en absoluto.",
+  "src": "1tlcap7"
+ },
+ "architect-foundations-practice-3": {
+  "question": "Tu coordinador delega en subagentes de búsqueda, análisis e informe. Los informes finales citan fuentes que no respaldan sus afirmaciones, aunque cada subagente se comporta con sensatez por separado. ¿Cuál es la causa arquitectónica más probable?",
+  "options": {
+   "A": "Se pierde la procedencia en los traspasos: los hallazgos y sus fuentes no se pasan juntos de forma estructurada, así que el redactor del informe empareja afirmaciones y citas a ojo",
+   "B": "El modelo del subagente de informes es demasiado pequeño",
+   "C": "La web no es fiable",
+   "D": "Hay demasiados subagentes ejecutándose en paralelo"
+  },
+  "rationale": "En pipelines multiagente, la procedencia solo sobrevive si el formato de traspaso lleva juntas la afirmación y la fuente. Ese modo de fallo produce exactamente este síntoma mientras cada etapa parece correcta por sí sola. El tamaño del modelo (B), la calidad de las fuentes (C) y el paralelismo (D) no explican hechos correctos emparejados con citas erróneas.",
+  "src": "18vqm3y"
+ },
+ "architect-foundations-practice-4": {
+  "question": "El subagente de análisis devuelve al coordinador volcados de documentos de 30.000 tokens, y este falla por los límites de contexto. ¿Cuál es la corrección adecuada?",
+  "options": {
+   "A": "Darle al coordinador una ventana de contexto mayor",
+   "B": "Hacer que los subagentes devuelvan extractos estructurados, hallazgos con citas y nivel de confianza, mientras los documentos completos permanecen en el contexto del subagente o en un archivo scratchpad",
+   "C": "Hacer que el coordinador descarte en silencio los mensajes más antiguos",
+   "D": "Ejecutar el análisis dos veces y quedarse con la respuesta más corta"
+  },
+  "rationale": "El aislamiento de contexto es el sentido de delegar en subagentes: el volumen bruto se queda en la periferia y viajan los resultados destilados. Una ventana mayor (A) pospone el fallo, descartar en silencio (C) pierde información arbitraria, y repetir la ejecución (D) no cambia nada estructural.",
+  "src": "12hd80t"
+ },
+ "architect-foundations-practice-5": {
+  "question": "Tu monorepo tiene directorios de frontend y backend con convenciones distintas, y una regla de todo el equipo sobre el estilo de los commits. ¿Dónde va cada parte de la configuración?",
+  "options": {
+   "A": "Todo en un único CLAUDE.md en la raíz",
+   "B": "En el CLAUDE.md personal, a nivel de usuario, de cada ingeniero",
+   "C": "La regla de commits en el CLAUDE.md a nivel de proyecto; las convenciones de cada área en reglas con alcance por ruta bajo .claude/rules/, que se cargan solo cuando se tocan los archivos correspondientes",
+   "D": "Una página de wiki enlazada desde el README"
+  },
+  "rationale": "La jerarquía existe precisamente para esto: reglas compartidas a nivel de proyecto y convenciones condicionales con alcance por ruta, de modo que el contexto solo se gasta donde es relevante. Un único archivo raíz (A) lo carga todo en todas partes, los archivos personales (B) divergen entre ingenieros, y una wiki (D) nunca llega al modelo.",
+  "src": "1cmpw71"
+ },
+ "architect-foundations-practice-6": {
+  "question": "Tu job de CI ejecuta Claude Code para revisar pull requests, y el pipeline debe analizar los resultados de forma mecánica. ¿Qué invocación es la correcta?",
+  "options": {
+   "A": "Modo interactivo, con una persona copiando la salida al CI",
+   "B": "Plan mode, que es más seguro para la automatización",
+   "C": "Un script de shell que hace grep sobre la transcripción legible por humanos",
+   "D": "Modo no interactivo con -p, con --output-format json y un schema, de modo que la revisión llegue como salida legible por máquina y validada"
+  },
+  "rationale": "El uso headless en CI es para lo que sirve -p con salida JSON y un schema: invocación determinista y resultados analizables. Un human-in-the-loop (A) no es CI, plan mode (B) es una puerta de revisión para el trabajo interactivo y no un formato de salida, y hacer grep sobre prosa (C) se rompe con el primer cambio de redacción.",
+  "src": "12c6aj5"
+ },
+ "architect-foundations-practice-7": {
+  "question": "El revisor automático señala decenas de detalles de estilo triviales por pull request, y los ingenieros han empezado a ignorarlo. ¿Qué cambio aborda el problema de los falsos positivos como sugiere el blueprint?",
+  "options": {
+   "A": "Definir criterios de revisión explícitos en el prompt: qué señalar, qué ignorar y un umbral de severidad, con algunos ejemplos resueltos de hallazgos dentro y fuera del alcance",
+   "B": "Ejecutar la revisión dos veces y publicar solo los hallazgos que aparezcan en ambas",
+   "C": "Limitar al revisor a tres hallazgos por pull request",
+   "D": "Enviar todos los hallazgos a un canal que nadie lee"
+  },
+  "rationale": "La precisión viene de criterios explícitos y ejemplos few-shot que trazan la frontera entre señal y ruido. Ejecutar dos veces (B) filtra el azar pero no el exceso sistemático de detalles menores, un límite arbitrario (C) descarta hallazgos reales en los días malos, y (D) es rendirse.",
+  "src": "xs8bkj"
+ },
+ "architect-foundations-practice-8": {
+  "question": "A las facturas a veces les falta el número de orden de compra, y tu schema de extracción debe manejarlo con honestidad sin dejar de detectar los fallos reales. ¿Cuál es el diseño de schema correcto?",
+  "options": {
+   "A": "Hacer obligatorios todos los campos para que no se pierda nada",
+   "B": "Hacer purchase_order nullable, de modo que la ausencia se registre como null, y validar que esté presente siempre que el tipo de documento lo requiera",
+   "C": "Hacerlo todo opcional para evitar errores de validación",
+   "D": "Hacer que el modelo invente un número plausible cuando falte"
+  },
+  "rationale": "El diseño del schema codifica la realidad: los datos genuinamente opcionales son nullable, y los requisitos condicionales se validan posteriormente. Todo obligatorio (A) fuerza la invención o el fallo en documentos legítimos, todo opcional (C) te impide ver los fallos reales, e inventar (D) es corrupción de datos.",
+  "src": "sas2hi"
+ },
+ "architect-foundations-practice-9": {
+  "question": "Tu pipeline informa de un 98 % de precisión por campo, medida sobre los documentos que el schema validó limpiamente. Un auditor califica la cifra de engañosa. ¿Por qué?",
+  "options": {
+   "A": "La precisión debería medirse solo sobre los documentos más difíciles",
+   "B": "El 98 % está por debajo del estándar de la industria",
+   "C": "Los documentos que validan limpiamente son una muestra sesgada: la medida honesta sale de una muestra etiquetada tomada de todos los documentos, incluidos los que fallaron la validación o la pasaron por poco",
+   "D": "La precisión por campo no es una métrica real"
+  },
+  "rationale": "Medir solo donde el sistema ya tuvo éxito infla la estimación; la calibración exige una muestra etiquetada representativa de todo el flujo de entrada. Solo los más difíciles (A) sesga en el sentido contrario, el supuesto estándar (B) es inventado, y (D) es falso.",
+  "src": "1v8xm4e"
+ },
+ "architect-foundations-practice-10": {
+  "question": "Tu agente de exploración de código tiene las herramientas get_file_contents, read_source y fetch_file, que leen archivos, y con frecuencia elige mal entre ellas. ¿Cuál es la corrección adecuada?",
+  "options": {
+   "A": "Añadir una cuarta herramienta de lectura de archivos, mejor",
+   "B": "Hacer fine-tuning del modelo con la lista de herramientas",
+   "C": "Aleatorizar qué herramienta despacha el harness",
+   "D": "Consolidar en una sola herramienta de lectura de archivos, o dar a las que sobrevivan descripciones nítidamente diferenciadas que indiquen exactamente cuándo se aplica cada una"
+  },
+  "rationale": "La selección de herramientas se basa en las descripciones; las herramientas solapadas con descripciones vagas generan vacilación. Consolidar o diferenciar con nitidez es la cura documentada. Añadir solapamiento (A) lo empeora, el fine-tuning (B) es desproporcionado, y la aleatorización (C) institucionaliza la confusión.",
+  "src": "1rd9ukl"
+ },
+ "architect-foundations-practice-11": {
+  "question": "Un workflow de soporte resuelve tickets buscando una cuenta, comprobando el derecho a la prestación y redactando una respuesta, siempre en ese orden. ¿Qué arquitectura es la correcta?",
+  "options": {
+   "A": "Un pipeline determinista que llama al modelo en cada paso definido",
+   "B": "Un único agente que decide cada paso en tiempo de ejecución",
+   "C": "Tres agentes que negocian el orden entre ellos",
+   "D": "Un solo prompt que contenga los tres pasos"
+  },
+  "rationale": "Una secuencia conocida y fija debe codificarse en lugar de redescubrirse en cada ejecución, lo que la hace más barata, más rápida y comprobable paso a paso. Las decisiones en tiempo de ejecución (B, C) añaden no determinismo sin beneficio, y un solo prompt (D) elimina los puntos de control entre pasos.",
+  "src": "11vkmpe"
+ },
+ "architect-foundations-practice-12": {
+  "question": "¿Cuál es la justificación más sólida para repartir el trabajo entre subagentes?",
+  "options": {
+   "A": "La tarea tiene muchos pasos",
+   "B": "Líneas de trabajo separadas necesitan cada una su propio contexto, y mezclarlas degrada ambas",
+   "C": "Los subagentes son más rápidos que un solo agente",
+   "D": "La salida debe ensamblarse a partir de varias secciones"
+  },
+  "rationale": "Los subagentes existen para aislar contexto, así que el argumento a su favor es la contaminación entre asuntos distintos y no el volumen. El número de pasos (A) y la salida por secciones (D) encajan con un workflow, y delegar suele añadir latencia en lugar de quitarla (C).",
+  "src": "izgjxg"
+ },
+ "architect-foundations-practice-13": {
+  "question": "Un agente entra en un bucle entre dos herramientas sin converger. ¿Cuál es el primer control más adecuado?",
+  "options": {
+   "A": "Aumentar la ventana de contexto para que vea más historial",
+   "B": "Cambiar a un modelo mayor",
+   "C": "Imponer un límite máximo de pasos y definir explícitamente la condición de terminación",
+   "D": "Eliminar una de las dos herramientas"
+  },
+  "rationale": "La no terminación se acota con una condición de parada explícita y un tope estricto, que contiene el coste y hace visible el fallo. Más contexto (A) y un modelo mayor (B) no garantizan la convergencia, y eliminar una herramienta (D) puede romper la tarea.",
+  "src": "1rpd8qs"
+ },
+ "architect-foundations-practice-14": {
+  "question": "¿Qué propiedad aumenta más el riesgo operativo de un diseño agéntico?",
+  "options": {
+   "A": "Llama a más de un modelo",
+   "B": "Produce salida estructurada",
+   "C": "Se ejecuta durante más de un minuto",
+   "D": "Realiza acciones irreversibles sin un punto de control"
+  },
+  "rationale": "La reversibilidad determina el coste de equivocarse, que es el riesgo dominante en la ejecución autónoma. Varios modelos (A), la estructura (B) y la duración (C) afectan al coste y a la complejidad, no al radio de impacto.",
+  "src": "153b35k"
+ },
+ "architect-foundations-practice-15": {
+  "question": "¿Cómo debe tratar un sistema agéntico un paso cuyo resultado no puede verificar?",
+  "options": {
+   "A": "Presentar el paso no verificable a confirmación humana antes de actuar sobre él",
+   "B": "Continuar, ya que el modelo suele acertar",
+   "C": "Reintentar el paso hasta que dos ejecuciones coincidan",
+   "D": "Registrar el paso y continuar"
+  },
+  "rationale": "Un resultado no verificable es exactamente donde corresponde el criterio humano, antes de actuar sobre él. Dar por correcto (B) y registrar sin detenerse (D) actúan ambos sobre una salida sin comprobar, y la coincidencia entre ejecuciones (C) establece consistencia, no verdad.",
+  "src": "18gtdnp"
+ },
+ "architect-foundations-practice-16": {
+  "question": "Un equipo propone un agente para una tarea en la que toda entrada está bien formada y todas las reglas son conocidas. ¿Qué debería recomendar el arquitecto?",
+  "options": {
+   "A": "Un agente, por flexibilidad futura",
+   "B": "Una implementación determinista, reservando las llamadas al modelo para las partes genuinamente ambiguas",
+   "C": "Un agente con un límite bajo de pasos",
+   "D": "Un diseño multiagente para separar responsabilidades"
+  },
+  "rationale": "Reglas conocidas sobre entrada bien formada son código, y usar un modelo ahí compra no determinismo a cambio de un precio. La flexibilidad especulativa (A), un agente restringido (C) y varios agentes (D) mantienen el coste sin la necesidad.",
+  "src": "1m689da"
+ },
+ "architect-foundations-practice-17": {
+  "question": "¿Qué mejora más la depurabilidad de un sistema agéntico en producción?",
+  "options": {
+   "A": "Reducir el número de herramientas",
+   "B": "Usar un único modelo en todos los pasos",
+   "C": "Registrar como traza las entradas, las llamadas a herramientas y las salidas de cada paso",
+   "D": "Aumentar el límite de pasos"
+  },
+  "rationale": "Una traza por paso es lo que permite reconstruir a posteriori una ejecución no determinista. Menos herramientas (A) y un solo modelo (B) simplifican sin explicar, y un tope más alto (D) alarga los fallos en lugar de aclararlos.",
+  "src": "1cxp2h9"
+ },
+ "architect-foundations-practice-18": {
+  "question": "¿Dónde deben registrarse las convenciones que se aplican a todas las personas que trabajan en un repositorio?",
+  "options": {
+   "A": "En la configuración personal de cada desarrollador",
+   "B": "En la plantilla de pull request",
+   "C": "En un mensaje fijado en el chat",
+   "D": "En un CLAUDE.md versionado en el repositorio"
+  },
+  "rationale": "La memoria de proyecto versionada está bajo control de versiones, es revisable y compartida, que es lo que exige una convención de equipo. La configuración personal (A) no se propaga, y las plantillas (B) y los mensajes (C) no se leen como contexto de trabajo.",
+  "src": "1kk6xts"
+ },
+ "architect-foundations-practice-19": {
+  "question": "¿Qué distingue al trabajo apto para el modo headless?",
+  "options": {
+   "A": "Está bien definido y es repetible, por lo que puede ejecutarse sin supervisión en automatización",
+   "B": "Es complejo y necesita una supervisión cercana",
+   "C": "Requiere muchas herramientas",
+   "D": "Produce una salida larga"
+  },
+  "rationale": "La ejecución headless encaja con trabajo acotado y repetible en el que nadie está mirando. La supervisión (B) apunta al uso interactivo, y el número de herramientas (C) y la longitud de la salida (D) no determinan la idoneidad.",
+  "src": "zwibzl"
+ },
+ "architect-foundations-practice-20": {
+  "question": "Una skill y un subagente podrían cubrir una misma necesidad. ¿Qué decide entre ellos?",
+  "options": {
+   "A": "Las skills siempre son preferibles",
+   "B": "Si la necesidad es un saber hacer reutilizable o una línea de trabajo aislada con su propio contexto",
+   "C": "Si la tarea es larga",
+   "D": "Si el repositorio ya tiene un CLAUDE.md"
+  },
+  "rationale": "Ambos resuelven problemas distintos: una skill empaqueta un procedimiento reutilizable, un subagente aísla el contexto. Una preferencia general (A), la duración (C) y los archivos existentes (D) no abordan esa distinción.",
+  "src": "1ndlrp7"
+ },
+ "architect-foundations-practice-21": {
+  "question": "¿Cuál es el uso correcto de un hook en un workflow de Claude Code?",
+  "options": {
+   "A": "Contener instrucciones que el modelo debe seguir",
+   "B": "Almacenar el contexto del proyecto",
+   "C": "Imponer una acción determinista en un punto definido, con independencia del modelo",
+   "D": "Definir qué modelo se usa"
+  },
+  "rationale": "Los hooks se ejecutan como código en puntos fijos, así que imponen en lugar de solicitar. Las instrucciones (A) y el contexto (B) pertenecen a la memoria del proyecto, y la elección de modelo (D) es configuración.",
+  "src": "1k8e4t2"
+ },
+ "architect-foundations-practice-22": {
+  "question": "Claude Code rinde bien para un ingeniero y de forma irregular en el resto del equipo. ¿Cuál es la causa más probable?",
+  "options": {
+   "A": "Los demás necesitan máquinas más potentes",
+   "B": "El repositorio es demasiado grande",
+   "C": "Los demás usan terminales distintas",
+   "D": "Las convenciones de trabajo viven en la configuración local de una persona en lugar de en el repositorio"
+  },
+  "rationale": "El contexto que no se versiona no viaja, lo que produce exactamente esta asimetría. El hardware (A), el tamaño del repositorio (B) y la elección de terminal (C) no explican una diferencia en la calidad de la salida.",
+  "src": "36xdwy"
+ },
+ "architect-foundations-practice-23": {
+  "question": "Un pipeline exige una salida que siempre valide contra un schema. ¿Cuál es el enfoque correcto?",
+  "options": {
+   "A": "Declarar el schema como una herramienta que el modelo debe llamar y validar al recibir",
+   "B": "Pedir el schema en el prompt y validar después",
+   "C": "Pedir JSON y reparar en código la salida malformada",
+   "D": "Usar una temperature más baja"
+  },
+  "rationale": "Un schema declarado hace que la estructura forme parte del contrato en lugar de ser una petición, y validar al recibir cierra el ciclo. Pedirlo en el prompt (B), reparar a posteriori (C) y la temperature (D) dejan la forma al azar.",
+  "src": "1lq7pbv"
+ },
+ "architect-foundations-practice-24": {
+  "question": "La extracción es precisa en los casos comunes y falla con formatos poco habituales. ¿Cuál es la respuesta más eficaz?",
+  "options": {
+   "A": "Subir la temperature para fomentar la flexibilidad",
+   "B": "Añadir ejemplos que cubran los formatos poco habituales y definir qué devolver cuando falta un campo",
+   "C": "Cambiar a un modelo mayor",
+   "D": "Pedirle al modelo que se esfuerce más con las entradas inusuales"
+  },
+  "rationale": "Los casos raros fallan porque no están especificados, y los ejemplos junto con una regla explícita para el campo ausente los especifican. La temperature (A) añade variación, un modelo mayor (C) no apunta a la laguna, y la exhortación (D) no es una especificación.",
+  "src": "dzr8b5"
+ },
+ "architect-foundations-practice-25": {
+  "question": "¿Qué debe definir un schema para un campo que el documento de origen puede no contener?",
+  "options": {
+   "A": "Nada, ya que el modelo lo omitirá",
+   "B": "Un valor por defecto que parezca plausible",
+   "C": "Una representación explícita de la ausencia, de modo que un valor ausente se distinga de uno sin rellenar",
+   "D": "Un campo de texto libre para notas"
+  },
+  "rationale": "La ausencia debe poder representarse, o el código posterior no distinguirá un vacío genuino de un fallo. La omisión silenciosa (A) es ambigua, los valores por defecto plausibles (B) fabrican datos, y un campo de notas (D) no hace el estado legible por máquina.",
+  "src": "rhgimu"
+ },
+ "architect-foundations-practice-26": {
+  "question": "¿Qué práctica mejora más la consistencia en un trabajo largo de extracción estructurada?",
+  "options": {
+   "A": "Aleatorizar el orden de los documentos",
+   "B": "Aumentar el límite de tokens de salida",
+   "C": "Ejecutar cada documento dos veces",
+   "D": "Fijar el prompt, el schema y la versión del modelo, y registrarlos junto con la salida"
+  },
+  "rationale": "La consistencia requiere que lo que da forma a la salida esté fijado y registrado, de modo que los resultados sigan siendo comparables y reproducibles. El orden (A) es irrelevante, el límite de tokens (B) afecta a la longitud, y las ejecuciones duplicadas (C) miden la varianza sin eliminarla.",
+  "src": "13k3cf1"
+ },
+ "architect-foundations-practice-27": {
+  "question": "Un prompt mezcla la instrucción, los datos y el formato de salida en prosa continua. ¿Cuál es la primera mejora?",
+  "options": {
+   "A": "Separar las secciones para que la instrucción, la entrada y el formato requerido sean distinguibles",
+   "B": "Acortarlo",
+   "C": "Moverlo al system prompt",
+   "D": "Añadir énfasis al requisito de formato"
+  },
+  "rationale": "La estructura permite al modelo distinguir la instrucción de los datos, que es la fuente más común de confusión en prompts largos. Acortar (B) puede eliminar detalle necesario, reubicar (C) no aclara, y el énfasis (D) no separa.",
+  "src": "1jlsull"
+ },
+ "architect-foundations-practice-28": {
+  "question": "¿Cuál es el indicador más claro de que la superficie de herramientas necesita un rediseño?",
+  "options": {
+   "A": "Contiene más de diez herramientas",
+   "B": "El modelo selecciona con regularidad una herramienta que no puede cumplir la petición",
+   "C": "Las herramientas devuelven JSON",
+   "D": "Las herramientas están implementadas en varios servicios"
+  },
+  "rationale": "La selección errónea repetida es la prueba de que las herramientas no se distinguen por sus descripciones, lo cual es un fallo de diseño. El número de herramientas (A), el formato de retorno (C) y la topología de implementación (D) no son problemas en sí mismos.",
+  "src": "17ie24d"
+ },
+ "architect-foundations-practice-29": {
+  "question": "¿Cómo debe diseñarse una herramienta que realiza una acción irreversible?",
+  "options": {
+   "A": "Con una descripción que advierta al modelo de que tenga cuidado",
+   "B": "De modo que requiera más parámetros",
+   "C": "De modo que la autorización y la confirmación se apliquen fuera del modelo",
+   "D": "De modo que se declare la última"
+  },
+  "rationale": "La irreversibilidad la controla el sistema que la rodea, porque una advertencia en el prompt es una petición y no una garantía. Los parámetros adicionales (B) y el orden (D) no restringen la autoridad.",
+  "src": "172rb0g"
+ },
+ "architect-foundations-practice-30": {
+  "question": "Una herramienta devuelve un payload grande que consume la mayor parte de la ventana de contexto. ¿Cuál es el cambio adecuado?",
+  "options": {
+   "A": "Aumentar la ventana de contexto",
+   "B": "Resumir el payload con una segunda llamada a un modelo",
+   "C": "Llamar a la herramienta con menos frecuencia",
+   "D": "Devolver solo lo que la tarea necesita, con una forma de pedir más detalle"
+  },
+  "rationale": "Las herramientas deben devolver resultados relevantes para la tarea en lugar de todo lo disponible, lo que conserva contexto para razonar. Una ventana mayor (A) pospone el problema, una segunda llamada (B) añade coste y un punto de fallo, y llamar con menos frecuencia (C) no cambia el payload.",
+  "src": "rceped"
+ },
+ "architect-foundations-practice-31": {
+  "question": "¿Qué debe incluir la descripción de una herramienta?",
+  "options": {
+   "A": "Qué hace la herramienta, cuándo usarla y qué significan sus parámetros",
+   "B": "El lenguaje de implementación y el framework",
+   "C": "El acuerdo de nivel de servicio",
+   "D": "El nombre del equipo responsable"
+  },
+  "rationale": "La descripción es la guía de selección del modelo, así que debe responder a la finalidad, la aplicabilidad y los parámetros. Los detalles de implementación (B), los niveles de servicio (C) y la titularidad (D) son irrelevantes para la elección.",
+  "src": "ebbuvq"
+ },
+ "architect-foundations-practice-32": {
+  "question": "Una ejecución agéntica larga pierde calidad a medida que avanza. ¿Cuál es la causa más probable?",
+  "options": {
+   "A": "La versión del modelo cambió a mitad de la ejecución",
+   "B": "El contexto se ha ido acumulando hasta que el material relevante compite con material obsoleto",
+   "C": "La temperature se fijó demasiado baja",
+   "D": "Las herramientas se volvieron más lentas"
+  },
+  "rationale": "La degradación progresiva a lo largo de una ejecución larga es la firma de la acumulación y la deriva del contexto. Las versiones no cambian a mitad de ejecución (A), una temperature baja (C) reduce la variedad, no la calidad, y la latencia de las herramientas (D) no afecta a la corrección.",
+  "src": "z4txf8"
+ },
+ "architect-foundations-practice-33": {
+  "question": "¿Cuál es la forma correcta de llevar el estado a través de un límite de compactación?",
+  "options": {
+   "A": "Confiar en que el modelo recuerde lo que importaba",
+   "B": "Aumentar la ventana de contexto para que nunca haga falta compactar",
+   "C": "Escribir las decisiones y restricciones que deben persistir en un resumen explícito que se arrastra hacia adelante",
+   "D": "Reiniciar la tarea tras la compactación"
+  },
+  "rationale": "La persistencia debe ser deliberada, porque la compactación pierde información por diseño. Confiar en el recuerdo (A) no es fiable, una ventana mayor (B) solo retrasa el límite, y reiniciar (D) descarta el trabajo hecho.",
+  "src": "1eo8kr"
+ },
+ "architect-foundations-practice-34": {
+  "question": "¿Qué medida mejora más la fiabilidad de un workflow que no debe producir en silencio una salida errónea?",
+  "options": {
+   "A": "Un modelo mayor",
+   "B": "Un prompt más largo",
+   "C": "Más ejemplos en el prompt",
+   "D": "Un paso de validación que pueda rechazar la salida y activar un fallback definido"
+  },
+  "rationale": "La fiabilidad frente al fallo silencioso requiere detección y una respuesta definida, que es lo que aporta la validación con un fallback. El tamaño del modelo (A), la longitud del prompt (B) y los ejemplos (C) mejoran el caso medio sin atrapar el malo.",
+  "src": "14d3rq6"
+ },
+ "architect-foundations-practice-35": {
+  "question": "¿Qué debe medirse para saber si un sistema agéntico en producción está sano?",
+  "options": {
+   "A": "El éxito de las tareas frente a un criterio definido, más la tasa y la forma de los fallos",
+   "B": "El total de tokens consumidos",
+   "C": "El tiempo medio de respuesta",
+   "D": "El número de llamadas a herramientas por ejecución"
+  },
+  "rationale": "La salud se define por si el sistema cumple la tarea y cómo falla cuando no lo hace. Los tokens (B), la latencia (C) y el número de llamadas (D) son señales de coste y de comportamiento que no dicen nada sobre la corrección.",
+  "src": "x57fqf"
+ },
+ "architect-foundations-mock1-1": {
+  "question": "El agente a veces responde preguntas de facturación usando un pedido que consultó tres turnos antes para un cliente distinto. ¿Cuál es la corrección arquitectónica?",
+  "options": {
+   "A": "Aumentar la ventana de contexto",
+   "B": "Acotar el contexto de cada conversación a un único cliente y borrar o aislar las consultas previas cuando cambie el sujeto",
+   "C": "Eliminar la herramienta lookup_order",
+   "D": "Indicar al modelo que tenga cuidado con la identidad del cliente"
+  },
+  "rationale": "La contaminación entre clientes es un defecto de acotación del contexto, no un problema del tamaño de la ventana",
+  "src": "1x50tu"
+ },
+ "architect-foundations-mock1-2": {
+  "question": "process_refund falla de forma intermitente porque el backend de facturación agota el tiempo de espera. ¿Qué debe devolver la herramienta para que el agente se comporte con sensatez?",
+  "options": {
+   "A": "Una cadena vacía",
+   "B": "Un mensaje pidiendo al usuario que lo intente más tarde",
+   "C": "Un error estructurado con una categoría y un indicador de reintentable, de modo que el agente pueda reintentar o escalar de forma deliberada",
+   "D": "El stack trace de la excepción"
+  },
+  "rationale": "Los errores estructurados con categorías e indicadores de reintentable son lo que permite a un agente recuperarse de forma deliberada",
+  "src": "724t0z"
+ },
+ "architect-foundations-mock1-3": {
+  "question": "¿Qué condición debe derivar un ticket a escalate_to_human en lugar de continuar con la resolución autónoma?",
+  "options": {
+   "A": "El cliente escribe en un idioma que el agente soporta",
+   "B": "El pedido tiene más de treinta días",
+   "C": "La conversación supera los cinco turnos",
+   "D": "La petición queda fuera de la política documentada, o el agente no logra avanzar tras un número acotado de intentos"
+  },
+  "rationale": "Los huecos de política y la falta de progreso son los desencadenantes de escalado documentados; el número de turnos y la antigüedad del pedido no lo son",
+  "src": "ibqrt2"
+ },
+ "architect-foundations-mock1-4": {
+  "question": "El agente a veces llama a get_customer cuando debería llamar a lookup_order. ¿Cuál es el cambio más eficaz?",
+  "options": {
+   "A": "Reescribir ambas descripciones de herramienta para que cada una indique con precisión cuándo se aplica y en qué se diferencia de la otra",
+   "B": "Reordenar las herramientas en la configuración",
+   "C": "Fusionarlas en una sola herramienta con un indicador de modo",
+   "D": "Aumentar la temperature del modelo"
+  },
+  "rationale": "La selección de herramientas se basa en las descripciones, así que la diferenciación es la corrección para la confusión entre herramientas similares",
+  "src": "1dwzsj9"
+ },
+ "architect-foundations-mock1-5": {
+  "question": "Las convenciones de backend deben aplicarse solo cuando se tocan archivos de backend. ¿Dónde les corresponde estar?",
+  "options": {
+   "A": "En el CLAUDE.md raíz para que estén siempre disponibles",
+   "B": "En una regla con alcance por ruta bajo .claude/rules/ con un frontmatter que coincida con las rutas de backend",
+   "C": "En la configuración a nivel de usuario de cada ingeniero",
+   "D": "En la wiki del repositorio"
+  },
+  "rationale": "Las reglas con alcance por ruta se cargan de forma condicional, que es exactamente el requisito planteado",
+  "src": "pl7897"
+ },
+ "architect-foundations-mock1-6": {
+  "question": "¿Cuándo es plan mode la opción adecuada frente a la ejecución directa?",
+  "options": {
+   "A": "Para todo cambio, ya que planificar siempre es más seguro",
+   "B": "Solo cuando el modelo no conoce el lenguaje",
+   "C": "Cuando el cambio es lo bastante grande o arriesgado como para que una persona revise el enfoque antes de hacer ediciones",
+   "D": "Cuando la ventana de contexto está casi llena"
+  },
+  "rationale": "Plan mode es una puerta de revisión humana del enfoque, justificada por el riesgo y no de forma universal",
+  "src": "7kbpu2"
+ },
+ "architect-foundations-mock1-7": {
+  "question": "Un procedimiento de revisión repetido de varios pasos debe estar disponible para todo el equipo como una única invocación. ¿Cuál es el mecanismo adecuado?",
+  "options": {
+   "A": "Un documento compartido que describa los pasos",
+   "B": "Un CLAUDE.md más largo",
+   "C": "Una transcripción de chat guardada",
+   "D": "Un comando slash personalizado o una skill versionados en el repositorio"
+  },
+  "rationale": "Los procedimientos repetibles de equipo pertenecen a comandos o skills versionados, no a prosa",
+  "src": "d1pfir"
+ },
+ "architect-foundations-mock1-8": {
+  "question": "Los subagentes devuelven documentos fuente completos al coordinador, que entonces supera su límite de contexto. ¿Cuál es el cambio de diseño correcto?",
+  "options": {
+   "A": "Hacer que los subagentes devuelvan hallazgos estructurados con citas mientras las fuentes en bruto permanecen en la periferia o en un scratchpad",
+   "B": "Darle al coordinador un modelo mayor",
+   "C": "Reducir el número de subagentes a uno",
+   "D": "Truncar cada documento a su primera página"
+  },
+  "rationale": "La delegación existe para mantener el volumen en la periferia y mover resultados destilados",
+  "src": "18pl62m"
+ },
+ "architect-foundations-mock1-9": {
+  "question": "Los informes finales atribuyen afirmaciones a las fuentes equivocadas aunque cada subagente es preciso por separado. ¿Cuál es la causa probable?",
+  "options": {
+   "A": "El modelo de síntesis es demasiado pequeño",
+   "B": "El formato de traspaso no lleva juntas la afirmación y la fuente, de modo que se pierde la procedencia entre etapas",
+   "C": "El subagente de búsqueda devuelve demasiados resultados",
+   "D": "Los informes se generan antes de que termine el análisis"
+  },
+  "rationale": "La procedencia sobrevive a los traspasos solo cuando el formato lleva juntas la afirmación y la fuente",
+  "src": "q6yxlt"
+ },
+ "architect-foundations-mock1-10": {
+  "question": "Un subagente falla de forma permanente con una fuente. ¿Qué debe recibir el coordinador?",
+  "options": {
+   "A": "Nada, para que el informe siga adelante",
+   "B": "Un bucle de reintentos silencioso hasta que lo consiga",
+   "C": "Un error propagado con contexto suficiente para decidir entre reintentar, excluir la fuente dejando constancia del hueco o abortar",
+   "D": "Un indicador genérico de fallo sin detalle"
+  },
+  "rationale": "Los errores deben propagarse con contexto suficiente para que el coordinador elija una vía de recuperación",
+  "src": "1i9glnd"
+ },
+ "architect-foundations-mock1-11": {
+  "question": "El revisor debe emitir resultados que un pipeline pueda analizar. ¿Qué invocación es la correcta?",
+  "options": {
+   "A": "Sesión interactiva con la salida redirigida a un log",
+   "B": "Plan mode con un paso de aprobación",
+   "C": "Un cron job que envía la transcripción por correo",
+   "D": "Modo print no interactivo con salida JSON y un schema"
+  },
+  "rationale": "El CI requiere una invocación no interactiva con salida estructurada y validada contra un schema",
+  "src": "1p2uwk0"
+ },
+ "architect-foundations-mock1-12": {
+  "question": "Las revisiones señalan muchos detalles de estilo de poco valor y los ingenieros ya los ignoran. ¿Qué cambio resuelve esto?",
+  "options": {
+   "A": "Definir en el prompt criterios de revisión explícitos y un umbral de severidad, con ejemplos de hallazgos dentro y fuera del alcance",
+   "B": "Publicar los hallazgos en un canal aparte",
+   "C": "Ejecutar la revisión solo en pull requests grandes",
+   "D": "Limitar la salida a cinco hallazgos"
+  },
+  "rationale": "La precisión viene de criterios explícitos y ejemplos que trazan el límite de la señal",
+  "src": "145b244"
+ },
+ "architect-foundations-mock1-13": {
+  "question": "Algunas facturas carecen legítimamente de fecha de entrega. ¿Cómo debería expresarlo el esquema?",
+  "options": {
+   "A": "Hacer el campo obligatorio y dejar que la extracción falle",
+   "B": "Hacer el campo nullable para que la ausencia quede registrada explícitamente, con validación condicional donde el tipo de documento lo exija",
+   "C": "Omitir el campo del esquema",
+   "D": "Asignarle por defecto la fecha de hoy"
+  },
+  "rationale": "Los campos nullable registran la ausencia legítima; los campos obligatorios fuerzan la invención de datos o el fallo",
+  "src": "1mrc943"
+ },
+ "architect-foundations-mock1-14": {
+  "question": "¿Qué bucle ofrece la salida de extracción más fiable?",
+  "options": {
+   "A": "Generar y después revisar manualmente cada registro",
+   "B": "Generar tres veces y quedarse con la mayoría",
+   "C": "Imponer un esquema JSON mediante tool use, validar y, si falla, reintentar proporcionando al modelo el error de validación",
+   "D": "Generar con temperature cero y aceptar el resultado"
+  },
+  "rationale": "La imposición de esquema junto con un bucle de validación y reintento es el patrón de fiabilidad que describe la guía",
+  "src": "lhbsd9"
+ },
+ "architect-foundations-mock1-15": {
+  "question": "Tu equipo informa de un 97 % de precisión medida solo sobre los registros que pasaron la validación. ¿Por qué es engañosa esa cifra?",
+  "options": {
+   "A": "La precisión debería medirse por campo, no por registro",
+   "B": "Un 97 % es demasiado bajo para reportarlo",
+   "C": "La validación y la precisión no guardan relación",
+   "D": "Excluye los fallos, de modo que mide dónde el sistema ya acierta en lugar de la tasa real sobre todos los documentos"
+  },
+  "rationale": "Medir solo los registros validados es una muestra sesgada; la calibración necesita cubrir todos los documentos",
+  "src": "gd4q25"
+ },
+ "architect-foundations-mock2-1": {
+  "question": "Un pipeline tiene cuatro pasos cuyo orden nunca varía y cuyas salidas se pueden comprobar una a una. ¿Qué debería ser?",
+  "options": {
+   "A": "Un agente que planifica cada ejecución",
+   "B": "Cuatro agentes, uno por paso",
+   "C": "Un workflow determinista con llamadas al modelo en puntos definidos",
+   "D": "Un único prompt que cubra los cuatro pasos"
+  },
+  "rationale": "Un orden fijo conocido se codifica en lugar de redescubrirse, lo que es más barato y se puede probar paso a paso. La planificación en tiempo de ejecución (A, B) añade no determinismo, y un solo prompt (D) elimina los puntos de control",
+  "src": "ts14e9"
+ },
+ "architect-foundations-mock2-2": {
+  "question": "¿Cuál es el coste principal de introducir un subagente?",
+  "options": {
+   "A": "Pierde el contexto que tenía el agente padre, salvo que el traspaso lo transmita de forma explícita",
+   "B": "Requiere un modelo más grande",
+   "C": "No puede usar herramientas",
+   "D": "Duplica el coste en tokens en todos los casos"
+  },
+  "rationale": "Delegar aporta aislamiento y se paga en contexto, por lo que los traspasos deben ser explícitos. Un subagente no requiere un modelo más grande (B), puede usar herramientas (C) y el coste varía según el trabajo (D)",
+  "src": "1xjz0k0"
+ },
+ "architect-foundations-mock2-3": {
+  "question": "Un paso autónomo modificaría datos de producción. ¿Qué exige la arquitectura?",
+  "options": {
+   "A": "Un modelo más capaz",
+   "B": "Un system prompt más largo que describa cautela",
+   "C": "Una política de reintentos",
+   "D": "Un punto de control en el que una persona autorice la acción, o un mecanismo reversible"
+  },
+  "rationale": "Los efectos externos irreversibles necesitan un límite de autorización o reversibilidad, aplicados fuera del modelo. La capacidad (A), la instrucción (B) y los reintentos (C) no acotan la consecuencia",
+  "src": "ub3kd6"
+ },
+ "architect-foundations-mock2-4": {
+  "question": "¿Qué ayuda más a diagnosticar a posteriori un fallo agéntico?",
+  "options": {
+   "A": "Solo la salida final",
+   "B": "Una traza de las entradas, las llamadas a herramientas y las salidas de cada paso",
+   "C": "El recuento total de tokens",
+   "D": "La versión del modelo"
+  },
+  "rationale": "Una traza por paso permite reconstruir una ejecución no determinista, que es lo que necesita el diagnóstico. La salida final (A), los totales de tokens (C) y la versión (D) no muestran dónde se produjo la divergencia",
+  "src": "1pfg4gv"
+ },
+ "architect-foundations-mock2-5": {
+  "question": "¿Dónde deberían vivir las convenciones de todo el repositorio para Claude Code?",
+  "options": {
+   "A": "En la configuración local de cada desarrollador",
+   "B": "En un CLAUDE.md versionado en el repositorio",
+   "C": "En el canal de chat del equipo",
+   "D": "Solo en la configuración de CI"
+  },
+  "rationale": "La memoria de proyecto versionada se comparte, está versionada y se revisa junto con el código. La configuración local (A) no se propaga, el chat (C) no se lee como contexto y la CI (D) cubre la automatización, no el trabajo interactivo",
+  "src": "ixz38f"
+ },
+ "architect-foundations-mock2-6": {
+  "question": "¿Qué tarea encaja mejor con Claude Code en modo headless en CI?",
+  "options": {
+   "A": "Depuración exploratoria de un fallo desconocido",
+   "B": "Diseñar la arquitectura de un módulo nuevo",
+   "C": "Programación en pareja con un desarrollador",
+   "D": "Una comprobación repetible y bien especificada que se ejecuta en cada pull request"
+  },
+  "rationale": "La ejecución headless sirve para trabajo acotado y repetible que se ejecuta sin supervisión. La exploración (A), el diseño (B) y la programación en pareja (C) dependen de un human-in-the-loop",
+  "src": "qu3lob"
+ },
+ "architect-foundations-mock2-7": {
+  "question": "¿Para qué sirve un hook?",
+  "options": {
+   "A": "Ejecutar una acción determinista en un punto definido, con independencia del modelo",
+   "B": "Almacenar instrucciones reutilizables",
+   "C": "Contener el contexto del proyecto",
+   "D": "Seleccionar el modelo"
+  },
+  "rationale": "Los hooks se ejecutan como código en puntos fijos, que es como se hace cumplir una garantía. Las instrucciones (B) y el contexto (C) pertenecen a la memoria de proyecto, y la elección del modelo (D) es configuración",
+  "src": "em9kzr"
+ },
+ "architect-foundations-mock2-8": {
+  "question": "Un pipeline necesita una salida que se ajuste siempre a una forma fija. ¿Cuál es el mecanismo correcto?",
+  "options": {
+   "A": "Pedir la forma en el prompt y parsear el resultado",
+   "B": "Posprocesar la prosa con expresiones regulares",
+   "C": "Declarar la forma como un esquema que el modelo debe cumplir y validar al recibirla",
+   "D": "Bajar la temperature"
+  },
+  "rationale": "Un esquema declarado convierte la forma en un contrato en lugar de una petición, y la validación cierra el bucle. Pedirlo en el prompt (A), parsear texto (B) y la temperature (D) dejan la forma al azar",
+  "src": "1kjemm0"
+ },
+ "architect-foundations-mock2-9": {
+  "question": "¿Cómo debería tratar un esquema un valor que puede no estar en la fuente?",
+  "options": {
+   "A": "Omitir el campo en silencio",
+   "B": "Proporcionar un valor por defecto verosímil",
+   "C": "Devolver una cadena vacía en todos los casos",
+   "D": "Definir una representación explícita de la ausencia"
+  },
+  "rationale": "La ausencia debe poder representarse para distinguir un hueco real de un fallo. La omisión silenciosa (A) es ambigua, un valor por defecto verosímil (B) inventa datos y una cadena vacía (C) confunde la ausencia con un valor vacío",
+  "src": "27xnfo"
+ },
+ "architect-foundations-mock2-10": {
+  "question": "La extracción funciona con entradas típicas y falla con las inusuales. ¿Cuál es la respuesta más eficaz?",
+  "options": {
+   "A": "Subir la temperature",
+   "B": "Usar un modelo más grande",
+   "C": "Añadir ejemplos que cubran los formatos inusuales e indicar qué devolver cuando falta un campo",
+   "D": "Pedirle al modelo que tenga cuidado con las entradas inusuales"
+  },
+  "rationale": "Los casos inusuales fallan porque nunca se especificaron, y los ejemplos junto con una regla para valores ausentes los especifican. La temperature (A) añade variación, el tamaño del modelo (B) no apunta al hueco y la exhortación (D) no es una especificación",
+  "src": "1o2ulma"
+ },
+ "architect-foundations-mock2-11": {
+  "question": "¿Cuál es la señal más clara de que una superficie de herramientas necesita rediseño y no mejores prompts?",
+  "options": {
+   "A": "Expone más de cinco herramientas",
+   "B": "El modelo selecciona repetidamente una herramienta que no puede satisfacer la petición",
+   "C": "Las herramientas están implementadas en servicios distintos",
+   "D": "Las herramientas devuelven payloads grandes"
+  },
+  "rationale": "La selección errónea repetida indica que las herramientas no se distinguen por sus descripciones, lo que es un fallo de diseño. El número de herramientas (A) y la topología de implementación (C) no son fallos, y el tamaño del payload (D) es otro problema",
+  "src": "2fz3dz"
+ },
+ "architect-foundations-mock2-12": {
+  "question": "¿Cómo debería restringirse una herramienta que elimina registros?",
+  "options": {
+   "A": "Aplicando la autorización y el alcance fuera del modelo",
+   "B": "Con una descripción que advierta al modelo de que la use con cuidado",
+   "C": "Exigiendo más parámetros",
+   "D": "Declarándola la última entre las herramientas"
+  },
+  "rationale": "La capacidad destructiva la acota el sistema que la rodea, ya que una descripción es una petición, no un control. Los parámetros adicionales (C) y el orden (D) no limitan la autoridad",
+  "src": "kakdrz"
+ },
+ "architect-foundations-mock2-13": {
+  "question": "Una integración MCP expone una base de datos entera mediante una sola herramienta general de consulta. ¿Cuál es el problema de arquitectura?",
+  "options": {
+   "A": "La autoridad del modelo no tiene límites y no se puede aplicar el mínimo privilegio",
+   "B": "Será lenta",
+   "C": "Usa demasiados tokens",
+   "D": "No puede devolver salida estructurada"
+  },
+  "rationale": "Una única herramienta sin restricciones elimina la posibilidad de acotar a qué puede acceder el modelo. La velocidad (B) y los tokens (C) son secundarios, y la salida estructurada (D) es posible en ambos casos",
+  "src": "usdqjb"
+ },
+ "architect-foundations-mock2-14": {
+  "question": "La calidad se degrada de forma constante a lo largo de una ejecución agéntica larga. ¿Cuál es la causa más probable?",
+  "options": {
+   "A": "La versión del modelo cambió a mitad de la ejecución",
+   "B": "El contexto acumulado ha diluido el material que importa",
+   "C": "La temperature es demasiado baja",
+   "D": "Las herramientas se han vuelto más lentas"
+  },
+  "rationale": "La degradación progresiva en una ejecución larga es la firma de la acumulación de contexto. Las versiones no cambian a mitad de ejecución (A), una temperature baja (C) reduce la variedad, no la calidad, y la latencia de las herramientas (D) no afecta a la corrección",
+  "src": "knf2jc"
+ },
+ "architect-foundations-mock2-15": {
+  "question": "¿Qué debe ocurrir para que el estado sobreviva a un límite de compactación?",
+  "options": {
+   "A": "Nada, el modelo retiene lo que importa",
+   "B": "Hay que ampliar la ventana de contexto",
+   "C": "Las decisiones y restricciones que deben persistir se escriben en un resumen explícito que se arrastra hacia delante",
+   "D": "Hay que reiniciar la ejecución"
+  },
+  "rationale": "La compactación pierde información, así que la persistencia debe ser deliberada. Confiar en el recuerdo (A) no es fiable, una ventana mayor (B) solo desplaza el límite y reiniciar (D) descarta el trabajo",
+  "src": "r3d0cm"
+ },
+ "architect-foundations-mock3-1": {
+  "question": "Un diseño agéntico llama repetidamente a la misma herramienta costosa con argumentos idénticos. ¿Qué indica esto?",
+  "options": {
+   "A": "Un comportamiento de reintento saludable",
+   "B": "La herramienta es demasiado rápida",
+   "C": "El agente no está reteniendo ni reutilizando el resultado, lo que apunta al diseño del estado",
+   "D": "El modelo es demasiado capaz"
+  },
+  "rationale": "Repetir una llamada idéntica significa que el agente no dispone del resultado previo, lo que es un problema de estado. No es comportamiento de reintento (A), y ni la velocidad de la herramienta (B) ni la capacidad (D) lo explican",
+  "src": "r9iqst"
+ },
+ "architect-foundations-mock3-2": {
+  "question": "¿Qué determina si dos líneas de trabajo pertenecen a subagentes distintos?",
+  "options": {
+   "A": "Si cada una necesita contexto que la otra contaminaría",
+   "B": "Su longitud combinada",
+   "C": "Si usan herramientas diferentes",
+   "D": "Si pueden ejecutarse en paralelo"
+  },
+  "rationale": "El aislamiento de contexto es la razón de ser de los subagentes. La longitud (B), la diferencia de herramientas (C) y el paralelismo (D) se pueden gestionar dentro de un único contexto",
+  "src": "2ghlwy"
+ },
+ "architect-foundations-mock3-3": {
+  "question": "¿Qué diseño reduce más el coste de una decisión autónoma equivocada?",
+  "options": {
+   "A": "Un modelo más grande",
+   "B": "Un prompt más largo",
+   "C": "Más herramientas",
+   "D": "Hacer la acción reversible o condicionarla a una confirmación"
+  },
+  "rationale": "La reversibilidad y el control previo acotan la consecuencia, que es en lo que consiste el riesgo. La capacidad (A), la longitud del prompt (B) y las herramientas (C) afectan a la probabilidad del error, no a su coste",
+  "src": "tf0aom"
+ },
+ "architect-foundations-mock3-4": {
+  "question": "Un CLAUDE.md ha crecido hasta varios miles de líneas. ¿Cuál es el efecto probable?",
+  "options": {
+   "A": "Mejores resultados, porque hay más contexto disponible",
+   "B": "Las instrucciones que importan compiten con material que ya no aplica",
+   "C": "Ningún efecto, ya que se lee una sola vez",
+   "D": "Respuestas más rápidas"
+  },
+  "rationale": "La memoria de proyecto es contexto y se diluye como cualquier otro. Más no es automáticamente mejor (A), no es gratis (C) y no acelera nada (D)",
+  "src": "5rh881"
+ },
+ "architect-foundations-mock3-5": {
+  "question": "¿Qué debería cumplir un skill antes de versionarse en un repositorio compartido?",
+  "options": {
+   "A": "Ser lo bastante largo para resultar útil",
+   "B": "Codificar un procedimiento que el equipo repite de verdad y poder revisarse",
+   "C": "Estar escrito por el ingeniero más senior",
+   "D": "Cubrir todos los casos límite"
+  },
+  "rationale": "Un skill compartido se justifica por una repetición real y debe poder revisarse como el código. La longitud (A), la autoría (C) y la exhaustividad (D) no lo establecen",
+  "src": "1vx2f60"
+ },
+ "architect-foundations-mock3-6": {
+  "question": "¿Por qué es preferible la configuración versionada a la configuración por desarrollador para las convenciones del equipo?",
+  "options": {
+   "A": "Se carga más rápido",
+   "B": "Usa menos contexto",
+   "C": "No se puede sobrescribir",
+   "D": "Está versionada, se revisa y se aplica a todos, incluida la automatización"
+  },
+  "rationale": "El contexto compartido, revisado y versionado es lo que hace que una convención se cumpla entre personas y en CI. La velocidad (A) y el tamaño del contexto (B) no son la razón, y aun así se puede sobrescribir en local (C)",
+  "src": "ubnepf"
+ },
+ "architect-foundations-mock3-7": {
+  "question": "Una respuesta validada con esquema falla la validación una de cada varios cientos de llamadas. ¿Cuál es el tratamiento correcto?",
+  "options": {
+   "A": "Definir una vía de fallback: reintentar y, después, fallar de forma explícita en lugar de pasar datos inválidos",
+   "B": "Ignorarlo, ya que la tasa es baja",
+   "C": "Desactivar la validación para evitar los fallos",
+   "D": "Aumentar el límite de tokens de salida"
+  },
+  "rationale": "Un fallo poco frecuente sigue necesitando una vía definida, y pasar datos inválidos en silencio es el resultado que hay que evitar. Ignorarlo (B) y desactivar la validación (C) hacen exactamente eso, y el límite de tokens (D) no es la causa",
+  "src": "g8jfvq"
+ },
+ "architect-foundations-mock3-8": {
+  "question": "¿Qué ventaja tiene validar la salida estructurada en la frontera en lugar de más adelante en el flujo?",
+  "options": {
+   "A": "Es más barato",
+   "B": "Elimina la necesidad de un esquema",
+   "C": "El fallo se detecta donde aún se puede reintentar o rechazar, antes de contaminar los pasos posteriores",
+   "D": "Mejora la precisión del modelo"
+  },
+  "rationale": "Detectarlo en la frontera contiene el fallo. No es principalmente una cuestión de coste (A), el esquema es lo que lo hace posible (B) y no cambia la precisión del modelo (D)",
+  "src": "quckp3"
+ },
+ "architect-foundations-mock3-9": {
+  "question": "Una extracción estructurada debe registrar de qué punto de la fuente salió cada valor. ¿Qué requiere esto?",
+  "options": {
+   "A": "Un modelo más grande",
+   "B": "Un prompt más largo",
+   "C": "Una segunda pasada de extracción",
+   "D": "Que el esquema incluya un campo de procedencia que el modelo deba rellenar"
+  },
+  "rationale": "Todo lo que la salida deba llevar tiene que formar parte de la forma declarada. El tamaño del modelo (A) y la longitud del prompt (B) no crean un campo, y una segunda pasada (C) es innecesaria si el esquema lo pide",
+  "src": "1ja291c"
+ },
+ "architect-foundations-mock3-10": {
+  "question": "Dos herramientas hacen casi lo mismo con nombres distintos. ¿Cuál es el fallo de arquitectura?",
+  "options": {
+   "A": "Duplicación de código",
+   "B": "Mayor latencia",
+   "C": "El modelo no tiene una base fiable para elegir entre ellas",
+   "D": "Mayor coste en tokens"
+  },
+  "rationale": "El fallo es la ambigüedad en el punto de selección, porque el modelo elige a partir de las descripciones. La duplicación de código (A), la latencia (B) y el coste (D) son consecuencias secundarias",
+  "src": "1r8cr61"
+ },
+ "architect-foundations-mock3-11": {
+  "question": "¿Qué debería hacer una herramienta cuando recibe argumentos que no puede satisfacer?",
+  "options": {
+   "A": "Devolver el resultado más cercano que pueda",
+   "B": "Devolver un error claro que indique qué estaba mal, para que el modelo pueda corregir la llamada",
+   "C": "Devolver un resultado vacío",
+   "D": "Lanzar una excepción que termine la ejecución"
+  },
+  "rationale": "Un error informativo mantiene la capacidad del modelo de adaptarse. Una aproximación (A) y un resultado vacío (C) son erróneos en silencio, y terminar (D) descarta una ejecución recuperable",
+  "src": "h6x8pg"
+ },
+ "architect-foundations-mock3-12": {
+  "question": "Una herramienta MCP expone una operación de escritura que el caso de uso nunca necesita. ¿Qué debería ocurrir?",
+  "options": {
+   "A": "Eliminarla, porque la autoridad sin usar es un riesgo innecesario",
+   "B": "Dejarla, ya que puede ser útil más adelante",
+   "C": "Documentar que no debe usarse",
+   "D": "Renombrarla para desincentivar su uso"
+  },
+  "rationale": "La autoridad que no se necesita no debería concederse. Conservarla por un posible uso futuro (B), documentarla (C) o renombrarla (D) dejan la capacidad al alcance",
+  "src": "1tg3or3"
+ },
+ "architect-foundations-mock3-13": {
+  "question": "¿Cuál es la señal fiable más temprana de que la gestión del contexto ha fallado en una ejecución larga?",
+  "options": {
+   "A": "El agente empieza a repetir trabajo o a contradecir decisiones anteriores",
+   "B": "La ejecución tarda más de lo esperado",
+   "C": "El coste en tokens sube",
+   "D": "Una herramienta devuelve un error"
+  },
+  "rationale": "La repetición y la autocontradicción son la firma conductual de un estado perdido. La duración (B) y el coste (C) aumentan por muchas razones, y un error de herramienta (D) no guarda relación",
+  "src": "ek8535"
+ },
+ "architect-foundations-mock3-14": {
+  "question": "¿Por qué es necesario un criterio de éxito definido para un sistema agéntico fiable?",
+  "options": {
+   "A": "Reduce el coste en tokens",
+   "B": "Sin él no hay forma de distinguir la finalización del fallo, así que el sistema no puede detenerse correctamente ni medirse",
+   "C": "Hace el prompt más corto",
+   "D": "Lo exige la plataforma"
+  },
+  "rationale": "La terminación y la medición dependen de una definición de «hecho». El coste (A), la longitud del prompt (C) y los requisitos de la plataforma (D) no son la razón",
+  "src": "1rsqpvx"
+ },
+ "architect-foundations-mock3-15": {
+  "question": "Un requisito de fiabilidad dice que una salida errónea nunca debe llegar al usuario sin ser detectada. ¿Qué necesita el diseño?",
+  "options": {
+   "A": "Un modelo más capaz",
+   "B": "Más ejemplos en el prompt",
+   "C": "Un paso de detección con una acción definida cuando salta",
+   "D": "Una ventana de contexto más larga"
+  },
+  "rationale": "Evitar el error silencioso requiere detección más una respuesta. La capacidad (A), los ejemplos (B) y el contexto (D) mejoran el caso medio, pero no atrapan el malo",
+  "src": "rm8mkx"
+ },
+ "architect-foundations-guide-1": {
+  "question": "Escenario: Agente de resolución de atención al cliente. Los datos de producción muestran que en el 12 % de los casos tu agente se salta get_customer por completo y llama a lookup_order usando únicamente el nombre que indica el cliente, lo que a veces provoca cuentas mal identificadas y reembolsos incorrectos. ¿Qué cambio resolvería este problema de fiabilidad de forma más eficaz?",
+  "options": {
+   "A": "Añadir un prerrequisito programático que bloquee las llamadas a lookup_order y process_refund hasta que get_customer haya devuelto un ID de cliente verificado.",
+   "B": "Mejorar el system prompt para indicar que la verificación del cliente mediante get_customer es obligatoria antes de cualquier operación con pedidos.",
+   "C": "Añadir ejemplos few-shot en los que el agente siempre llama primero a get_customer, incluso cuando los clientes aportan por su cuenta los datos del pedido.",
+   "D": "Implementar un clasificador de enrutamiento que analice cada petición y habilite solo el subconjunto de herramientas adecuado para ese tipo de petición."
+  },
+  "rationale": "Cuando la lógica de negocio crítica exige una secuencia concreta de herramientas (como verificar la identidad del cliente antes de procesar reembolsos), el cumplimiento programático ofrece garantías deterministas que los enfoques basados en prompts no pueden dar. Las opciones B y C dependen de que el LLM cumpla de forma probabilística, lo cual es insuficiente cuando los errores tienen consecuencias económicas. La opción D aborda la disponibilidad de herramientas y no su orden, que no es el problema real.",
+  "src": "67kp4i"
+ },
+ "architect-foundations-guide-2": {
+  "question": "Escenario: Agente de resolución de atención al cliente. Los logs de producción muestran que el agente llama con frecuencia a get_customer cuando los usuarios preguntan por pedidos (p. ej., \"check my order #12345\"), en lugar de llamar a lookup_order. Ambas herramientas tienen descripciones mínimas (\"Retrieves customer information\" / \"Retrieves order details\") y aceptan formatos de identificador similares. ¿Cuál es el primer paso más eficaz para mejorar la fiabilidad de la selección de herramientas?",
+  "options": {
+   "A": "Añadir al system prompt ejemplos few-shot que muestren patrones correctos de selección de herramientas, con 5-8 ejemplos de consultas sobre pedidos dirigidas a lookup_order.",
+   "B": "Ampliar la descripción de cada herramienta para incluir los formatos de entrada que admite, ejemplos de consultas, casos límite y los límites que explican cuándo usarla frente a herramientas similares.",
+   "C": "Implementar una capa de enrutamiento que analice la entrada del usuario antes de cada turno y preseleccione la herramienta adecuada según palabras clave y patrones de identificador detectados.",
+   "D": "Fusionar ambas herramientas en una sola herramienta lookup_entity que acepte cualquier identificador y determine internamente qué backend consultar."
+  },
+  "rationale": "Las descripciones de las herramientas son el mecanismo principal que usan los LLM para seleccionarlas. Cuando las descripciones son mínimas, los modelos carecen del contexto para diferenciar herramientas similares. La opción B aborda directamente esta causa raíz con una solución de poco esfuerzo y mucho impacto. Los ejemplos few-shot (A) añaden sobrecarga de tokens sin resolver el problema de fondo. Una capa de enrutamiento (C) es excesiva y esquiva la comprensión del lenguaje natural del LLM. Fusionar las herramientas (D) es una decisión de arquitectura válida, pero exige más esfuerzo del que justifica un \"primer paso\" cuando el problema inmediato son unas descripciones inadecuadas.",
+  "src": "15artq4"
+ },
+ "architect-foundations-guide-3": {
+  "question": "Escenario: Agente de resolución de atención al cliente. Tu agente logra un 55 % de resolución en el primer contacto, muy por debajo del objetivo del 80 %. Los logs muestran que escala casos sencillos (sustituciones estándar por daños con fotos como prueba) mientras intenta gestionar de forma autónoma situaciones complejas que requieren excepciones de política. ¿Cuál es la forma más eficaz de mejorar la calibración de las escaladas?",
+  "options": {
+   "A": "Añadir a tu system prompt criterios de escalado explícitos con ejemplos few-shot que muestren cuándo escalar y cuándo resolver de forma autónoma.",
+   "B": "Hacer que el agente indique por sí mismo una puntuación de confianza (1-10) antes de cada respuesta y enrutar automáticamente las peticiones a humanos cuando la confianza caiga por debajo de un umbral.",
+   "C": "Desplegar un modelo clasificador independiente entrenado con tickets históricos para predecir qué peticiones necesitan escalado antes de que el agente principal empiece a procesarlas.",
+   "D": "Implementar un análisis de sentimiento para detectar el nivel de frustración del cliente y escalar automáticamente cuando el sentimiento negativo supere un umbral."
+  },
+  "rationale": "Añadir criterios de escalado explícitos con ejemplos few-shot aborda directamente la causa raíz: los límites de decisión poco claros. Es la respuesta inicial proporcionada antes de añadir infraestructura. La opción B falla porque la confianza autoinformada por el LLM está mal calibrada; el agente ya tiene una confianza errónea en los casos difíciles. La opción C es excesiva, ya que requiere datos etiquetados e infraestructura de ML cuando aún no se ha probado la optimización del prompt. La opción D resuelve un problema distinto; el sentimiento no se correlaciona con la complejidad del caso, que es el problema real.",
+  "src": "80rhil"
+ },
+ "architect-foundations-guide-4": {
+  "question": "Escenario: Generación de código con Claude Code. Quieres crear un comando slash personalizado /review que ejecute la lista de comprobación estándar de revisión de código de tu equipo. Este comando debe estar disponible para todos los desarrolladores cuando clonen o actualicen (pull) el repositorio. ¿Dónde deberías crear el archivo de este comando?",
+  "options": {
+   "A": "En el directorio .claude/commands/ del repositorio del proyecto",
+   "B": "En ~/.claude/commands/ en el directorio personal de cada desarrollador",
+   "C": "En el archivo CLAUDE.md en la raíz del proyecto",
+   "D": "En un archivo .claude/config.json con un array commands"
+  },
+  "rationale": "Los comandos slash personalizados de ámbito de proyecto deben almacenarse en el directorio .claude/commands/ dentro del repositorio. Estos comandos están bajo control de versiones y quedan disponibles automáticamente para todos los desarrolladores cuando clonan o actualizan (pull) el repositorio. La opción B (~/.claude/commands/) es para comandos personales que no se comparten mediante control de versiones. La opción C (CLAUDE.md) es para instrucciones y contexto del proyecto, no para definiciones de comandos. La opción D describe un mecanismo de configuración que no existe en Claude Code.",
+  "src": "bp6ni9"
+ },
+ "architect-foundations-guide-5": {
+  "question": "Escenario: Generación de código con Claude Code. Te han asignado reestructurar la aplicación monolítica del equipo en microservicios. Esto implicará cambios en decenas de archivos y requiere tomar decisiones sobre los límites de los servicios y las dependencias entre módulos. ¿Qué enfoque deberías adoptar?",
+  "options": {
+   "A": "Entrar en plan mode para explorar el código, entender las dependencias y diseñar un enfoque de implementación antes de hacer cambios.",
+   "B": "Empezar con ejecución directa y hacer cambios de forma incremental, dejando que la implementación revele los límites naturales de los servicios.",
+   "C": "Usar ejecución directa con instrucciones previas exhaustivas que detallen exactamente cómo debe estructurarse cada servicio.",
+   "D": "Empezar en modo de ejecución directa y cambiar a plan mode solo si surge una complejidad inesperada durante la implementación."
+  },
+  "rationale": "El plan mode está pensado para tareas complejas con cambios a gran escala, varios enfoques válidos y decisiones de arquitectura, exactamente lo que exige la reestructuración de un monolito en microservicios. Permite explorar el código de forma segura y diseñar antes de comprometerse con los cambios. La opción B arriesga un costoso trabajo de rehacer cuando las dependencias se descubran tarde. La opción C asume que ya conoces la estructura correcta sin explorar el código. La opción D ignora que la complejidad ya consta en los requisitos, no es algo que pueda surgir más adelante.",
+  "src": "j5ix0p"
+ },
+ "architect-foundations-guide-6": {
+  "question": "Escenario: Generación de código con Claude Code. Tu base de código tiene áreas distintas con convenciones de código diferentes: los componentes React usan estilo funcional con hooks, los handlers de API usan async/await con un tratamiento de errores específico y los modelos de base de datos siguen un patrón repository. Los archivos de test están repartidos por toda la base de código junto al código que prueban (p. ej., Button.test.tsx junto a Button.tsx), y quieres que todos los tests sigan las mismas convenciones sin importar dónde estén. ¿Cuál es la forma más mantenible de asegurar que Claude aplique automáticamente las convenciones correctas al generar código?",
+  "options": {
+   "A": "Crear archivos de reglas en .claude/rules/ con frontmatter YAML que especifique patrones glob para aplicar las convenciones de forma condicional según las rutas de los archivos",
+   "B": "Consolidar todas las convenciones en el CLAUDE.md raíz bajo encabezados para cada área, confiando en que Claude infiera qué sección aplica",
+   "C": "Crear skills en .claude/skills/ para cada tipo de código que incluyan las convenciones relevantes en sus archivos SKILL.md",
+   "D": "Colocar un CLAUDE.md independiente en cada subdirectorio con las convenciones específicas de esa área"
+  },
+  "rationale": "La opción A es correcta porque .claude/rules/ con patrones glob (p. ej., **/*.test.tsx) permite aplicar las convenciones automáticamente según las rutas de los archivos, sea cual sea el directorio, algo esencial para los archivos de test repartidos por toda la base de código. La opción B depende de la inferencia en lugar de una coincidencia explícita, lo que la hace poco fiable. La opción C requiere invocar el skill manualmente o depende de que Claude decida cargarlos, lo que contradice la necesidad de una aplicación determinista y \"automática\" basada en rutas de archivo. La opción D no puede gestionar fácilmente archivos repartidos por muchos directorios, ya que los archivos CLAUDE.md están ligados al directorio.",
+  "src": "15ttw2f"
+ },
+ "architect-foundations-guide-7": {
+  "question": "Escenario: Sistema de investigación multiagente. Tras ejecutar el sistema sobre el tema \"impact of AI on creative industries\", observas que cada subagente se completa con éxito: el agente de búsqueda web encuentra artículos relevantes, el agente de análisis de documentos resume correctamente los artículos académicos y el agente de síntesis produce una salida coherente. Sin embargo, los informes finales cubren solo las artes visuales y omiten por completo la música, la escritura y la producción cinematográfica. Al examinar los logs del coordinador, ves que descompuso el tema en tres subtareas: \"AI in digital art creation\", \"AI in graphic design\" y \"AI in photography\". ¿Cuál es la causa raíz más probable?",
+  "options": {
+   "A": "El agente de síntesis carece de instrucciones para identificar huecos de cobertura en los hallazgos que recibe de otros agentes.",
+   "B": "La descomposición de tareas del agente coordinador es demasiado estrecha, lo que da lugar a asignaciones a subagentes que no cubren todos los ámbitos relevantes del tema.",
+   "C": "Las consultas del agente de búsqueda web no son lo bastante amplias y hay que ampliarlas para cubrir más sectores de las industrias creativas.",
+   "D": "El agente de análisis de documentos está filtrando fuentes relacionadas con industrias creativas no visuales por unos criterios de relevancia demasiado restrictivos."
+  },
+  "rationale": "Los logs del coordinador revelan directamente la causa raíz: descompuso \"creative industries\" solo en subtareas de artes visuales (arte digital, diseño gráfico, fotografía) y omitió por completo la música, la escritura y el cine. Los subagentes ejecutaron correctamente sus tareas asignadas; el problema es lo que se les asignó. Las opciones A, C y D culpan erróneamente a agentes posteriores que funcionan correctamente dentro de su alcance asignado.",
+  "src": "1iwvorw"
+ },
+ "architect-foundations-guide-8": {
+  "question": "Escenario: Sistema de investigación multiagente. El subagente de búsqueda web agota el tiempo de espera mientras investiga un tema complejo. Tienes que diseñar cómo fluye esta información del fallo de vuelta al agente coordinador. ¿Qué enfoque de propagación de errores permite mejor una recuperación inteligente?",
+  "options": {
+   "A": "Devolver al coordinador un contexto de error estructurado que incluya el tipo de fallo, la consulta intentada, los resultados parciales y posibles enfoques alternativos.",
+   "B": "Implementar dentro del subagente una lógica de reintento automático con backoff exponencial, devolviendo un estado genérico \"search unavailable\" solo después de agotar todos los reintentos.",
+   "C": "Capturar el timeout dentro del subagente y devolver un conjunto de resultados vacío marcado como exitoso.",
+   "D": "Propagar la excepción de timeout directamente a un manejador de nivel superior que termine todo el workflow de investigación."
+  },
+  "rationale": "El contexto de error estructurado da al coordinador la información que necesita para tomar decisiones de recuperación inteligentes: si reintentar con una consulta modificada, probar un enfoque alternativo o continuar con resultados parciales. El estado genérico de la opción B oculta contexto valioso al coordinador e impide tomar decisiones informadas. La opción C suprime el error al marcar el fallo como éxito, lo que impide cualquier recuperación y arriesga resultados de investigación incompletos. La opción D termina todo el workflow innecesariamente cuando habría estrategias de recuperación que podrían funcionar.",
+  "src": "13xbnd3"
+ },
+ "architect-foundations-guide-9": {
+  "question": "Escenario: Sistema de investigación multiagente. Durante las pruebas observas que el agente de síntesis necesita con frecuencia verificar afirmaciones concretas mientras combina hallazgos. Actualmente, cuando hace falta verificar, el agente de síntesis devuelve el control al coordinador, que invoca al agente de búsqueda web y después vuelve a invocar la síntesis con los resultados. Esto añade 2-3 viajes de ida y vuelta por tarea y aumenta la latencia un 40 %. Tu evaluación muestra que el 85 % de estas verificaciones son comprobaciones simples de datos (fechas, nombres, estadísticas) y el 15 % requiere una investigación más profunda. ¿Cuál es el enfoque más eficaz para reducir la sobrecarga manteniendo la fiabilidad del sistema?",
+  "options": {
+   "A": "Dar al agente de síntesis una herramienta verify_fact de ámbito limitado para consultas simples, mientras las verificaciones complejas siguen delegándose al agente de búsqueda web a través del coordinador.",
+   "B": "Hacer que el agente de síntesis acumule todas las necesidades de verificación y las devuelva por lotes al coordinador al final de su pasada, que luego las envía todas a la vez al agente de búsqueda web.",
+   "C": "Dar al agente de síntesis acceso a todas las herramientas de búsqueda web para que pueda gestionar cualquier necesidad de verificación directamente, sin viajes de ida y vuelta por el coordinador.",
+   "D": "Hacer que el agente de búsqueda web almacene en caché de forma proactiva contexto adicional alrededor de cada fuente durante la investigación inicial, anticipando lo que el agente de síntesis podría necesitar verificar."
+  },
+  "rationale": "La opción A aplica el principio de mínimo privilegio al dar al agente de síntesis solo lo que necesita para el caso común del 85 % (verificación de datos simples), a la vez que conserva el patrón de coordinación existente para los casos complejos. El enfoque por lotes de la opción B crea dependencias bloqueantes, ya que los pasos de síntesis pueden depender de datos verificados previamente. La opción C sobreaprovisiona al agente de síntesis y viola la separación de responsabilidades. La opción D depende de una caché especulativa que no puede predecir de forma fiable lo que el agente de síntesis necesitará verificar.",
+  "src": "8qcdkh"
+ },
+ "architect-foundations-guide-10": {
+  "question": "Escenario: Claude Code para integración continua. Tu script de pipeline ejecuta claude \"Analyze this pull request for security issues\" pero el job se queda colgado indefinidamente. Los logs indican que Claude Code está esperando entrada interactiva. ¿Cuál es el enfoque correcto para ejecutar Claude Code en un pipeline automatizado?",
+  "options": {
+   "A": "Añadir el flag -p: claude -p \"Analyze this pull request for security issues\"",
+   "B": "Establecer la variable de entorno CLAUDE_HEADLESS=true antes de ejecutar el comando",
+   "C": "Redirigir stdin desde /dev/null: claude \"Analyze this pull request for security issues\" < /dev/null",
+   "D": "Añadir el flag --batch: claude --batch \"Analyze this pull request for security issues\""
+  },
+  "rationale": "El flag -p (o --print) es la forma documentada de ejecutar Claude Code en modo no interactivo. Procesa el prompt, envía el resultado a stdout y termina sin esperar entrada del usuario, exactamente lo que necesitan los pipelines de CI/CD. Las otras opciones hacen referencia a funcionalidades inexistentes (la variable de entorno CLAUDE_HEADLESS, el flag --batch) o usan apaños de Unix que no resuelven correctamente la sintaxis de comandos de Claude Code.",
+  "src": "1mn27r4"
+ },
+ "architect-foundations-guide-11": {
+  "question": "Escenario: Claude Code para integración continua. Tu equipo quiere reducir los costes de API del análisis automatizado. Actualmente, las llamadas a Claude en tiempo real alimentan dos workflows: (1) una comprobación bloqueante previa al merge que debe completarse antes de que los desarrolladores puedan hacer merge, y (2) un informe de deuda técnica generado durante la noche para revisarlo a la mañana siguiente. Tu responsable propone pasar ambos a la Message Batches API por su ahorro de costes del 50 %. ¿Cómo deberías evaluar esta propuesta?",
+  "options": {
+   "A": "Usar el procesamiento por lotes solo para los informes de deuda técnica; mantener las llamadas en tiempo real para las comprobaciones previas al merge.",
+   "B": "Pasar ambos workflows a procesamiento por lotes, con sondeo del estado para comprobar la finalización.",
+   "C": "Mantener las llamadas en tiempo real para ambos workflows para evitar problemas con el orden de los resultados del batch.",
+   "D": "Pasar ambos a procesamiento por lotes con un fallback por timeout a tiempo real si los batches tardan demasiado."
+  },
+  "rationale": "La Message Batches API ofrece un ahorro de costes del 50 %, pero tiene tiempos de procesamiento de hasta 24 horas sin SLA de latencia garantizado. Esto la hace inadecuada para comprobaciones bloqueantes previas al merge en las que los desarrolladores esperan resultados, pero ideal para trabajos nocturnos por lotes como los informes de deuda técnica. La opción B es incorrecta porque confiar en que se complete \"a menudo más rápido\" no es aceptable para workflows bloqueantes. La opción C refleja un error conceptual: los resultados del batch se pueden correlacionar mediante los campos custom_id. La opción D añade complejidad innecesaria cuando la solución más simple es asignar cada API al caso de uso que le corresponde.",
+  "src": "9mp34i"
+ },
+ "architect-foundations-guide-12": {
+  "question": "Escenario: Claude Code para integración continua. Una pull request modifica 14 archivos del módulo de seguimiento de stock. Tu revisión de una sola pasada, que analiza todos los archivos juntos, produce resultados inconsistentes: comentarios detallados para algunos archivos pero superficiales para otros, errores evidentes que se pasan por alto y comentarios contradictorios, que señalan un patrón como problemático en un archivo mientras aprueban código idéntico en otro de la misma PR. ¿Cómo deberías reestructurar la revisión?",
+  "options": {
+   "A": "Dividirla en pasadas enfocadas: analizar cada archivo individualmente en busca de problemas locales y después ejecutar una pasada de integración independiente que examine el flujo de datos entre archivos.",
+   "B": "Exigir a los desarrolladores que dividan las PR grandes en entregas más pequeñas de 3-4 archivos antes de que se ejecute la revisión automatizada.",
+   "C": "Cambiar a un modelo de gama superior con una ventana de contexto más grande para dar a los 14 archivos la atención adecuada en una sola pasada.",
+   "D": "Ejecutar tres pasadas de revisión independientes sobre toda la PR y señalar solo los problemas que aparezcan en al menos dos de las tres ejecuciones."
+  },
+  "rationale": "Dividir las revisiones en pasadas enfocadas aborda directamente la causa raíz: la dilución de la atención al procesar muchos archivos a la vez. El análisis archivo a archivo garantiza una profundidad uniforme, y una pasada de integración aparte detecta los problemas entre archivos. La opción B traslada la carga a los desarrolladores sin mejorar el sistema. La opción C pasa por alto que las ventanas de contexto más grandes no resuelven los problemas de calidad de la atención. La opción D suprimiría de hecho la detección de errores reales al exigir consenso sobre problemas que quizá solo se detecten de forma intermitente.",
+  "src": "mqye4d"
+ }
+}

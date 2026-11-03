@@ -1,0 +1,582 @@
+{
+ "confusions": [
+  {
+   "id": "agent-or-workflow",
+   "title": "Agent or workflow",
+   "body": "| | Workflow | Agent |\n| --- | --- | --- |\n| Who decides the path | You did, in advance | The model, at run time |\n| Testable | Yes, it is deterministic | Only in aggregate |\n| Cost | Predictable | Depends on the run |\n| Fails by | Doing the wrong thing you specified | Not stopping |\n\n**The question:** can you write down the steps?\n\nIf you can, write them down. Most problems people reach for an agent to solve\nare workflows that were never finished being specified."
+  },
+  {
+   "id": "tool-skill-or-mcp-server",
+   "title": "Tool, Skill, or MCP server",
+   "body": "| | Use it when |\n| --- | --- |\n| **Built-in tool** | Anthropic already ships the capability |\n| **Custom tool** | Only your system can do it, and only your application needs it |\n| **Skill** | A reusable procedure, no new data access |\n| **MCP server** | The same integration is needed by more than one client |\n\n**The question:** how many applications need this?\n\nOne application means a custom tool. More than one means a server, because that\nis the entire reason the protocol exists."
+  },
+  {
+   "id": "streaming-or-batching",
+   "title": "Streaming or batching",
+   "body": "Neither is about cost, although cost is the usual reason people choose.\n\n**The question:** is anyone waiting?\n\nSomebody waiting means the Messages API, and streaming if the wait is long\nenough to feel. Nobody waiting means the Message Batches API, at 50% cost,\nreturned within a 24-hour window. Multi-turn tool calling rules batching out\nregardless."
+  },
+  {
+   "id": "context-editing-or-compaction",
+   "title": "Context editing or compaction",
+   "body": "Both manage a conversation that has grown too long, and they do opposite things.\n\n**Context editing clears.** Old tool results or thinking blocks are removed\nbefore the model sees them. What was there is gone.\n\n**Compaction summarizes.** Earlier context is replaced by a summary of itself,\nso the substance survives in less space.\n\n**The question:** is the old content still needed, or only the fact of it?\n\nTool results you have already acted on can be cleared. A conversation whose\nearlier decisions still matter should be compacted."
+  },
+  {
+   "id": "prompt-caching-or-context-editing",
+   "title": "Prompt caching or context editing",
+   "body": "Both reduce what you pay for a long conversation, at different ends.\n\nCaching makes the **repeated prefix** cheap to resend. Context editing makes the\nconversation **shorter**. Caching is free to try; editing changes what the model\ncan see.\n\nReach for caching first. It costs nothing to be wrong about."
+  },
+  {
+   "id": "end-turn-tool-use-or-max-tokens",
+   "title": "end_turn, tool_use, or max_tokens",
+   "body": "`stop_reason` is the field, and treating all three as \"I have a response now\" is\nthe most common API mistake there is.\n\n| Value | Meaning | What your code should do |\n| --- | --- | --- |\n| `end_turn` | Claude finished | Return the content |\n| `tool_use` | Claude wants a tool run | Execute it, append the result as a **user** turn, call again |\n| `max_tokens` | Output was truncated | Raise the limit or split the task. Do not use the fragment |\n| `pause_turn` | A long-running server tool paused | Send the response back to continue |\n| `refusal` | A safety classifier declined | Check `stop_details`; do not read `content` as an answer |\n\nThe dangerous one is `max_tokens`. Nothing throws, the string looks like an\nanswer, and if you were parsing JSON the error you log will be a JSON error."
+  },
+  {
+   "id": "certification-or-course-certificate",
+   "title": "Certification or course certificate",
+   "body": "The distinction this repository is most careful about, because getting it wrong\nin public is expensive.\n\n| | Course certificate | Certification |\n| --- | --- | --- |\n| How you get it | Complete a free course on Claude Academy | Pass a proctored exam |\n| Where | Online, at your own pace | Pearson VUE, online or a test center |\n| Costs | Nothing | 99 to 175 USD |\n| Proves | You watched the material | You passed an assessment against a published blueprint |\n| Expires | No | 12 months, with a free renewal |\n\nNever describe a course certificate as a certification, and never write \"Claude\nCertified\" unless you hold the credential."
+  },
+  {
+   "id": "scaled-score-or-percentage",
+   "title": "Scaled score or percentage",
+   "body": "720 is a scaled score on a range of 100 to 1,000. It is not 72%.\n\nA scaled score places your result on a standard range so that different versions\nof the paper, which may differ slightly in difficulty, can be compared. There is\nno published mapping from questions answered to scaled score, so any \"you can\nafford to miss N\" figure you have been told was invented.\n\n**The question:** am I treating this as a fraction of questions?\n\nIf so, stop. Use the per-domain breakdown on the score report instead, which is\nthe half that tells you what to do next."
+  },
+  {
+   "id": "retake-wait-or-appeal-window",
+   "title": "Retake wait or appeal window",
+   "body": "Two different clocks, and people confuse them at the worst moment.\n\n**Retake waits** grow per attempt: 14 days, then 30, then 90. At most four\nattempts per exam in a rolling twelve months, full fee each time.\n\n**The appeal window** is 14 calendar days from an invalidated result. The\ncontent of individual items is never appealable; the process around them is.\n\nThey share a number, which is exactly why they get muddled."
+  }
+ ],
+ "courses": [
+  {
+   "id": "claude-101",
+   "title": "Claude 101",
+   "summary": "Using Claude for everyday work: core features, effective conversations, and where to go deeper",
+   "url": "https://academy.claude.com/courses/claude-101",
+   "section": "Claude platform",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "claude-platform-101",
+   "title": "Claude Platform 101",
+   "summary": "The Claude platform end to end: products, features, and how the pieces fit",
+   "url": "https://academy.claude.com/courses/claude-platform-101",
+   "section": "Claude platform",
+   "certs": [
+    "associate-foundations",
+    "developer-foundations"
+   ]
+  },
+  {
+   "id": "claude-code-101",
+   "title": "Claude Code 101",
+   "summary": "Claude Code in the daily development workflow",
+   "url": "https://academy.claude.com/courses/claude-code-101",
+   "section": "Claude platform",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "claude-code-in-action",
+   "title": "Claude Code in Action",
+   "summary": "Long, hands-off Claude Code sessions you can trust: steer, configure, automate, and verify",
+   "url": "https://academy.claude.com/courses/claude-code-in-action",
+   "section": "Claude platform",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "introduction-to-claude-cowork",
+   "title": "Introduction to Claude Cowork",
+   "summary": "The Cowork task loop, plugins and skills, file and research workflows, and steering multi-step work",
+   "url": "https://academy.claude.com/courses/introduction-to-claude-cowork",
+   "section": "Claude platform",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "introduction-to-claude-tag",
+   "title": "Introduction to Claude Tag",
+   "summary": "Claude Tag in a team's Slack workspace: where to hand it work, steering and correcting it so a fix holds for the whole channel, and giving it a standing job",
+   "url": "https://academy.claude.com/courses/introduction-to-claude-tag",
+   "section": "Claude platform",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "building-with-the-claude-api",
+   "title": "Building with the Claude API",
+   "summary": "The full span of working with Anthropic models through the API: messages, tools, streaming, and production patterns",
+   "url": "https://academy.claude.com/courses/building-with-the-claude-api",
+   "section": "Developer and integration",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "tool-use-with-the-messages-api",
+   "title": "Tool use with the Messages API",
+   "summary": "Fixing tool use that already runs: wrong tool choice, rejected calls, stalled responses, and input tokens that grow with every result, one problem per lesson",
+   "url": "https://academy.claude.com/courses/tool-use-with-the-messages-api",
+   "section": "Developer and integration",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "introduction-to-model-context-protocol",
+   "title": "Introduction to Model Context Protocol",
+   "summary": "MCP servers and clients from scratch in Python: tools, resources, and prompts",
+   "url": "https://academy.claude.com/courses/introduction-to-model-context-protocol",
+   "section": "Developer and integration",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "model-context-protocol-advanced-topics",
+   "title": "Model Context Protocol: Advanced Topics",
+   "summary": "Sampling, notifications, file system access, and transports for production MCP servers",
+   "url": "https://academy.claude.com/courses/model-context-protocol-advanced-topics",
+   "section": "Developer and integration",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "introduction-to-agent-skills",
+   "title": "Introduction to agent skills",
+   "summary": "Building, configuring, and sharing Skills in Claude Code, from first Skill to team distribution",
+   "url": "https://academy.claude.com/courses/introduction-to-agent-skills",
+   "section": "Developer and integration",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "introduction-to-subagents",
+   "title": "Introduction to subagents",
+   "summary": "Using and creating subagents to manage context, delegate tasks, and build specialized workflows",
+   "url": "https://academy.claude.com/courses/introduction-to-subagents",
+   "section": "Developer and integration",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "claude-with-amazon-bedrock",
+   "title": "Claude with Amazon Bedrock",
+   "summary": "Running Claude on AWS, from the accreditation program Anthropic built with AWS",
+   "url": "https://academy.claude.com/courses/claude-with-amazon-bedrock",
+   "section": "Deployment platforms",
+   "certs": [
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "claude-on-google-cloud",
+   "title": "Claude on Google Cloud",
+   "summary": "Working with Anthropic models on Google Cloud and Vertex AI",
+   "url": "https://academy.claude.com/courses/claude-with-google-cloud-s-vertex-ai",
+   "section": "Deployment platforms",
+   "certs": [
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "deploying-claude-enterprise-with-confidence",
+   "title": "Deploying Claude Enterprise with Confidence",
+   "summary": "The five organization-wide decisions behind a Claude Enterprise rollout: structure and identity, access, governance, spend, and visibility",
+   "url": "https://academy.claude.com/courses/deploying-claude-enterprise-with-confidence",
+   "section": "Deployment platforms",
+   "certs": [
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "ai-fluency-framework-foundations",
+   "title": "AI Fluency: Framework & Foundations",
+   "summary": "The core framework for collaborating with AI systems",
+   "url": "https://academy.claude.com/courses/ai-fluency-framework-foundations",
+   "section": "AI Fluency",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "ai-capabilities-and-limitations",
+   "title": "AI Capabilities and Limitations",
+   "summary": "How AI works, what it does well, and where it fails",
+   "url": "https://academy.claude.com/courses/ai-capabilities-and-limitations",
+   "section": "AI Fluency",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "ai-fluency-for-builders",
+   "title": "AI Fluency for Builders",
+   "summary": "The framework applied to people building AI-powered products",
+   "url": "https://academy.claude.com/courses/ai-fluency-for-builders",
+   "section": "AI Fluency",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "ai-fluency-for-educators",
+   "title": "AI Fluency for educators",
+   "summary": "Applying AI Fluency to teaching practice and institutional strategy",
+   "url": "https://academy.claude.com/courses/ai-fluency-for-educators",
+   "section": "AI Fluency",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "ai-fluency-for-pk-12-educators",
+   "title": "AI Fluency for pK-12 Educators",
+   "summary": "The framework adapted for primary and secondary education",
+   "url": "https://academy.claude.com/courses/ai-fluency-for-k-12-educators",
+   "section": "AI Fluency",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "ai-fluency-for-students",
+   "title": "AI Fluency for students",
+   "summary": "AI Fluency for learning, career planning, and academic success",
+   "url": "https://academy.claude.com/courses/ai-fluency-for-students",
+   "section": "AI Fluency",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "ai-fluency-for-nonprofits",
+   "title": "AI Fluency for nonprofits",
+   "summary": "Increasing organizational impact while staying true to mission and values",
+   "url": "https://academy.claude.com/courses/ai-fluency-for-nonprofits",
+   "section": "AI Fluency",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "ai-fluency-for-small-businesses",
+   "title": "AI Fluency for Small Businesses",
+   "summary": "The framework applied to small-business operations",
+   "url": "https://academy.claude.com/courses/ai-fluency-for-small-businesses",
+   "section": "AI Fluency",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "ai-fluency-for-creative-work",
+   "title": "AI Fluency for Creative Work",
+   "summary": "The framework applied to creative practice, keeping authorship deliberate",
+   "url": "https://academy.claude.com/courses/ai-fluency-for-creative-work",
+   "section": "AI Fluency",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "teaching-ai-fluency",
+   "title": "Teaching AI Fluency",
+   "summary": "Teaching and assessing AI Fluency in instructor-led settings",
+   "url": "https://academy.claude.com/courses/teaching-ai-fluency",
+   "section": "AI Fluency",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "ai-fluency-for-pk-12-train-the-trainer",
+   "title": "AI Fluency for pK-12 Train the Trainer",
+   "summary": "A ready-to-run workshop kit for educators leading AI fluency sessions for colleagues, built with the American Federation of Teachers",
+   "url": "https://academy.claude.com/courses/ai-fluency-for-pk-12-train-the-trainer",
+   "section": "AI Fluency",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "building-effective-human-agent-teams-beta",
+   "title": "Building Effective Human Agent Teams (Beta)",
+   "summary": "Moving a team from single-player AI to multiplayer: how the work changes, how a multiplayer agent differs from a chatbot, the team norms that support one, and four principles for healthy human-agent teams",
+   "url": "https://academy.claude.com/courses/building-effective-human-agent-teams",
+   "section": "AI Fluency",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "the-ai-native-sdlc-playbook",
+   "title": "The AI-native SDLC playbook",
+   "summary": "Twelve plays for using Claude at each stage of the software development lifecycle, for engineering, platform and security leads whose organization already uses Claude Code. About an hour of reading, with no quiz or completion badge; not listed as prep for any exam",
+   "url": "https://academy.claude.com/courses/ai-native-sdlc-playbook",
+   "section": "Developer and integration",
+   "certs": [
+    "developer-foundations",
+    "architect-professional"
+   ],
+   "extra": true
+  }
+ ],
+ "prepPaths": {
+  "associate-foundations": "https://anthropic-partners.skilljar.com/path/claude-certified-associate-foundations",
+  "developer-foundations": "https://anthropic-partners.skilljar.com/path/claude-certified-developer-foundations",
+  "architect-foundations": "https://anthropic-partners.skilljar.com/page/claude-certified-architect-foundations-prep-courses",
+  "architect-professional": "https://anthropic-partners.skilljar.com/path/claude-certified-architect-professional"
+ },
+ "strategy": {
+  "emphasis": {
+   "associate-foundations": "The heaviest domain is evaluating outputs (21%), not writing prompts (14%). Practice reviewing Claude's answers for fabricated details, verifying claims against sources, and deciding what needs human review. Build at least one Project with instructions and knowledge sources. The governance domain rewards knowing when not to upload sensitive data and how to anonymize.",
+   "developer-foundations": "A third of the exam is Applications and integration, so API mechanics deserve the most time: messages, streaming, caching, batch versus realtime, and schema design. Do not over-invest in Claude Code and debugging, which together are under 6%. Build one application end to end that calls the API, uses a tool, and validates structured output.",
+   "architect-foundations": "The six exam scenarios are published, and four appear per sitting. Study the scenarios until each one's likely questions are predictable, then do the guide's own preparation exercises. The appendix names specific testable items (stop_reason values, isError, fork_session, --json-schema); go down that list and verify you can explain each one.",
+   "architect-professional": "More than half the exam is integration, solution design, and evaluation. Build or dissect an end-to-end system with RAG, evaluation, and observability. Do not neglect the soft domains: stakeholder communication and governance are 28% combined, and the sample rationales reward defensible, least-privilege, justified decisions."
+  },
+  "weeks": [
+   {
+    "title": "Week 1: scope",
+    "body": "Read the exam guide fully. Build the blueprint checklist. Complete the [prep courses](learning-paths.md#certification-prep-courses) for your exam, marking checklist items green as they are covered."
+   },
+   {
+    "title": "Week 2: depth",
+    "body": "Work the red and yellow checklist items through documentation and hands-on building. This is the week to build the real thing the guide asks for: a Project, an application, an agent, or an extraction pipeline depending on your exam."
+   },
+   {
+    "title": "Week 3: close",
+    "body": "Reread the guide. Work the sample questions and rationales. Rerun the [system test, network checks, and application shutdown list](registration.md#preparing-your-computer-for-an-online-proctored-exam) on the machine you will test with. Sit the exam early in a day when you are fresh."
+   }
+  ],
+  "examWeek": [
+   "Name on Pearson registration exactly matches your photo ID",
+   "Accommodations, if needed, approved before scheduling",
+   "OnVUE system test passed on the exam machine and network",
+   "Corporate network domains cleared with IT, or a personal machine and network arranged",
+   "Know the shutdown list: browsers, Zoom, Teams, Outlook, Discord, remote-access tools, and the Claude desktop app",
+   "Private room arranged, desk clear, second monitor disconnected",
+   "Reschedule decision made no later than 24 hours out, since after that the fee is forfeited"
+  ],
+  "during": [
+   "120 minutes for 53 to 63 questions is roughly two minutes each. Flag and move on rather than stalling; unanswered questions score zero, so answer everything.",
+   "Multiple-response items state how many responses to select. Read that line first.",
+   "Scenario questions reward the best answer among defensible ones. The official rationales consistently prefer the option that addresses the stated constraint (cost, privacy, least privilege) over the generically reasonable one.",
+   "If a question seems faulty, note its number mentally and [report it afterward](policies.md#reporting-a-problem-with-a-question); reporting never hurts your result."
+  ]
+ },
+ "videos": [
+  {
+   "id": "lesson-2b-the-4d-framework",
+   "section": "AI Fluency, the complete course",
+   "title": "Lesson 2B: The 4D framework",
+   "summary": "Delegation, Description, Discernment, and Diligence, the spine of the whole course and of the Associate blueprint.",
+   "url": "https://www.youtube.com/watch?v=W4Ua6XFfX9w",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "lesson-3b-capabilities-and-limitations",
+   "section": "AI Fluency, the complete course",
+   "title": "Lesson 3B: Capabilities and limitations",
+   "summary": "What Claude can and cannot do, and how to tell the difference. This is the material behind the **AI Capabilities and Limitations** course and the questions that ask you to verify rather than trust.",
+   "url": "https://www.youtube.com/watch?v=W5cga7xipRI",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "lesson-7-effective-prompting-techniques",
+   "section": "AI Fluency, the complete course",
+   "title": "Lesson 7: Effective prompting techniques",
+   "summary": "The deep dive on prompting, and the longest lesson in the course.",
+   "url": "https://www.youtube.com/watch?v=2YCaBqP8muw",
+   "certs": [
+    "associate-foundations"
+   ]
+  },
+  {
+   "id": "prompting-101",
+   "section": "Prompting",
+   "title": "Prompting 101",
+   "summary": "Prompt structure, iteration, and the habits behind reliable output, recorded at the Code w/ Claude conference.",
+   "url": "https://www.youtube.com/watch?v=ysPbXH0LpIE",
+   "certs": [
+    "associate-foundations",
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "ai-prompt-engineering-a-deep-dive",
+   "section": "Prompting",
+   "title": "AI prompt engineering: a deep dive",
+   "summary": "A longer conversation on how prompting actually works, from the people who do it at Anthropic.",
+   "url": "https://www.youtube.com/watch?v=T9aRN5JkmL8",
+   "certs": [
+    "associate-foundations",
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "prompting-for-agents",
+   "section": "Prompting",
+   "title": "Prompting for agents",
+   "summary": "How prompting changes once the model is acting rather than answering. Relevant to the agent domains on the Developer and Architect papers.",
+   "url": "https://www.youtube.com/watch?v=XSZP9GhhuAc",
+   "certs": [
+    "associate-foundations",
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "mastering-claude-code-in-30-minutes",
+   "section": "Claude Code",
+   "title": "Mastering Claude Code in 30 minutes",
+   "summary": "A compact end-to-end tour. The fastest way to see the whole tool at once.",
+   "url": "https://www.youtube.com/watch?v=6eBSHbLKuN0",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "claude-code-best-practices",
+   "section": "Claude Code",
+   "title": "Claude Code best practices",
+   "summary": "Configuration, workflows, and working habits, recorded at Code w/ Claude.",
+   "url": "https://www.youtube.com/watch?v=gv0WHhKelSE",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "building-headless-automation-with-claude-code",
+   "section": "Claude Code",
+   "title": "Building headless automation with Claude Code",
+   "summary": "Headless mode and automation, which the Developer blueprint names explicitly.",
+   "url": "https://www.youtube.com/watch?v=dRsjO-88nBs",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "building-with-mcp-and-the-claude-api",
+   "section": "The Claude API and MCP",
+   "title": "Building with MCP and the Claude API",
+   "summary": "The two together, which is how the exams treat them.",
+   "url": "https://www.youtube.com/watch?v=aZLr962R6Ag",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "mcp-201",
+   "section": "The Claude API and MCP",
+   "title": "MCP 201",
+   "summary": "Beyond the basics: the material the Advanced Topics course covers.",
+   "url": "https://www.youtube.com/watch?v=HNzH5Us1Rvg",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "why-anthropic-built-and-donated-mcp",
+   "section": "The Claude API and MCP",
+   "title": "Why Anthropic built and donated MCP",
+   "summary": "The reasoning behind the protocol, which explains the design decisions the scenario questions ask you to apply.",
+   "url": "https://www.youtube.com/watch?v=PLyCki2K0Lg",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "building-more-effective-ai-agents",
+   "section": "Agents and subagents",
+   "title": "Building more effective AI agents",
+   "summary": "The workflow-versus-agent decision, which is the judgment the scenario questions test most often.",
+   "url": "https://www.youtube.com/watch?v=uhJJgc-0iTQ",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "tips-for-building-ai-agents",
+   "section": "Agents and subagents",
+   "title": "Tips for building AI agents",
+   "summary": "Practical guidance on scoping, tools, and when to stop adding autonomy.",
+   "url": "https://www.youtube.com/watch?v=LP5OCa20Zpg",
+   "certs": [
+    "developer-foundations",
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "claude-in-amazon-bedrock",
+   "section": "Deploying on Bedrock and Vertex AI",
+   "title": "Claude in Amazon Bedrock",
+   "url": "https://www.youtube.com/watch?v=8gTpgWru0Wg",
+   "certs": [
+    "architect-foundations",
+    "architect-professional"
+   ]
+  },
+  {
+   "id": "claude-in-google-cloud-s-vertex-ai",
+   "section": "Deploying on Bedrock and Vertex AI",
+   "title": "Claude in Google Cloud's Vertex AI",
+   "url": "https://www.youtube.com/watch?v=TUysIAtxyrQ",
+   "certs": [
+    "architect-foundations",
+    "architect-professional"
+   ]
+  }
+ ]
+}

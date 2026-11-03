@@ -1,18 +1,20 @@
 {
  "exam": "architect-professional",
- "syncedAt": "2026-11-03T16:18:13.494Z",
+ "syncedAt": "2026-11-03T17:12:41.960Z",
+ "contentHash": "09ff9e13aab8",
  "factsVerified": "2026-11-01",
  "counts": {
-  "questions": 83,
+  "questions": 93,
   "flashcards": 61,
   "guide": 3,
+  "app": 10,
   "distinct": {
    "Integration": 15,
    "Solution Design & Architecture": 11,
    "Evaluation, Testing & Optimization": 11,
-   "Governance, Safety & Risk Management": 8,
-   "Stakeholder Communication & Lifecycle Management": 8,
-   "Claude Models, Prompting & Context Engineering": 6,
+   "Governance, Safety & Risk Management": 11,
+   "Stakeholder Communication & Lifecycle Management": 11,
+   "Claude Models, Prompting & Context Engineering": 10,
    "Developer Productivity & Operational Enablement": 6
   }
  }

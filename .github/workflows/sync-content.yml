@@ -1,0 +1,65 @@
+# Daily import from the study repo. When it changes what the app ships, the content goes to the `content-sync`
+# branch and a PR (with the sync log and the Spanish still to translate); CI runs on it; a person merges and deploys.
+name: Content sync
+on:
+  schedule: [{ cron: '23 5 * * *' }]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency: { group: content-sync, cancel-in-progress: false }
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # The sync script expects this app inside a clone of the study repo
+      - uses: actions/checkout@v7
+        with: { repository: Amey-Thakur/CLAUDE-CERTIFICATIONS, path: study }
+      - uses: actions/checkout@v7
+        with: { path: study/practice-app, fetch-depth: 0 }
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+      - uses: actions/setup-node@v7
+        with: { node-version: 24 }
+      - id: sync
+        working-directory: study/practice-app
+        run: |
+          node scripts/sync-content.mjs > "$RUNNER_TEMP/sync.log" 2>&1 || { cat "$RUNNER_TEMP/sync.log"; exit 1; }
+          cat "$RUNNER_TEMP/sync.log"
+          if git diff --quiet -- src/content && [ -z "$(git ls-files --others --exclude-standard -- src/content)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.sync.outputs.changed == 'true'
+        working-directory: study/practice-app
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          upstream=$(git -C .. rev-parse --short HEAD)
+          git checkout -q -B content-sync
+          git add src/content
+          git commit -q -m "Content sync from the study repo (${upstream})"
+          # Nothing new since the last run: leave the branch and the PR alone
+          if git fetch -q origin content-sync 2>/dev/null && git diff --quiet FETCH_HEAD -- src/content; then
+            echo "content-sync already holds this content"; exit 0
+          fi
+          git push -q -f origin content-sync
+          {
+            echo "Automatic import from Amey-Thakur/CLAUDE-CERTIFICATIONS@${upstream}."
+            echo
+            echo '```'; cat "$RUNNER_TEMP/sync.log"; echo '```'
+            echo
+            echo 'Before merging: translate the Spanish items reported as stale or missing (the unit tests fail until they are current: `node scripts/i18n.mjs check`), map any course the log reports in `scripts/course-map.json`, review the diff, then deploy with `npm run deploy`.'
+          } > "$RUNNER_TEMP/body.md"
+          if [ "$(gh pr view content-sync --json state -q .state 2>/dev/null)" = "OPEN" ]; then
+            gh pr edit content-sync --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr create --head content-sync --base main --title "Content sync from the study repo" --body-file "$RUNNER_TEMP/body.md"
+          fi
+          gh workflow run ci.yml --ref content-sync

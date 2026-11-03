@@ -25,6 +25,15 @@ export function useNeedsCertPick(): boolean {
   return hasSnapshot && currentCertId(data, certLocal) === null
 }
 
+/** Which of the three study weeks the exam date puts you in: 0–2, or why there is none. */
+export function studyWeek(examDate: string | undefined, at: number): { week: number } | { far: number } | { past: true } | null {
+  if (!examDate) return null
+  const days = Math.ceil((new Date(examDate + 'T09:00').getTime() - at) / 864e5)
+  if (days < 0) return { past: true }
+  if (days > 21) return { far: days }
+  return { week: days > 14 ? 0 : days > 7 ? 1 : 2 }
+}
+
 export const examDateOf = (data: Data, cert: CertDef) => {
   const key = examDateKey(cert.id)
   return Object.hasOwn(data.settings, key) ? data.settings[key].value || undefined : undefined

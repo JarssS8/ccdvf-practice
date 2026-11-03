@@ -1,11 +1,13 @@
 {
  "exam": "architect-foundations",
- "syncedAt": "2026-11-03T16:18:13.472Z",
+ "syncedAt": "2026-11-03T17:06:05.463Z",
+ "contentHash": "e740a273149c",
  "factsVerified": "2026-11-01",
  "counts": {
   "questions": 92,
   "flashcards": 62,
   "guide": 12,
+  "app": 0,
   "distinct": {
    "Agentic Architecture & Orchestration": 17,
    "Claude Code Configuration & Workflows": 17,

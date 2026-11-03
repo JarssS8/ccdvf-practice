@@ -10,6 +10,16 @@ import { applyTheme, savedTheme } from './views/Settings.tsx'
 
 applyTheme(savedTheme())
 
+// A tab left open across a deploy asks for content chunks that no longer exist: load the new version once
+window.addEventListener('vite:preloadError', (e) => {
+  try {
+    if (sessionStorage.getItem('ccdvf_reloaded')) return
+    sessionStorage.setItem('ccdvf_reloaded', '1')
+  } catch { return }
+  e.preventDefault()
+  window.location.reload()
+})
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

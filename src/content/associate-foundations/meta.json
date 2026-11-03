@@ -1,11 +1,13 @@
 {
  "exam": "associate-foundations",
- "syncedAt": "2026-11-03T16:18:13.386Z",
+ "syncedAt": "2026-11-03T17:06:05.368Z",
+ "contentHash": "cb54f34ad149",
  "factsVerified": "2026-11-01",
  "counts": {
   "questions": 83,
   "flashcards": 61,
   "guide": 3,
+  "app": 0,
   "distinct": {
    "Output Evaluation and Validation": 18,
    "Workflow Integration and Solution Design": 13,

@@ -1447,5 +1447,185 @@
   ],
   "rationale": "Confident-but-wrong answers following a document refresh, with model and latency unchanged, point to retrieval feeding the model poor context, for example a broken re-index or mismatched embeddings. The other options would not be triggered specifically by a document refresh.",
   "dupGroup": "architect-professional-practice-2"
+ },
+ {
+  "id": "architect-professional-app-1",
+  "cert": "architect-professional",
+  "source": "app",
+  "domain": "Claude Models, Prompting & Context Engineering",
+  "question": "A document-intake pipeline runs two Claude stages on the same model. Stage one routes about 400,000 incoming emails a day into one of six queues, using labels that human reviewers agree on almost without exception. Stage two drafts a monthly regulatory analysis that reasons across dozens of filings. Finance asks the architect to cut cost. Which recommendation is best?",
+  "options": {
+   "A": "Move both stages to the smallest model, since a single uniform tier keeps the pipeline simpler to operate",
+   "B": "Keep both stages on the current model, since any model change risks quality regressions in production",
+   "C": "Evaluate a smaller model on the routing stage against a labeled set and switch only if it meets the bar",
+   "D": "Move the regulatory stage to a smaller model, since it runs only monthly and its volume is negligible"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "The cost sits in the high-volume routing stage, whose crisp labels make it the stage most likely to be served by a smaller model, and the switch is justified by evaluation rather than assumed. Moving everything down (A) ignores the deep reasoning stage two needs. Refusing any change (B) forgoes a saving the evidence may well support; model changes are managed with evaluation, not avoided. Downsizing the regulatory stage (D) targets the stage with negligible volume and the highest reasoning demand, saving little while risking the most.",
+  "evidence": "Model selection is a cost-latency-quality tradeoff argued from the task, not brand preference."
+ },
+ {
+  "id": "architect-professional-app-2",
+  "cert": "architect-professional",
+  "source": "app",
+  "domain": "Claude Models, Prompting & Context Engineering",
+  "question": "A legal team's summarization assistant must cite sources in an in-house citation style with several irregular cases (consolidated dockets, sealed exhibits, superseded rulings). The summaries are accurate, but citations for the irregular cases come out inconsistent, and two rewrites of the prose description of the style have not helped. The team has a set of correctly cited documents. What should the architect change first?",
+  "options": {
+   "A": "Fine-tune a model on the firm's past briefs so that the citation style is learned in the weights",
+   "B": "Add worked examples of each irregular case to the prompt, then re-test on held-out documents",
+   "C": "Expand the prose description of the style and mark the irregular-case rules as critical in capitals",
+   "D": "Ask the model to reason step by step about each citation before it writes the final summary"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "A format that is hard to state in prose is best conveyed by demonstration: few-shot examples covering exactly the failing irregular cases, checked on documents that were not used as examples. Fine-tuning (A) is the slow, expensive answer to a problem that examples in the prompt already solve. More prose and emphasis (C) repeats the approach that has failed twice. Chain-of-thought (D) helps multi-step reasoning, but the failure is an unfamiliar output format, not a reasoning error, and more reasoning without a reference pattern does not show the model what the style looks like.",
+  "evidence": "Apply prompt engineering techniques (zero-shot, few-shot, chain-of-thought)"
+ },
+ {
+  "id": "architect-professional-app-3",
+  "cert": "architect-professional",
+  "source": "app",
+  "domain": "Claude Models, Prompting & Context Engineering",
+  "question": "An account-research agent calls a CRM lookup tool six to eight times per task. Each call returns the full account record, about 15,000 tokens of history and metadata, although the agent only ever uses the contact name, account tier and renewal date. Long tasks now hit the context limit, and reasoning in the later steps degrades. Which change best addresses the problem?",
+  "options": {
+   "A": "Move the agent to a model with a larger context window so that all of the records fit",
+   "B": "Enable prompt caching on the tool results so the repeated records cost less per call",
+   "C": "Instruct the agent in its system prompt to ignore every record field it does not need",
+   "D": "Have the tool return only the fields the task uses before results enter the context"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "The context is being spent on data the task never uses; trimming the tool's output at the source keeps each call to a few hundred tokens, which addresses both the limit and the dilution that degrades later reasoning. A larger window (A) delays the same failure at higher cost and leaves the irrelevant material in place. Caching (B) reuses a stable prefix to cut cost and latency, but it does not reduce how much of the window the records occupy. An instruction to ignore fields (C) still sends every token into the context, so neither the limit nor the dilution changes.",
+  "evidence": "Optimize context windows and manage token usage"
+ },
+ {
+  "id": "architect-professional-app-4",
+  "cert": "architect-professional",
+  "source": "app",
+  "domain": "Claude Models, Prompting & Context Engineering",
+  "question": "Twelve internal assistants each carry their own pasted copy of the same compliance disclaimer and escalation procedure in their system prompts. Legal revised the wording a month ago; four assistants still use the old text, and nobody can say which version each assistant was running last week. What should the architect put in place?",
+  "options": {
+   "A": "A single versioned module for the shared block, referenced by every assistant and reviewed on change",
+   "B": "Prompt caching on each assistant's system prompt so the shared disclaimer is processed only once",
+   "C": "A quarterly audit that compares every assistant's copy with legal's master text and fixes differences",
+   "D": "One merged assistant to replace all twelve, so that only a single system prompt is left to maintain"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The failure is duplicated prompt content drifting silently. Factoring the shared block into one versioned module that every assistant references means a change is made once, reviewed, and traceable to a version. Caching (B) is a cost and latency mechanism; it neither propagates new wording nor records which version ran. A quarterly audit (C) is a detective control that leaves assistants out of date for months. Merging the assistants (D) throws away their specialisation to solve a maintenance problem that modular prompts solve directly.",
+  "evidence": "Prompt reuse at enterprise scale means modular prompts, versioning, and Skills, so behavior changes are reviewable events rather than silent drift."
+ },
+ {
+  "id": "architect-professional-app-5",
+  "cert": "architect-professional",
+  "source": "app",
+  "domain": "Governance, Safety & Risk Management",
+  "question": "A customer-service assistant looks up orders through a tool that accepts any order number. Its only protection is a system-prompt rule never to disclose other customers' orders. A red-team tester obtained another customer's delivery address by supplying that customer's order number with a plausible story. The product owner proposes rewording the rule more forcefully. What should the architect recommend instead?",
+  "options": {
+   "A": "Log every order lookup and have the support team review those logs weekly for suspicious access",
+   "B": "Scope the lookup tool to the authenticated customer's orders and add an output check as a layer",
+   "C": "Keep the reworded rule and move to a larger model that follows system instructions more reliably",
+   "D": "Require customers to restate the order number twice before the assistant reveals any details"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "The prompt rule is a single layer, and it has already failed. Restricting the tool to the authenticated customer's own orders removes the capability that was abused, and an output check adds an independent layer behind it. Weekly log review (A) detects a leak after the data is gone. A stronger rule on a larger model (C) is still one bypassable prompt-level layer. Restating the number (D) does nothing against an attacker who already has it.",
+  "evidence": "Layer guardrails: input validation, output filtering, scoped permissions, human-in-the-loop for consequential actions. One layer is a single point of failure."
+ },
+ {
+  "id": "architect-professional-app-6",
+  "cert": "architect-professional",
+  "source": "app",
+  "domain": "Governance, Safety & Risk Management",
+  "question": "A recruiting firm will use Claude to shortlist applicants for interview. Validated against recruiters' past decisions, the shortlister agrees 94% of the time overall, and the team has already removed names and photos from its inputs. Applicants are not currently told how shortlists are produced. Before launch, the ethics review asks for one more addition. Which is most important?",
+  "options": {
+   "A": "Senior recruiters reviewing a random sample of shortlists every week and correcting any poor picks",
+   "B": "Also redacting universities and postcodes, since those fields can act as proxies for background",
+   "C": "Raising agreement with recruiters' past decisions to 98% on a larger and more recent validation set",
+   "D": "Comparing shortlist rates between applicant groups, and disclosing the model's role to candidates"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Nothing yet measures whether outcomes differ between groups: a 94% aggregate can hide large gaps, and agreement with past recruiter decisions can simply reproduce their bias. Applicants are also unaware that a model is involved. Comparing outcomes across groups and disclosing the model's role closes both gaps. Weekly recruiter sampling (A) judges shortlists against the same recruiter standard that may carry the bias, and a random sample does not compare groups. Redacting more fields (B) is a sensible mitigation, but like the first redaction it is unmeasured, so nobody can tell whether a disparity remains. A higher agreement target (C) is still an aggregate tied to past decisions, so closer agreement can mean closer reproduction of past bias.",
+  "evidence": "Ethics is scored concretely: bias testing, fairness across user groups, transparency about AI involvement."
+ },
+ {
+  "id": "architect-professional-app-7",
+  "cert": "architect-professional",
+  "source": "app",
+  "domain": "Governance, Safety & Risk Management",
+  "question": "A US federal agency plans a cloud-hosted Claude assistant to help its caseworkers answer benefit inquiries. Some inquiries include applicants' medical details, and a small share come from applicants living in the EU. The agency CIO asks which regulatory consideration decides which hosting environments the solution may use at all. Which answer is best?",
+  "options": {
+   "A": "HIPAA, since medical details in the inquiries must be de-identified before they leave the agency",
+   "B": "GDPR, since applicants in the EU mean the service has to be hosted in an EU region to serve them",
+   "C": "FedRAMP, since a federal agency may only deploy to cloud services authorized for federal use",
+   "D": "The agency's records-retention schedule, since every transcript must be kept for a set period"
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "The question is which environments the agency may deploy to at all, and for a US federal agency's cloud deployment that is what FedRAMP governs: authorized environments carrying the required controls. HIPAA (A) is relevant to how health information flows through the design, but it is a data-handling obligation, not the rule that determines which cloud environments a federal agency may use. GDPR (B) is about how personal data of people in the EU is processed (minimization, purpose limitation, erasure) and touches only a small share of inquiries; it does not decide the agency's hosting environment. A retention schedule (D) shapes what is stored and for how long, not where the solution may run.",
+  "evidence": "US federal cloud deployments: authorized environments and controls"
+ },
+ {
+  "id": "architect-professional-app-8",
+  "cert": "architect-professional",
+  "source": "app",
+  "domain": "Stakeholder Communication & Lifecycle Management",
+  "question": "At kickoff, an insurer's COO says, \"We want a Claude agent for claims.\" The engineering team, keen to show momentum, proposes building a multi-agent prototype over the next two weeks. Nobody has yet said which part of claims handling is costly, what constraints apply, or how success would be measured. What should the architect do first?",
+  "options": {
+   "A": "Run structured discovery on the problem, constraints and success measures before choosing a design",
+   "B": "Build the prototype quickly, since a working demo is the fastest way to surface the real requirements",
+   "C": "Choose the model and orchestration framework first, since those choices constrain every later decision",
+   "D": "Request all historical claims data so the team can explore it and find where an agent would add value"
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "With no stated problem, constraints or success measure, any design, including the choice of an agent at all, is a guess. Discovery comes before architecture. A prototype (B) commits to a multi-agent design before anyone knows whether the problem needs one, and its demo cannot be judged without success measures. Picking the model and framework (C) is a design decision taken before the requirement exists. A bulk data request (D) is exploration without a question, and it raises data-handling obligations before any purpose has been established.",
+  "evidence": "Structured discovery before design: business problem, constraints, success measures, then architecture."
+ },
+ {
+  "id": "architect-professional-app-9",
+  "cert": "architect-professional",
+  "source": "app",
+  "domain": "Stakeholder Communication & Lifecycle Management",
+  "question": "Three months after launch, business users of a contract-review assistant keep reporting that it is \"too slow\". Requests range from quick clause lookups to full reviews of 80-page agreements, and no response-time target was ever agreed for either. The team has made several tuning changes, and after each one the complaints continue. What should the architect do next?",
+  "options": {
+   "A": "Move full reviews to a faster model once an evaluation confirms that review quality is maintained",
+   "B": "Enable streaming so text appears sooner, then survey users after a month on whether it feels faster",
+   "C": "Add per-request latency dashboards so the team can see exactly where the time is being spent",
+   "D": "Agree with the business how fast each kind of request must be, then track and report against that"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "The complaints persist because nobody has defined fast enough for either kind of request, so no change can be shown to have succeeded. Agreeing a target per request type with the business, then measuring and reporting against it, turns the complaint into a shared, testable expectation. A faster model (A) is a reasonable lever, but without a target nobody knows whether the result will be fast enough or whether the lookups were the problem. Streaming plus a survey (B) improves perceived speed and gathers opinions, but it still leaves no agreed threshold to judge against. Dashboards (C) show where time goes inside the team, but they do not tell the team what speed the business expects.",
+  "evidence": "expectations get managed with explicit SLAs"
+ },
+ {
+  "id": "architect-professional-app-10",
+  "cert": "architect-professional",
+  "source": "app",
+  "domain": "Stakeholder Communication & Lifecycle Management",
+  "question": "A Claude solution was handed over to a client's platform team, which now owns it and must evolve it independently. The handoff package was a complete set of architecture diagrams. Within a month the team moved a per-user greeting to the top of the system prompt, which broke prompt caching and raised costs, and removed a validation step they believed was redundant. Neither change contradicted the diagrams. What should future handoffs add?",
+  "options": {
+   "A": "Diagrams annotated with every prompt section and pipeline step, kept current in the client's wiki",
+   "B": "A written account of why each design choice was made and the constraints any change must respect",
+   "C": "A hands-on session walking the client team through how to operate and deploy each component",
+   "D": "A sign-off step in which the architect's team reviews every prompt or pipeline edit before release"
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Both changes were reasonable-looking edits that broke an unstated constraint: static content goes first so caching works, and the validation step is a guardrail. What the client lacked was the reasoning behind the design, so handoff must carry the reasons and the constraints that later changes have to respect. Annotated diagrams (A) record more of what was built, but the edits did not contradict the diagrams, so more detail on structure would not have prevented them. An operations walkthrough (C) teaches how to run and deploy the system, not why it is built the way it is. Architect sign-off (D) catches errors only by keeping the original team in the loop, which contradicts the requirement that the client evolve the solution independently.",
+  "evidence": "handoff includes implementation guidance, not just diagrams"
  }
 ]

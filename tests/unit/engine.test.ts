@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { inCert, questionIndex, questionsOf, repoQuestions } from '../../src/lib/content'
-import { attemptsOf, buildAttempt, domainMisses, domainStats, domainTrends, exposures, isCorrect, latestByQuestion, modeSpec, mostMissed, readiness, resultOf, scoreAttempt } from '../../src/lib/engine'
+import { ensureAll, inCert, questionIndex, questionsOf, repoQuestions as allQuestions } from '../../src/lib/content'
+import { attemptsOf, buildAttempt, countsForReadiness, domainMisses, domainStats, domainTrends, exposures, isCorrect, latestByQuestion, modeSpec, mostMissed, readiness, resultOf, scoreAttempt } from '../../src/lib/engine'
 import { deck, queue, schedule } from '../../src/lib/srs'
-import { currentCertId } from '../../src/lib/cert'
+import { currentCertId, studyWeek } from '../../src/lib/cert'
 import { CERTS, certById, certOfQuestion } from '../../src/shared/certs'
 import { answersCsv } from '../../src/lib/export'
 import { en } from '../../src/i18n/en'
@@ -10,6 +10,9 @@ import { es } from '../../src/i18n/es'
 import type { Data } from '../../src/lib/store'
 import type { Attempt } from '../../src/lib/types'
 
+// Content arrives per certification on demand; these tests use all of it
+await ensureAll()
+const repoQuestions = allQuestions()
 const qs = questionIndex([])
 const DV = certById('developer-foundations')
 const AF = certById('architect-foundations')
@@ -152,5 +155,44 @@ describe('which certification is studied', () => {
     const legacy = withAttempt(empty(), 'x', [repoQuestions[0].id], () => true, 1)
     expect(currentCertId(legacy, null)).toBe('developer-foundations')
     expect(currentCertId(empty(), null)).toBeNull()
+  })
+})
+
+describe('questions written by the app', () => {
+  const CCARP = certById('architect-professional')
+  const app = questionsOf(CCARP).filter((q) => q.source === 'app')
+
+  it('fill the thin domains and stay out of duplicate groups', () => {
+    expect(app.length).toBeGreaterThanOrEqual(10)
+    expect(app.every((q) => !q.dupGroup)).toBe(true)
+    expect(questionsOf(DV).filter((q) => q.source === 'app' && q.domain === 'Claude Code').length).toBeGreaterThanOrEqual(4)
+  })
+  it('are practice: mocks may use them, readiness never counts them', () => {
+    expect(countsForReadiness(app[0])).toBe(false)
+    expect(countsForReadiness({ source: 'ai' })).toBe(false)
+    expect(countsForReadiness({ source: 'practice' })).toBe(true)
+    const d = withAttempt(empty(), 'x', app.map((q) => q.id), () => true, 1, 'drill', CCARP.id)
+    expect(exposures(d, qs, CCARP)).toHaveLength(app.length)
+    expect(readiness(exposures(d, qs, CCARP), qs, CCARP)).toBeNull()
+  })
+  it('a full mock of a formerly thin certification keeps the domain quotas', () => {
+    const a = buildAttempt('full', empty(), qs, { cert: CCARP, now: 0 })
+    if ('error' in a) throw new Error(a.error)
+    const per = (name: string) => a.questionIds.filter((id) => qs.get(id)!.domain === name).length
+    expect(per('Claude Models, Prompting & Context Engineering')).toBe(8)
+    expect(per('Governance, Safety & Risk Management')).toBe(9)
+  })
+})
+
+describe('study plan week', () => {
+  const at = new Date('2026-11-03T09:00').getTime()
+  it('three weeks counted back from the exam date', () => {
+    expect(studyWeek(undefined, at)).toBeNull()
+    expect(studyWeek('2026-11-30', at)).toEqual({ far: 27 })
+    expect(studyWeek('2026-11-24', at)).toEqual({ week: 0 })
+    expect(studyWeek('2026-11-14', at)).toEqual({ week: 1 })
+    expect(studyWeek('2026-11-05', at)).toEqual({ week: 2 })
+    expect(studyWeek('2026-11-03', at)).toEqual({ week: 2 })
+    expect(studyWeek('2026-11-01', at)).toEqual({ past: true })
   })
 })

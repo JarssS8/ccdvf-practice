@@ -65,10 +65,11 @@ for (const cert of CERTS) {
   const warn = (m) => console.warn(`  ! ${cert.code} ${m}`)
   const names = cert.domains.map((d) => d.name)
 
-  // Questions: repo bank + the exam guide's sample questions
-  const samplesFile = join(here, 'guide-samples', `${cert.id}.json`)
-  const samples = existsSync(samplesFile) ? JSON.parse(readFileSync(samplesFile, 'utf8')) : []
-  const questions = [...bank.questions.filter((q) => q.exam === cert.id), ...samples].map((q) => ({
+  // Questions: repo bank + the exam guide's sample questions + the app's own items for thin domains (source "app")
+  const local = (dir) => { const f = join(here, dir, `${cert.id}.json`); return existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : [] }
+  const samples = local('guide-samples')
+  const extra = local('extra-questions')
+  const questions = [...bank.questions.filter((q) => q.exam === cert.id), ...samples, ...extra].map((q) => ({
     id: q.id,
     cert: cert.id,
     source: q.source,
@@ -77,19 +78,24 @@ for (const cert of CERTS) {
     options: q.options,
     answer: (Array.isArray(q.answer) ? q.answer.join('') : String(q.answer)).replace(/[^A-E]/g, '').split(''),
     rationale: q.rationale,
+    ...(q.evidence ? { evidence: q.evidence } : {}),
   }))
   for (const q of questions) {
     if (!names.includes(q.domain)) warn(`${q.id}: unknown domain "${q.domain}"`)
     if (!q.answer.length || q.answer.some((l) => !q.options[l])) warn(`${q.id}: answer not among options`)
   }
 
+  // App-written items stay out of the clusters: a shared group would let them hide a repo question from readiness
   const toks = questions.map((q) => tokens(q.question + ' ' + q.options[q.answer[0]]))
   const parent = questions.map((_, i) => i)
   const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])))
   let dups = 0
   for (let i = 0; i < questions.length; i++)
-    for (let j = i + 1; j < questions.length; j++)
-      if (jaccard(toks[i], toks[j]) >= 0.33) { parent[find(j)] = find(i); dups++ }
+    for (let j = i + 1; j < questions.length; j++) {
+      if (jaccard(toks[i], toks[j]) < 0.33) continue
+      if (questions[i].source === 'app' || questions[j].source === 'app') { warn(`${questions[j].id} is too close to ${questions[i].id}: rewrite the app item`); continue }
+      parent[find(j)] = find(i); dups++
+    }
   const groups = {}
   questions.forEach((q, i) => (groups[find(i)] ??= []).push(q.id))
   for (const ids of Object.values(groups)) {
@@ -124,13 +130,18 @@ for (const cert of CERTS) {
   write(`${cert.id}/flashcards.json`, flashcards)
   write(`${cert.id}/notes.json`, notes)
   write(`${cert.id}/blueprint.json`, blueprint)
+  // syncedAt only moves when the imported content does, so an unchanged daily sync leaves no diff
+  const contentHash = createHash('sha1').update(JSON.stringify([questions, flashcards, notes, blueprint, verified])).digest('hex').slice(0, 12)
+  let previous = null
+  try { previous = JSON.parse(readFileSync(join(out, cert.id, 'meta.json'), 'utf8')) } catch { /* first sync */ }
   write(`${cert.id}/meta.json`, {
     exam: cert.id,
-    syncedAt: new Date().toISOString(),
+    syncedAt: previous?.contentHash === contentHash ? previous.syncedAt : new Date().toISOString(),
+    contentHash,
     factsVerified: verified,
-    counts: { questions: questions.length, flashcards: flashcards.length, guide: samples.length, distinct: pool },
+    counts: { questions: questions.length, flashcards: flashcards.length, guide: samples.length, app: extra.length, distinct: pool },
   })
-  console.log(`${cert.code}: questions ${questions.length} (${dups} near-duplicate pairs, ${samples.length} from the guide) · flashcards ${flashcards.length} · facts verified ${verified}`)
+  console.log(`${cert.code}: questions ${questions.length} (${dups} near-duplicate pairs, ${samples.length} from the guide, ${extra.length} written by the app) · flashcards ${flashcards.length} · facts verified ${verified}`)
 }
 
 // Program news: "### Month: title" entries under year headings (common to every certification)
@@ -151,5 +162,93 @@ for (const line of read('guide/program-changes.md').split('\n')) {
 }
 for (const n of news) n.body = n.body.trim()
 if (!only) write('news.json', news.slice(0, 12))
+
+// ---------- study guide pages: confusable pairs, courses, study plan, official videos ----------
+
+const map = JSON.parse(readFileSync(join(here, 'course-map.json'), 'utf8'))
+const gwarn = (m) => console.warn('  ! guide ' + m)
+const slug = (s) => s.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+/** Markdown fit for the app: no diagrams, images, alert markers or horizontal rules. */
+const clean = (s) => s
+  .replace(/```mermaid[\s\S]*?```\n?/g, '')
+  .replace(/^.*!\[.*$\n?/gm, '')
+  .replace(/^> \[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\n/gm, '')
+  .replace(/^---+\s*$/gm, '')
+  .replace(/\n{3,}/g, '\n\n')
+  .trim()
+/** `## Heading` sections of a page, in order. */
+const sections = (text, level = '## ') => {
+  const out = []
+  let cur = null
+  for (const line of text.split('\n')) {
+    if (line.startsWith(level)) { cur = { title: line.slice(level.length).trim(), body: '' }; out.push(cur); continue }
+    if (cur) cur.body += line + '\n'
+  }
+  return out
+}
+const certsOf = (table, key, what) => {
+  if (!Object.hasOwn(map[table], key)) { gwarn(`${what} "${key}" is not in scripts/course-map.json`); return [] }
+  return map[table][key]
+}
+const byShort = (name) => CERTS.find((c) => c.short === name.trim())?.id
+
+const confusions = sections(read('guide/confusions.md'))
+  .filter((s) => !/^where to go next/i.test(s.title))
+  .map((s) => ({ id: slug(s.title), title: s.title, body: clean(s.body) }))
+
+const courses = []
+for (const s of sections(read('guide/courses.md'))) {
+  for (const row of s.body.split('\n')) {
+    const cells = row.split('|').slice(1, -1).map((c) => c.trim())
+    const url = cells[2]?.match(/\((https:\/\/academy\.claude\.com\/[^)]+)\)/)?.[1]
+    if (cells.length < 3 || !url) continue
+    courses.push({ id: slug(cells[0]), title: cells[0], summary: cells[1], url, section: s.title, certs: certsOf('courses', cells[0], 'course') })
+  }
+}
+for (const x of JSON.parse(readFileSync(join(here, 'extra-courses.json'), 'utf8'))) {
+  if (courses.some((c) => c.url === x.url)) { gwarn(`extra course now listed upstream, remove it from scripts/extra-courses.json: ${x.title}`); continue }
+  courses.push({ id: slug(x.title), title: x.title, summary: x.summary, url: x.url, section: x.section, certs: certsOf('courses', x.title, 'course'), extra: true })
+}
+if (courses.length < 25) gwarn(`only ${courses.length} courses parsed from guide/courses.md`)
+
+const prepPaths = {}
+for (const row of read('guide/learning-paths.md').split('\n')) {
+  const m = row.match(/^\| ([^|]+?) \| \[[^\]]+\]\((https:\/\/anthropic-partners\.skilljar\.com\/[^)]+)\)/)
+  const id = m && byShort(m[1])
+  if (id) prepPaths[id] = m[2]
+}
+for (const c of CERTS) if (!prepPaths[c.id]) gwarn(`no official prep path for ${c.code}`)
+
+const strategyText = read('guide/study-strategy.md')
+const part = (title) => sections(strategyText).find((s) => s.title.toLowerCase().startsWith(title))?.body ?? ''
+const emphasis = {}
+// By link target (../<cert>/README.md), not by the display name
+for (const m of part('per-certification emphasis').matchAll(/^\*\*\[[^\]]+\]\(\.\.\/([a-z-]+)\/README\.md\)\.\*\* (.+)$/gm)) {
+  if (CERTS.some((c) => c.id === m[1])) emphasis[m[1]] = m[2].trim()
+}
+for (const c of CERTS) if (!emphasis[c.id]) gwarn(`no study emphasis for ${c.code}`)
+const bullets = (body, re = /^- (?:\[ \] )?(.+)$/gm) => [...body.matchAll(re)].map((m) => m[1].trim())
+const weeks = bullets(part('a sensible three-week shape'), /^- \*\*([^*]+?)\.\*\* (.+)$/gm).length
+  ? [...part('a sensible three-week shape').matchAll(/^- \*\*([^*]+?)\.\*\* (.+)$/gm)].map((m) => ({ title: m[1].trim(), body: m[2].trim() }))
+  : []
+if (weeks.length !== 3) gwarn(`expected 3 study weeks, found ${weeks.length}`)
+const strategy = { emphasis, weeks, examWeek: bullets(part('exam week checklist')), during: bullets(part('during the exam')) }
+if (!strategy.examWeek.length || !strategy.during.length) gwarn('exam-week checklist or exam tips not found')
+
+const videos = []
+for (const s of sections(read('guide/videos.md'))) {
+  if (/playlist/i.test(s.title)) continue
+  const certs = certsOf('videos', s.title, 'video section')
+  for (const v of sections(s.body, '### ')) {
+    const url = v.body.match(/\]\((https:\/\/www\.youtube\.com\/watch\?v=[\w-]+)\)/)?.[1]
+    if (!url) continue
+    const summary = v.body.split('\n').map((l) => l.trim()).find((l) => l && !l.startsWith('[![') && !l.startsWith('!['))
+    videos.push({ id: slug(v.title), section: s.title, title: v.title, ...(summary ? { summary } : {}), url, certs })
+  }
+}
+if (videos.length < 10) gwarn(`only ${videos.length} videos parsed from guide/videos.md`)
+
+if (!only) write('guide.json', { confusions, courses, prepPaths, strategy, videos })
+console.log(`guide: ${confusions.length} confusable pairs · ${courses.length} courses · ${videos.length} videos · ${strategy.examWeek.length} exam-week checks`)
 
 checkTranslations('check')

@@ -48,11 +48,18 @@ export default function ReviewView({ id, index }: { id: string; index: number })
         {!q ? <p>{t.review.gone}</p> : (
           <>
             <QuestionCard q={q} seed={a.seed} selected={choice} reveal showDomain />
+            {q.source === 'app' && <p className="callout callout-info small">{t.review.appNote}</p>}
             <Explanation q={q} seed={a.seed} />
             <div className="row">
               <button className="btn btn-sm" disabled={inDeck} onClick={() => dispatch({ type: 'review', id: crypto.randomUUID(), cardId: 'q:' + qid, rating: ADDED, reviewedAt: now() })}>
                 <Icon name="cards" size={16} />{inDeck ? t.review.inDeck : t.review.addDeck}
               </button>
+              {q.source === 'app' && (
+                <a className="btn btn-sm" target="_blank" rel="noopener noreferrer"
+                  href={`https://github.com/JarssS8/ccdvf-practice/issues/new?title=${encodeURIComponent(`Question ${q.id}: the key looks wrong`)}`}>
+                  <Icon name="alert" size={16} />{t.review.appReport}
+                </a>
+              )}
               {q.source === 'ai' && (
                 <button className="btn btn-sm btn-danger" disabled={!!reported} onClick={() => dispatch({ type: 'aiq.report', id: q.id })}>
                   <Icon name="alert" size={16} />{reported ? t.review.reported : t.review.report}

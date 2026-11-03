@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { flashcardText, flashcardsOf, localize, newsFor, notesFor, questionsOf, repoQuestions } from '../../src/lib/content'
-import { CERTS } from '../../src/shared/certs'
+import { ensureAll, flashcardText, flashcardsOf, guide, guideText, localize, newsFor, notesFor, questionsOf, repoQuestions as allQuestions } from '../../src/lib/content'
+import { CERTS, isCertId } from '../../src/shared/certs'
+import { guideEntries } from '../../src/shared/guide'
+
+// Content arrives per certification on demand; these tests read all of it
+await ensureAll()
+const repoQuestions = allQuestions()
 
 describe('localized questions', () => {
   it('keep the English answer key and option letters', () => {
@@ -35,6 +40,22 @@ describe('other content', () => {
       expect(notesFor(c, 'es').cheatSheet).not.toBe(notesFor(c, 'en').cheatSheet)
     }
     expect(newsFor('es').length).toBe(newsFor('en').length)
+  })
+  it('the guide pages: nine confusable pairs, courses mapped to real certifications, a prep path and a plan for each', () => {
+    expect(guide.confusions).toHaveLength(9)
+    expect(guide.courses.length).toBeGreaterThanOrEqual(28)
+    for (const c of guide.courses) {
+      expect(c.certs.length, c.title).toBeGreaterThan(0)
+      expect(c.certs.every(isCertId)).toBe(true)
+      expect(c.url).toMatch(/^https:\/\/academy\.claude\.com\/courses\//)
+    }
+    for (const c of CERTS) {
+      expect(guide.prepPaths[c.id]).toMatch(/^https:\/\/anthropic-partners\.skilljar\.com\//)
+      expect(guide.strategy.emphasis[c.id]).toBeTruthy()
+      expect(guide.courses.some((x) => x.certs.includes(c.id))).toBe(true)
+    }
+    expect(guide.strategy.weeks).toHaveLength(3)
+    for (const [key, en] of guideEntries(guide)) expect(guideText(key, en, 'es'), key).not.toBe(en)
   })
   it('question ids are unique across certifications', () => {
     expect(new Set(repoQuestions.map((q) => q.id)).size).toBe(repoQuestions.length)

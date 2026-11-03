@@ -12,6 +12,7 @@ describe('browser', { skip }, () => {
   const problems = []
   const email = uniqueEmail('ui')
   const PW = 'correct horse battery'
+  let drillResults = ''
 
   before(async () => {
     clearRateLimits()
@@ -66,6 +67,7 @@ describe('browser', { skip }, () => {
       await page.getByRole('button', { name: 'Siguiente' }).click()
     }
     await page.waitForURL(/#\/results\//)
+    drillResults = page.url()
     await page.goto(BASE + '/#/progress')
     await page.waitForSelector('.hbar-row')
     assert.equal(await page.locator('.hbar-row').count(), 8)
@@ -99,6 +101,11 @@ describe('browser', { skip }, () => {
     assert.match(await page.locator('.grid-modes').first().textContent(), /60 preguntas · 120 min/)
     assert.match(await page.locator('body').textContent(), /12 preguntas · corrección al momento/)
 
+    // An attempt of the other certification still opens with its own domains
+    await page.goto(drillResults)
+    await page.waitForSelector('#score-h')
+    assert.match(await page.locator('main').textContent(), /Aplicaciones e integración|Selección y optimización|Agentes y workflows|Ingeniería de prompts|Herramientas y MCP|Seguridad|Claude Code|Evaluación, pruebas/)
+
     // Exam date: one per certification
     await page.goto(BASE + '/#/settings')
     await page.fill('#exam-date', '2027-01-15')
@@ -121,6 +128,35 @@ describe('browser', { skip }, () => {
       await page.waitForTimeout(250)
     }
     assert.deepEqual(rows, [{ key: 'cert', value: 'developer-foundations' }, { key: 'exam_date:architect-foundations', value: '2027-01-15' }])
+    await page.goto(BASE + '/#/settings')
+  })
+
+  it('notes: confusable pairs, courses for the certification, and a plan that follows the exam date', async () => {
+    await page.goto(BASE + '/#/notes/confusions')
+    await page.waitForSelector('main article.card')
+    assert.equal(await page.locator('.seg-tabs a').count(), 6)
+    assert.equal(await page.locator('main article.card').count(), 9)
+    assert.match(await page.locator('main').textContent(), /La pregunta clave/)
+
+    await page.goto(BASE + '/#/notes/courses')
+    const prep = page.getByRole('link', { name: /Ruta oficial de preparación de CCDV-F/ })
+    assert.match(await prep.getAttribute('href'), /claude-certified-developer-foundations/)
+    assert.ok(await page.locator('.course-list').first().locator('li').count() >= 6)
+    assert.match(await page.locator('main').textContent(), /Building with the Claude API/)
+
+    // Exam in five days: the plan marks week 3 and Home points at the checklist
+    const inFive = new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10)
+    await page.goto(BASE + '/#/settings')
+    await page.fill('#exam-date', inFive)
+    await page.locator('#exam-date').blur()
+    await page.goto(BASE + '/#/')
+    await page.getByRole('link', { name: /Semana del examen/ }).click()
+    await page.waitForURL(/#\/notes\/plan/)
+    await page.waitForSelector('.week-card.current')
+    const current = page.locator('.week-card.current')
+    assert.equal(await current.count(), 1)
+    assert.match(await current.textContent(), /Semana 3|semana 3/i)
+    assert.ok(await page.locator('#exam-week li').count() >= 5)
     await page.goto(BASE + '/#/settings')
   })
 

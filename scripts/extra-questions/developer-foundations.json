@@ -1,0 +1,66 @@
+[
+ {
+  "id": "developer-foundations-app-1",
+  "source": "app",
+  "domain": "Claude Code",
+  "task": "Claude Code Operation: the CLAUDE.md hierarchy",
+  "question": "A team adopts Claude Code. The lead wants every developer's sessions to follow the convention \"run the full test suite before proposing a commit\". One developer also personally prefers very terse answers, which colleagues do not want imposed on them. Where should each instruction live?",
+  "options": {
+   "A": "Both in the project's CLAUDE.md, so that all of the team's guidance is kept together in one file",
+   "B": "Both in each developer's own user-level CLAUDE.md, copied onto every machine by hand",
+   "C": "The convention in the project's committed CLAUDE.md, the preference at the user level",
+   "D": "Both typed at the start of each session, so every developer controls exactly what applies"
+  },
+  "answer": "C",
+  "rationale": "The CLAUDE.md hierarchy separates scopes: guidance for everyone working in the repository belongs in the project-level file committed with the code, and a personal preference belongs at the user level, where it affects only that developer. Putting both in the project file (A) imposes one person's preference on the whole team. Hand-copied user-level files (B) are unversioned and drift between machines. Retyping instructions each session (D) is not persistent and is easily forgotten.",
+  "evidence": "the CLAUDE.md hierarchy, repository initialization, and settings.json configuration"
+ },
+ {
+  "id": "developer-foundations-app-2",
+  "source": "app",
+  "domain": "Claude Code",
+  "task": "Claude Code Operation: core components (Skills)",
+  "question": "A team repeatedly asks Claude Code to write release notes following a detailed house procedure: group changes by component, link each ticket, and list breaking changes first. The procedure needs no new data or system access, only the same instructions applied the same way each time, and the team wants to reuse it across its projects. Which approach fits best?",
+  "options": {
+   "A": "Package the procedure as a Skill that Claude Code applies whenever release notes are needed",
+   "B": "Build an MCP server exposing a release-notes tool for Claude Code and other clients to call",
+   "C": "Write a custom tool in each repository that formats release notes from the commit history",
+   "D": "Rely on the built-in tools alone, since file reading and shell access already cover the procedure"
+  },
+  "answer": "A",
+  "rationale": "What needs reusing is a set of instructions and conventions, not code or access to a system, which is what a Skill packages. An MCP server (B) is for a capability several applications must call and that is maintained independently; it adds a service to run for what is only a procedure. A custom tool in every repository (C) duplicates code to do what instructions already do. The built-in tools (D) supply file and shell access but carry none of the house procedure, so results would vary from run to run.",
+  "evidence": "Reusable instructions and conventions, not code"
+ },
+ {
+  "id": "developer-foundations-app-3",
+  "source": "app",
+  "domain": "Claude Code",
+  "task": "Claude Code Operation: core components (Agents, subagents)",
+  "question": "Midway through a refactor in Claude Code, a developer needs to know every place a deprecated configuration key is read across a large monorepo. The refactor plan and the decisions taken so far exist only in the current session. Earlier searches like this flooded the session with output, and later answers lost track of the plan. Which approach fits best?",
+  "options": {
+   "A": "Start a fresh session for the search and paste the refactor plan back in by hand afterwards",
+   "B": "Switch to a model with a larger context window so the search output and the plan both fit",
+   "C": "Add a line to CLAUDE.md telling Claude Code to keep the refactor plan in mind at all times",
+   "D": "Delegate the search to a subagent so only its summary of findings returns to the session"
+  },
+  "answer": "D",
+  "rationale": "A subagent runs the verbose search in its own context and hands back only the findings, so the main session keeps its plan and stays uncluttered. A fresh session (A) discards the plan that exists only in the current session and depends on manual reconstruction. A larger window (B) delays the same dilution at higher cost. A CLAUDE.md reminder (C) does not stop the search output from crowding the plan out of the session.",
+  "evidence": "subagents also isolate context so a long investigation does not pollute the main thread"
+ },
+ {
+  "id": "developer-foundations-app-4",
+  "source": "app",
+  "domain": "Claude Code",
+  "task": "Claude Code Operation: session management",
+  "question": "A developer has spent a long Claude Code session building a payments feature, now finished and committed. They want to start an unrelated documentation cleanup in the same repository, but in a quick test Claude Code kept steering the docs task back toward the payments code. The team's lasting conventions are already in the project's CLAUDE.md. What should the developer do?",
+  "options": {
+   "A": "Stay in the session and tell Claude Code to ignore everything that came before the docs task",
+   "B": "Start a new session for the docs task, relying on CLAUDE.md for the lasting conventions",
+   "C": "Add notes about the payments work to CLAUDE.md so that the docs task sees the full history",
+   "D": "Move to a model with a larger context window so that both tasks fit without interfering"
+  },
+  "answer": "B",
+  "rationale": "The payments history is stale context for an unrelated task, and the durable conventions already live in CLAUDE.md, so a new session gives the docs task a clean context without losing anything that matters. Asking the model to ignore earlier context (A) leaves it in the window, where it keeps exerting influence. Writing the payments history into CLAUDE.md (C) makes the pollution permanent for every future session. A larger window (D) keeps the irrelevant history in play at higher cost.",
+  "evidence": "features (session management, built-in and custom slash commands, headless mode, streaming mode, auto-mode)"
+ }
+]

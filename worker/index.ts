@@ -1,18 +1,21 @@
 import { asDisplayed, questionHash, type Question, type Letter } from '../src/shared/exam'
 import { CERTS, DEFAULT_CERT, certById, certOfDomain, certOfExamDateKey, certOfQuestion, hasDomain, isCertId, type CertDef } from '../src/shared/certs'
-import bankEsJson from '../src/content/es/questions.json'
 import aoQuestions from '../src/content/associate-foundations/questions.json'
 import aoNotes from '../src/content/associate-foundations/notes.json'
 import aoBlueprint from '../src/content/associate-foundations/blueprint.json'
+import aoEs from '../src/content/associate-foundations/es/questions.json'
 import dvQuestions from '../src/content/developer-foundations/questions.json'
 import dvNotes from '../src/content/developer-foundations/notes.json'
 import dvBlueprint from '../src/content/developer-foundations/blueprint.json'
+import dvEs from '../src/content/developer-foundations/es/questions.json'
 import afQuestions from '../src/content/architect-foundations/questions.json'
 import afNotes from '../src/content/architect-foundations/notes.json'
 import afBlueprint from '../src/content/architect-foundations/blueprint.json'
+import afEs from '../src/content/architect-foundations/es/questions.json'
 import apQuestions from '../src/content/architect-professional/questions.json'
 import apNotes from '../src/content/architect-professional/notes.json'
 import apBlueprint from '../src/content/architect-professional/blueprint.json'
+import apEs from '../src/content/architect-professional/es/questions.json'
 import { createAuth, recoveryEnabled, type Auth, type Env } from './auth'
 
 // Per certification: its bank, its study notes (tutor context and the generator's grounding) and its official blueprint
@@ -31,7 +34,8 @@ const MATERIAL = new Map<string, Material>([
 ])
 const materialOf = (cert: CertDef) => MATERIAL.get(cert.id)!
 const bankById = new Map(CERTS.flatMap((c) => materialOf(c).bank).map((q) => [q.id, q]))
-const bankEs = bankEsJson as Record<string, { question: string; options: Record<string, string>; rationale: string; src?: string }>
+// Spanish of every bank question, by id (ids are unique across certifications)
+const bankEs = { ...aoEs, ...dvEs, ...afEs, ...apEs } as Record<string, { question: string; options: Record<string, string>; rationale: string; src?: string }>
 const LATE_GRACE_MS = 30_000
 const MAX_OPS = 100
 const MAX_ATTEMPTS = 1000 // per user

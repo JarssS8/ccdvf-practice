@@ -1,0 +1,326 @@
+{
+ "confusion:agent-or-workflow:title": {
+  "text": "Agente o workflow",
+  "src": "1gk3q0w"
+ },
+ "confusion:agent-or-workflow:body": {
+  "text": "| | Workflow | Agente |\n| --- | --- | --- |\n| Quién decide el camino | Tú, de antemano | El modelo, en tiempo de ejecución |\n| Se puede probar | Sí, es determinista | Solo en conjunto |\n| Coste | Predecible | Depende de la ejecución |\n| Falla por | Hacer lo incorrecto que tú especificaste | No detenerse |\n\n**La pregunta clave:** ¿puedes escribir los pasos?\n\nSi puedes, escríbelos. La mayoría de los problemas para los que la gente recurre\na un agente son workflows que nunca se terminaron de especificar.",
+  "src": "sqsjw"
+ },
+ "confusion:tool-skill-or-mcp-server:title": {
+  "text": "Tool, Skill o servidor MCP",
+  "src": "1dxk7nk"
+ },
+ "confusion:tool-skill-or-mcp-server:body": {
+  "text": "| | Úsalo cuando |\n| --- | --- |\n| **Tool integrada** | Anthropic ya ofrece la capacidad |\n| **Tool personalizada** | Solo tu sistema puede hacerlo, y solo lo necesita tu aplicación |\n| **Skill** | Un procedimiento reutilizable, sin nuevo acceso a datos |\n| **Servidor MCP** | La misma integración la necesita más de un cliente |\n\n**La pregunta clave:** ¿cuántas aplicaciones necesitan esto?\n\nUna aplicación implica una tool personalizada. Más de una implica un servidor,\nporque esa es toda la razón de ser del protocolo.",
+  "src": "llttuy"
+ },
+ "confusion:streaming-or-batching:title": {
+  "text": "Streaming o batching",
+  "src": "1p6dl94"
+ },
+ "confusion:streaming-or-batching:body": {
+  "text": "Ninguno de los dos va de coste, aunque el coste es el motivo habitual por el que la gente elige.\n\n**La pregunta clave:** ¿hay alguien esperando?\n\nSi alguien espera, Messages API, y streaming si la espera es lo bastante larga\ncomo para notarse. Si nadie espera, Message Batches API, con un 50 % del coste,\ndevuelto en una ventana de 24 horas. El tool calling de varios turnos descarta\nel batching en cualquier caso.",
+  "src": "gk63ig"
+ },
+ "confusion:context-editing-or-compaction:title": {
+  "text": "Edición de contexto o compactación",
+  "src": "kzvye6"
+ },
+ "confusion:context-editing-or-compaction:body": {
+  "text": "Ambas gestionan una conversación que ha crecido demasiado, y hacen cosas opuestas.\n\n**La edición de contexto borra.** Los resultados de tools antiguos o los bloques de thinking se eliminan\nantes de que el modelo los vea. Lo que había ya no está.\n\n**La compactación resume.** El contexto anterior se sustituye por un resumen de sí mismo,\nde modo que la sustancia sobrevive en menos espacio.\n\n**La pregunta clave:** ¿sigue haciendo falta el contenido antiguo, o solo el hecho de que existió?\n\nLos resultados de tools sobre los que ya has actuado se pueden borrar. Una conversación cuyas\ndecisiones anteriores siguen importando debe compactarse.",
+  "src": "1qe61e3"
+ },
+ "confusion:prompt-caching-or-context-editing:title": {
+  "text": "Prompt caching o edición de contexto",
+  "src": "b2q3qk"
+ },
+ "confusion:prompt-caching-or-context-editing:body": {
+  "text": "Ambos reducen lo que pagas por una conversación larga, desde extremos distintos.\n\nEl caching abarata reenviar el **prefijo repetido**. La edición de contexto hace que la\nconversación sea **más corta**. Probar el caching no cuesta nada; editar cambia lo que el modelo\npuede ver.\n\nEmpieza por el caching. No cuesta nada equivocarse con él.",
+  "src": "17zxeww"
+ },
+ "confusion:end-turn-tool-use-or-max-tokens:title": {
+  "text": "end_turn, tool_use o max_tokens",
+  "src": "1kr2fm4"
+ },
+ "confusion:end-turn-tool-use-or-max-tokens:body": {
+  "text": "`stop_reason` es el campo, y tratar los tres como «ya tengo una respuesta» es\nel error más común con la API.\n\n| Valor | Significado | Qué debería hacer tu código |\n| --- | --- | --- |\n| `end_turn` | Claude ha terminado | Devolver el contenido |\n| `tool_use` | Claude quiere que se ejecute una tool | Ejecutarla, añadir el resultado como un turno de **usuario** y llamar de nuevo |\n| `max_tokens` | La salida se truncó | Subir el límite o dividir la tarea. No usar el fragmento |\n| `pause_turn` | Una server tool de larga duración se pausó | Reenviar la respuesta para continuar |\n| `refusal` | Un clasificador de seguridad rechazó la petición | Revisar `stop_details`; no leer `content` como una respuesta |\n\nEl peligroso es `max_tokens`. No salta ninguna excepción, el string parece una\nrespuesta, y si estabas parseando JSON el error que registres será un error de JSON.",
+  "src": "j2pkfo"
+ },
+ "confusion:certification-or-course-certificate:title": {
+  "text": "Certificación o certificado de curso",
+  "src": "onlbhs"
+ },
+ "confusion:certification-or-course-certificate:body": {
+  "text": "La distinción con la que este repositorio es más cuidadoso, porque equivocarse\nen público sale caro.\n\n| | Certificado de curso | Certificación |\n| --- | --- | --- |\n| Cómo se consigue | Completar un curso gratuito en Claude Academy | Aprobar un examen con supervisión |\n| Dónde | Online, a tu ritmo | Pearson VUE, online o en un centro de examen |\n| Coste | Nada | De 99 a 175 USD |\n| Demuestra | Que viste el material | Que superaste una evaluación frente a un blueprint publicado |\n| Caduca | No | A los 12 meses, con renovación gratuita |\n\nNunca describas un certificado de curso como una certificación, y nunca escribas «Claude\nCertified» a menos que tengas la credencial.",
+  "src": "1fq2x6c"
+ },
+ "confusion:scaled-score-or-percentage:title": {
+  "text": "Puntuación escalada o porcentaje",
+  "src": "5ea9e2"
+ },
+ "confusion:scaled-score-or-percentage:body": {
+  "text": "720 es una puntuación escalada en un rango de 100 a 1.000. No es un 72 %.\n\nUna puntuación escalada sitúa tu resultado en un rango estándar para que se puedan comparar\nlas distintas versiones del examen, que pueden diferir ligeramente en dificultad. No existe\nninguna correspondencia publicada entre preguntas acertadas y puntuación escalada, así que cualquier cifra del tipo «puedes\npermitirte fallar N» que te hayan dicho es inventada.\n\n**La pregunta clave:** ¿lo estoy tratando como una fracción de preguntas?\n\nSi es así, para. Usa en su lugar el desglose por dominio del informe de puntuación, que es\nla mitad que te dice qué hacer a continuación.",
+  "src": "18liwpc"
+ },
+ "confusion:retake-wait-or-appeal-window:title": {
+  "text": "Espera para repetir o plazo de apelación",
+  "src": "10ihg0o"
+ },
+ "confusion:retake-wait-or-appeal-window:body": {
+  "text": "Dos relojes distintos, y la gente los confunde en el peor momento.\n\n**Las esperas para repetir** aumentan con cada intento: 14 días, luego 30, luego 90. Como máximo cuatro\nintentos por examen en doce meses consecutivos, con la tarifa completa cada vez.\n\n**El plazo de apelación** es de 14 días naturales desde un resultado invalidado. El\ncontenido de cada pregunta nunca se puede apelar; el proceso que las rodea, sí.\n\nComparten un número, y por eso mismo se confunden.",
+  "src": "19wnn3l"
+ },
+ "course:claude-101": {
+  "text": "Usar Claude en el trabajo diario: funciones básicas, conversaciones eficaces y dónde profundizar",
+  "src": "9ow99"
+ },
+ "course:claude-platform-101": {
+  "text": "La plataforma Claude de principio a fin: productos, funciones y cómo encajan las piezas",
+  "src": "ydkigh"
+ },
+ "course:claude-code-101": {
+  "text": "Claude Code en el flujo de desarrollo diario",
+  "src": "82n0st"
+ },
+ "course:claude-code-in-action": {
+  "text": "Sesiones largas y autónomas de Claude Code en las que puedes confiar: dirigir, configurar, automatizar y verificar",
+  "src": "ufjc2r"
+ },
+ "course:introduction-to-claude-cowork": {
+  "text": "El bucle de tareas de Cowork, plugins y skills, workflows de archivos e investigación, y cómo dirigir trabajo de varios pasos",
+  "src": "15d4ngc"
+ },
+ "course:introduction-to-claude-tag": {
+  "text": "Claude Tag en el workspace de Slack de un equipo: dónde encargarle trabajo, cómo dirigirlo y corregirlo para que una corrección valga para todo el canal, y cómo darle una tarea permanente",
+  "src": "k1dpah"
+ },
+ "course:building-with-the-claude-api": {
+  "text": "Todo el espectro de trabajo con los modelos de Anthropic a través de la API: mensajes, tools, streaming y patrones de producción",
+  "src": "16qzvb7"
+ },
+ "course:tool-use-with-the-messages-api": {
+  "text": "Arreglar el tool use que ya funciona: elección de tool incorrecta, llamadas rechazadas, respuestas bloqueadas y tokens de entrada que crecen con cada resultado, un problema por lección",
+  "src": "7y49bl"
+ },
+ "course:introduction-to-model-context-protocol": {
+  "text": "Servidores y clientes MCP desde cero en Python: tools, resources y prompts",
+  "src": "1d67kqd"
+ },
+ "course:model-context-protocol-advanced-topics": {
+  "text": "Sampling, notificaciones, acceso al sistema de archivos y transportes para servidores MCP en producción",
+  "src": "ihhp2k"
+ },
+ "course:introduction-to-agent-skills": {
+  "text": "Crear, configurar y compartir Skills en Claude Code, desde la primera Skill hasta la distribución al equipo",
+  "src": "szn2y0"
+ },
+ "course:introduction-to-subagents": {
+  "text": "Usar y crear subagents para gestionar el contexto, delegar tareas y construir workflows especializados",
+  "src": "1agj1zf"
+ },
+ "course:claude-with-amazon-bedrock": {
+  "text": "Ejecutar Claude en AWS, del programa de acreditación que Anthropic creó con AWS",
+  "src": "l1d3uw"
+ },
+ "course:claude-on-google-cloud": {
+  "text": "Trabajar con los modelos de Anthropic en Google Cloud y Vertex AI",
+  "src": "1kl4q3m"
+ },
+ "course:deploying-claude-enterprise-with-confidence": {
+  "text": "Las cinco decisiones a nivel de organización detrás de un despliegue de Claude Enterprise: estructura e identidad, acceso, gobernanza, gasto y visibilidad",
+  "src": "s64v76"
+ },
+ "course:ai-fluency-framework-foundations": {
+  "text": "El marco básico para colaborar con sistemas de IA",
+  "src": "3osas3"
+ },
+ "course:ai-capabilities-and-limitations": {
+  "text": "Cómo funciona la IA, qué hace bien y dónde falla",
+  "src": "8i885v"
+ },
+ "course:ai-fluency-for-builders": {
+  "text": "El marco aplicado a quienes construyen productos con IA",
+  "src": "1sloj7q"
+ },
+ "course:ai-fluency-for-educators": {
+  "text": "Aplicar AI Fluency a la práctica docente y a la estrategia institucional",
+  "src": "1iu1r87"
+ },
+ "course:ai-fluency-for-pk-12-educators": {
+  "text": "El marco adaptado a la educación primaria y secundaria",
+  "src": "gl34s5"
+ },
+ "course:ai-fluency-for-students": {
+  "text": "AI Fluency para aprender, planificar la carrera profesional y tener éxito académico",
+  "src": "6h3t9k"
+ },
+ "course:ai-fluency-for-nonprofits": {
+  "text": "Aumentar el impacto de la organización sin perder de vista la misión y los valores",
+  "src": "1pknxhk"
+ },
+ "course:ai-fluency-for-small-businesses": {
+  "text": "El marco aplicado a las operaciones de una pequeña empresa",
+  "src": "chyqd8"
+ },
+ "course:ai-fluency-for-creative-work": {
+  "text": "El marco aplicado a la práctica creativa, manteniendo la autoría deliberada",
+  "src": "1o7o9jf"
+ },
+ "course:teaching-ai-fluency": {
+  "text": "Enseñar y evaluar AI Fluency en entornos dirigidos por un instructor",
+  "src": "1s5qb5y"
+ },
+ "course:ai-fluency-for-pk-12-train-the-trainer": {
+  "text": "Un kit de taller listo para usar para docentes que dirigen sesiones de AI Fluency para sus compañeros, creado con la American Federation of Teachers",
+  "src": "1lr3g8v"
+ },
+ "course:building-effective-human-agent-teams-beta": {
+  "text": "Pasar de un equipo con IA individual a uno multijugador: cómo cambia el trabajo, en qué se diferencia un agente multijugador de un chatbot, las normas de equipo que lo respaldan y cuatro principios para equipos sanos de personas y agentes",
+  "src": "d627do"
+ },
+ "course:the-ai-native-sdlc-playbook": {
+  "text": "Doce jugadas para usar Claude en cada etapa del ciclo de vida del desarrollo de software, para responsables de ingeniería, plataforma y seguridad cuya organización ya usa Claude Code. Aproximadamente una hora de lectura, sin cuestionario ni insignia de finalización; no figura como preparación para ningún examen",
+  "src": "1z8jl8"
+ },
+ "emphasis:associate-foundations": {
+  "text": "El dominio con más peso es evaluar las salidas (21 %), no escribir prompts (14 %). Practica revisar las respuestas de Claude en busca de detalles inventados, verificar afirmaciones frente a las fuentes y decidir qué necesita revisión humana. Crea al menos un Project con instrucciones y fuentes de conocimiento. El dominio de gobernanza premia saber cuándo no subir datos sensibles y cómo anonimizarlos.",
+  "src": "1g4ecpe"
+ },
+ "emphasis:developer-foundations": {
+  "text": "Un tercio del examen es Aplicaciones e integración, así que la mecánica de la API merece más tiempo: mensajes, streaming, caching, batch frente a tiempo real y diseño de esquemas. No inviertas demasiado en Claude Code y depuración, que juntos suman menos del 6 %. Construye una aplicación de principio a fin que llame a la API, use una tool y valide una salida estructurada.",
+  "src": "sz8iqe"
+ },
+ "emphasis:architect-foundations": {
+  "text": "Los seis escenarios del examen están publicados, y en cada convocatoria aparecen cuatro. Estudia los escenarios hasta que las preguntas probables de cada uno resulten predecibles y luego haz los ejercicios de preparación de la propia guía. El apéndice nombra elementos concretos que pueden evaluarse (valores de `stop_reason`, `isError`, `fork_session`, `--json-schema`); recorre esa lista y comprueba que sabes explicar cada uno.",
+  "src": "7pql7u"
+ },
+ "emphasis:architect-professional": {
+  "text": "Más de la mitad del examen es integración, diseño de soluciones y evaluación. Construye o analiza en detalle un sistema de principio a fin con RAG, evaluación y observabilidad. No descuides los dominios blandos: la comunicación con los stakeholders y la gobernanza suman un 28 % entre ambas, y las justificaciones de ejemplo premian las decisiones defendibles, de mínimo privilegio y justificadas.",
+  "src": "1n4sapf"
+ },
+ "week:0:title": {
+  "text": "Semana 1: alcance",
+  "src": "1fhou4"
+ },
+ "week:0:body": {
+  "text": "Lee la guía del examen por completo. Elabora la lista de comprobación del blueprint. Completa los [cursos de preparación](learning-paths.md#certification-prep-courses) de tu examen, marcando en verde los elementos de la lista a medida que los cubras.",
+  "src": "1jzjudm"
+ },
+ "week:1:title": {
+  "text": "Semana 2: profundidad",
+  "src": "94ldk2"
+ },
+ "week:1:body": {
+  "text": "Trabaja los elementos en rojo y amarillo de la lista con la documentación y construyendo cosas. Esta es la semana para construir lo que pide la guía: un Project, una aplicación, un agente o un pipeline de extracción, según tu examen.",
+  "src": "v582ux"
+ },
+ "week:2:title": {
+  "text": "Semana 3: cierre",
+  "src": "t7k1oy"
+ },
+ "week:2:body": {
+  "text": "Vuelve a leer la guía. Trabaja las preguntas de ejemplo y sus justificaciones. Repite la [prueba del sistema, las comprobaciones de red y la lista de aplicaciones que cerrar](registration.md#preparing-your-computer-for-an-online-proctored-exam) en el equipo con el que harás el examen. Haz el examen temprano, en un día en que estés descansado.",
+  "src": "cxiqda"
+ },
+ "examWeek:0": {
+  "text": "El nombre en el registro de Pearson coincide exactamente con el de tu documento de identidad con foto",
+  "src": "1o6j3q1"
+ },
+ "examWeek:1": {
+  "text": "Adaptaciones, si hacen falta, aprobadas antes de reservar",
+  "src": "w9ldd0"
+ },
+ "examWeek:2": {
+  "text": "Prueba del sistema de OnVUE superada en el equipo y la red del examen",
+  "src": "bw6ium"
+ },
+ "examWeek:3": {
+  "text": "Dominios de la red corporativa autorizados con IT, o un equipo y una red personales preparados",
+  "src": "1jvu6w2"
+ },
+ "examWeek:4": {
+  "text": "Conoces la lista de cierre: navegadores, Zoom, Teams, Outlook, Discord, herramientas de acceso remoto y la app de escritorio de Claude",
+  "src": "1vqyuzd"
+ },
+ "examWeek:5": {
+  "text": "Sala privada preparada, escritorio despejado, segundo monitor desconectado",
+  "src": "pcy64m"
+ },
+ "examWeek:6": {
+  "text": "Decisión de reprogramar tomada como máximo 24 horas antes, ya que después se pierde la tarifa",
+  "src": "131o1t9"
+ },
+ "during:0": {
+  "text": "120 minutos para entre 53 y 63 preguntas son aproximadamente dos minutos por pregunta. Márcala y sigue en lugar de atascarte; las preguntas sin responder puntúan cero, así que responde a todas.",
+  "src": "1nbvi9i"
+ },
+ "during:1": {
+  "text": "Las preguntas de respuesta múltiple indican cuántas respuestas hay que seleccionar. Lee primero esa línea.",
+  "src": "1rm8np1"
+ },
+ "during:2": {
+  "text": "Las preguntas de escenario premian la mejor respuesta entre las defendibles. Las justificaciones oficiales prefieren de forma consistente la opción que atiende la restricción planteada (coste, privacidad, mínimo privilegio) frente a la que es razonable en general.",
+  "src": "1i9pull"
+ },
+ "during:3": {
+  "text": "Si una pregunta parece defectuosa, apunta mentalmente su número y [infórmala después](policies.md#reporting-a-problem-with-a-question); informar nunca perjudica tu resultado.",
+  "src": "1tsrs5u"
+ },
+ "video:lesson-2b-the-4d-framework": {
+  "text": "Delegation, Description, Discernment y Diligence, la columna vertebral de todo el curso y del blueprint Associate.",
+  "src": "n5x3x8"
+ },
+ "video:lesson-3b-capabilities-and-limitations": {
+  "text": "Lo que Claude puede y no puede hacer, y cómo distinguirlo. Es el material detrás del curso **AI Capabilities and Limitations** y de las preguntas que te piden verificar en lugar de fiarte.",
+  "src": "1fypkne"
+ },
+ "video:lesson-7-effective-prompting-techniques": {
+  "text": "El análisis en profundidad del prompting, y la lección más larga del curso.",
+  "src": "151f7eg"
+ },
+ "video:prompting-101": {
+  "text": "Estructura del prompt, iteración y los hábitos detrás de una salida fiable, grabado en la conferencia Code w/ Claude.",
+  "src": "uwcio"
+ },
+ "video:ai-prompt-engineering-a-deep-dive": {
+  "text": "Una conversación más larga sobre cómo funciona realmente el prompting, con las personas que lo hacen en Anthropic.",
+  "src": "k3tud5"
+ },
+ "video:prompting-for-agents": {
+  "text": "Cómo cambia el prompting cuando el modelo actúa en lugar de responder. Relevante para los dominios de agentes de los exámenes Developer y Architect.",
+  "src": "3enkru"
+ },
+ "video:mastering-claude-code-in-30-minutes": {
+  "text": "Un recorrido compacto de principio a fin. La forma más rápida de ver toda la herramienta de una vez.",
+  "src": "1fc61ig"
+ },
+ "video:claude-code-best-practices": {
+  "text": "Configuración, workflows y hábitos de trabajo, grabado en Code w/ Claude.",
+  "src": "d7vi78"
+ },
+ "video:building-headless-automation-with-claude-code": {
+  "text": "Modo headless y automatización, que el blueprint Developer nombra explícitamente.",
+  "src": "1cjlx3h"
+ },
+ "video:building-with-mcp-and-the-claude-api": {
+  "text": "Las dos juntas, que es como las tratan los exámenes.",
+  "src": "xiqdja"
+ },
+ "video:mcp-201": {
+  "text": "Más allá de lo básico: el material que cubre el curso Advanced Topics.",
+  "src": "1undkgy"
+ },
+ "video:why-anthropic-built-and-donated-mcp": {
+  "text": "El razonamiento detrás del protocolo, que explica las decisiones de diseño que las preguntas de escenario te piden aplicar.",
+  "src": "1t2h833"
+ },
+ "video:building-more-effective-ai-agents": {
+  "text": "La decisión entre workflow y agente, que es el criterio que más a menudo ponen a prueba las preguntas de escenario.",
+  "src": "kpycb9"
+ },
+ "video:tips-for-building-ai-agents": {
+  "text": "Orientación práctica sobre cómo acotar el alcance, las tools y cuándo dejar de añadir autonomía.",
+  "src": "16ih9sk"
+ }
+}

@@ -1,0 +1,9 @@
+[
+ {
+  "_note": "Live on academy.claude.com (checked 2026-11-03) but not yet in the study repo's guide/courses.md. Dropped automatically once upstream lists the same URL.",
+  "title": "The AI-native SDLC playbook",
+  "summary": "Twelve plays for using Claude at each stage of the software development lifecycle, for engineering, platform and security leads whose organization already uses Claude Code. About an hour of reading, with no quiz or completion badge; not listed as prep for any exam",
+  "url": "https://academy.claude.com/courses/ai-native-sdlc-playbook",
+  "section": "Developer and integration"
+ }
+]

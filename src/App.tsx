@@ -1,8 +1,9 @@
-import { useEffect, useMemo, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Icon } from './components/Icon'
 import { SyncBadge } from './components/ui'
 import { CertSwitcher } from './components/CertSwitcher'
-import { inCert, questionIndex } from './lib/content'
+import { ensureAll, ensureCert, inCert, isLoaded, questionIndex, useContentVersion } from './lib/content'
+import { certOfAttempt } from './shared/certs'
 import { useCert, useNeedsCertPick } from './lib/cert'
 import { useRoute } from './lib/router'
 import { checkSession, sync, useStore } from './lib/store'
@@ -33,7 +34,23 @@ const NAV = [
 /** Every question of every certification by id: what an attempt needs to resolve its questions. */
 export function useQuestions() {
   const { data } = useStore()
-  return useMemo(() => questionIndex(data.aiQuestions), [data.aiQuestions])
+  const version = useContentVersion()
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `version` is the loaded content, read inside questionIndex
+  return useMemo(() => questionIndex(data.aiQuestions), [data.aiQuestions, version])
+}
+
+/** Loads the certifications a screen needs; `failed` when a load did not come back (offline, or a deploy replaced the chunk). */
+function useCertsReady(ids: string[]) {
+  useContentVersion()
+  // The set of certifications whose load failed; another set starts clean without resetting state in the effect
+  const [failedKey, setFailedKey] = useState('')
+  const key = ids.join('|')
+  useEffect(() => {
+    let live = true
+    Promise.all(key.split('|').map((id) => ensureCert(id))).catch(() => { if (live) setFailedKey(key) })
+    return () => { live = false }
+  }, [key])
+  return { ready: ids.every(isLoaded), failed: failedKey === key }
 }
 
 /** The questions of the certification being studied. */
@@ -87,6 +104,7 @@ export default function App() {
   const t = useT()
   const { authed, hasSnapshot, data } = useStore()
   const needsPick = useNeedsCertPick()
+  const cert = useCert()
   useEffect(() => { void checkSession() }, [])
   // Timed attempts that ran out anywhere are closed wherever the app is open
   useEffect(() => {
@@ -96,6 +114,16 @@ export default function App() {
   }, [data])
 
   const [section = '', id, extra] = route
+  // The certification being studied, and the one of an attempt opened by its address (it can be another)
+  const opened = (section === 'exam' || section === 'review' || section === 'results') && id && Object.hasOwn(data.attempts, id) ? certOfAttempt(data.attempts[id]) : null
+  const content = useCertsReady(opened && opened !== cert.id ? [cert.id, opened] : [cert.id])
+  // Once the studied one is in, the rest arrive in idle time: other attempts, exports and offline use need them
+  useEffect(() => {
+    if (!content.ready) return
+    const later = (cb: () => void) => ('requestIdleCallback' in window ? window.requestIdleCallback(cb, { timeout: 4000 }) : setTimeout(cb, 1500))
+    later(() => { void ensureAll().catch(() => { /* retried on the next screen that needs it */ }) })
+  }, [content.ready])
+
   // Legal pages are public: readable before signing up
   if (section === 'legal') return <Legal page={id ?? 'aviso'} />
   if (authed === false || isResetPending()) return <AuthView />
@@ -103,6 +131,15 @@ export default function App() {
 
   // A new account chooses what to prepare before anything else
   if (needsPick) return <CertPick />
+  if (!content.ready) {
+    return (
+      <main style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center', padding: 24 }} aria-busy={!content.failed}>
+        {content.failed
+          ? <div className="stack" style={{ alignItems: 'center', textAlign: 'center' }}><p>{t.common.contentFailed}</p><button className="btn btn-primary" onClick={() => window.location.reload()}>{t.common.retry}</button></div>
+          : <p className="muted">{t.common.loading}</p>}
+      </main>
+    )
+  }
 
   if (section === 'exam' && id) return <ExamView id={id} />
   if (section === 'review' && id) return <ReviewView id={id} index={Number(extra ?? 0)} />
@@ -113,7 +150,7 @@ export default function App() {
     case 'results': view = id ? <Results id={id} timeout={extra === 'timeout'} /> : <Progress />; break
     case 'domains': view = <Domains />; break
     case 'cards': view = <Cards />; break
-    case 'notes': view = <Notes />; break
+    case 'notes': view = <Notes tab={id} />; break
     case 'progress': view = <Progress />; break
     case 'settings': view = <Settings />; break
     default: view = <Home />

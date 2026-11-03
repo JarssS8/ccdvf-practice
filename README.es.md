@@ -10,6 +10,11 @@
   <img src="docs/screenshots/home.png" alt="Inicio: siguiente paso, preparación estimada y dónde ganar puntos" width="640">
   <img src="docs/screenshots/exam.png" alt="Simulacro en el móvil" width="200">
 </p>
+<p>
+  <img src="docs/screenshots/pick.png" alt="Primera vez: elegir la certificación que preparas" width="200">
+  <img src="docs/screenshots/switcher.png" alt="Cambiar de certificación desde la barra superior en el móvil" width="200">
+  <img src="docs/screenshots/plan.png" alt="Plan de estudio: qué priorizar, la semana en la que estás y la checklist del examen" width="420">
+</p>
 
 ## Qué hace
 
@@ -20,6 +25,7 @@
 | **Preparación estimada** | Un rango de 100 a 1000 calculado solo con tus *primeros* intentos, reponderado por dominio, con el corte en 720. |
 | **Gráficos** | Dónde fallas más (por puntos perdidos), evolución por dominio, preguntas que más fallas e historial de mocks. |
 | **Flashcards** | Repetición espaciada FSRS; las preguntas que fallas entran solas en el mazo. |
+| **Guía de estudio** | En Apuntes: las parejas de conceptos que el examen obliga a distinguir, los cursos (y la ruta oficial de preparación) de tu certificación con los vídeos de Anthropic, y un plan de tres semanas que marca en cuál estás según la fecha de examen, con la checklist de la semana del examen. |
 | **Tutor IA** *(opcional)* | Pregúntale por qué una opción está mal. Solo habla de la pregunta que tienes delante. |
 | **Preguntas IA** *(opcional)* | Genera preguntas nuevas basadas en los apuntes; un segundo modelo las comprueba antes de guardarlas. |
 | **Dos idiomas** | Interfaz, apuntes, flashcards, drills y tutor en español o inglés. |
@@ -142,7 +148,15 @@ Los tests de navegador usan Chromium headless con `playwright-core`; define `CHR
 
 Las preguntas, flashcards, apuntes y novedades se importan de [Amey-Thakur/CLAUDE-CERTIFICATIONS](https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS) con `npm run sync` (espera esta carpeta dentro de un clon de ese repo), una carpeta por certificación en `src/content/<cert-id>/`. Las certificaciones (códigos, longitud, dominios y pesos) se declaran una sola vez en `src/shared/certs.ts`; los ejemplos de las guías oficiales están en `scripts/guide-samples/<cert-id>.json`. Revisa y haz commit del diff de `src/content/` antes de desplegar: `build` y `deploy` no importan nada y `deploy` se niega a correr con cambios sin commitear en `src/content`.
 
-Las versiones en español están en `src/content/es/`. Cada entrada guarda `src`, la huella del texto inglés del que se tradujo; si el inglés cambia, la app muestra ese elemento en inglés hasta que se actualice la traducción. `npm run sync` avisa de las traducciones desactualizadas; tras corregirlas, ejecuta `node scripts/i18n.mjs stamp`.
+Las páginas de la guía (confusiones, cursos, plan de estudio, vídeos) van a `src/content/guide.json`; a qué certificación sirve cada curso está en `scripts/course-map.json`, y los cursos que ya están en Claude Academy pero aún no en el repo de estudio, en `scripts/extra-courses.json`.
+
+Un GitHub Action diario (`.github/workflows/sync-content.yml`) sincroniza con la última versión del repo de estudio. Si el contenido cambia, abre o actualiza un pull request `content-sync` con el log y el español pendiente de traducir, y lanza el CI; una persona traduce, fusiona y despliega.
+
+Donde el repo de estudio tiene pocas preguntas distintas para que un mock completo siga el temario, la app añade las suyas (`scripts/extra-questions/<cert-id>.json`, origen `app`), escritas a partir de la guía oficial y verificadas a ciegas por un segundo modelo. Salen en mocks y drills con la etiqueta «Creada por la app» y un enlace para reportarlas, y nunca cuentan para la preparación estimada.
+
+El contenido de cada certificación (con su español) es un chunk aparte que se carga bajo demanda: la que estudias antes de mostrar la app, y las demás en segundo plano.
+
+Las versiones en español están en `src/content/<cert-id>/es/` (y en `src/content/es/` las novedades y la guía). Cada entrada guarda `src`, la huella del texto inglés del que se tradujo; si el inglés cambia, la app muestra ese elemento en inglés hasta que se actualice la traducción. `npm run sync` avisa de las traducciones desactualizadas; tras corregirlas, ejecuta `node scripts/i18n.mjs stamp`.
 
 Para añadir un idioma: copia `src/i18n/es.ts`, tradúcelo, regístralo en `src/i18n/index.ts` y añade los ficheros de `src/content/<idioma>/`.
 

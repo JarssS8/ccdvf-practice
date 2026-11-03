@@ -2,6 +2,8 @@ name: CI
 on:
   push: { branches: [main] }
   pull_request:
+  # The content-sync job starts this on its branch: PRs opened with the Actions token do not trigger pull_request
+  workflow_dispatch:
 
 permissions:
   contents: read

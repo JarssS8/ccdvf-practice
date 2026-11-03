@@ -1,0 +1,41 @@
+{
+ "_note": "Which certification each course and video section of the study repo serves, after guide/course-notes.md (mapping diagram) and the section intros of guide/courses.md and guide/videos.md. The sync warns about any course or video section missing here.",
+ "courses": {
+  "Claude 101": ["associate-foundations"],
+  "Claude Platform 101": ["associate-foundations", "developer-foundations"],
+  "Claude Code 101": ["developer-foundations", "architect-foundations", "architect-professional"],
+  "Claude Code in Action": ["developer-foundations", "architect-foundations", "architect-professional"],
+  "Introduction to Claude Cowork": ["associate-foundations"],
+  "Introduction to Claude Tag": ["associate-foundations"],
+  "Building with the Claude API": ["developer-foundations", "architect-foundations", "architect-professional"],
+  "Tool use with the Messages API": ["developer-foundations", "architect-foundations", "architect-professional"],
+  "Introduction to Model Context Protocol": ["developer-foundations", "architect-foundations", "architect-professional"],
+  "Model Context Protocol: Advanced Topics": ["developer-foundations", "architect-foundations", "architect-professional"],
+  "Introduction to agent skills": ["developer-foundations", "architect-foundations", "architect-professional"],
+  "Introduction to subagents": ["developer-foundations", "architect-foundations", "architect-professional"],
+  "Claude with Amazon Bedrock": ["architect-foundations", "architect-professional"],
+  "Claude on Google Cloud": ["architect-foundations", "architect-professional"],
+  "Deploying Claude Enterprise with Confidence": ["architect-professional"],
+  "AI Fluency: Framework & Foundations": ["associate-foundations"],
+  "AI Capabilities and Limitations": ["associate-foundations"],
+  "AI Fluency for Builders": ["associate-foundations"],
+  "AI Fluency for educators": ["associate-foundations"],
+  "AI Fluency for pK-12 Educators": ["associate-foundations"],
+  "AI Fluency for students": ["associate-foundations"],
+  "AI Fluency for nonprofits": ["associate-foundations"],
+  "AI Fluency for Small Businesses": ["associate-foundations"],
+  "AI Fluency for Creative Work": ["associate-foundations"],
+  "Teaching AI Fluency": ["associate-foundations"],
+  "AI Fluency for pK-12 Train the Trainer": ["associate-foundations"],
+  "Building Effective Human Agent Teams (Beta)": ["associate-foundations"],
+  "The AI-native SDLC playbook": ["developer-foundations", "architect-professional"]
+ },
+ "videos": {
+  "AI Fluency, the complete course": ["associate-foundations"],
+  "Prompting": ["associate-foundations", "developer-foundations", "architect-foundations", "architect-professional"],
+  "Claude Code": ["developer-foundations", "architect-foundations", "architect-professional"],
+  "The Claude API and MCP": ["developer-foundations", "architect-foundations", "architect-professional"],
+  "Agents and subagents": ["developer-foundations", "architect-foundations", "architect-professional"],
+  "Deploying on Bedrock and Vertex AI": ["architect-foundations", "architect-professional"]
+ }
+}

@@ -63,11 +63,12 @@ export default function Domains() {
                 const groups = new Set(pool.map(groupOf))
                 const unseen = [...groups].filter((g) => !seen.has(g)).length
                 const aiN = aiActive.filter((q) => q.domain === d.name).length
+                const appN = pool.filter((q) => q.source === 'app').length
                 return (
                   <tr key={d.name}>
                     <td style={{ fontWeight: 500, minWidth: 180 }}>{t.domains[d.name]}</td>
                     <td className="num">{t.common.percent(fmtNum(d.weight, lang))}</td>
-                    <td className="num">{groups.size}{aiN ? <span className="muted"> +{aiN} AI</span> : null}</td>
+                    <td className="num">{groups.size - appN}{appN ? <span className="muted"> +{appN} app</span> : null}{aiN ? <span className="muted"> +{aiN} AI</span> : null}</td>
                     <td className="num">{unseen}</td>
                     <td style={{ minWidth: 140 }}>
                       {d.first.n ? (

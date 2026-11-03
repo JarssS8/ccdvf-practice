@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
 import { LangPicker, SyncBadge } from '../components/ui'
-import { metaOf } from '../lib/content'
+import { ensureAll, metaOf, questionIndex } from '../lib/content'
 import { examDateOf, useCert } from '../lib/cert'
 import { CERTS, examDateKey, type CertDef } from '../shared/certs'
 import { fmtDate } from '../lib/engine'
-import { api, chooseCert, deleteAccount, deviceId, dispatch, exportBackup, logout, now, setAiConsent, sync, useStore } from '../lib/store'
+import { api, chooseCert, deleteAccount, deviceId, dispatch, exportBackup, getData, logout, now, setAiConsent, sync, useStore } from '../lib/store'
 import { errorText, ownText, useLang, useT } from '../i18n'
 import { answersCsv } from '../lib/export'
-import { useQuestions } from '../App'
 
 type Theme = 'auto' | 'light' | 'dark'
 export const applyTheme = (t: Theme) => {
@@ -34,7 +33,6 @@ export default function Settings() {
   const { data, status, pending, lastError } = useStore()
   const t = useT()
   const lang = useLang()
-  const qs = useQuestions()
   const cert = useCert()
   const meta = metaOf(cert)
   const [theme, setTheme] = useState<Theme>(savedTheme)
@@ -140,7 +138,7 @@ export default function Settings() {
         <p className="small muted">{t.settings.exportText} {t.settings.exportCsvText}</p>
         <div className="row">
           <button className="btn btn-sm" onClick={() => save(exportBackup(), 'application/json', 'json')}><Icon name="download" size={16} />{t.settings.export}</button>
-          <button className="btn btn-sm" onClick={() => save(answersCsv(data, qs, t, lang), 'text/csv;charset=utf-8', 'csv')}><Icon name="download" size={16} />{t.settings.exportCsv}</button>
+          <button className="btn btn-sm" onClick={() => void ensureAll().then(() => save(answersCsv(getData(), questionIndex(getData().aiQuestions), t, lang), 'text/csv;charset=utf-8', 'csv'), () => setErr(t.common.contentFailed))}><Icon name="download" size={16} />{t.settings.exportCsv}</button>
         </div>
       </section>
 

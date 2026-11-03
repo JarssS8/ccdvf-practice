@@ -14,6 +14,11 @@
   <img src="docs/screenshots/where-you-miss.png" alt="Share of answers missed per domain" width="420">
   <img src="docs/screenshots/trend.png" alt="Hit rate trend per domain" width="420">
 </p>
+<p>
+  <img src="docs/screenshots/pick.png" alt="First run: choosing the certification to prepare" width="200">
+  <img src="docs/screenshots/switcher.png" alt="Switching certification from the top bar on a phone" width="200">
+  <img src="docs/screenshots/plan.png" alt="Study plan: what to prioritise, the week you are in, the exam-week checklist" width="420">
+</p>
 
 ## What it does
 
@@ -24,6 +29,7 @@
 | **Readiness estimate** | A 100–1000 range from your *first* attempts only, re-weighted by domain, with the 720 pass mark. |
 | **Charts** | Where you miss most (by marks lost), trend per domain, most-missed questions, history of mocks. |
 | **Flashcards** | FSRS spaced repetition; questions you miss join the deck automatically. |
+| **Study guide** | In Notes: the pairs the exams make you tell apart, the courses (and official prep path) for your certification with Anthropic's own videos, and a three-week plan that marks the week you are in from your exam date, with the exam-week checklist. |
 | **AI tutor** *(optional)* | Ask why an option is wrong. It only talks about the question in front of you. |
 | **AI questions** *(optional)* | Generates new items grounded in the notes, checked by a second model before they are kept. |
 | **Two languages** | Interface, notes, flashcards, drills and tutor in English or Spanish. |
@@ -164,9 +170,15 @@ Browser tests drive headless Chromium through `playwright-core`; set `CHROMIUM_P
 
 ## Content and translations
 
-The questions, flashcards, notes and news are imported from [Amey-Thakur/CLAUDE-CERTIFICATIONS](https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS) with `npm run sync` (it expects this folder inside a clone of that repo), one folder per certification in `src/content/<cert-id>/`. The certifications themselves (codes, length, domains and weights) are declared once in `src/shared/certs.ts`; the official guide samples live in `scripts/guide-samples/<cert-id>.json`. Review the diff of `src/content/` and commit it before deploying: the imported text becomes the AI tutor's notes and the bank's answer keys.
+The questions, flashcards, notes and news are imported from [Amey-Thakur/CLAUDE-CERTIFICATIONS](https://github.com/Amey-Thakur/CLAUDE-CERTIFICATIONS) with `npm run sync` (it expects this folder inside a clone of that repo), one folder per certification in `src/content/<cert-id>/`. The certifications themselves (codes, length, domains and weights) are declared once in `src/shared/certs.ts`; the official guide samples live in `scripts/guide-samples/<cert-id>.json`. Review the diff of `src/content/` and commit it before deploying: the imported text becomes the AI tutor's notes and the bank's answer keys. The guide pages (confusable pairs, courses, study plan, videos) go to `src/content/guide.json`; which certification each course serves is kept in `scripts/course-map.json`, and courses already on Claude Academy but not yet in the study repo in `scripts/extra-courses.json`.
 
-Spanish versions live in `src/content/es/`. Each entry stores `src`, a hash of the English text it was translated from; when the English changes, the app shows English for that item until the translation is updated. `npm run sync` reports stale translations; after fixing them run `node scripts/i18n.mjs stamp`.
+A daily GitHub Action (`.github/workflows/sync-content.yml`) runs the sync against the latest study repo. When the content changes it opens or updates a `content-sync` pull request with the sync log and the Spanish still to translate, and starts CI on it; a person translates, merges and deploys.
+
+Where the study repo has too few distinct questions for a full mock to follow the blueprint, the app adds its own items (`scripts/extra-questions/<cert-id>.json`, source `app`), written from the official exam guide and checked blind by a second model. They appear in mocks and drills with a "Written by the app" label and a link to report them, and never count towards the readiness estimate.
+
+Each certification's content (with its Spanish) is a separate chunk loaded on demand: the one being studied before the app renders, the others in idle time.
+
+Spanish versions live in `src/content/<cert-id>/es/` (and `src/content/es/` for news and the guide pages). Each entry stores `src`, a hash of the English text it was translated from; when the English changes, the app shows English for that item until the translation is updated. `npm run sync` reports stale translations; after fixing them run `node scripts/i18n.mjs stamp`.
 
 To add a language: copy `src/i18n/es.ts`, translate it, register it in `src/i18n/index.ts`, and add `src/content/<lang>/` files.
 

@@ -4,6 +4,8 @@ export const en = {
   common: {
     appName: 'Claude Cert Practice',
     loading: 'Loading…',
+    contentFailed: 'The questions could not be loaded. Check your connection.',
+    retry: 'Try again',
     skip: 'Skip to content',
     close: 'Close',
     continue: 'Continue',
@@ -43,6 +45,7 @@ export const en = {
     not_found: 'Not found.',
     no_missed: 'There are no missed questions to review.',
     no_questions: 'There are no questions for this mode yet.',
+    loading: 'The questions are still loading. Try again in a moment.',
     ai_disabled: 'AI is not available right now.',
     ai_consent: 'Accept the AI terms in Settings to use the tutor.',
     ai_limit: 'You have used your AI allowance for today. It resets at midnight UTC.',
@@ -95,7 +98,7 @@ export const en = {
   } as Record<string, string>,
   sources: {
     practice: 'Repo practice set', 'mock-1': 'Repo mock 1', 'mock-2': 'Repo mock 2', 'mock-3': 'Repo mock 3',
-    guide: 'Official guide sample', ai: 'AI-generated',
+    guide: 'Official guide sample', ai: 'AI-generated', app: 'Written by the app',
   } as Record<string, string>,
   auth: {
     tagline: 'Practice for the Claude certifications',
@@ -189,6 +192,7 @@ export const en = {
     noneFinished: 'You have not finished any yet',
     pickExam: 'Pick an exam to start →',
     news: 'Program news:',
+    examWeek: 'Exam week: go through the checklist',
     more: 'More',
   },
   exams: {
@@ -311,6 +315,8 @@ export const en = {
     addDeck: 'Add to flashcards',
     reported: 'Reported: it will not appear again',
     report: 'Report: the key is wrong',
+    appNote: 'Written by the app from the official exam guide, not part of the study repo. If you think the key is wrong, tell us.',
+    appReport: 'Report on GitHub',
     finish: 'Finish review',
   },
   progress: {
@@ -384,8 +390,29 @@ export const en = {
   notesView: {
     title: 'Notes',
     meta: (synced: string, verified: string | null) => `From the repo · synced ${synced}${verified ? ` · facts verified ${verified}` : ''}`,
-    tabs: { cheat: 'Cheat sheet', notes: 'Notes', news: 'News' },
+    tabs: { cheat: 'Cheat sheet', notes: 'Notes', confusions: 'Mix-ups', courses: 'Courses', plan: 'Plan', news: 'News' },
     section: 'Section',
+  },
+  guideView: {
+    confusionsIntro: 'These exams test distinctions more than facts: which of two similar things fits the situation. These are the pairs worth being certain about, with the question that separates each one.',
+    prepPath: (code: string) => `Official ${code} prep path`,
+    prepPathNote: 'On Partner Academy. The exam guide, not the prep path, defines what is tested.',
+    forCert: (code: string) => `Courses for ${code}`,
+    coursesNote: 'All free on Claude Academy.',
+    otherCourses: (n: number) => `Other courses in the program (${n})`,
+    newInAcademy: 'New on Academy',
+    open: (title: string) => `${title} (opens Claude Academy)`,
+    videos: 'Official videos',
+    watch: (title: string) => `${title} (opens YouTube)`,
+    planFor: (code: string) => `What to prioritise for ${code}`,
+    weeks: 'Three weeks',
+    thisWeek: 'This week',
+    noDate: 'Set your exam date in Settings to see which week you are in.',
+    farAway: (d: number) => `${d} days to go: week 1 starts when 21 are left.`,
+    past: 'Your exam date has passed.',
+    examWeek: 'Exam-week checklist',
+    during: 'During the exam',
+    source: 'From the study repo guide.',
   },
   settings: {
     title: 'Settings',

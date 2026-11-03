@@ -58,6 +58,12 @@ export default function Home() {
         <p className="small muted">{t.home.examLine(cert.name, cert.items, cert.minutes, SCALE.pass)}</p>
       </div>
 
+      {/* Exam week: the checklist matters more than anything else on this page */}
+      {daysLeft != null && daysLeft >= 0 && daysLeft <= 7 && (
+        <a className="callout callout-info" href="#/notes/plan" style={{ textDecoration: 'none', color: 'var(--ink)', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontWeight: 600 }}>
+          <span>{t.home.examWeek}</span><Icon name="arrowRight" size={18} />
+        </a>
+      )}
       {err && <p role="alert" className="callout callout-bad">{errorText(t, err)}</p>}
 
       <div className="bento">

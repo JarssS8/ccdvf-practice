@@ -1,0 +1,915 @@
+{
+ "associate-foundations-practice-1": {
+  "question": "Claude resume un contrato con un proveedor y afirma que la cláusula de rescisión exige un preaviso de 60 días, citando la sección 14.2. Vas a enviar el resumen a tu equipo legal. ¿Qué debes hacer primero?",
+  "options": {
+   "A": "Comprobar la sección 14.2 del contrato y confirmar el plazo de preaviso antes de enviarlo",
+   "B": "Enviarlo, ya que Claude citó una sección concreta",
+   "C": "Preguntarle a Claude qué nivel de confianza tiene y enviarlo si es alto",
+   "D": "Reformular el resumen con un lenguaje más formal y enviarlo"
+  },
+  "rationale": "Las citas con apariencia de precisión pueden ser inventadas, y el material destinado a revisión legal exige verificarse contra el documento fuente. Una cita concreta no es prueba de exactitud (B), la confianza que declara el propio modelo no es una señal de fiabilidad (C), y reescribir el texto no hace nada por su corrección (D).",
+  "src": "1ng03wx"
+ },
+ "associate-foundations-practice-2": {
+  "question": "Le pides a Claude que redacte un análisis competitivo, y la salida presenta cifras de cuota de mercado de tres competidores sin fuentes. Las cifras parecen plausibles. ¿Cuál es el tratamiento adecuado?",
+  "options": {
+   "A": "Incluir las cifras, ya que la plausibilidad basta para documentos internos",
+   "B": "Verificar cada cifra con una fuente de estudios de mercado y conservar solo lo que se confirme, con citas",
+   "C": "Eliminar las cifras e indicar que no había datos de mercado disponibles",
+   "D": "Pedirle a Claude que regenere hasta que los números se estabilicen entre ejecuciones"
+  },
+  "rationale": "Las afirmaciones cuantitativas sin fuente son un terreno clásico de alucinaciones; lo profesional es verificarlas contra una fuente fiable y conservar lo que resista. La plausibilidad no es exactitud (A), eliminarlo todo descarta material realmente verificable (C), y la consistencia entre regeneraciones no establece la verdad (D).",
+  "src": "267lr1"
+ },
+ "associate-foundations-practice-3": {
+  "question": "Necesitas que Claude produzca un informe trimestral a partir de notas de reuniones, un resumen de hoja de cálculo y el informe del trimestre anterior. El primer intento no respeta la estructura ni el tono requeridos. ¿Cuál es el siguiente paso más eficaz?",
+  "options": {
+   "A": "Reintentar el mismo prompt, ya que los resultados varían entre ejecuciones",
+   "B": "Cambiar al modelo más capaz y reenviar el mismo prompt",
+   "C": "Reescribir el prompt indicando el rol, las secciones requeridas en orden y el tono, y adjuntar el informe del trimestre anterior como ejemplo de formato",
+   "D": "Dividir el trabajo en cuarenta prompts de una sola frase"
+  },
+  "rationale": "La estructura, las restricciones explícitas y un ejemplo del formato deseado son los remedios más eficaces ante un fallo de formato y tono. Volver a lanzar (A) deja la carencia intacta, un modelo mayor no aprende requisitos que no se han indicado (B), y la fragmentación excesiva destruye la coherencia (D).",
+  "src": "p5p6sq"
+ },
+ "associate-foundations-practice-4": {
+  "question": "El prompt de un compañero le pide a Claude que «analice los comentarios de nuestros clientes y arregle los problemas». La salida es genérica. ¿Qué revisión aplica mejor la descomposición de tareas?",
+  "options": {
+   "A": "Añadir «sé específico y detallado» al prompt",
+   "B": "Hacer la misma pregunta tres veces y combinar las respuestas",
+   "C": "Pegar más comentarios en el mismo prompt",
+   "D": "Pedir primero una lista categorizada de temas de queja con recuentos, después los tres principales por frecuencia, y luego una acción propuesta por tema"
+  },
+  "rationale": "La descomposición convierte una petición compuesta y vaga en una secuencia de pasos verificables, cada uno con un resultado concreto. Los intensificadores vagos (A) no aportan estructura, repetir (B) multiplica la vaguedad, y más entrada sin más estructura (C) suele empeorar el enfoque.",
+  "src": "1yt2aog"
+ },
+ "associate-foundations-practice-5": {
+  "question": "Tu equipo redacta cientos de respuestas breves y rutinarias a clientes cada día, y el coste y la velocidad importan más que los matices. De vez en cuando una escalada compleja requiere un razonamiento cuidadoso. ¿Cuál es una estrategia de modelos sensata?",
+  "options": {
+   "A": "Usar el modelo más capaz para todo y maximizar la calidad",
+   "B": "Usar el modelo más rápido y barato para las respuestas rutinarias y cambiar a uno más capaz para las escaladas complejas",
+   "C": "Usar el modelo más rápido para todo, incluidas las escaladas",
+   "D": "Alternar modelos al azar para repartir la carga"
+  },
+  "rationale": "malgasta presupuesto de coste y latencia en trabajo rutinario; **C** atiende mal justo los casos que requieren profundidad; **D** no hace corresponder nada con nada. **B** ajusta la elección del modelo a los requisitos de la tarea en ambos sentidos, que es el criterio que se evalúa.",
+  "src": "znhj21"
+ },
+ "associate-foundations-practice-6": {
+  "question": "Tu proceso de cierre mensual implica recopilar cifras, redactar un comentario de desviaciones y dar formato a un paquete para el consejo. Quieres que Claude te ayude de forma duradera, no solo una vez. ¿Cuál es el enfoque más sólido?",
+  "options": {
+   "A": "Crear un Project con las convenciones del comentario y los paquetes anteriores como conocimiento, más instrucciones sobre la estructura, y ejecutar cada cierre dentro de él",
+   "B": "Pegar todo en un chat nuevo cada mes y pedir el paquete",
+   "C": "Pedirle a Claude que haga el cierre completo de forma autónoma, incluida la obtención de las cifras",
+   "D": "Usar Claude solo para revisar la ortografía del paquete final"
+  },
+  "rationale": "Los workflows duraderos y repetidos pertenecen a un Project, donde las instrucciones y el conocimiento persisten y mejoran. Volver a pegar cada mes (B) reconstruye el contexto a mano cada vez, la autonomía total sobre cifras financieras sin revisión (C) ignora el criterio de uso apropiado, y limitarse a la ortografía (D) renuncia al valor real.",
+  "src": "rvt2wl"
+ },
+ "associate-foundations-practice-7": {
+  "question": "Un jefe de departamento te pregunta si Claude podría «encargarse de nuestro onboarding de clientes». ¿Cuál es el primer paso correcto?",
+  "options": {
+   "A": "Decir que sí y ponerse a construirlo de inmediato",
+   "B": "Mapear los pasos del onboarding, identificar cuáles implican redactar, resumir o consultar, que Claude hace bien, y cuáles requieren criterio humano o acceso a sistemas que no tiene",
+   "C": "Decir que no, porque el onboarding implica datos de clientes",
+   "D": "Reenviar la pregunta al soporte de Anthropic"
+  },
+  "rationale": "La habilidad central del Associate es traducir una petición de negocio en un reparto realista del trabajo: dónde aporta valor Claude, dónde se quedan las personas y cuáles son los límites. Un sí sin matices (A) y un no sin matices (C) se saltan el análisis, y el soporte (D) no conoce tu proceso.",
+  "src": "vpfmtr"
+ },
+ "associate-foundations-practice-8": {
+  "question": "El Project de tu equipo responde preguntas sobre políticas a partir de un manual subido. RR. HH. publica una nueva versión del manual. ¿Qué debe ocurrir para que el Project siga siendo fiable?",
+  "options": {
+   "A": "Nada; Claude encontrará la nueva versión por su cuenta",
+   "B": "Añadir el nuevo manual junto al antiguo para que ambos estén disponibles",
+   "C": "Sustituir el manual obsoleto en el conocimiento del Project y contrastar por muestreo las respuestas con la nueva versión",
+   "D": "Decir a los usuarios que mencionen la nueva versión en cada prompt"
+  },
+  "rationale": "El conocimiento de un Project se mantiene, no se actualiza solo; las fuentes obsoletas son un defecto de calidad del que responde quien lo configura. Claude no obtiene por sí mismo tus documentos internos (A), conservar ambas versiones invita a respuestas contradictorias (B), y trasladar la carga a cada usuario (D) no es mantenimiento.",
+  "src": "ex6gyy"
+ },
+ "associate-foundations-practice-9": {
+  "question": "Quieres que Claude analice patrones de abandono en una exportación que incluye nombres de clientes, correos electrónicos y números de cuenta. La política de la empresa prohíbe compartir datos personales con herramientas externas. ¿Cuál es la acción correcta?",
+  "options": {
+   "A": "Subir el archivo, ya que el análisis de abandono tiene un fin interno",
+   "B": "Subirlo pero indicarle a Claude que ignore las columnas con datos personales",
+   "C": "Abandonar el análisis",
+   "D": "Eliminar o seudonimizar primero las columnas identificativas, y luego subir y analizar"
+  },
+  "rationale": "Haz que la tarea sea conforme y luego hazla: los identificadores no son necesarios para analizar patrones. La finalidad no anula la política (A), una instrucción de ignorar datos no es un control porque los datos ya salieron del perímetro (B), y abandonar el trabajo (C) es innecesario cuando la anonimización lo hace posible.",
+  "src": "kzmoit"
+ },
+ "associate-foundations-practice-10": {
+  "question": "Un prompt que funcionaba bien durante semanas ahora da respuestas desviadas después de que tu equipo añadiera muchos documentos nuevos al Project. ¿Cuál es el mejor primer diagnóstico?",
+  "options": {
+   "A": "Comprobar si el conocimiento recién añadido está diluyendo o contradiciendo las fuentes en las que deberían basarse las respuestas",
+   "B": "Reescribir el prompt desde cero",
+   "C": "Cambiar a un modelo más grande",
+   "D": "Eliminar el Project y empezar de nuevo"
+  },
+  "rationale": "El cambio que coincidió con la regresión es el primer sospechoso: el conocimiento nuevo puede desplazar o contradecir las fuentes relevantes. Reescribir el prompt (B), cambiar de modelo (C) o reconstruirlo todo (D) tratan síntomas antes de diagnosticar el cambio real.",
+  "src": "vcy7fn"
+ },
+ "associate-foundations-practice-11": {
+  "question": "Claude produce una tabla comparativa de competidores en la que una fila está marcada como «datos no disponibles» y el resto está completo. Un compañero te pide que borres la fila vacía para que la tabla parezca completa. ¿Cuál es la respuesta correcta?",
+  "options": {
+   "A": "Borrar la fila, ya que una tabla incompleta resta confianza",
+   "B": "Mantener la fila y su etiqueta, porque el hueco es en sí mismo un hallazgo que el lector necesita",
+   "C": "Rellenar la fila con una estimación razonable y marcarla como aproximada",
+   "D": "Pedirle a Claude que busque más a fondo hasta que todas las filas estén rellenas"
+  },
+  "rationale": "Un hueco declarado es información: indica al lector dónde es débil el análisis. Borrarlo (A) oculta una limitación, una estimación sin marcar (C) fabrica datos, y presionar al modelo para que rellene la celda (D) invita a la invención en lugar de a la recuperación.",
+  "src": "zlt986"
+ },
+ "associate-foundations-practice-12": {
+  "question": "Dos ejecuciones del mismo prompt dan cifras distintas para la misma métrica. ¿Qué conclusión está respaldada?",
+  "options": {
+   "A": "La cifra más alta es más probable que sea correcta porque el modelo encontró más evidencia",
+   "B": "Las cifras deben promediarse para reducir la varianza",
+   "C": "Ninguna de las cifras está establecida, y la métrica debe contrastarse con la fuente",
+   "D": "El prompt está bien y el modelo necesita una ventana de contexto más larga"
+  },
+  "rationale": "La discrepancia entre ejecuciones muestra que la cifra no se apoya en una fuente fiable, así que ninguna está establecida. Preferir el número mayor (A) es arbitrario, promediar (B) trata dos números sin verificar como si fueran mediciones, y la longitud del contexto (D) no guarda relación con que la cifra sea cierta.",
+  "src": "bwycth"
+ },
+ "associate-foundations-practice-13": {
+  "question": "Le pides a Claude que extraiga todas las condiciones de pago de un contrato de 40 páginas. La salida enumera cuatro condiciones, con un formato limpio. ¿Cuál es la primera comprobación?",
+  "options": {
+   "A": "Confirmar que el formato es coherente en las cuatro entradas",
+   "B": "Preguntarle a Claude si las encontró todas",
+   "C": "Volver a ejecutarlo con una temperatura más alta para que aparezcan más condiciones",
+   "D": "Leer las secciones de pago del contrato para confirmar que no se omitió ninguna condición"
+  },
+  "rationale": "La extracción falla por omisión con más frecuencia que por error, y una salida ordenada no da ninguna señal de que esté completa. El formato (A) es cosmético, la autoevaluación (B) no es evidencia, y la temperatura (C) cambia la redacción, no la exhaustividad.",
+  "src": "e0ymq1"
+ },
+ "associate-foundations-practice-14": {
+  "question": "Un resumen que encargaste afirma una conclusión que contradice tu propia lectura de la fuente. ¿Qué debes hacer?",
+  "options": {
+   "A": "Localizar el pasaje en el que se apoya la conclusión y compararlo con ambas lecturas",
+   "B": "Dar la razón al resumen, ya que el modelo leyó todo el documento",
+   "C": "Dar la razón a tu lectura y tratar el resumen como erróneo",
+   "D": "Preguntar a un compañero cuál de las dos suena más plausible"
+  },
+  "rationale": "El desacuerdo se resuelve volviendo al pasaje en cuestión, lo que lo zanja con evidencia. Dar la razón a una u otra (B, C) decide sin comprobar, y recabar opiniones (D) sustituye la fuente por la plausibilidad.",
+  "src": "1q33wic"
+ },
+ "associate-foundations-practice-15": {
+  "question": "Claude produce una recomendación bien argumentada y sin citas sobre un tema en el que no tienes experiencia. ¿Cuál es el uso apropiado?",
+  "options": {
+   "A": "Adoptarla, ya que el razonamiento es internamente coherente",
+   "B": "Tratarla como una hipótesis que contrastar con fuentes antes de actuar",
+   "C": "Descartarla, porque la salida sin fuentes no tiene valor",
+   "D": "Pedir citas y adoptar lo que devuelva"
+  },
+  "rationale": "El razonamiento sin fuentes es un punto de partida, útil para estructurar una indagación pero no para decidir. La coherencia interna no es exactitud (A), el razonamiento aún puede ser útil (C), y las citas generadas a petición requieren la misma verificación que la afirmación (D).",
+  "src": "185kda0"
+ },
+ "associate-foundations-practice-16": {
+  "question": "Un equipo quiere que Claude redacte resúmenes semanales de la salud de los clientes a partir de tickets de soporte, notas del CRM y datos de uso. ¿Qué detalle de diseño es más importante para que la salida siga siendo útil durante meses?",
+  "options": {
+   "A": "Elegir el modelo más grande disponible",
+   "B": "Ejecutar el resumen a diario en lugar de semanalmente",
+   "C": "Definir qué debe contener un resumen de salud y mantener esa definición en un único lugar que el equipo mantiene",
+   "D": "Dejar que cada miembro del equipo escriba su propio prompt"
+  },
+  "rationale": "Una definición estable y mantenida del entregable es lo que mantiene la salida coherente cuando cambian las personas y las entradas. El tamaño del modelo (A) no arregla una tarea sin definir, una mayor frecuencia (B) multiplica una salida poco clara, y los prompts por persona (D) garantizan la deriva.",
+  "src": "1p6haa0"
+ },
+ "associate-foundations-practice-17": {
+  "question": "¿Qué tarea de un proceso de informes mensual es la candidata más débil para delegar en Claude?",
+  "options": {
+   "A": "Redactar el resumen narrativo a partir de cifras acordadas",
+   "B": "Reformatear el informe del mes pasado a la nueva plantilla",
+   "C": "Extraer las cinco desviaciones principales de una exportación de hoja de cálculo",
+   "D": "Decidir qué cuenta con bajo rendimiento escalar al equipo directivo"
+  },
+  "rationale": "La decisión de escalar conlleva responsabilidad y depende de relaciones y de un contexto que el modelo no tiene. Redactar (A), reformatear (B) y extraer (C) son tareas acotadas con una salida comprobable.",
+  "src": "97f3je"
+ },
+ "associate-foundations-practice-18": {
+  "question": "Un proceso funciona bien para un analista y mal para otros tres que usan el mismo prompt. ¿Cuál es la causa más probable?",
+  "options": {
+   "A": "El prompt depende de un contexto que el primer analista aporta sin darse cuenta",
+   "B": "Los otros tres necesitan un modelo más capaz",
+   "C": "La tarea no es adecuada para Claude",
+   "D": "Los otros tres usan entradas más cortas"
+  },
+  "rationale": "Que una persona tenga éxito con el mismo prompt suele significar que aporta contexto no declarado, como saber qué archivo adjuntar o qué aspecto tiene un buen resultado. Cambiar de modelo (B) no suple el contexto que falta, la tarea claramente funciona (C), y la longitud de la entrada (D) es un síntoma, no una causa.",
+  "src": "1dwxilr"
+ },
+ "associate-foundations-practice-19": {
+  "question": "¿Cuándo es apropiado mantener un paso de aprobación humana en un workflow de Claude por lo demás automatizado?",
+  "options": {
+   "A": "Siempre, ya que la automatización es intrínsecamente arriesgada",
+   "B": "Cuando la acción es difícil de revertir o tiene consecuencias externas",
+   "C": "Solo mientras el flujo es nuevo, y después eliminarlo",
+   "D": "Nunca, porque los pasos de aprobación anulan el propósito de la automatización"
+  },
+  "rationale": "La aprobación compensa su coste allí donde un error es caro o difícil de deshacer. La aprobación generalizada (A) y su eliminación generalizada (D) ignoran el riesgo concreto, y una regla basada en el tiempo (C) retira el control sin importar qué hace la acción.",
+  "src": "6z2day"
+ },
+ "associate-foundations-practice-20": {
+  "question": "Un compañero propone pegar una lista de clientes en un prompt para redactar mensajes personalizados. ¿Cuál es el tratamiento correcto?",
+  "options": {
+   "A": "Seguir adelante, ya que el prompt no se almacena en ningún sitio de forma permanente",
+   "B": "Pedirle a Claude que mantenga los nombres en confidencialidad",
+   "C": "Eliminar o sustituir los datos identificativos antes de redactar, y volver a añadirlos después",
+   "D": "Seguir adelante pero borrar la conversación después"
+  },
+  "rationale": "Trabajar con datos anonimizados y volver a asociar los identificadores después logra la tarea sin exponer los datos personales. Las suposiciones sobre el almacenamiento (A) no son un control, una instrucción al modelo (B) no es una salvaguarda, y borrar después (D) no deshace la divulgación.",
+  "src": "1pbibzl"
+ },
+ "associate-foundations-practice-21": {
+  "question": "¿Qué afirmación sobre indicarle a un modelo que no haga algo es correcta?",
+  "options": {
+   "A": "Una instrucción en el prompt es un control exigible",
+   "B": "Las instrucciones son exigibles si se colocan en un system prompt",
+   "C": "Las instrucciones son exigibles si se repiten varias veces",
+   "D": "Una instrucción orienta el comportamiento pero no lo garantiza, así que los controles van fuera del prompt"
+  },
+  "rationale": "Las instrucciones del prompt influyen en el comportamiento y no son garantías, así que todo lo que deba cumplirse se hace cumplir en el sistema que lo rodea. La ubicación (B) y la repetición (C) cambian la fuerza de la orientación, no su naturaleza, y tratarla como si fuera un mecanismo de cumplimiento (A) es el error que evalúa la pregunta.",
+  "src": "1463uog"
+ },
+ "associate-foundations-practice-22": {
+  "question": "Un informe regulado redactado con Claude está a punto de presentarse. ¿De qué es responsable quien lo revisa?",
+  "options": {
+   "A": "De la exactitud y el cumplimiento normativo del documento presentado, con independencia de cómo se redactó",
+   "B": "De confirmar que Claude se usó conforme a la política",
+   "C": "De confirmar que el prompt incluía la normativa pertinente",
+   "D": "De registrar qué versión del modelo produjo el borrador"
+  },
+  "rationale": "La responsabilidad recae en quien presenta el documento, y la herramienta utilizada no la transfiere. El cumplimiento de la política (B), el contenido del prompt (C) y el registro de versiones (D) son prácticas razonables que no sustituyen la responsabilidad sobre el documento.",
+  "src": "zd7bsg"
+ },
+ "associate-foundations-practice-23": {
+  "question": "¿Cuándo está más claramente justificado revelar que una IA ayudó en un trabajo?",
+  "options": {
+   "A": "Siempre que cualquier herramienta de IA haya intervenido en el trabajo en cualquier fase",
+   "B": "Cuando la valoración que la audiencia hace del trabajo depende de cómo se produjo",
+   "C": "Solo cuando la salida se publica externamente",
+   "D": "Solo cuando lo exige una política escrita"
+  },
+  "rationale": "La divulgación importa donde la procedencia cambiaría cómo pondera el lector el trabajo. Una regla universal (A) vuelve la señal insignificante, y limitarla a la publicación externa (C) o a la política escrita (D) deja fuera casos internos en los que realmente importa.",
+  "src": "m9p79p"
+ },
+ "associate-foundations-practice-24": {
+  "question": "Un prompt produce una salida que es precisa pero sistemáticamente demasiado larga. ¿Cuál es la solución más fiable?",
+  "options": {
+   "A": "Añadir «sé conciso» al prompt",
+   "B": "Pedir después un resumen de la salida",
+   "C": "Indicar el límite en términos concretos, como un número de palabras o de viñetas",
+   "D": "Usar un modelo más pequeño"
+  },
+  "rationale": "Los límites concretos son comprobables y reproducibles, a diferencia de los adjetivos. «Sé conciso» (A) se interpreta de forma distinta en cada ejecución, resumir después (B) añade un paso y un segundo punto de fallo, y un modelo más pequeño (D) cambia precisión por brevedad.",
+  "src": "ri5ww3"
+ },
+ "associate-foundations-practice-25": {
+  "question": "Necesitas que la salida tenga siempre una estructura concreta para poder pegarla en una plantilla. ¿Cuál es la técnica más eficaz?",
+  "options": {
+   "A": "Describir la estructura en prosa al final del prompt",
+   "B": "Pedir que la salida esté bien organizada",
+   "C": "Pedir la salida dos veces y quedarse con la mejor",
+   "D": "Proporcionar un ejemplo relleno de la estructura exacta que quieres"
+  },
+  "rationale": "Un ejemplo especifica el objetivo sin ambigüedad y es la señal más fuerte de que se dispone para el formato. La descripción en prosa (A) deja margen a la interpretación, una petición vaga (B) deja más, y generar dos veces (C) no define el objetivo en absoluto.",
+  "src": "1atrtlm"
+ },
+ "associate-foundations-practice-26": {
+  "question": "Un prompt largo con muchas reglas produce una salida que cumple algunas reglas e ignora otras. ¿Qué deberías probar primero?",
+  "options": {
+   "A": "Separar la tarea en etapas para que cada salida se compruebe antes de la siguiente",
+   "B": "Repetir las reglas ignoradas en mayúsculas",
+   "C": "Mover todas las reglas al principio del prompt",
+   "D": "Añadir una regla que diga que se deben cumplir todas las reglas"
+  },
+  "rationale": "Dividir el trabajo reduce cuánto debe cumplirse a la vez y ofrece un punto de control entre etapas. El énfasis (B), el orden (C) y una metarregla (D) dejan la misma carga en un único paso.",
+  "src": "10ur0qs"
+ },
+ "associate-foundations-practice-27": {
+  "question": "¿Qué detalle mejora más un prompt que le pide a Claude revisar un documento?",
+  "options": {
+   "A": "Indicar que la revisión debe ser exhaustiva",
+   "B": "Indicar para qué es la revisión y qué se consideraría un problema",
+   "C": "Adjuntar varios documentos similares para compararlos",
+   "D": "Pedir la revisión como una lista numerada"
+  },
+  "rationale": "El propósito y los criterios le dicen al modelo qué buscar, que es de lo que depende una revisión. La exhaustividad (A) no es medible, los documentos adicionales (C) añaden ruido sin criterios, y el formato (D) afecta a la presentación, no al fondo.",
+  "src": "198kbah"
+ },
+ "associate-foundations-practice-28": {
+  "question": "Una tarea consiste en leer una vez un informe de 200 páginas y responder una única pregunta. ¿Qué consideración debe guiar la elección?",
+  "options": {
+   "A": "El modelo más barato disponible, ya que la tarea se ejecuta una sola vez",
+   "B": "Si el modelo ofrece el tiempo de respuesta más rápido",
+   "C": "Si el modelo puede abarcar y razonar sobre todo el documento de forma fiable",
+   "D": "Si la tarea puede repartirse entre varios modelos pequeños"
+  },
+  "rationale": "La restricción determinante es la comprensión fiable de un documento largo, que es lo que debe satisfacer la elección. El coste (A) y la velocidad (B) solo importan entre modelos que pueden hacer la tarea, y dividirla (D) corre el riesgo de perder el razonamiento a través del documento que la pregunta necesita.",
+  "src": "1ylws1k"
+ },
+ "associate-foundations-practice-29": {
+  "question": "¿Cuándo tiene más sentido trabajar en un proyecto de Claude que en una integración con la API?",
+  "options": {
+   "A": "Cuando el volumen es alto y predecible",
+   "B": "Cuando la salida debe insertarse automáticamente en otro sistema",
+   "C": "Cuando la tarea debe ejecutarse según una programación",
+   "D": "Cuando el trabajo es exploratorio y lo hacen personas, no sistemas"
+  },
+  "rationale": "Los proyectos se adaptan al trabajo humano e iterativo en el que las personas curan y reutilizan el contexto. El volumen alto (A), el traspaso programático (B) y la programación (C) describen integración de sistemas, para lo que sirve la API.",
+  "src": "kdppm6"
+ },
+ "associate-foundations-practice-30": {
+  "question": "Un equipo pregunta si debe pasar a un modelo más grande porque las salidas son inconsistentes. ¿Qué debe establecerse primero?",
+  "options": {
+   "A": "Si la inconsistencia procede del prompt y de las entradas y no del modelo",
+   "B": "La diferencia de coste entre los dos modelos",
+   "C": "Si el modelo más grande está disponible en su región",
+   "D": "Cuánto más rápido es el modelo actual"
+  },
+  "rationale": "La inconsistencia suele deberse a una tarea poco especificada o a entradas variables, algo que un modelo más grande no arregla. El coste (B), la disponibilidad (C) y la velocidad (D) son datos para una decisión que aún no se ha demostrado que sea la correcta.",
+  "src": "wy7al9"
+ },
+ "associate-foundations-practice-31": {
+  "question": "¿Qué pertenece al conocimiento de un proyecto en lugar de a prompts individuales?",
+  "options": {
+   "A": "La pregunta concreta que se hace hoy",
+   "B": "El material en el que debería poder basarse cada conversación del proyecto",
+   "C": "La extensión de salida preferida para un informe",
+   "D": "Un documento puntual que se revisa esta semana"
+  },
+  "rationale": "El conocimiento del proyecto contiene lo que se repite, de modo que cada conversación parte de la misma base. La pregunta de hoy (A), una preferencia de formato aislada (C) y un documento puntual (D) pertenecen al prompt que los necesita.",
+  "src": "12upgo7"
+ },
+ "associate-foundations-practice-32": {
+  "question": "Las respuestas de un proyecto se han vuelto más vagas a medida que se añadían más documentos. ¿Cuál es la causa probable?",
+  "options": {
+   "A": "Cambió la versión del modelo",
+   "B": "El proyecto tiene muy pocos documentos para fundamentar las respuestas",
+   "C": "El conocimiento ahora contiene material solapado u obsoleto que compite con las fuentes correctas",
+   "D": "Los prompts se han vuelto demasiado específicos"
+  },
+  "rationale": "El conocimiento acumulado y sin mantener diluye la recuperación, y el síntoma es precisamente esta deriva hacia la vaguedad. Un cambio de versión (A) no guarda relación con lo que se añadió, y tanto los pocos documentos (B) como los prompts demasiado específicos (D) contradicen la tendencia descrita.",
+  "src": "qaw88o"
+ },
+ "associate-foundations-practice-33": {
+  "question": "¿Cómo debe tratarse el conocimiento de un proyecto cuando cambia el material subyacente?",
+  "options": {
+   "A": "Se actualiza automáticamente desde los sistemas de origen",
+   "B": "Solo necesita revisión cuando las respuestas son visiblemente erróneas",
+   "C": "Debe reconstruirse desde cero cada trimestre",
+   "D": "Debe mantenerse de forma deliberada, porque no se actualiza solo"
+  },
+  "rationale": "El conocimiento del proyecto es una copia curada y es tan preciso como quien lo mantiene. No se sincroniza (A), esperar a errores visibles (B) supone actuar cuando el daño ya está hecho, y las reconstrucciones periódicas (C) son un desperdicio y siguen sin estar ligadas a los cambios reales.",
+  "src": "oqvgg2"
+ },
+ "associate-foundations-practice-34": {
+  "question": "Un workflow que ha funcionado de forma fiable durante meses empieza a devolver resultados desviados. ¿Cuál es el primer paso de diagnóstico?",
+  "options": {
+   "A": "Establecer qué cambió: las entradas, la configuración o el conocimiento",
+   "B": "Reescribir el prompt desde cero",
+   "C": "Cambiar a otro modelo",
+   "D": "Aumentar la cantidad de contexto proporcionado"
+  },
+  "rationale": "Un sistema que funcionaba y se degrada apunta a un cambio, e identificarlo es más rápido y seguro que reconstruir. Reescribir (B), cambiar de modelo (C) y añadir contexto (D) alteran el sistema antes de conocer la causa.",
+  "src": "vajkoo"
+ },
+ "associate-foundations-practice-35": {
+  "question": "La calidad de la salida es aceptable, pero el proceso tarda tanto que no compensa usarlo. ¿Qué debe examinarse primero?",
+  "options": {
+   "A": "Si un modelo más rápido alcanzaría el nivel de calidad exigido",
+   "B": "Si la parte lenta es el modelo o los pasos humanos que lo rodean",
+   "C": "Si el prompt puede acortarse",
+   "D": "Si la tarea debería abandonarse"
+  },
+  "rationale": "Localizar el retraso real va antes que optimizar nada, y en la práctica los pasos circundantes suelen dominar. Cambiar el modelo (A) o el prompt (C) presupone que el modelo es el cuello de botella, y abandonar (D) descarta un proceso que ya produce una salida aceptable.",
+  "src": "18bjzeo"
+ },
+ "associate-foundations-mock1-1": {
+  "question": "Un compañero comparte un resumen de políticas redactado por Claude que se lee bien y cita tres documentos internos por su nombre. ¿Cuál es el paso de revisión apropiado antes de que circule por todo el departamento?",
+  "options": {
+   "A": "Hacerlo circular, ya que las fuentes nombradas demuestran que está fundamentado",
+   "B": "Pedirle a Claude que revise su propio trabajo y hacerlo circular si está de acuerdo",
+   "C": "Confirmar que cada documento nombrado existe y dice lo que el resumen afirma",
+   "D": "Añadir un aviso de que el resumen fue generado por IA y hacerlo circular"
+  },
+  "rationale": "Las fuentes nombradas pueden ser inventadas; verificarlas contra los documentos reales es el paso de diligencia. La autorrevisión (B) no es evidencia independiente, y un aviso (D) no hace que el contenido sea correcto",
+  "src": "1dc8a4p"
+ },
+ "associate-foundations-mock1-2": {
+  "question": "Necesitas un primer borrador de una actualización para los stakeholders a partir de un registro largo del proyecto. ¿Qué prompt tiene más probabilidades de producir un borrador utilizable al primer intento?",
+  "options": {
+   "A": "«Resume este registro del proyecto.»",
+   "B": "«Escribe algo bueno sobre este registro del proyecto para mi jefe.»",
+   "C": "«Resume este registro del proyecto. Sé detallado, minucioso y profesional.»",
+   "D": "«Estás redactando una actualización semanal para directivos no técnicos. A partir del registro, produce: estado en una línea, tres avances, dos riesgos con responsables y el foco de la próxima semana. Mantenla por debajo de 200 palabras.»"
+  },
+  "rationale": "El rol, la audiencia, la estructura explícita y las restricciones de longitud son lo que convierte una petición vaga en un borrador utilizable. Los intensificadores como «detallado y minucioso» (C) no aportan estructura",
+  "src": "19z72oc"
+ },
+ "associate-foundations-mock1-3": {
+  "question": "Un workflow redacta cientos de confirmaciones de citas rutinarias cada día. La latencia y el coste dominan; el lenguaje es formulaico. ¿Qué opción encaja?",
+  "options": {
+   "A": "Un modelo rápido y de bajo coste, reservando uno más capaz para las excepciones",
+   "B": "El modelo más capaz, por coherencia",
+   "C": "El modelo que sea el más reciente",
+   "D": "Alternar entre modelos para repartir el coste"
+  },
+  "rationale": "Ajusta el nivel del modelo al trabajo: rápido y barato para el volumen formulaico, capaz para las excepciones",
+  "src": "75m16w"
+ },
+ "associate-foundations-mock1-4": {
+  "question": "El Project de tu equipo responde preguntas a partir de un manual de producto. Los usuarios informan de respuestas seguras sobre una funcionalidad que se eliminó el trimestre pasado. ¿Cuál es la causa más probable?",
+  "options": {
+   "A": "El modelo necesita reentrenamiento",
+   "B": "El conocimiento del Project aún contiene el manual obsoleto",
+   "C": "Los usuarios formulan mal las preguntas",
+   "D": "La ventana de contexto es demasiado pequeña"
+  },
+  "rationale": "El conocimiento del Project lo mantienes tú; los documentos obsoletos producen respuestas desfasadas con aplomo",
+  "src": "106nblp"
+ },
+ "associate-foundations-mock1-5": {
+  "question": "El departamento legal te pide analizar una hoja de cálculo de tickets de soporte que contiene nombres y direcciones de correo de clientes. Tu organización prohíbe enviar datos personales a herramientas externas. ¿Qué haces?",
+  "options": {
+   "A": "Subirla, ya que lo ha pedido legal",
+   "B": "Subirla y pedirle a Claude que ignore las columnas con datos personales",
+   "C": "Eliminar o seudonimizar las columnas personales y luego analizar lo que queda",
+   "D": "Decirle a legal que el análisis no es posible"
+  },
+  "rationale": "Haz que la tarea sea conforme y luego hazla. La jerarquía de quien lo solicita no anula la política, y pedirle al modelo que ignore datos no hace que dejen de haberse enviado",
+  "src": "zjh61k"
+ },
+ "associate-foundations-mock1-6": {
+  "question": "Claude produce una respuesta de cinco párrafos cuando necesitabas tres viñetas, dos veces seguidas. ¿Cuál es el ajuste más eficaz?",
+  "options": {
+   "A": "Volver a preguntar y esperar que varíe",
+   "B": "Cambiar a un modelo más capaz",
+   "C": "Reformatear manualmente cada respuesta",
+   "D": "Indicar el formato de forma explícita, incluyendo el número de viñetas y su longitud máxima"
+  },
+  "rationale": "Los fallos de formato se corrigen indicando el formato, no volviendo a lanzar ni cambiando a un modelo mejor",
+  "src": "1mabfop"
+ },
+ "associate-foundations-mock1-7": {
+  "question": "¿Cuál de estas es la señal más fuerte de que una afirmación generada por Claude necesita verificación antes de usarse?",
+  "options": {
+   "A": "La afirmación es un número, una fecha o una cita concretos que importarían si fueran erróneos",
+   "B": "La respuesta es larga",
+   "C": "La respuesta se produjo rápidamente",
+   "D": "La respuesta usa vocabulario técnico"
+  },
+  "rationale": "Los detalles concretos y con consecuencias son la superficie de mayor riesgo de invención. La longitud, la rapidez y el vocabulario no son indicio de exactitud",
+  "src": "1cmm2y3"
+ },
+ "associate-foundations-mock1-8": {
+  "question": "Un responsable quiere saber si Claude puede «sustituir nuestro proceso de informes semanales». ¿Cuál es la respuesta más útil?",
+  "options": {
+   "A": "Sí, para eso sirve la automatización con IA",
+   "B": "Un desglose de qué pasos del informe puede redactar o resumir Claude, cuáles requieren criterio humano o acceso a sistemas, y cuál sería el paso de revisión",
+   "C": "No, los informes requieren supervisión humana",
+   "D": "Una recomendación de contratar a un consultor"
+  },
+  "rationale": "La habilidad que se valora es un reparto realista del trabajo con un paso de revisión, no un sí o un no",
+  "src": "18qa0lv"
+ },
+ "associate-foundations-mock1-9": {
+  "question": "Estás configurando un Project que usarán varios compañeros para comunicaciones coherentes con clientes. ¿Qué pertenece a las instrucciones del Project y no a cada prompt individual?",
+  "options": {
+   "A": "El nombre del cliente concreto del mensaje de hoy",
+   "B": "La fecha de hoy",
+   "C": "El tono de la casa, los avisos legales obligatorios y la estructura estándar de un mensaje a clientes",
+   "D": "Las preferencias personales de escritura del compañero"
+  },
+  "rationale": "Las convenciones duraderas y compartidas van en las instrucciones; los detalles propios de cada mensaje van en el prompt",
+  "src": "3vxqb7"
+ },
+ "associate-foundations-mock1-10": {
+  "question": "Un resumen generado por Claude omite una salvedad importante que aparece en el documento original. ¿Qué modo de fallo ilustra esto?",
+  "options": {
+   "A": "Alucinación mediante detalles inventados",
+   "B": "Un límite de la ventana de contexto",
+   "C": "Un ataque de inyección de prompts",
+   "D": "Omisión, que exige leer el original y no solo revisar la salida"
+  },
+  "rationale": "La omisión es tan dañina como la invención y solo se ve si lees el original, no únicamente la salida",
+  "src": "1pn77ca"
+ },
+ "associate-foundations-mock1-11": {
+  "question": "Tu prompt funcionaba bien el mes pasado y ahora da peores resultados después de que tu equipo añadiera doce documentos al conocimiento del Project. ¿Qué es lo primero que hay que investigar?",
+  "options": {
+   "A": "Si los documentos nuevos diluyen o contradicen las fuentes que deberían usar las respuestas",
+   "B": "Si ha cambiado el modelo",
+   "C": "Si los compañeros usan navegadores distintos",
+   "D": "Si el prompt debería ser más largo"
+  },
+  "rationale": "Diagnostica el cambio que coincidió con la regresión antes de reescribir nada",
+  "src": "odvzgv"
+ },
+ "associate-foundations-mock1-12": {
+  "question": "¿Para qué tarea un Project con instrucciones y conocimiento persistentes es claramente mejor que un chat puntual?",
+  "options": {
+   "A": "Pedir un sinónimo",
+   "B": "Un informe mensual que sigue la misma estructura y se apoya en los mismos documentos de referencia",
+   "C": "Comprobar un único dato",
+   "D": "Reescribir un correo"
+  },
+  "rationale": "El trabajo repetido con contexto y estructura estables es justo para lo que sirven los Projects",
+  "src": "xjug4i"
+ },
+ "associate-foundations-mock1-13": {
+  "question": "¿Qué práctica reduce mejor el riesgo de compartir con un cliente una salida inexacta de Claude?",
+  "options": {
+   "A": "Leer la salida para revisar el tono antes de enviarla",
+   "B": "Enviarla con una nota indicando que ha participado una IA",
+   "C": "Verificar las afirmaciones que causarían daño si fueran erróneas y hacer que una segunda persona revise el material dirigido al cliente",
+   "D": "Usar el modelo más grande disponible"
+  },
+  "rationale": "Verificación de las afirmaciones con consecuencias más revisión humana del material dirigido al cliente. El tamaño del modelo no es un control",
+  "src": "ncacej"
+ },
+ "associate-foundations-mock1-14": {
+  "question": "Quieres que Claude te ayude a rediseñar un proceso de aprobación lento en lugar de limitarse a acelerar sus pasos actuales. ¿Qué enfoque de prompt encaja con ese objetivo?",
+  "options": {
+   "A": "\"Haz más rápido nuestro proceso de aprobación.\"",
+   "B": "\"Automatiza nuestras aprobaciones.\"",
+   "C": "\"¿Qué hacen otras empresas con las aprobaciones?\"",
+   "D": "\"Estos son los pasos actuales de aprobación y dónde se producen los retrasos. Propón dos rediseños: uno que mantenga la estructura actual y otro que reordene o elimine pasos, con las ventajas e inconvenientes de cada uno.\""
+  },
+  "rationale": "Rediseñar un proceso requiere dar a Claude los pasos actuales y los puntos de dolor, y pedirle alternativas con sus ventajas e inconvenientes",
+  "src": "1ttrmpl"
+ },
+ "associate-foundations-mock1-15": {
+  "question": "¿Qué situación exige con más claridad escalar a un compañero técnico en lugar de resolverla tú mismo?",
+  "options": {
+   "A": "Una petición de conectar Claude directamente a la base de datos interna de pedidos de la empresa mediante una integración",
+   "B": "Un prompt que necesita una mejor estructura",
+   "C": "Una salida con el tono equivocado",
+   "D": "Un Project cuyo conocimiento hay que actualizar"
+  },
+  "rationale": "Las integraciones de sistemas pertenecen al ámbito de Developer y Architect; reconocer ese límite es una competencia de Associate",
+  "src": "93gx7t"
+ },
+ "associate-foundations-mock2-1": {
+  "question": "Claude devuelve una respuesta sobre una política que coincide exactamente con lo que esperabas, sin ninguna cita. ¿Qué te indica esa coincidencia?",
+  "options": {
+   "A": "La respuesta queda confirmada, ya que concuerda con lo que tú entiendes",
+   "B": "La respuesta probablemente es correcta, pero debería reformularse",
+   "C": "Nada sobre su exactitud, porque coincidir con una expectativa no es una prueba",
+   "D": "El modelo ha leído el documento de la política"
+  },
+  "rationale": "Coincidir con lo que ya creías es el error más fácil de pasar por alto, porque nada invita a comprobarlo. Ni la confirmación (A), ni la reformulación (B), ni suponer que ha habido recuperación de documentos (D) establecen que la afirmación sea cierta",
+  "src": "1bxz68q"
+ },
+ "associate-foundations-mock2-2": {
+  "question": "Un compañero le pide a Claude que revise su propia respuesta anterior, y Claude la confirma. ¿Cuánto peso tiene esa confirmación?",
+  "options": {
+   "A": "Ninguno por sí sola, porque la comprobación no es independiente de lo que se comprueba",
+   "B": "Mucho, porque el modelo ha revisado su propio razonamiento",
+   "C": "Mucho si la confirmación es detallada",
+   "D": "Depende del modelo utilizado"
+  },
+  "rationale": "La autorrevisión no es una fuente independiente y no puede establecer que algo sea correcto. El nivel de detalle (C) y la elección del modelo (D) no hacen independiente una autocomprobación",
+  "src": "1dhwjms"
+ },
+ "associate-foundations-mock2-3": {
+  "question": "Un informe redactado con Claude contiene una cifra que no puedes verificar en ninguna fuente disponible. ¿Cuál es el tratamiento adecuado antes de difundirlo?",
+  "options": {
+   "A": "Difundirlo con un aviso general sobre la ayuda de la IA",
+   "B": "Mantener la cifra y marcarla como estimación",
+   "C": "Pedirle a Claude una fuente y quedarse con lo que devuelva",
+   "D": "Eliminar la cifra y señalar que no se pudo verificar"
+  },
+  "rationale": "Una afirmación no verificable no debe presentarse como un hecho, y una laguna señalada es honesta. Un aviso genérico (A) no aborda la cifra concreta, una estimación sin fundamento (B) la tergiversa, y una cita producida a petición (C) necesita la misma verificación",
+  "src": "8n2jad"
+ },
+ "associate-foundations-mock2-4": {
+  "question": "¿Cuál de estas tareas es la mejor candidata para encomendar a Claude en un proceso de cierre mensual?",
+  "options": {
+   "A": "Aprobar los asientos contables definitivos",
+   "B": "Redactar el comentario de desviaciones a partir de cifras que ya están acordadas",
+   "C": "Decidir qué desviaciones requieren investigación",
+   "D": "Dar el visto bueno a la conciliación"
+  },
+  "rationale": "Redactar a partir de datos acordados es una tarea acotada y comprobable. La aprobación (A), el visto bueno (D) y la decisión sobre qué investigar (C) conllevan responsabilidad",
+  "src": "1fp8bbd"
+ },
+ "associate-foundations-mock2-5": {
+  "question": "Un workflow produce buenos resultados, pero nadie lo usa. ¿Qué debe examinarse primero?",
+  "options": {
+   "A": "Si hay que actualizar el modelo",
+   "B": "Si la salida llega al lugar donde realmente se trabaja, en una forma sobre la que la gente pueda actuar",
+   "C": "Si el prompt es lo bastante largo",
+   "D": "Si hace falta formar a más personas"
+  },
+  "rationale": "La adopción suele fallar por el encaje con el proceso existente más que por la calidad de la salida. El modelo (A) y la longitud del prompt (C) atienden a una calidad que ya es aceptable, y la formación (D) trata un síntoma",
+  "src": "hcvjbp"
+ },
+ "associate-foundations-mock2-6": {
+  "question": "Un equipo quiere pegar en Claude comentarios de clientes anonimizados para analizar temas. ¿Qué riesgo persiste tras eliminar los nombres?",
+  "options": {
+   "A": "Ninguno, ya que la anonimización elimina el riesgo por completo",
+   "B": "Que el modelo almacene el texto de forma permanente",
+   "C": "Que el análisis de temas no sea fiable con datos anonimizados",
+   "D": "El texto libre aún puede identificar a personas por detalles concretos, así que sigue siendo necesaria una revisión antes de enviarlo"
+  },
+  "rationale": "Quitar los nombres no elimina los detalles identificativos del texto libre, y por eso sigue haciendo falta un paso de revisión. Tratar la anonimización como completa (A) es el error que se evalúa, y ni las suposiciones sobre el almacenamiento (B) ni la fiabilidad (C) son aquí el problema de gobernanza",
+  "src": "a57xf2"
+ },
+ "associate-foundations-mock2-7": {
+  "question": "¿Quién debe decidir si una salida asistida por Claude es apta para enviarse a un cliente?",
+  "options": {
+   "A": "La persona responsable de la relación con el cliente",
+   "B": "Quien escribió el prompt",
+   "C": "El modelo, si se le pide que evalúe su propia salida",
+   "D": "Nadie, si el workflow se aprobó de antemano"
+  },
+  "rationale": "La responsabilidad sobre la comunicación saliente es lo que decide la cuestión. Haber escrito el prompt (B) es accesorio, la autoevaluación (C) no es independiente, y la aprobación previa de un workflow (D) no revisa este caso concreto",
+  "src": "bn6xpv"
+ },
+ "associate-foundations-mock2-8": {
+  "question": "Un prompt funciona bien hasta que el documento de entrada es mucho más largo de lo habitual, y entonces baja la calidad. ¿Cuál es la explicación más probable?",
+  "options": {
+   "A": "El modelo se ha vuelto menos capaz",
+   "B": "El prompt es demasiado corto",
+   "C": "El material relevante ahora compite con mucho más texto alrededor",
+   "D": "Los documentos más largos siempre producen peores resultados"
+  },
+  "rationale": "La dilución en una entrada mucho más larga es la causa habitual de este patrón. El modelo no ha cambiado (A), la longitud del prompt (B) no es la variable que cambió, y la longitud por sí sola no es determinante (D)",
+  "src": "1shq5xl"
+ },
+ "associate-foundations-mock2-9": {
+  "question": "Quieres aplicar el mismo análisis a cincuenta documentos con una salida coherente. ¿Qué es lo más importante?",
+  "options": {
+   "A": "Usar el modelo más grande disponible",
+   "B": "Procesar los documentos en una sola conversación",
+   "C": "Revisar solo una muestra de las salidas",
+   "D": "Fijar el prompt y la estructura de salida exigida, y aplicar ambos sin cambios a cada documento"
+  },
+  "rationale": "La coherencia en un conjunto viene de mantener constantes la instrucción y la forma de la salida. El tamaño del modelo (A) no crea coherencia, una única conversación larga (B) invita a la deriva, y el muestreo (C) es una política de revisión, no un diseño",
+  "src": "17bbmy0"
+ },
+ "associate-foundations-mock2-10": {
+  "question": "Una tarea debe devolver una respuesta en menos de un segundo para una interfaz interactiva, y el trabajo es una clasificación sencilla. ¿Qué se deduce?",
+  "options": {
+   "A": "Usar el modelo más capaz para ir sobre seguro",
+   "B": "Agrupar las peticiones en batch",
+   "C": "Usar el modelo más pequeño que cumpla el requisito de precisión, ya que la latencia es la restricción determinante",
+   "D": "Aumentar el contexto proporcionado"
+  },
+  "rationale": "Con un requisito estricto de latencia y una tarea sencilla, lo adecuado es el modelo más pequeño que sea suficiente. El modelo más capaz (A) gasta latencia en una precisión que no hace falta, el batch (B) rompe la interactividad, y más contexto (D) añade coste y tiempo",
+  "src": "1ncw59a"
+ },
+ "associate-foundations-mock2-11": {
+  "question": "¿Cuál es la lectura correcta de la puntuación publicada de un modelo en un benchmark al elegir para una tarea de negocio concreta?",
+  "options": {
+   "A": "Predice el rendimiento en tu tarea",
+   "B": "Es una señal general que no sustituye a evaluar con tu propia tarea",
+   "C": "Es irrelevante",
+   "D": "Determina el precio que cabe esperar pagar"
+  },
+  "rationale": "Los benchmarks indican la capacidad general y no pueden sustituir a la medición sobre la tarea real. Tratarlos como predictivos (A) o como irrelevantes (C) son errores, y no fijan el precio (D)",
+  "src": "1qwfh88"
+ },
+ "associate-foundations-mock2-12": {
+  "question": "Dos equipos mantienen copias separadas de los mismos documentos de referencia en sus propios Projects. ¿Cuál es el riesgo principal?",
+  "options": {
+   "A": "Las copias se van desviando y los dos equipos empiezan a responder de forma distinta a la misma pregunta",
+   "B": "Un mayor coste de almacenamiento",
+   "C": "Respuestas más lentas",
+   "D": "El modelo se confunde entre Projects"
+  },
+  "rationale": "El conocimiento duplicado diverge porque cada copia se mantiene por separado, lo que produce respuestas incoherentes. El almacenamiento (B) y la velocidad (C) son secundarios, y los Projects no se filtran unos en otros (D)",
+  "src": "1iuuhch"
+ },
+ "associate-foundations-mock2-13": {
+  "question": "¿Cuál es el primer paso correcto al configurar un Project para una tarea recurrente?",
+  "options": {
+   "A": "Decidir qué necesita saber la tarea cada vez y añadir solo eso",
+   "B": "Subir todos los documentos que tiene el equipo",
+   "C": "Escribir la instrucción más larga posible",
+   "D": "Añadir documentos a medida que surgen preguntas, sin revisarlos"
+  },
+  "rationale": "Una base deliberada y mínima mantiene precisa la recuperación y es mantenible. Subirlo todo (B) y acumular sin revisar (D) diluyen, y la longitud de la instrucción (C) no es la cuestión",
+  "src": "m4th5l"
+ },
+ "associate-foundations-mock2-14": {
+  "question": "Un usuario informa de que Claude dio una respuesta errónea, pero no puedes reproducirla. ¿Cuál es el siguiente paso más útil?",
+  "options": {
+   "A": "Suponer que el usuario se ha equivocado",
+   "B": "Obtener el prompt exacto, las entradas y la configuración que utilizó",
+   "C": "Aumentar el tamaño del modelo para todos",
+   "D": "Añadir una advertencia en la interfaz"
+  },
+  "rationale": "La reproducción depende de las condiciones exactas, y reunirlas es la única forma de diagnosticar. Descartar el informe (A) tira la señal, y un cambio de modelo (C) o una advertencia (D) actúan antes de conocer la causa",
+  "src": "i2t3wg"
+ },
+ "associate-foundations-mock2-15": {
+  "question": "La calidad de la salida varía entre ejecuciones de un prompt idéntico con la misma entrada. ¿Qué indica esto?",
+  "options": {
+   "A": "El sistema está roto",
+   "B": "La temperatura debe ser cero para todas las tareas",
+   "C": "Cierta variación es esperable, y la tarea necesita restricciones lo bastante ajustadas para que la variación no importe",
+   "D": "Hay que acortar la entrada"
+  },
+  "rationale": "La generación no es determinista, así que el diseño debe tolerar la variación dentro de límites aceptables. Tratarla como una avería (A) malinterpreta un comportamiento normal, una regla universal de temperatura (B) es demasiado burda, y la longitud de la entrada (D) no tiene relación",
+  "src": "4r2crv"
+ },
+ "associate-foundations-mock3-1": {
+  "question": "Un resumen cita una estadística que resulta ser correcta. ¿Valida eso el resto del resumen?",
+  "options": {
+   "A": "Sí, una afirmación verificada indica que el conjunto es fiable",
+   "B": "Sí, si la estadística era la afirmación más difícil",
+   "C": "No, cada afirmación importante necesita su propia comprobación",
+   "D": "Solo si se nombró la fuente"
+  },
+  "rationale": "La verificación no se generaliza de una afirmación a las demás. Tratarla como un indicador del conjunto (A, B) es el error que se evalúa, y nombrar una fuente (D) no verifica el resto de las afirmaciones",
+  "src": "1uj0whf"
+ },
+ "associate-foundations-mock3-2": {
+  "question": "Claude rechaza responder a una parte de una petición y explica por qué. ¿Cómo debe interpretarse?",
+  "options": {
+   "A": "Como información sobre un límite o una política que conviene entender antes de continuar",
+   "B": "Como un fallo que hay que sortear",
+   "C": "Como señal de que el prompt era demasiado largo",
+   "D": "Como motivo para cambiar de modelo"
+  },
+  "rationale": "Un rechazo con su motivo es una señal sobre la tarea, no un obstáculo que rodear. Sortearlo (B) ignora el motivo, y no hay indicios ni de longitud del prompt (C) ni de elección de modelo (D)",
+  "src": "ggs3yk"
+ },
+ "associate-foundations-mock3-3": {
+  "question": "Necesitas saber si un informe largo respalda una conclusión concreta. ¿Cuál es el enfoque más fiable?",
+  "options": {
+   "A": "Pedir un resumen y leerlo",
+   "B": "Preguntar si el informe respalda la conclusión",
+   "C": "Pedir una puntuación de confianza",
+   "D": "Pedir los pasajes que atañen a la conclusión y leerlos tú mismo"
+  },
+  "rationale": "Recuperar la evidencia y leerla mantiene el juicio en tus manos. Un resumen (A) y un veredicto directo (B) traspasan el juicio al modelo, y una puntuación de confianza (C) no es evidencia",
+  "src": "1w1n17i"
+ },
+ "associate-foundations-mock3-4": {
+  "question": "Un proceso manual lleva cuatro horas y produce un documento que nadie lee. ¿Qué debería ocurrir antes de automatizarlo?",
+  "options": {
+   "A": "Automatizarlo, ya que cuatro horas es mucho",
+   "B": "Establecer si el documento hace falta siquiera",
+   "C": "Automatizarlo y medir la adopción después",
+   "D": "Repartirlo entre más personas"
+  },
+  "rationale": "Automatizar trabajo innecesario hace el desperdicio más rápido. Seguir adelante sin más (A, C) se salta la pregunta, y redistribuirlo (D) no resuelve si hace falta",
+  "src": "7h77cz"
+ },
+ "associate-foundations-mock3-5": {
+  "question": "¿Qué secuencia es la correcta al introducir Claude en un proceso recurrente de un equipo?",
+  "options": {
+   "A": "Automatizar todo el proceso y refinar después",
+   "B": "Empezar por el paso que sea acotado y comprobable, demostrarlo y luego ampliar",
+   "C": "Empezar por el paso más difícil, ya que es el que más valor tiene",
+   "D": "Dejar que cada persona lo adopte como prefiera"
+  },
+  "rationale": "Un primer paso acotado produce evidencia y confianza a bajo coste. Automatizar todo primero (A) arriesga todo a la vez, el paso más difícil (C) es el que menos probabilidades tiene de funcionar al principio, y una adopción sin coordinar (D) produce deriva",
+  "src": "yxv79t"
+ },
+ "associate-foundations-mock3-6": {
+  "question": "Una política prohíbe enviar datos de clientes a servicios externos. Un compañero le pide a Claude que resuma un correo de un cliente. ¿Qué se aplica?",
+  "options": {
+   "A": "Nada, porque resumir no es enviar",
+   "B": "La política solo si se nombra al cliente",
+   "C": "Nada, porque la salida se queda dentro de la empresa",
+   "D": "La política, ya que el correo son datos de cliente"
+  },
+  "rationale": "Enviar el contenido es el acto que regula la política. Enmarcarlo como resumir (A) o por el destino de la salida (C) malinterpreta la política, y esta no se limita a personas nombradas (B)",
+  "src": "aedl0p"
+ },
+ "associate-foundations-mock3-7": {
+  "question": "¿Cuál es la respuesta correcta ante la petición de presentar a un cliente una salida del modelo como si la hubiera escrito una persona?",
+  "options": {
+   "A": "Negarse a tergiversarlo y plantear la cuestión de la transparencia a quien sea responsable de la relación",
+   "B": "Acceder, ya que al cliente le importa la calidad, no el origen",
+   "C": "Acceder si la salida se editó mucho",
+   "D": "Acceder y dejar constancia de la decisión internamente"
+  },
+  "rationale": "El problema es tergiversar activamente el origen, y esa cuestión corresponde a la persona responsable de la relación. Editar (C) y dejar constancia interna (D) no hacen verdadera la representación, y la calidad (B) no es el punto",
+  "src": "mgcog3"
+ },
+ "associate-foundations-mock3-8": {
+  "question": "Un prompt pide una recomendación y obtiene en su lugar un análisis equilibrado. ¿Cuál es la causa más probable?",
+  "options": {
+   "A": "El modelo es incapaz de recomendar",
+   "B": "La temperatura es demasiado alta",
+   "C": "El prompt no indicaba que se exigía una única recomendación con su motivo",
+   "D": "La entrada era demasiado corta"
+  },
+  "rationale": "La forma de la salida sigue a la instrucción, y no se pidió ninguna decisión. La incapacidad (A) no es el problema, y ni la temperatura (B) ni la longitud de la entrada (D) determinan si se da una recomendación",
+  "src": "op2274"
+ },
+ "associate-foundations-mock3-9": {
+  "question": "¿Cuál es la forma más eficaz de conseguir una salida ajustada al nivel adecuado para un público concreto?",
+  "options": {
+   "A": "Pedir que sea clara",
+   "B": "Pedir una respuesta más corta",
+   "C": "Pedir palabras más sencillas",
+   "D": "Nombrar al público y lo que ya sabe"
+  },
+  "rationale": "Nombrar al lector y sus conocimientos previos es lo que calibra el nivel. La claridad (A), la longitud (B) y el vocabulario (C) son consecuencias, no la instrucción",
+  "src": "1ouglku"
+ },
+ "associate-foundations-mock3-10": {
+  "question": "Un compañero usa el modelo más grande para todas las tareas, incluido el formateo. ¿Qué deberías señalarle?",
+  "options": {
+   "A": "Nada, la capacidad nunca se desperdicia",
+   "B": "Que el modelo más grande es menos preciso en tareas sencillas",
+   "C": "Que ajustar el modelo al trabajo ahorra coste sin perder nada en las tareas sencillas",
+   "D": "Que el formateo debería hacerse a mano"
+  },
+  "rationale": "El principio es el ajuste a la tarea, y el trabajo sencillo no se beneficia de capacidad extra. La capacidad no es gratis (A), los modelos más grandes no son menos precisos en tareas sencillas (B), y el trabajo manual (D) no es la alternativa",
+  "src": "uux92i"
+ },
+ "associate-foundations-mock3-11": {
+  "question": "¿Cuándo importa más la elección de la interfaz que la del modelo?",
+  "options": {
+   "A": "Nunca, el modelo determina el resultado",
+   "B": "Cuando el obstáculo es cómo aporta la gente el contexto y actúa sobre la salida, no la calidad de la respuesta",
+   "C": "Solo en equipos muy grandes",
+   "D": "Solo cuando el coste está limitado"
+  },
+  "rationale": "Cuando el cuello de botella es la adopción o el aporte de contexto, domina la interfaz. Tratar el modelo como decisivo (A) pasa esto por alto, y ni el tamaño del equipo (C) ni el coste (D) definen el caso",
+  "src": "15ifby4"
+ },
+ "associate-foundations-mock3-12": {
+  "question": "¿Qué riesgo hay al añadir un documento al conocimiento de un Project sin eliminar la versión a la que sustituye?",
+  "options": {
+   "A": "Se pueden usar ambas versiones, lo que produce respuestas que mezclan material vigente y obsoleto",
+   "B": "El coste de almacenamiento",
+   "C": "Respuestas más lentas",
+   "D": "El Project se negará a responder"
+  },
+  "rationale": "El material obsoleto sigue siendo recuperable y contradice la versión vigente. El almacenamiento (B) y la velocidad (C) son secundarios, y el Project no se niega a responder (D)",
+  "src": "64vwby"
+ },
+ "associate-foundations-mock3-13": {
+  "question": "¿Cuál es la mejor prueba para saber si algo pertenece al conocimiento de un Project?",
+  "options": {
+   "A": "Si todas las conversaciones del Project se beneficiarían de ello",
+   "B": "Si es lo bastante largo como para que merezca la pena subirlo",
+   "C": "Si se creó recientemente",
+   "D": "Si es confidencial"
+  },
+  "rationale": "La recurrencia entre conversaciones es lo que distingue el conocimiento compartido del contenido del prompt. La longitud (B), la actualidad (C) y la sensibilidad (D) no guardan relación con esa prueba",
+  "src": "1twr4x4"
+ },
+ "associate-foundations-mock3-14": {
+  "question": "Un prompt que antes era fiable ahora devuelve respuestas más cortas que antes. ¿Qué merece comprobarse primero?",
+  "options": {
+   "A": "Si el modelo está obsoleto",
+   "B": "Si han cambiado la entrada o las instrucciones, incluyendo cualquier cosa añadida al Project",
+   "C": "Si la red va lenta",
+   "D": "Si la cuenta ha alcanzado un límite"
+  },
+  "rationale": "Un cambio de comportamiento apunta a un cambio en las entradas o en la configuración. La obsolescencia (A), la red (C) y los límites (D) producen errores, no respuestas más cortas",
+  "src": "1dqsvcu"
+ },
+ "associate-foundations-mock3-15": {
+  "question": "Alguien informa de que Claude se equivoca en un dato que la semana pasada dio correctamente. ¿Cuál es la primera pregunta más útil?",
+  "options": {
+   "A": "¿Qué modelo usaste?",
+   "B": "¿Cuánto duró la conversación?",
+   "C": "¿Qué preguntaste exactamente y qué respondió?",
+   "D": "¿Lo has vuelto a intentar?"
+  },
+  "rationale": "El intercambio exacto es lo que permite examinar la afirmación. El modelo (A), la duración (B) y reintentarlo (D) pueden importar más adelante, pero ninguno establece lo que ocurrió",
+  "src": "1dxya0r"
+ },
+ "associate-foundations-guide-1": {
+  "question": "Un associate le pide a Claude que resuma una normativa nueva, y Claude produce un resumen seguro de sí mismo que cita un número de apartado concreto. Antes de enviar el resumen al equipo de cumplimiento, ¿cuál es la acción más adecuada?",
+  "options": {
+   "A": "Enviarlo tal cual, ya que Claude expresó mucha confianza.",
+   "B": "Verificar el apartado citado con el texto oficial de la normativa antes de compartirlo.",
+   "C": "Pedirle a Claude que valore su propia confianza y enviarlo si la valoración es alta.",
+   "D": "Reformular el resumen para que suene más formal y luego enviarlo."
+  },
+  "rationale": "Los modelos de lenguaje pueden inventar detalles con apariencia de precisión, como números de cita, lo que es una alucinación. Validar las afirmaciones factuales, sobre todo las citas destinadas a un público de cumplimiento, con una fuente autorizada es la diligencia que se exige. La confianza autodeclarada (A, C) no es un indicador fiable de exactitud, y reformatear (D) no resuelve la corrección.",
+  "src": "1lok01i"
+ },
+ "associate-foundations-guide-2": {
+  "question": "Un associate necesita generar un gran volumen de borradores breves de respuesta a clientes, donde la velocidad y el coste importan más que el razonamiento profundo. ¿Qué opción encaja mejor con la tarea?",
+  "options": {
+   "A": "Usar el modelo más capaz y de mayor coste para cada respuesta, para maximizar la calidad.",
+   "B": "Usar un modelo más rápido y de menor coste, adecuado para tareas sencillas y de gran volumen.",
+   "C": "Desactivar todas las funciones del producto para reducir costes.",
+   "D": "Cambiar a otra plataforma de IA."
+  },
+  "rationale": "Alinear la elección del modelo con los requisitos de la tarea significa asignar un modelo más rápido y barato al trabajo sencillo y de gran volumen, y reservar el modelo más capaz para el razonamiento complejo. Usar siempre el mejor modelo (A) malgasta el presupuesto de coste y latencia; desactivar funciones (C) o cambiar de plataforma (D) no resuelve el equilibrio.",
+  "src": "1419r63"
+ },
+ "associate-foundations-guide-3": {
+  "question": "Un project manager quiere subir una hoja de cálculo con nombres de clientes y números de cuenta para que Claude analice tendencias. La política de la organización restringe compartir datos personales regulados. ¿Cuál es la acción más adecuada?",
+  "options": {
+   "A": "Subir el archivo tal cual, ya que el análisis es interno.",
+   "B": "Eliminar o anonimizar los identificadores personales antes de subirlo, conforme a la política.",
+   "C": "Subir el archivo pero indicarle a Claude que no lo conserve.",
+   "D": "Omitir el análisis por completo."
+  },
+  "rationale": "Aplicar salvaguardas de sensibilidad de datos y privacidad significa censurar o anonimizar los identificadores regulados antes de usarlos, de modo que el análisis pueda hacerse sin exponer datos protegidos. Subirlo tal cual (A) infringe la política; indicarle al modelo que no conserve los datos (C) no satisface el control de la política; abandonar la tarea (D) es innecesario cuando la anonimización la hace posible.",
+  "src": "10xd3d4"
+ }
+}

@@ -7,6 +7,9 @@ import type { Answer, Attempt, AttemptResult, Mode } from './types'
 
 export { displayLetter, optionOrder } from '../shared/exam'
 
+/** Only the study repo's questions measure readiness: AI-generated and app-written ones are practice. */
+export const countsForReadiness = (q: Pick<Question, 'source'> | undefined) => !!q && q.source !== 'ai' && q.source !== 'app'
+
 export const isCorrect = (q: Question, choice: Letter[] | undefined) =>
   !!choice && choice.length === q.answer.length && q.answer.every((l) => choice.includes(l))
 
@@ -195,7 +198,7 @@ export function estimate(correct: number, n: number): Estimate | null {
 
 /** Readiness from first exposures to repo questions only, re-weighted to the blueprint. */
 export function readiness(exp: Exposure[], qs: Map<string, AiQuestion>, cert: CertDef) {
-  const first = exp.filter((e) => e.firstOfGroup && qs.get(e.qid)?.source !== 'ai')
+  const first = exp.filter((e) => e.firstOfGroup && countsForReadiness(qs.get(e.qid)))
   if (!first.length) return null
   const by: Record<string, { n: number; c: number }> = {}
   for (const e of first) {
