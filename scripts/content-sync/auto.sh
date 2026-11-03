@@ -33,7 +33,8 @@ UPSTREAM="$(git -C "$STUDY" rev-parse --short HEAD)"
 echo "app $(git rev-parse --short HEAD) · study repo $UPSTREAM"
 
 step "sync"
-node scripts/sync-content.mjs | tee "$STATE/sync.txt"
+# Warnings (unmapped courses, translations to do) go to stderr: Claude and the PR need them too
+node scripts/sync-content.mjs 2>&1 | tee "$STATE/sync.txt"
 if git diff --quiet -- src/content && [ -z "$(git ls-files --others --exclude-standard -- src/content)" ]; then
   echo "nothing new in the study repo for the app"
   if [ "$(gh pr view content-sync --json state -q .state 2>/dev/null)" = "OPEN" ] && [ -z "${DRY_RUN:-}" ]; then
