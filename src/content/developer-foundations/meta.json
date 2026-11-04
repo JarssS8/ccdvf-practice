@@ -1,22 +1,24 @@
 {
  "exam": "developer-foundations",
- "syncedAt": "2026-11-03T17:12:41.876Z",
- "contentHash": "19477ad26a8e",
+ "syncedAt": "2026-11-04T21:42:16.951Z",
+ "contentHash": "0d48cbfab054",
  "factsVerified": "2026-11-01",
  "counts": {
-  "questions": 87,
+  "questions": 212,
   "flashcards": 61,
   "guide": 3,
   "app": 4,
+  "curated": 125,
+  "calibrated": 208,
   "distinct": {
-   "Applications and Integration": 25,
-   "Model Selection and Optimization": 11,
-   "Agents and Workflows": 12,
-   "Prompt and Context Engineering": 9,
-   "Tools and MCPs": 7,
-   "Security and Safety": 5,
-   "Claude Code": 5,
-   "Eval, Testing, and Debugging": 3
+   "Applications and Integration": 65,
+   "Model Selection and Optimization": 31,
+   "Agents and Workflows": 31,
+   "Prompt and Context Engineering": 23,
+   "Tools and MCPs": 19,
+   "Security and Safety": 15,
+   "Claude Code": 10,
+   "Eval, Testing, and Debugging": 8
   }
  }
 }

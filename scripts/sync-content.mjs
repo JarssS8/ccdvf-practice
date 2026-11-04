@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { CERTS, domainQuotas } from '../src/shared/certs.ts'
+import { upstreamHash } from '../src/shared/exam.ts'
 import { run as checkTranslations } from './i18n.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -65,35 +66,53 @@ for (const cert of CERTS) {
   const warn = (m) => console.warn(`  ! ${cert.code} ${m}`)
   const names = cert.domains.map((d) => d.name)
 
-  // Questions: repo bank + the exam guide's sample questions + the app's own items for thin domains (source "app")
+  // Questions: repo bank + the exam guide's sample questions + the app's own items: written for thin domains (source "app")
+  // or as the calibrated bank (source "curated")
   const local = (dir) => { const f = join(here, dir, `${cert.id}.json`); return existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : [] }
   const samples = local('guide-samples')
   const extra = local('extra-questions')
-  const questions = [...bank.questions.filter((q) => q.exam === cert.id), ...samples, ...extra].map((q) => ({
+  const keyOf = (q) => (Array.isArray(q.answer) ? q.answer.join('') : String(q.answer)).replace(/[^A-E]/g, '').split('')
+  const shape = (q) => ({
     id: q.id,
     cert: cert.id,
     source: q.source,
     domain: q.domain,
     question: q.question,
     options: q.options,
-    answer: (Array.isArray(q.answer) ? q.answer.join('') : String(q.answer)).replace(/[^A-E]/g, '').split(''),
+    answer: keyOf(q),
     rationale: q.rationale,
     ...(q.evidence ? { evidence: q.evidence } : {}),
-  }))
+    ...(q.ref ? { ref: q.ref } : {}),
+    ...(q.calibrated ? { calibrated: q.calibrated } : {}),
+  })
+  const upstream = [...bank.questions.filter((q) => q.exam === cert.id), ...samples, ...extra].map(shape)
+
+  // Rewrites of upstream questions without their answer-pattern cues (scripts/question-overrides/): same id and key, new wording.
+  // Each one names the upstream text it rewrote; when upstream moves, the question falls back to it, uncalibrated.
+  const overrides = local('question-overrides')
+  const questions = upstream.map((q) => {
+    if (!Object.hasOwn(overrides, q.id)) return q
+    const o = overrides[q.id]
+    if (o.src !== upstreamHash(q)) { warn(`${q.id}: upstream changed, re-review its override in scripts/question-overrides/`); return q }
+    return { ...q, question: o.question, options: o.options, rationale: o.rationale, ...(o.evidence ? { evidence: o.evidence } : {}), ref: o.ref, calibrated: o.calibrated }
+  })
+  for (const id of Object.keys(overrides)) if (!upstream.some((q) => q.id === id)) warn(`${id}: override for a question that no longer exists`)
   for (const q of questions) {
     if (!names.includes(q.domain)) warn(`${q.id}: unknown domain "${q.domain}"`)
     if (!q.answer.length || q.answer.some((l) => !q.options[l])) warn(`${q.id}: answer not among options`)
   }
 
-  // App-written items stay out of the clusters: a shared group would let them hide a repo question from readiness
-  const toks = questions.map((q) => tokens(q.question + ' ' + q.options[q.answer[0]]))
+  // Clusters use the upstream wording, so rewriting a question never regroups what was already seen.
+  // App-written and curated items stay out of them: a shared group would let them hide behind a question already seen.
+  const own = (q) => q.source === 'app' || q.source === 'curated'
+  const toks = upstream.map((q) => tokens(q.question + ' ' + q.options[q.answer[0]]))
   const parent = questions.map((_, i) => i)
   const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])))
   let dups = 0
   for (let i = 0; i < questions.length; i++)
     for (let j = i + 1; j < questions.length; j++) {
       if (jaccard(toks[i], toks[j]) < 0.33) continue
-      if (questions[i].source === 'app' || questions[j].source === 'app') { warn(`${questions[j].id} is too close to ${questions[i].id}: rewrite the app item`); continue }
+      if (own(questions[i]) || own(questions[j])) { warn(`${questions[j].id} is too close to ${questions[i].id}: rewrite the ${questions[j].source} item`); continue }
       parent[find(j)] = find(i); dups++
     }
   const groups = {}
@@ -139,9 +158,9 @@ for (const cert of CERTS) {
     syncedAt: previous?.contentHash === contentHash ? previous.syncedAt : new Date().toISOString(),
     contentHash,
     factsVerified: verified,
-    counts: { questions: questions.length, flashcards: flashcards.length, guide: samples.length, app: extra.length, distinct: pool },
+    counts: { questions: questions.length, flashcards: flashcards.length, guide: samples.length, app: extra.filter((q) => q.source === 'app').length, curated: extra.filter((q) => q.source === 'curated').length, calibrated: questions.filter((q) => q.calibrated).length, distinct: pool },
   })
-  console.log(`${cert.code}: questions ${questions.length} (${dups} near-duplicate pairs, ${samples.length} from the guide, ${extra.length} written by the app) · flashcards ${flashcards.length} · facts verified ${verified}`)
+  console.log(`${cert.code}: questions ${questions.length} (${dups} near-duplicate pairs, ${samples.length} from the guide, ${extra.filter((q) => q.source === 'app').length} written by the app, ${extra.filter((q) => q.source === 'curated').length} curated, ${questions.filter((q) => q.calibrated).length} calibrated) · flashcards ${flashcards.length} · facts verified ${verified}`)
 }
 
 // Program news: "### Month: title" entries under year headings (common to every certification)

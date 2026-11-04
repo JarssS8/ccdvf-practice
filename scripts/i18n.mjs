@@ -7,7 +7,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { questionHash, textHash } from '../src/shared/exam.ts'
+import { questionHash, stemParts, textHash } from '../src/shared/exam.ts'
 import { CERTS } from '../src/shared/certs.ts'
 import { guideEntries } from '../src/shared/guide.ts'
 
@@ -21,6 +21,7 @@ export const newsHash = (n) => textHash(n.title + '\n' + n.body)
 
 const fences = (s) => (s.match(/```/g) ?? []).length
 const rows = (s) => (s.match(/^\|/gm) ?? []).length
+const codeBlocks = (s) => stemParts(s).filter((p) => p.code).map((p) => p.text)
 
 export function run(mode) {
   const stamp = mode === 'stamp'
@@ -47,6 +48,8 @@ export function run(mode) {
       const t = qes[x.id]
       if (!t) { tally(at[0], 'missing', ...at.slice(1)); continue }
       if (Object.keys(t.options ?? {}).sort().join() !== Object.keys(x.options).sort().join()) issues.push(`${x.id}: option letters differ`)
+      // Code in a stem is never translated
+      if (JSON.stringify(codeBlocks(t.question ?? '')) !== JSON.stringify(codeBlocks(x.question))) issues.push(`${x.id}: code blocks in the stem differ from the English`)
       if (stamp && !t.src) t.src = questionHash(x)
       tally(at[0], t.src === questionHash(x) ? 'fresh' : 'stale', ...at.slice(1))
     }

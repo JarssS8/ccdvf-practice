@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { asDisplayed, displayLetter, optionOrder, questionHash, relabel, type Question } from '../../src/shared/exam'
+import { asDisplayed, displayLetter, optionOrder, questionHash, relabel, stemParts, stemPreview, type Question } from '../../src/shared/exam'
 import { CERTS, DEFAULT_CERT, certById, certOfAttempt, certOfDomain, certOfExamDateKey, certOfQuestion, domainQuotas, examDateKey, isCertId, quickMinutes } from '../../src/shared/certs'
 
 const q: Question = {
@@ -78,5 +78,23 @@ describe('exam facts', () => {
   it('the translation fingerprint changes with the English text', () => {
     expect(questionHash(q)).toBe(questionHash({ ...q }))
     expect(questionHash(q)).not.toBe(questionHash({ ...q, question: 'Which one? ' }))
+  })
+})
+
+describe('stems with code', () => {
+  const stem = 'The handler fails on some responses:\n```python\ntext = response.content[0].text\n```\nWhat is the cause?'
+  it('splits prose and fenced code, dropping the language tag', () => {
+    expect(stemParts(stem)).toEqual([
+      { code: false, text: 'The handler fails on some responses:' },
+      { code: true, text: 'text = response.content[0].text' },
+      { code: false, text: 'What is the cause?' },
+    ])
+  })
+  it('previews without the code', () => {
+    expect(stemPreview(stem)).toBe('The handler fails on some responses: What is the cause?')
+    expect(stemPreview('Plain stem?')).toBe('Plain stem?')
+  })
+  it('an unclosed fence runs to the end', () => {
+    expect(stemParts('Look:\n```json\n{"a": 1}')).toEqual([{ code: false, text: 'Look:' }, { code: true, text: '{"a": 1}' }])
   })
 })

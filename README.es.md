@@ -138,6 +138,7 @@ Cada proveedor de inicio de sesión aparece en la pantalla de entrada en cuanto 
 
 ```bash
 npm test             # unitarios (Vitest): barajado, notas, datos de gráficos, CSV, paridad i18n, traducciones, email
+npm run lint:bank   # lint de patrones de respuesta de los bancos (las reglas del banco calibrado fallan el código de salida)
 npm run test:e2e     # compila, arranca el Worker con una D1 local desechable y lanza los tests de API y navegador
 npm run test:smoke   # comprueba una instancia desplegada con una cuenta que se borra sola (-- --base <url>, -- --ai)
 ```
@@ -153,6 +154,8 @@ Las páginas de la guía (confusiones, cursos, plan de estudio, vídeos) van a `
 Un GitHub Action diario (`.github/workflows/sync-content.yml`) sincroniza con la última versión del repo de estudio. Si el contenido cambia, abre o actualiza un pull request `content-sync` con el log y el español pendiente de traducir, y lanza el CI; una persona traduce, fusiona y despliega.
 
 Donde el repo de estudio tiene pocas preguntas distintas para que un mock completo siga el temario, la app añade las suyas (`scripts/extra-questions/<cert-id>.json`, origen `app`), escritas a partir de la guía oficial y verificadas a ciegas por un segundo modelo. Salen en mocks y drills con la etiqueta «Creada por la app» y un enlace para reportarlas, y nunca cuentan para la preparación estimada.
+
+**Banco calibrado.** Las preguntas del repo de estudio están escritas de modo que la opción correcta suele ser la más larga (el 89 % del banco de Developer), y eso vuelve inútiles las notas. En Developer – Foundations las preguntas del repo se reescriben sin esas pistas (`scripts/question-overrides/<cert-id>.json`, aplicado encima de la importación; la clave y su letra no cambian, y cada reescritura indica el texto original que sustituye, así que si el repo cambia se avisa en vez de revertirla en silencio) y 125 preguntas nuevas (`scripts/extra-questions/`, origen `curated`) añaden el comportamiento actual de la API, lectura de código y trazas, y preguntas de varias respuestas. `npm run lint:bank` (que también ejecuta `npm test`) fija lo que debe cumplir una pregunta calibrada: la clave es la opción más larga como mucho en el 30 % de los casos, las longitudes de las opciones no difieren más de 1,6×, no hay distractores de plantilla, las explicaciones citan las opciones solo como «(B)» y cada pregunta lleva su `ref` oficial. Cuando un banco tiene preguntas calibradas, la preparación estimada cuenta solo las calibradas respondidas después de su hora `calibrated`.
 
 El contenido de cada certificación (con su español) es un chunk aparte que se carga bajo demanda: la que estudias antes de mostrar la app, y las demás en segundo plano.
 

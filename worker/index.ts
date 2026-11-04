@@ -1,4 +1,4 @@
-import { asDisplayed, questionHash, type Question, type Letter } from '../src/shared/exam'
+import { asDisplayed, questionHash, stemPreview, type Question, type Letter } from '../src/shared/exam'
 import { CERTS, DEFAULT_CERT, certById, certOfDomain, certOfExamDateKey, certOfQuestion, hasDomain, isCertId, type CertDef } from '../src/shared/certs'
 import aoQuestions from '../src/content/associate-foundations/questions.json'
 import aoNotes from '../src/content/associate-foundations/notes.json'
@@ -350,7 +350,7 @@ ${question.question}
 ${optionText(question)}
 Key: ${question.answer.join(', ')}
 Student answer: ${shown.length ? shown.join(', ') : 'blank'}
-Bank rationale: ${question.rationale}
+Bank rationale: ${question.rationale}${found.evidence ? `\nSource quote: ${found.evidence}` : ''}${found.ref ? `\nOfficial source: ${found.ref}` : ''}
 
 NOTES:
 ${materialOf(cert).notes.slice(0, 16000)}`
@@ -372,7 +372,7 @@ const jaccard = (a: Set<string>, b: Set<string>) => { let i = 0; for (const t of
 
 interface Draft { question: string; options: Record<string, string>; answer: string[]; select: number; rationale: string; evidence: string }
 
-function validate(d: Draft, multi: boolean, grounding: string): string | null {
+function validate(d: Draft, multi: boolean, grounding: string, longestMargin = 1.15): string | null {
   if (!d || typeof d.question !== 'string' || d.question.length < 40) return 'stem'
   const keys = Object.keys(d.options ?? {})
   if (keys.join('') !== 'ABCD' || keys.some((k) => typeof d.options[k] !== 'string' || d.options[k].length < 8)) return 'options'
@@ -384,7 +384,7 @@ function validate(d: Draft, multi: boolean, grounding: string): string | null {
   if (ans.length === 1) {
     const sorted = [...lens].sort((a, b) => b - a)
     const correctLen = d.options[ans[0]].length
-    if (correctLen === sorted[0] && correctLen > sorted[1] * 1.15) return 'the key is the longest option'
+    if (correctLen === sorted[0] && correctLen > sorted[1] * longestMargin) return 'the key is the longest option'
   }
   if (typeof d.rationale !== 'string' || d.rationale.length < 60) return 'rationale'
   if (typeof d.evidence !== 'string' || norm(d.evidence).length < 20 || !grounding.includes(norm(d.evidence))) return `quote not found in notes or blueprint: “${String(d.evidence).slice(0, 120)}”`
@@ -408,7 +408,10 @@ async function generate(req: Request, env: Env, user: User) {
   const budget = await takeAiBudget(env, u, ip, 1 + count)
   if (budget) return json({ error: budget }, 429)
 
-  const examples = bank.filter((q) => q.domain === domain).sort(() => Math.random() - 0.5).slice(0, 2)
+  // Style examples from the calibrated items when there are any: the older ones teach the longest-key cue
+  const inDomain = bank.filter((q) => q.domain === domain)
+  const calibrated = inDomain.filter((q) => q.calibrated && q.source !== 'guide')
+  const examples = (calibrated.length >= 2 ? calibrated : inDomain).sort(() => Math.random() - 0.5).slice(0, 2)
   // Only this certification's own questions: they are what a new item must not repeat
   const existing = await env.DB.prepare('SELECT body FROM ai_questions WHERE user_id = ?').bind(u).all<{ body: string }>()
   const mine = existing.results.map((r) => JSON.parse(r.body) as Question).filter((q) => certOfQuestion(q) === cert.id)
@@ -433,7 +436,8 @@ Rules:
 NOTES:
 ${notesText}`
 
-  const covered = [...bank, ...mine].map((q) => `- ${q.question.slice(0, 170)}`).join('\n')
+  // Only this domain's scenarios: the whole bank would be tens of thousands of characters on every call
+  const covered = [...bank, ...mine].filter((q) => q.domain === domain).map((q) => `- ${stemPreview(q.question).slice(0, 170)}`).join('\n')
   const userPrompt = `Write ${count} new items. Style examples (do not copy):\n\n${examples.map((q) => `${q.question}\n${optionText(q)}\nKey: ${q.answer.join(',')}`).join('\n\n')}\n\nAlready in the bank (do not reuse these scenarios):\n${covered}`
 
   let drafts: Draft[] = []
@@ -452,7 +456,7 @@ ${notesText}`
   const rejected: { question: string; reason: string }[] = why.map((reason) => ({ question: '', reason: `DeepSeek: ${reason}` }))
   const candidates: Draft[] = []
   for (const d of drafts.slice(0, count)) {
-    const reason = validate(d, multi, grounding)
+    const reason = validate(d, multi, grounding, calibrated.length >= 2 ? 1.05 : 1.15)
     if (reason) { rejected.push({ question: d?.question?.slice(0, 80) ?? '', reason }); continue }
     const t = tokenSet(d.question)
     if (known.some((k) => jaccard(k, t) >= 0.5) || candidates.some((c) => jaccard(tokenSet(c.question), t) >= 0.5)) {

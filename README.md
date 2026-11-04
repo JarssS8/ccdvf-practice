@@ -142,6 +142,7 @@ Each sign-in provider appears on the sign-in screen only when both of its secret
 
 ```bash
 npm test             # unit tests (Vitest): shuffling, scoring, chart data, CSV, i18n parity, translations, reset email
+npm run lint:bank   # answer-pattern lint of the question banks (calibrated rules fail the exit code)
 npm run test:e2e     # builds, starts the Worker on a throwaway local D1, runs API + headless-browser tests
 npm run test:smoke   # checks a deployed instance with a self-deleting account (-- --base <url>, -- --ai)
 ```
@@ -175,6 +176,8 @@ The questions, flashcards, notes and news are imported from [Amey-Thakur/CLAUDE-
 A daily GitHub Action (`.github/workflows/sync-content.yml`) runs the sync against the latest study repo. When the content changes it opens or updates a `content-sync` pull request with the sync log and the Spanish still to translate, and starts CI on it; a person translates, merges and deploys.
 
 Where the study repo has too few distinct questions for a full mock to follow the blueprint, the app adds its own items (`scripts/extra-questions/<cert-id>.json`, source `app`), written from the official exam guide and checked blind by a second model. They appear in mocks and drills with a "Written by the app" label and a link to report them, and never count towards the readiness estimate.
+
+**Calibrated bank.** The study repo's questions were written so that the right option is usually the longest (89% of the Developer bank), which makes scores meaningless. For Developer – Foundations the repo's questions are rewritten without those cues (`scripts/question-overrides/<cert-id>.json`, applied on top of the import; the key and its letter never change, and each override names the upstream text it replaced, so an upstream edit is flagged instead of silently reverting it) and 125 new items (`scripts/extra-questions/`, source `curated`) add current API behaviour, code and trace reading, and multiple-response items. `npm run lint:bank` (also run by `npm test`) enforces what a calibrated item must satisfy: the key is the longest option in at most 30% of items, option lengths stay within 1.6×, no template distractors, rationales cite options only as "(B)", and every item carries an official `ref`. Once a bank has calibrated items, the readiness estimate counts only calibrated questions answered after their `calibrated` time. Each new draft is checked with `node scripts/lint-questions.mjs --candidates drafts.json`, answered blind by a second reader, and probed with the options alone to confirm the stem is needed.
 
 Each certification's content (with its Spanish) is a separate chunk loaded on demand: the one being studied before the app renders, the others in idle time.
 

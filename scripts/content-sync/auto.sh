@@ -43,6 +43,11 @@ if git diff --quiet -- src/content && [ -z "$(git ls-files --others --exclude-st
   exit 0
 fi
 git checkout -q -B content-sync
+# A rewritten question whose upstream text moved would ship uncalibrated: the owner re-reviews it by hand
+if grep -q 'upstream changed, re-review' "$STATE/sync.txt"; then
+  git checkout -q -- src/content && git clean -fdq -- src/content && git checkout -q main
+  fail "an upstream question with an override changed: re-review scripts/question-overrides/"
+fi
 
 step "translate and map (Claude Code)"
 if node scripts/i18n.mjs check | grep -qE '[1-9][0-9]* (stale|missing)' || grep -q 'course-map.json\|extra-courses.json' "$STATE/sync.txt"; then

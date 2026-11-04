@@ -1,4 +1,4 @@
-import { displayLetter, optionOrder, relabel, type Letter, type Question } from '../shared/exam'
+import { displayLetter, optionOrder, relabel, stemParts, type Letter, type Question } from '../shared/exam'
 import { useT } from '../i18n'
 import { Icon } from './Icon'
 
@@ -9,6 +9,13 @@ interface Props {
   onToggle?: (l: Letter) => void
   reveal?: boolean
   showDomain?: boolean
+}
+
+/** A stem's prose and its ``` code blocks, as text (never HTML). The first prose part is the page heading when `heading`. */
+export function Stem({ text, heading = true }: { text: string; heading?: boolean }) {
+  return <>{stemParts(text).map((p, i) => p.code
+    ? <pre key={i} className="stem-code"><code>{p.text}</code></pre>
+    : i === 0 && heading ? <h1 key={i}>{p.text}</h1> : <p key={i}>{p.text}</p>)}</>
 }
 
 /** Renders a question with options in the attempt's shuffled order; letters are relabelled for display. */
@@ -25,7 +32,7 @@ export function QuestionCard({ q, seed, selected, onToggle, reveal, showDomain }
         {q.source === 'ai' && <span className="chip"><Icon name="sparkle" size={12} />{t.sources.ai}</span>}
         {q.source === 'app' && <span className="chip">{t.sources.app}</span>}
       </div>
-      <h1 className="q-stem" id={`${name}-stem`}>{q.question}</h1>
+      <div className="q-stem" id={`${name}-stem`}><Stem text={q.question} /></div>
       <fieldset className="options" aria-labelledby={`${name}-stem`}>
         <legend className="sr-only">{t.question.chooseN(q.answer.length)}</legend>
         {order.map((orig, i) => {
@@ -58,6 +65,7 @@ export function Explanation({ q, seed }: { q: Question; seed: number }) {
       <div className="eyebrow">{t.question.explanation} · {t.sources[q.source] ?? q.source}</div>
       <p style={{ fontSize: 15 }}>{relabel(q.rationale, q, seed)}</p>
       {q.evidence && <p className="small muted">{t.question.evidence(q.evidence)}</p>}
+      {q.ref && /^https:\/\//.test(q.ref) && <a className="small" href={q.ref} target="_blank" rel="noopener noreferrer">{t.question.officialSource}</a>}
     </section>
   )
 }

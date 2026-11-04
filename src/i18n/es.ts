@@ -5,6 +5,7 @@ const s = (n: number, one: string, many: string) => (n === 1 ? one : many)
 export const es: Dict = {
   common: {
     appName: 'Claude Cert Practice',
+    calibratedReadiness: 'Este banco se ha rehecho para que la opción correcta ya no se delate por su longitud o su redacción. Solo cuentan para la estimación las preguntas calibradas que no habías visto, respondidas después del cambio.',
     loading: 'Cargando…',
     contentFailed: 'No se han podido cargar las preguntas. Revisa la conexión.',
     retry: 'Reintentar',
@@ -100,7 +101,7 @@ export const es: Dict = {
   },
   sources: {
     practice: 'Práctica del repo', 'mock-1': 'Mock 1 del repo', 'mock-2': 'Mock 2 del repo', 'mock-3': 'Mock 3 del repo',
-    guide: 'Ejemplo de la guía oficial', ai: 'Generada por IA', app: 'Creada por la app',
+    guide: 'Ejemplo de la guía oficial', ai: 'Generada por IA', app: 'Creada por la app', curated: 'Banco calibrado',
   },
   auth: {
     tagline: 'Práctica para las certificaciones de Claude',
@@ -245,7 +246,8 @@ export const es: Dict = {
     correct: 'Correcta',
     yourAnswer: 'Tu respuesta',
     explanation: 'Explicación',
-    evidence: (e: string) => `Fuente citada (apuntes o temario oficial): «${e}»`,
+    evidence: (e: string) => `Fuente: ${e}`,
+    officialSource: 'Documentación oficial',
   },
   tutor: {
     title: 'Tutor IA',
@@ -284,6 +286,7 @@ export const es: Dict = {
     freshScore: (p: number, n: number) => `${p} % en ${n} nuevas`,
     noneFresh: 'ninguna era nueva',
     allFresh: (n: number) => ` Las ${n} eran nuevas para ti, así que este resultado cuenta entero.`,
+    tooFast: (s: number, exam: number) => `Has ido a ${s} s por pregunta; el examen real te da unos ${exam} s. Lee cada escenario hasta el final: el detalle que decide la respuesta casi nunca está en la primera frase.`,
     biggestGain: 'Lo que más sube la nota ahora',
     reviewMissed: 'Repasa lo que fallaste',
     reviewMissedText: 'Cada fallada entra también en tus tarjetas para no volver a fallarla.',

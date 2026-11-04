@@ -11,7 +11,8 @@
    "D": "Switch to the smallest available model regardless of output quality."
   },
   "answer": "B",
-  "rationale": "The Message Batches API is designed for latency-tolerant, high-volume workloads at lower cost, which matches an overnight, non-urgent job. Sending requests synchronously in parallel (A) does not reduce per-token cost; lowering max_tokens (C) or blindly downsizing the model (D) does not address the batch-versus-realtime tradeoff."
+  "rationale": "The Message Batches API is designed for latency-tolerant, high-volume workloads at lower cost, which matches an overnight, non-urgent job. Sending requests synchronously in parallel (A) does not reduce per-token cost; lowering max_tokens (C) or blindly downsizing the model (D) does not address the batch-versus-realtime tradeoff.",
+  "calibrated": "2026-11-04T22:06:00Z"
  },
  {
   "id": "developer-foundations-guide-2",
@@ -25,7 +26,8 @@
    "D": "Switch to a larger model that follows instructions more reliably."
   },
   "answer": "B",
-  "rationale": "Prompt injection is addressed by isolating untrusted content from trusted instructions and enforcing least-privilege guardrails so injected text cannot invoke sensitive tools. Temperature (A) is irrelevant to injection; a polite request (C) is not an enforceable control; a more instruction-following model (D) can be more susceptible, not less."
+  "rationale": "Prompt injection is addressed by isolating untrusted content from trusted instructions and enforcing least-privilege guardrails so injected text cannot invoke sensitive tools. Temperature (A) is irrelevant to injection; a polite request (C) is not an enforceable control; a more instruction-following model (D) can be more susceptible, not less.",
+  "calibrated": "2026-11-04T22:06:00Z"
  },
  {
   "id": "developer-foundations-guide-3",
@@ -39,6 +41,7 @@
    "D": "Rely on a built-in tool, since built-in tools can reach any internal REST API."
   },
   "answer": "B",
-  "rationale": "An MCP server exposes reusable tools that multiple Claude applications can share and that can be maintained independently. Hard-coding logic into prompts (A) is neither reusable nor maintainable; pasting data (C) gives no live access and wastes context; built-in tools (D) do not automatically reach arbitrary internal APIs."
+  "rationale": "An MCP server exposes reusable tools that multiple Claude applications can share and that can be maintained independently. Hard-coding logic into prompts (A) is neither reusable nor maintainable; pasting data (C) gives no live access and wastes context; built-in tools (D) do not automatically reach arbitrary internal APIs.",
+  "calibrated": "2026-11-04T22:06:00Z"
  }
 ]

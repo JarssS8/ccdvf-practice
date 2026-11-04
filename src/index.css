@@ -239,7 +239,11 @@ table.data td.num, table.data th.num { text-align: right; white-space: nowrap; f
 .timer { display: inline-flex; align-items: center; gap: 6px; padding: 0 16px; min-height: 44px; border-radius: 999px; background: var(--tile-lime); color: var(--on-tile); font: 700 15px var(--font); font-variant-numeric: tabular-nums; }
 .timer.warn { background: var(--warn-bg); color: #FFFFFF; }
 .exam-body { flex: 1; width: 100%; max-width: 820px; margin: 0 auto; padding: 12px 16px 28px; display: flex; flex-direction: column; gap: 16px; }
-.q-stem { background: var(--surface); border-radius: var(--r-xl); padding: 22px; font-family: var(--display); font-size: clamp(20px, 3vw, 24px); line-height: 1.38; font-weight: 600; letter-spacing: -0.015em; white-space: pre-wrap; }
+.q-stem { background: var(--surface); border-radius: var(--r-xl); padding: 22px; font-family: var(--display); font-size: clamp(20px, 3vw, 24px); line-height: 1.38; font-weight: 600; letter-spacing: -0.015em; white-space: pre-wrap; min-width: 0; }
+.q-stem h1, .q-stem p { font: inherit; letter-spacing: inherit; margin: 0; }
+.q-stem > * + * { margin-top: 14px; }
+.stem-code { margin: 0; padding: 14px 16px; border-radius: var(--r-md); background: var(--surface-2); overflow-x: auto; white-space: pre; font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace; font-size: 14px; line-height: 1.5; font-weight: 400; letter-spacing: 0; tab-size: 2; }
+.flashcard .stem-code { text-align: left; font-size: 13px; }
 .options { display: flex; flex-direction: column; gap: 10px; border: 0; padding: 0; margin: 0; min-width: 0; }
 .option {
   display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; min-height: 58px; border-radius: var(--r-lg);

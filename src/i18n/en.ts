@@ -3,6 +3,7 @@ const s = (n: number, one: string, many: string) => (n === 1 ? one : many)
 export const en = {
   common: {
     appName: 'Claude Cert Practice',
+    calibratedReadiness: 'This bank was rebuilt so the right option can no longer be spotted by its length or wording. Only calibrated questions you had never seen, answered after the change, count towards the estimate.',
     loading: 'Loading…',
     contentFailed: 'The questions could not be loaded. Check your connection.',
     retry: 'Try again',
@@ -98,7 +99,7 @@ export const en = {
   } as Record<string, string>,
   sources: {
     practice: 'Repo practice set', 'mock-1': 'Repo mock 1', 'mock-2': 'Repo mock 2', 'mock-3': 'Repo mock 3',
-    guide: 'Official guide sample', ai: 'AI-generated', app: 'Written by the app',
+    guide: 'Official guide sample', ai: 'AI-generated', app: 'Written by the app', curated: 'Calibrated bank',
   } as Record<string, string>,
   auth: {
     tagline: 'Practice for the Claude certifications',
@@ -243,7 +244,8 @@ export const en = {
     correct: 'Correct',
     yourAnswer: 'Your answer',
     explanation: 'Explanation',
-    evidence: (e: string) => `Cited source (notes or official blueprint): “${e}”`,
+    evidence: (e: string) => `Source: ${e}`,
+    officialSource: 'Official documentation',
   },
   tutor: {
     title: 'AI tutor',
@@ -282,6 +284,7 @@ export const en = {
     freshScore: (p: number, n: number) => `${p}% on ${n} new`,
     noneFresh: 'none were new',
     allFresh: (n: number) => ` All ${n} were new to you, so this result counts in full.`,
+    tooFast: (s: number, exam: number) => `You spent ${s} s per question; the real exam gives you about ${exam} s. Read every scenario to the end: the detail that decides the answer is rarely in the first sentence.`,
     biggestGain: 'What raises your score most now',
     reviewMissed: 'Review what you missed',
     reviewMissedText: 'Every missed question also goes into your flashcards so you do not miss it again.',

@@ -3,6 +3,7 @@ import { Rating, type Grade } from 'ts-fsrs'
 import { useCertQuestions } from '../App'
 import { useCert } from '../lib/cert'
 import { Empty } from '../components/ui'
+import { Stem } from '../components/QuestionCard'
 import { deck, NEW_PER_DAY, preview, queue, schedule } from '../lib/srs'
 import { dispatch, now, useStore } from '../lib/store'
 import { useLang, useT } from '../i18n'
@@ -67,7 +68,7 @@ export default function Cards() {
           <>
             <article className="card flashcard" aria-live="polite">
               <span className="chip" style={{ alignSelf: 'center' }}>{t.cardsView.origin[current.origin]}{s.byCard.has(current.id) ? '' : t.cardsView.newTag}</span>
-              <p style={{ whiteSpace: 'pre-wrap', fontWeight: 600 }}>{current.front}</p>
+              <div className="stack" style={{ whiteSpace: 'pre-wrap', fontWeight: 600, gap: 12 }}><Stem text={current.front} heading={false} /></div>
               {shown && <p className="back">{current.back}</p>}
             </article>
             {!shown ? (

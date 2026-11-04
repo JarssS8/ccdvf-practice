@@ -3,7 +3,7 @@ import { useCertQuestions, useQuestions } from '../App'
 import { useCert } from '../lib/cert'
 import { Icon } from '../components/Icon'
 import { Empty, Meter, ScaleBar, ZoneChip } from '../components/ui'
-import { attemptTitle, attemptsOf, domainMisses, domainStats, domainTrends, exposures, resultOf, fmtDate, fmtDuration, fmtNum, mostMissed, pct, PASS_P, readiness } from '../lib/engine'
+import { attemptTitle, attemptsOf, domainMisses, domainStats, domainTrends, exposures, resultOf, fmtDate, fmtDuration, fmtNum, isCalibratedBank, mostMissed, pct, PASS_P, readiness, stemPreview } from '../lib/engine'
 import { DomainMissBars, DomainTrendGrid } from '../components/charts'
 import { localize } from '../lib/content'
 import { startAttempt } from '../lib/actions'
@@ -102,6 +102,7 @@ export default function Progress() {
                   <p className="small muted">{t.progress.readinessNote(ready.n)}</p>
                 </>
               ) : <p className="small muted">{t.progress.noFirst}</p>}
+              {isCalibratedBank(qs) && <p className="tiny muted">{t.common.calibratedReadiness}</p>}
             </div>
             <div className="card">
               <div className="row-between">
@@ -155,7 +156,7 @@ export default function Progress() {
                     <a key={m.qid} href={at && idx >= 0 ? `#/review/${at.id}/${idx}` : '#/progress'} className="list-item">
                       <span className="badge-icon bad" style={{ fontWeight: 700, fontSize: 14 }}>{m.wrong}×</span>
                       <span style={{ flex: 1, minWidth: 0 }}>
-                        <span className="small" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{q.question}</span>
+                        <span className="small" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{stemPreview(q.question)}</span>
                         <span className="tiny muted">{t.domains[q.domain]} · {t.progress.missedTimes(m.wrong, m.n)}</span>
                       </span>
                       <Icon name="chevronRight" size={18} />

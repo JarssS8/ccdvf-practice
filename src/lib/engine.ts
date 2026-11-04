@@ -1,14 +1,20 @@
 import { mulberry32, shuffle, type Letter, type Question } from '../shared/exam'
 import { SCALE, certById, certOfAttempt, domainQuotas, quickMinutes, type CertDef } from '../shared/certs'
 import { groupOf, guideCount, inCert, type AiQuestion } from './content'
+export { stemPreview } from '../shared/exam'
 import { getLang, type Dict, type Lang } from '../i18n'
 import type { Data } from './store'
 import type { Answer, Attempt, AttemptResult, Mode } from './types'
 
 export { displayLetter, optionOrder } from '../shared/exam'
 
-/** Only the study repo's questions measure readiness: AI-generated and app-written ones are practice. */
-export const countsForReadiness = (q: Pick<Question, 'source'> | undefined) => !!q && q.source !== 'ai' && q.source !== 'app'
+/** A bank that has calibrated questions (no answer-pattern cues) measures readiness on those alone. */
+export const isCalibratedBank = (qs: Map<string, AiQuestion>) => { for (const q of qs.values()) if (q.calibrated) return true; return false }
+
+/** Only bank questions measure readiness: AI-generated and app-written ones are practice. In a calibrated bank, only
+ *  calibrated questions answered after they were calibrated (`at`, ms) count. */
+export const countsForReadiness = (q: Pick<Question, 'source' | 'calibrated'> | undefined, at?: number, calibratedBank = false) =>
+  !!q && q.source !== 'ai' && q.source !== 'app' && (!calibratedBank || (!!q.calibrated && at !== undefined && at >= Date.parse(q.calibrated)))
 
 export const isCorrect = (q: Question, choice: Letter[] | undefined) =>
   !!choice && choice.length === q.answer.length && q.answer.every((l) => choice.includes(l))
@@ -196,9 +202,10 @@ export function estimate(correct: number, n: number): Estimate | null {
   return { n, p, lo, hi, scaled: toScaled(p), scaledLo: toScaled(lo), scaledHi: toScaled(hi), zone }
 }
 
-/** Readiness from first exposures to repo questions only, re-weighted to the blueprint. */
+/** Readiness from first exposures to bank questions only, re-weighted to the blueprint. */
 export function readiness(exp: Exposure[], qs: Map<string, AiQuestion>, cert: CertDef) {
-  const first = exp.filter((e) => e.firstOfGroup && countsForReadiness(qs.get(e.qid)))
+  const calibrated = isCalibratedBank(inCert(qs, cert))
+  const first = exp.filter((e) => e.firstOfGroup && countsForReadiness(qs.get(e.qid), e.at, calibrated))
   if (!first.length) return null
   const by: Record<string, { n: number; c: number }> = {}
   for (const e of first) {

@@ -14,7 +14,29 @@ export interface Question {
   rationale: string
   dupGroup?: string
   evidence?: string
+  /** Official page that settles the key (calibrated items). */
+  ref?: string
+  /** ISO time from which the item is free of answer-pattern cues; only answers given after it measure readiness. */
+  calibrated?: string
 }
+
+/** A stem split into prose and ``` code blocks, in order (an unclosed fence runs to the end). */
+export function stemParts(s: string): { code: boolean; text: string }[] {
+  const out: { code: boolean; text: string }[] = []
+  const re = /```[^\n]*\n?([\s\S]*?)(?:```|$)/g
+  let at = 0
+  for (let m = re.exec(s); m; m = re.exec(s)) {
+    if (m.index > at) out.push({ code: false, text: s.slice(at, m.index).trim() })
+    out.push({ code: true, text: m[1].replace(/\n$/, '') })
+    at = re.lastIndex
+    if (!m[0]) break
+  }
+  if (at < s.length) out.push({ code: false, text: s.slice(at).trim() })
+  return out.filter((p) => p.code || p.text)
+}
+
+/** The stem as one line of prose, without its code blocks: for previews, lists and exports. */
+export const stemPreview = (s: string) => stemParts(s).filter((p) => !p.code).map((p) => p.text).join(' ').replace(/\s+/g, ' ').trim()
 
 // ---------- option order (shared so the Worker sees a question exactly as the viewer does) ----------
 
@@ -69,3 +91,6 @@ export function asDisplayed(q: Question, seed: number, choice: Letter[]) {
 
 /** Translation fingerprint of a question's English text. */
 export const questionHash = (q: Pick<Question, 'question' | 'options' | 'rationale'>) => textHash(JSON.stringify([q.question, q.options, q.rationale]))
+
+/** Fingerprint of what an override replaces in an upstream question: when it moves, the override must be re-reviewed. */
+export const upstreamHash = (q: Pick<Question, 'question' | 'options' | 'answer'>) => textHash(JSON.stringify([q.question, q.options, q.answer]))

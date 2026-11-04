@@ -3,7 +3,7 @@ import { useQuestions } from '../App'
 import { Icon } from '../components/Icon'
 import { Empty, Meter, ScaleBar, ZoneChip } from '../components/ui'
 import { startAttempt } from '../lib/actions'
-import { attemptTitle, estimate, fmtDate, fmtDuration, isCorrect, pct, resultOf } from '../lib/engine'
+import { attemptTitle, estimate, fmtDate, fmtDuration, isCorrect, pct, resultOf, stemPreview } from '../lib/engine'
 import { useStore } from '../lib/store'
 import { SCALE, certById, certOfAttempt } from '../shared/certs'
 import { localize } from '../lib/content'
@@ -36,6 +36,8 @@ export default function Results({ id, timeout }: { id: string; timeout?: boolean
   const failed = rows.filter((x) => !x.ok).length
   const misses = rows.filter((x) => !x.ok || x.ans?.flagged)
   const perQ = r.total ? r.timeUsedMs / r.total : 0
+  const answered = r.total - r.blank
+  const perAnswered = answered ? r.timeUsedMs / answered : 0
 
   // The headline says in plain words where you stand
   const headline = !exam || !est ? t.results.done : t.results[est.zone]
@@ -72,6 +74,8 @@ export default function Results({ id, timeout }: { id: string; timeout?: boolean
               {t.results.approx}
               {repeat ? t.results.repeat(r.total - r.fresh, r.total, r.fresh ? t.results.freshScore(pct(r.freshCorrect, r.fresh), r.fresh) : t.results.noneFresh) : t.results.allFresh(r.total)}
             </p>
+            {/* Scenario items read in seconds are usually answered from the options' shape, not from the stem */}
+            {answered >= 10 && perAnswered < 30_000 && <p className="callout small" role="note" style={{ background: 'var(--surface-2)' }}>{t.results.tooFast(Math.round(perAnswered / 1000), Math.round((cert.minutes * 60) / cert.items))}</p>}
           </>
         )}
       </section>
@@ -130,7 +134,7 @@ export default function Results({ id, timeout }: { id: string; timeout?: boolean
           {misses.slice(0, 8).map(({ i, q, ok, ans }) => (
             <a key={i} href={`#/review/${a.id}/${i}`} className="list-item">
               <span className="tiny" style={{ fontWeight: 700, color: ok ? 'var(--muted)' : 'var(--bad-ink)', minWidth: 30 }}>#{i + 1}</span>
-              <span className="small" style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{q?.question}</span>
+              <span className="small" style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{q && stemPreview(q.question)}</span>
               <span className="tiny" style={{ color: ok ? 'var(--muted)' : 'var(--bad-ink)', whiteSpace: 'nowrap', fontWeight: 600 }}>{!ans?.choice.length ? t.results.blank : ok ? t.results.flagged : t.results.missedWord}</span>
             </a>
           ))}

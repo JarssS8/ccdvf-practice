@@ -6,7 +6,7 @@ import { newsFor, questionsOf } from '../lib/content'
 import { activeAttempt, discardAttempt, startAttempt } from '../lib/actions'
 import { examDateOf, useCert } from '../lib/cert'
 import { SCALE } from '../shared/certs'
-import { attemptTitle, attemptsOf, domainStats, exposures, fmtDate, fmtDuration, fmtNum, isCorrect, latestByQuestion, locale, pct, readiness, resultOf } from '../lib/engine'
+import { attemptTitle, attemptsOf, domainStats, exposures, fmtDate, fmtDuration, fmtNum, isCalibratedBank, isCorrect, latestByQuestion, locale, pct, readiness, resultOf } from '../lib/engine'
 import { deck, queue, schedule } from '../lib/srs'
 import { now, useStore } from '../lib/store'
 import { errorText, useLang, useT } from '../i18n'
@@ -24,6 +24,7 @@ export default function Home() {
 
   const exp = useMemo(() => exposures(data, qs, cert), [data, qs, cert])
   const ready = useMemo(() => readiness(exp, qs, cert), [exp, qs, cert])
+  const calibrated = useMemo(() => isCalibratedBank(qs), [qs])
   const domains = useMemo(() => domainStats(exp, qs, cert), [exp, qs, cert])
   const cards = useMemo(() => { const s = schedule(data, new Date(now())); const q = queue(deck(data, qs, lang, cert), s); return q.due.length + q.fresh.length }, [data, qs, lang, cert])
   const missed = useMemo(() => {
@@ -153,6 +154,7 @@ export default function Home() {
               <p className="small muted">{t.home.readinessEmpty}</p>
             </>
           )}
+          {calibrated && <p className="tiny muted">{t.common.calibratedReadiness}</p>}
         </section>
 
         {missed > 0 ? (

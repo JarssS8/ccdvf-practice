@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { ensureAll, inCert, questionIndex, questionsOf, repoQuestions as allQuestions } from '../../src/lib/content'
-import { attemptsOf, buildAttempt, countsForReadiness, domainMisses, domainStats, domainTrends, exposures, isCorrect, latestByQuestion, modeSpec, mostMissed, readiness, resultOf, scoreAttempt } from '../../src/lib/engine'
+import { attemptsOf, buildAttempt, countsForReadiness, isCalibratedBank, domainMisses, domainStats, domainTrends, exposures, isCorrect, latestByQuestion, modeSpec, mostMissed, readiness, resultOf, scoreAttempt } from '../../src/lib/engine'
 import { deck, queue, schedule } from '../../src/lib/srs'
 import { currentCertId, studyWeek } from '../../src/lib/cert'
 import { CERTS, certById, certOfQuestion } from '../../src/shared/certs'
@@ -86,7 +86,8 @@ describe('scoring and stats', () => {
   })
   it('readiness only exists once there are first attempts', () => {
     expect(readiness([], qs, DV)).toBeNull()
-    expect(readiness(exposures(d, qs, DV), qs, DV)?.n).toBe(10)
+    // Answered long before the Developer bank was calibrated
+    expect(readiness(exposures(d, qs, DV), qs, DV)).toBeNull()
   })
   it('isCorrect needs the exact set of keys', () => {
     const q = qs.get(ids[0])!
@@ -181,6 +182,40 @@ describe('questions written by the app', () => {
     const per = (name: string) => a.questionIds.filter((id) => qs.get(id)!.domain === name).length
     expect(per('Claude Models, Prompting & Context Engineering')).toBe(8)
     expect(per('Governance, Safety & Risk Management')).toBe(9)
+  })
+})
+
+describe('a calibrated bank', () => {
+  const dv = questionsOf(DV)
+  const since = Math.max(...dv.filter((q) => q.calibrated).map((q) => Date.parse(q.calibrated!)))
+  // One per duplicate group, so each is a first exposure of its own
+  const cal = dv.filter((q) => q.calibrated && q.source !== 'guide' && q.source !== 'curated')
+    .filter((q, i, a) => a.findIndex((x) => (x.dupGroup ?? x.id) === (q.dupGroup ?? q.id)) === i).slice(0, 8).map((q) => q.id)
+  const curated = dv.filter((q) => q.source === 'curated').slice(0, 5).map((q) => q.id)
+
+  it('Developer is calibrated, the other certifications are not yet', () => {
+    expect(isCalibratedBank(inCert(qs, DV))).toBe(true)
+    expect(isCalibratedBank(inCert(qs, AF))).toBe(false)
+    expect(curated.length).toBe(5)
+  })
+  it('counts only calibrated questions answered after their calibration', () => {
+    const later = withAttempt(empty(), 'late', [...cal, ...curated], (i) => i % 2 === 0, since + 60_000)
+    expect(readiness(exposures(later, qs, DV), qs, DV)?.n).toBe(cal.length + curated.length)
+    const early = withAttempt(empty(), 'early', cal, () => true, since - 60_000)
+    expect(readiness(exposures(early, qs, DV), qs, DV)).toBeNull()
+  })
+  it('a question already seen before the rebuild never counts as fresh again', () => {
+    const d = withAttempt(withAttempt(empty(), 'old', cal.slice(0, 3), () => true, since - 60_000), 'new', cal, () => true, since + 60_000)
+    expect(readiness(exposures(d, qs, DV), qs, DV)?.n).toBe(cal.length - 3)
+  })
+  it('app-written and uncalibrated questions stay out; other banks keep the old rule', () => {
+    const app = dv.find((q) => q.source === 'app')!
+    expect(countsForReadiness(app, since + 1, true)).toBe(false)
+    expect(countsForReadiness({ source: 'practice' }, since + 1, true)).toBe(false)
+    expect(countsForReadiness({ source: 'practice' }, 0, false)).toBe(true)
+  })
+  it('curated questions never share a duplicate group', () => {
+    expect(dv.filter((q) => q.source === 'curated').every((q) => !q.dupGroup)).toBe(true)
   })
 })
 
