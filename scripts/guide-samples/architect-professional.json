@@ -11,7 +11,8 @@
    "D": "Replace the agent with a larger model that follows instructions more reliably."
   },
   "answer": "B",
-  "rationale": "Least privilege means removing capabilities the role does not require, eliminating the attack surface rather than monitoring or guarding it. Logging (A) and confirmations (C) are detective/compensating controls, not removal of unnecessary privilege; model size (D) is unrelated to authorization scope."
+  "rationale": "Least privilege means removing capabilities the role does not require, eliminating the attack surface rather than monitoring or guarding it. Logging (A) and confirmations (C) are detective/compensating controls, not removal of unnecessary privilege; model size (D) is unrelated to authorization scope.",
+  "calibrated": "2026-11-04T23:27:00Z"
  },
  {
   "id": "architect-professional-guide-2",
@@ -25,7 +26,8 @@
    "D": "Move the policy document into a few-shot example block."
   },
   "answer": "C",
-  "rationale": "Ordering stable content first and enabling prompt caching lets repeated prefixes be reused, reducing both time-to-first-token and per-request cost without discarding required context. Truncation (A) loses needed policy; downsizing blindly (B) risks quality; relocating to few-shot (D) does not create a cacheable, reusable prefix."
+  "rationale": "Ordering stable content first and enabling prompt caching lets repeated prefixes be reused, reducing both time-to-first-token and per-request cost without discarding required context. Truncation (A) loses needed policy; downsizing blindly (B) risks quality; relocating to few-shot (D) does not create a cacheable, reusable prefix.",
+  "calibrated": "2026-11-04T23:27:00Z"
  },
  {
   "id": "architect-professional-guide-3",
@@ -39,6 +41,7 @@
    "D": "The context window has shrunk."
   },
   "answer": "B",
-  "rationale": "Confident-but-wrong answers following a document refresh, with model and latency unchanged, point to retrieval feeding the model poor context, for example a broken re-index or mismatched embeddings. The other options would not be triggered specifically by a document refresh."
+  "rationale": "Confident-but-wrong answers following a document refresh, with model and latency unchanged, point to retrieval feeding the model poor context, for example a broken re-index or mismatched embeddings. The other options would not be triggered specifically by a document refresh.",
+  "calibrated": "2026-11-04T23:27:00Z"
  }
 ]

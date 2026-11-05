@@ -1,0 +1,1440 @@
+[
+ {
+  "id": "architect-foundations-cur-a01",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Design and implement agentic loops for autonomous task execution",
+  "question": "Scenario: Customer Support Resolution Agent. In about 9% of conversations the agent tells the customer \"Let me pull up your order\" and then nothing else happens; no refund is issued. Logs show the last API response in those cases had stop_reason \"tool_use\". Here is the loop:\n\n```python\nwhile True:\n    resp = client.messages.create(model=MODEL, max_tokens=4096,\n                                  tools=TOOLS, messages=messages)\n    messages.append({\"role\": \"assistant\", \"content\": resp.content})\n    if resp.content[0].type == \"text\":\n        return resp.content[0].text\n    results = [run_tool(b) for b in resp.content if b.type == \"tool_use\"]\n    messages.append({\"role\": \"user\", \"content\": results})\n```\n\nWhat is the root cause and the correct fix?",
+  "options": {
+   "A": "The first block's type is not a stop signal; branch on stop_reason, continuing on \"tool_use\" and returning on \"end_turn\".",
+   "B": "Claude writes text before some tool calls; instruct it in the system prompt never to emit text in a response that contains a tool call.",
+   "C": "The loop should scan the returned text for phrases like \"let me\" or \"one moment\" and keep iterating whenever it finds one.",
+   "D": "The loop has no turn limit; add a maximum of 10 iterations so a stalled conversation is cut off and passed to a human agent."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Claude can emit explanatory text and a tool_use block in the same response, so the first block's type says nothing about whether work remains. stop_reason is the authoritative signal: \"tool_use\" means execute and continue, \"end_turn\" means finished. A turn cap (D) is a safety net that would not fix the premature exit. A prompt rule (B) is probabilistic and still leaves the wrong signal in code. Scanning text for phrases (C) is the natural-language parsing anti-pattern.",
+  "evidence": "Loop control should key off stop_reason (tool_use vs end_turn), not off text content or the first block type.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/agent-loop",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a02",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Design and implement agentic loops for autonomous task execution",
+  "question": "Scenario: Customer Support Resolution Agent. After a customer message about a late package, the agent crashes with a 400 on its second request. Trace:\n\n```text\nPOST /v1/messages -> 200  stop_reason=tool_use\n  content: [text, tool_use get_customer (toolu_01A),\n            tool_use lookup_order (toolu_01B)]\nloop: executed toolu_01A -> ok\nloop: appended user message [tool_result toolu_01A]\nPOST /v1/messages -> 400 invalid_request_error\n  \"tool_use ids were found without tool_result blocks\n   immediately after: toolu_01B\"\n```\n\nWhat change to the loop fixes this class of failure?",
+  "options": {
+   "A": "Raise max_tokens so the response is not cut off before the model has finished writing its second tool call.",
+   "B": "Run every tool_use block in the assistant message and return all of the tool_result blocks together in one user message.",
+   "C": "Treat the 400 as transient and retry the identical request with exponential backoff and jitter.",
+   "D": "Send the lookup_order result in a second user message immediately after the one holding the get_customer result."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "The assistant message contained two tool_use blocks, and the API requires a matching tool_result for each in the very next user message. Executing all blocks and returning all results together satisfies that for any number of parallel calls. A 400 is not retryable (C), and the identical request would fail again. Splitting results across two user messages (D) still leaves the first message incomplete. The content shows both blocks arrived intact, so truncation (A) is not involved.",
+  "evidence": "Parallel tool calls: return all tool_result blocks in a single user message; 400 errors are not retryable.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a03",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Design and implement agentic loops for autonomous task execution",
+  "question": "Scenario: Multi-Agent Research System. Your search subagent uses a server-side web search tool and loops while stop_reason is \"tool_use\", treating anything else as final. In about 7% of runs the coordinator receives only a one-line preamble (\"I'll search for recent regulatory filings...\") and no findings. Logs show those responses ended with stop_reason \"pause_turn\". How should the subagent loop handle this?",
+  "options": {
+   "A": "Return the preamble as the result, and have the coordinator re-delegate the same search to a fresh subagent.",
+   "B": "On pause_turn, send the response back as the assistant turn in a new request so the turn continues.",
+   "C": "Raise max_tokens so the server-side search finishes inside a single response and never pauses at all.",
+   "D": "Add a line to the subagent prompt telling it to complete every search within a single response without pausing."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "pause_turn means a long-running server-side turn was paused; the documented handling is to pass the response back so Claude resumes where it stopped. A larger max_tokens (C) addresses max_tokens truncation, a different stop reason. Re-delegating (A) discards progress and may pause again. A prompt instruction (D) cannot control a server-side pause. The lesson: handle every stop_reason explicitly instead of equating non-tool_use with done.",
+  "evidence": "pause_turn: resume by sending the response back as-is; check stop_reason before reading content.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a04",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Design and implement agentic loops for autonomous task execution",
+  "question": "Scenario: Developer Productivity with Claude. A teammate's codebase-exploration agent, built directly on the Messages API, behaves erratically: it sometimes stops mid-investigation and sometimes repeats greps it already ran. Reviewing the loop, you find it (1) ends when the reply text contains \"Investigation complete\", (2) caps at 8 iterations, and (3) sends only the most recent tool result in each new request. Which TWO changes make the loop correct? (Select TWO.)",
+  "options": {
+   "A": "Terminate when stop_reason is \"end_turn\" instead of matching marker text in the reply.",
+   "B": "Lower the iteration cap from 8 to 5 so the agent has fewer chances to repeat the same grep.",
+   "C": "Start every iteration with a fresh message list containing a one-paragraph summary the agent wrote itself.",
+   "D": "Ask Claude to put a \"status\": \"done\" field in its prose and parse that field to decide when to stop.",
+   "E": "Append each assistant message and its tool results to the history so Claude sees everything gathered so far."
+  },
+  "answer": [
+   "A",
+   "E"
+  ],
+  "rationale": "Termination should come from stop_reason, and continuity comes from accumulating the assistant turns and tool_result blocks so the model can reason about what it has already found. Lowering the cap (B) only truncates work and is not a stopping mechanism. A status field in prose (D) is still a natural-language completion signal. Rebuilding context from an agent-written summary each turn (C) drops the raw results that the next decision depends on.",
+  "evidence": "Continue on tool_use, stop on end_turn, and append tool results to history; avoid text-based completion signals and arbitrary caps.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/agent-loop",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a05",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Orchestrate multi-agent systems with coordinator-subagent patterns",
+  "question": "Scenario: Multi-Agent Research System. Query logs show 68% of requests are single-fact lookups such as \"When did the EU AI Act enter into force?\", yet the coordinator always runs the search, analysis, synthesis, and report subagents in sequence. Median latency is three minutes. Answers to complex, multi-source questions are good and must not regress. How should you cut latency?",
+  "options": {
+   "A": "Merge the four subagents into one agent holding every tool, so the whole pipeline runs in a single context.",
+   "B": "Run the analysis and synthesis subagents at the same time as search so the stages overlap in wall-clock time.",
+   "C": "Have the coordinator assess each query and invoke only the subagents it needs, such as search alone for a single-fact lookup.",
+   "D": "Place a separate classifier service ahead of the coordinator that sends simple queries to a standalone search-only application."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "A coordinator is meant to analyze query requirements and choose which subagents to invoke rather than push every request through the full pipeline. Merging everything (A) gives up the context isolation that keeps complex runs good. An external classifier (D) adds a layer and a second system to maintain for a decision the coordinator can already make. Analysis and synthesis (B) depend on search output, so they cannot meaningfully overlap with it.",
+  "evidence": "Coordinators should dynamically select subagents by query complexity instead of always running the full pipeline.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a06",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Orchestrate multi-agent systems with coordinator-subagent patterns",
+  "question": "Scenario: Multi-Agent Research System. A report on EU battery regulation cites 14 sources, all trade press. Reviewers expected regulator filings and supplier disclosures. Logs show all three search subagents received the same delegation prompt (\"research EU battery regulation\") and returned heavily overlapping articles. Which TWO changes best address the coverage gap and the duplication? (Select TWO.)",
+  "options": {
+   "A": "Give each search subagent a distinct source type or subtopic in its delegation prompt: press, regulator filings, supplier disclosures.",
+   "B": "Raise each search subagent's result limit from 10 to 50 so that more source types surface by chance.",
+   "C": "Have the coordinator review the synthesis output for gaps and re-delegate targeted queries before the report is finalized.",
+   "D": "Switch the synthesis subagent to a larger model so it can infer what the missing source types would have said.",
+   "E": "Let the three search subagents message each other during their runs so they can deduplicate results themselves."
+  },
+  "answer": [
+   "A",
+   "C"
+  ],
+  "rationale": "Partitioning scope by subtopic or source type removes the duplication at its origin, and a coordinator-driven refinement loop catches remaining gaps and sends targeted follow-up queries. A bigger synthesis model (D) cannot create evidence that was never retrieved. Peer messaging (E) bypasses the coordinator, which should own communication, error handling, and observability. More results per identical prompt (B) mostly yields more of the same press coverage.",
+  "evidence": "Partition research scope across subagents and use coordinator-led refinement loops to fill gaps.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a07",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Configure subagent invocation, context passing, and spawning",
+  "question": "Scenario: Multi-Agent Research System. The coordinator ran the search and document-analysis subagents, then delegated to synthesis as shown. The synthesis subagent replies that it has nothing to work with.\n\n```text\ncoordinator -> Agent(subagent_type=\"synthesis\",\n  prompt=\"Synthesize the findings from the search and analysis\n          agents into a two-page brief with citations.\")\n\nsynthesis -> \"I don't have any findings. Please provide the\n              search and analysis results.\"\n```\n\nWhat is the correct fix?",
+  "options": {
+   "A": "Include the complete findings in the synthesis prompt as structured records that keep each claim apart from its source URL, document name, and page.",
+   "B": "Resume the search subagent's session from inside the synthesis subagent so it can read that agent's earlier transcript.",
+   "C": "Tell the synthesis subagent in its prompt to re-run the web searches itself and rebuild the findings before writing.",
+   "D": "Write the findings into the synthesis AgentDefinition's system prompt when the coordinator application is configured."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Subagents start with a fresh context and receive only what the coordinator puts in the delegation prompt, so the findings must be passed explicitly. Structured records preserve attribution so citations survive synthesis. Sessions are not shared between subagents (B). An AgentDefinition is static (D) and cannot hold results produced at runtime. Re-running searches (C) duplicates work and may return different sources than the ones analyzed.",
+  "evidence": "Subagents do not inherit parent context; the only channel is the prompt string, so findings and attribution must be included.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/subagents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a08",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Configure subagent invocation, context passing, and spawning",
+  "question": "Scenario: Multi-Agent Research System. The three search subagents are independent of one another, but the search phase is slow. Trace from one run:\n\n```text\nt=0s    coordinator    Agent(search-news)      launched\nt=62s   search-news    returned 9 findings\nt=63s   coordinator    Agent(search-filings)   launched\nt=118s  search-filings returned 6 findings\nt=119s  coordinator    Agent(search-academic)  launched\nt=171s  search-academic returned 11 findings\nt=172s  coordinator    Agent(synthesis)        launched\n```\n\nWhat change brings the search phase close to the duration of the slowest single search?",
+  "options": {
+   "A": "Switch the three search subagents to a smaller, faster model tier while keeping the one-per-turn delegation.",
+   "B": "Have each search subagent hand its findings to the next one in its prompt so later searches start with warm context.",
+   "C": "Raise the concurrent-subagent limit for the session from its default to 40 so more subagents are allowed to run at once.",
+   "D": "Have the coordinator issue all three Agent tool calls in a single response so the subagents run concurrently."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Each search was launched in its own coordinator turn, so they ran back to back (62 + 55 + 52 seconds). Emitting multiple Agent calls in one response lets them run concurrently. The concurrency limit (C) was never reached; only one subagent was ever running. A faster model (A) shortens each step but leaves the sequential structure. Chaining findings (B) makes the dependency explicit and does nothing to remove it.",
+  "evidence": "Spawn parallel subagents by emitting multiple Agent (Task) tool calls in a single coordinator response.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/subagents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a09",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Configure subagent invocation, context passing, and spawning",
+  "question": "Scenario: Multi-Agent Research System. You deploy this coordinator headless, with no interactive approver. It never delegates: its attempts to call a subagent come back as denied tool calls, and it falls back to searching the web by itself.\n\n```python\noptions = ClaudeAgentOptions(\n    allowed_tools=[\"WebSearch\", \"Read\"],\n    agents={\n        \"search\": AgentDefinition(description=\"Finds sources on a topic\",\n                                  prompt=SEARCH_PROMPT, tools=[\"WebSearch\"]),\n        \"synthesis\": AgentDefinition(description=\"Merges findings into a brief\",\n                                     prompt=SYNTH_PROMPT, tools=[\"Read\"]),\n    },\n)\n```\n\nWhat is the fix?",
+  "options": {
+   "A": "Add the subagent-spawning tool, Agent (formerly Task), to the coordinator's allowed_tools.",
+   "B": "Move the two definitions into .claude/agents/ files so the coordinator can discover them at startup time.",
+   "C": "Rewrite both descriptions to say the coordinator must delegate to the agent for every request.",
+   "D": "Add Read and WebSearch to the search definition's tools list so it can finish the work itself."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Subagents are invoked through the Agent tool (called Task in older versions). With no approver, a call to a tool that is not in allowed_tools is denied, so the coordinator never delegates. Better descriptions (C) help Claude choose a subagent but cannot grant the missing permission. File-based definitions (B) change where agents are defined, not whether the coordinator may call the tool. Widening a subagent's tools (D) is unrelated to the denied delegation.",
+  "evidence": "Claude invokes subagents through the Agent tool (formerly Task); it must be permitted in the coordinator's allowed tools.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/subagents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a10",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Implement multi-step workflows with enforcement and handoff patterns",
+  "question": "Scenario: Customer Support Resolution Agent. When the agent calls escalate_to_human for a policy exception, human agents in the ticketing system see only the fields passed in the tool call and cannot open the conversation transcript. They report spending several minutes re-asking customers what they already told Claude. Which THREE fields should the escalate_to_human payload include? (Select THREE.)",
+  "options": {
+   "A": "The recommended next action for the human agent.",
+   "B": "The model's step-by-step reasoning from every turn of the conversation.",
+   "C": "The root cause of the problem and the refund amount at stake.",
+   "D": "The verified customer ID and the order or orders involved.",
+   "E": "Every raw tool response returned by the backend during the session."
+  },
+  "answer": [
+   "A",
+   "C",
+   "D"
+  ],
+  "rationale": "A human who cannot see the transcript needs a compact, structured summary: who the customer is, what went wrong and what is owed, and what Claude recommends. Dumping reasoning from every turn (B) or all raw tool output (E) recreates the transcript-reading problem the summary is meant to remove and buries the decision-relevant facts.",
+  "evidence": "Handoff summaries for humans without transcript access should carry customer ID, root cause, amount, and recommended action.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a11",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Implement multi-step workflows with enforcement and handoff patterns",
+  "question": "Scenario: Customer Support Resolution Agent. In 11% of conversations where the customer writes \"transfer me to a person\", the agent replies with troubleshooting steps first, and those customers rate the interaction poorly. Most of these cases are within the agent's authority (damaged item with photo attached). Which change best fixes the behavior?",
+  "options": {
+   "A": "Add an explicit rule with examples: if the customer asks for a human, call escalate_to_human at once with a handoff summary.",
+   "B": "Have the agent report a confidence score from 1 to 10 each turn and escalate automatically below a fixed cutoff.",
+   "C": "Add sentiment scoring on each customer message and escalate when the frustration score passes a set threshold.",
+   "D": "Resolve the issue first when it is within the agent's authority, then offer a transfer in the closing message of the chat."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "An explicit request for a human is a defined escalation trigger and should be honored immediately, with the handoff context attached, even when the agent could solve the problem. Resolving first (D) overrides the customer's stated choice. Sentiment (C) and self-reported confidence (B) are unreliable proxies for what the customer asked for, and neither detects an explicit request.",
+  "evidence": "Escalate immediately when a customer explicitly requests a human; sentiment and self-reported confidence are poor proxies.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a12",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Apply Agent SDK hooks for tool call interception and data normalization",
+  "question": "Scenario: Customer Support Resolution Agent. Policy: refunds over $500 must be escalated. The hook below is registered, yet logs show a $740 refund went through. No hook_callback_failed message appears in the message stream.\n\n```python\nasync def cap_refund(input_data, tool_use_id, context):\n    if input_data[\"tool_input\"].get(\"amount\", 0) > 500:\n        return {\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\",\n            \"permissionDecision\": \"deny\",\n            \"permissionDecisionReason\": \"Over $500: call escalate_to_human.\"}}\n    return {}\n\noptions = ClaudeAgentOptions(\n    mcp_servers={\"support\": support_server},\n    hooks={\"PreToolUse\": [HookMatcher(matcher=\"process_refund\", hooks=[cap_refund])]})\n\n# log: tool_use name=mcp__support__process_refund amount=740 -> ok\n```\n\nWhy did the refund go through, and what fixes it?",
+  "options": {
+   "A": "The matcher misses the namespaced MCP name; match mcp__support__process_refund or a pattern like ^mcp__support__.",
+   "B": "Set on_failure=\"block\" on the matcher so that a callback that fails stops the refund from being processed at all.",
+   "C": "The check must run in a PostToolUse hook, because the amount is only reliable after the tool has returned its result.",
+   "D": "The matcher should be removed so that the hook runs for every event type, including events that fire after the tool executes."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "MCP tools are named mcp__<server>__<tool>, and matchers test the tool name, so the bare \"process_refund\" pattern never selects this call and the callback never runs. Fixing the matcher makes the deterministic deny take effect and redirects to escalation. A PostToolUse check (C) would run after the money has moved. Dropping the matcher (D) misses the point that it is the name pattern that is wrong. on_failure=\"block\" (B) only matters when a callback throws, and none did here.",
+  "evidence": "Tool-hook matchers test the tool name; MCP tools use the mcp__<server>__<action> pattern; PreToolUse can deny.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/hooks",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a13",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Apply Agent SDK hooks for tool call interception and data normalization",
+  "question": "Scenario: Developer Productivity with Claude. Your triage agent uses three MCP servers that your vendor owns. The CI server returns finished_at as Unix seconds (1730678400), the issue tracker returns ISO 8601 strings, and the deploy tool returns status as integers (0, 1, 2). In 8% of triage runs the agent misorders events or misreports deploy state. What is the most reliable fix?",
+  "options": {
+   "A": "Add few-shot examples that show epoch timestamps and status integers being converted correctly.",
+   "B": "Add a PostToolUse hook that rewrites each result into ISO 8601 timestamps and named statuses before the model reads it.",
+   "C": "Document each server's formats in the system prompt and ask the agent to convert all values to one format before comparing them.",
+   "D": "Fork each vendor MCP server and change its output format so that all three servers agree with one another."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "A PostToolUse hook runs in your code on every result, so the model only ever sees one consistent format, and it works without touching vendor servers. Prompt instructions (C) and few-shot examples (A) ask the model to do deterministic conversion work and still fail some fraction of the time. Forking vendor servers (D) creates a maintenance burden for something a thin hook layer does.",
+  "evidence": "PostToolUse hooks can normalize heterogeneous formats (timestamps, status codes) before the model processes results.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/hooks",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a14",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Manage session state, resumption, and forking",
+  "question": "Scenario: Code Generation with Claude Code. After a long session mapping the payments module (about 80 tool calls), you want to prototype two refactors, extracting a service and an event-driven design, without paying for that analysis twice. Both prototypes will edit the same files. Which TWO actions fit? (Select TWO.)",
+  "options": {
+   "A": "Start two new sessions and have each one re-explore the module before it begins its refactor.",
+   "B": "Resume the original session and ask for both refactors one after the other so the second can learn from the first.",
+   "C": "Fork the analysis session once per approach so each branch starts from the same history.",
+   "D": "Enable plan mode in the original session and write both designs into the same plan file.",
+   "E": "Give each branch its own git worktree, since a fork copies conversation history but not the files on disk."
+  },
+  "answer": [
+   "C",
+   "E"
+  ],
+  "rationale": "Forking gives two independent branches from the shared analysis baseline, and separate worktrees keep their file edits from colliding because forks branch only the conversation. Sequential work in one session (B) contaminates the second design with the first. Fresh sessions (A) repeat the 80-call exploration you wanted to avoid. A shared plan file (D) merges the designs instead of keeping them independent.",
+  "evidence": "Fork branches conversation history from a shared baseline; it does not branch the filesystem.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/sessions",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a15",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Manage session state, resumption, and forking",
+  "question": "Scenario: Code Generation with Claude Code. Yesterday you named a session \"billing-audit\" after Claude mapped 140 files. Overnight a teammate merged a refactor that renamed functions in three of them (invoice.py, tax.py, ledger.py). Resumed today, Claude still cites the old function names. The rest of the analysis remains valid. What is the most efficient way to continue?",
+  "options": {
+   "A": "Resume the named session and tell Claude which three files changed so it re-reads only those.",
+   "B": "Resume the session and ask Claude to re-verify its whole earlier analysis against the current repository.",
+   "C": "Fork the resumed session, assuming a fork re-reads changed files automatically.",
+   "D": "Discard the session and start a new one with the original prompt, re-exploring all 140 files from scratch."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The prior context is mostly valid, so resuming keeps most of the work, and naming the changed files enables targeted re-analysis instead of full re-exploration. Re-verifying everything (B) spends tokens on 137 unchanged files. Starting over (D) discards valid analysis. A fork (C) copies the same stale history and does not re-read files on its own.",
+  "evidence": "When resuming after code changes, inform the agent of specific file changes for targeted re-analysis rather than full re-exploration.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/sessions",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a16",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Design task decomposition strategies for complex workflows",
+  "question": "Scenario: Code Generation with Claude Code. A legacy 400-file Python service has no tests, and leadership asks for \"comprehensive tests\". A developer scripts a loop that walks files alphabetically and asks Claude to write tests for each. Early output covers trivial utilities while the billing and auth modules remain untested. What is the better decomposition?",
+  "options": {
+   "A": "Keep the per-file loop, but sort the files by size so the largest modules are handled first in each run.",
+   "B": "Add a 90% coverage threshold per file to the loop script and retry any file that falls below that target.",
+   "C": "Ask Claude in one prompt to write tests for the whole repository and then review the combined output afterwards.",
+   "D": "Map structure in plan mode, rank modules by risk and impact, then follow a prioritized plan that adapts."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Open-ended work like this benefits from adaptive decomposition: first map the codebase, find high-impact areas, then build and revise a prioritized plan as dependencies are discovered. Sorting by size (A) is still a fixed order that ignores risk. One giant prompt (C) overloads attention and context. A coverage gate (B) measures lines hit, not whether the riskiest modules were prioritized, and it keeps the arbitrary order.",
+  "evidence": "Decompose open-ended tasks by mapping structure, identifying high-impact areas, then creating a prioritized plan that adapts.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a17",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Implement multi-step workflows with enforcement and handoff patterns",
+  "question": "Scenario: Developer Productivity with Claude. Your Agent SDK maintenance agent runs shell commands through the Bash tool, including database migrations. Policy: any migration or DROP against a shared environment needs a human to approve it first. The system prompt already says \"ask before irreversible commands\", yet one run migrated the shared staging database without asking. How should you enforce the policy?",
+  "options": {
+   "A": "Add a PostToolUse hook on Bash that notifies the team in chat after any migration command finishes running.",
+   "B": "Move the approval sentence to the top of the system prompt and add two examples of correct approval requests for risky steps.",
+   "C": "Remove Bash and leave the agent with read-only tools so that it cannot run migrations of any kind.",
+   "D": "Register a PreToolUse hook on Bash that inspects the command and returns \"ask\" or \"deny\" for migration and DROP patterns."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "A PreToolUse hook runs outside the model before the command executes and can force a human approval or a denial for matching commands, giving a deterministic checkpoint. Prompt text and examples (B) are probabilistic and already failed once. A PostToolUse notification (A) arrives after the migration has run. Removing Bash (C) is over-engineered and breaks the agent's legitimate maintenance work.",
+  "evidence": "PreToolUse hooks can deny or require approval deterministically; prompt-only enforcement has a non-zero failure rate.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/hooks",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a18",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Design task decomposition strategies for complex workflows",
+  "question": "Scenario: Claude Code for Continuous Integration. Your team runs two CI jobs. Job 1 reviews every PR for the same three aspects: security, test coverage, and API-doc updates. Job 2 investigates nightly flaky-test failures whose root causes vary: races, dependency drift, shared fixtures, infrastructure outages. A fixed three-step chain works for Job 1 but often misses the cause in Job 2. How should Job 2 be restructured?",
+  "options": {
+   "A": "Let the agent derive subtasks from what each step finds: map failing tests, classify patterns, then dig into the main cluster.",
+   "B": "Run the existing three-step chain three times and keep only the findings that appear in at least two of the runs.",
+   "C": "Extend the fixed chain to eight steps covering every root cause seen so far in the incident history, including infrastructure outages.",
+   "D": "Give each failing test its own independent single-pass job and merge the separate outputs at the end of the run."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Job 1 is predictable, which suits prompt chaining. Job 2 is open-ended: what to examine next depends on what the previous step discovered, so subtasks should be generated adaptively. A longer fixed chain (C) only encodes past causes. Voting across identical runs (B) repeats the same blind spots. Isolated per-test jobs (D) cannot see cross-test patterns such as a shared fixture.",
+  "evidence": "Use prompt chaining for predictable multi-aspect work and adaptive decomposition for open-ended investigation.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a19",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Apply Agent SDK hooks for tool call interception and data normalization",
+  "question": "Scenario: Claude Code for Continuous Integration. A CI auto-fix job must never modify workflow files. You added the hook below, but a run still rewrote .github/workflows/deploy.yml, and the job log shows the hook's message in stderr.\n\n```json\n{ \"hooks\": { \"PreToolUse\": [ { \"matcher\": \"Edit|Write\",\n  \"hooks\": [ { \"type\": \"command\",\n               \"command\": \".claude/hooks/protect-workflows.sh\" } ] } ] } }\n```\n```bash\npath=$(jq -r '.tool_input.file_path')\nif [[ \"$path\" == *\".github/workflows/\"* ]]; then\n  echo \"Workflow files are off limits in CI.\" >&2\n  exit 1\nfi\n```\n\nWhat is wrong?",
+  "options": {
+   "A": "The matcher is applied to file paths, so it must be changed to \"*\" before the hook can see workflow file edits at all.",
+   "B": "The check should run in PostToolUse and revert the file whenever the path matches a workflow file.",
+   "C": "Exit code 1 is non-blocking; exit with code 2 or print a JSON deny decision so the edit is actually blocked.",
+   "D": "The rule belongs in CLAUDE.md, because settings hooks only record events and cannot affect any tool calls."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "The hook ran (stderr shows its message) and detected the path, but for command hooks only exit code 2, or a JSON deny decision, blocks the tool call; other non-zero codes are treated as non-blocking errors. Matchers test tool names (A), and Edit|Write already matches. Hooks can block calls, so moving the rule to CLAUDE.md (D) would weaken it to a suggestion. A PostToolUse revert (B) lets the edit happen first and is not preventive.",
+  "evidence": "In Claude Code command hooks, exit code 2 blocks a tool call; other non-zero exits do not.",
+  "ref": "https://code.claude.com/docs/en/hooks",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a20",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Orchestrate multi-agent systems with coordinator-subagent patterns",
+  "question": "Scenario: Claude Code for Continuous Integration. A review coordinator fans out to security, test, and dependency reviewer subagents. When the dependency reviewer timed out on a large monorepo PR, it returned an empty findings list, and the coordinator posted \"No issues found\" and set the check to passed. Which TWO changes fix the failure handling? (Select TWO.)",
+  "options": {
+   "A": "Retry inside the subagent with exponential backoff, returning an empty list if every attempt fails.",
+   "B": "Have the coordinator mark the check incomplete and list unreviewed scope whenever a subagent reports a failure.",
+   "C": "Abort the whole CI job on any subagent error and discard the other reviewers' findings entirely.",
+   "D": "Raise the dependency reviewer's timeout to 30 minutes so that empty results cannot occur on large pull requests.",
+   "E": "Have each subagent return a structured status: failure type, scope not reviewed, and any partial findings."
+  },
+  "answer": [
+   "B",
+   "E"
+  ],
+  "rationale": "The root problem is that a failure looked like a success. A structured error with partial results lets the coordinator tell the difference and decide how to recover, and an explicit incomplete status keeps a silent gap from reading as a pass. A longer timeout (D) only delays the next failure. An empty list after retries (A) is the same silent success. Aborting everything (C) throws away valid findings from the two healthy reviewers.",
+  "evidence": "Propagate structured error context (failure type, scope, partial results) so the coordinator can recover; do not mask failures as empty success.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a21",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Design task decomposition strategies for complex workflows",
+  "question": "Scenario: Structured Data Extraction. Contracts average 60 pages and the schema has 40 fields spread across sections. A single-pass extraction call fills most fields but skips some clauses and, in about 10% of documents, returns a renewal term that conflicts with an amendment in the annex. How should you decompose the work?",
+  "options": {
+   "A": "Extract per section in focused passes, then run a separate pass that reconciles conflicts such as amendments overriding base terms.",
+   "B": "Run the single-pass call three times and take the majority value for each field, flagging for human review any fields where the runs disagree.",
+   "C": "Add the 40 field definitions and one fully worked example contract to the prompt of the single-pass call.",
+   "D": "Split the document into fixed 10-page chunks, extract each one, and concatenate the resulting JSON arrays."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Splitting into focused local passes avoids attention dilution, and a separate integration pass handles the cross-section reasoning (an annex amendment overriding a base term) that no local pass can see. Majority voting (B) repeats the same blind spots. Fixed page chunks (D) cut clauses at arbitrary boundaries and still never reconcile conflicts. A richer prompt (C) leaves the single pass overloaded.",
+  "evidence": "Split large analyses into per-unit local passes plus a separate cross-unit integration pass.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a22",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Design and implement agentic loops for autonomous task execution",
+  "question": "Scenario: Structured Data Extraction. About 3% of invoice records land in the warehouse with a null line-items array. A trace of one such run:\n\n```text\nPOST /v1/messages -> 200\n  stop_reason=max_tokens  usage.output_tokens=4096\n  content[0].text='{\"invoice_id\":\"INV-8841\",\"lines\":[{\"sku\":\"A12\",\"qty\":3,\n    \"price\":19.5},{\"sku\":\"B07\",\"qty\":'\npipeline: json.loads -> JSONDecodeError\npipeline: except -> save record, lines=null, status=ok\n```\n\nWhat is the correct fix?",
+  "options": {
+   "A": "Check stop_reason before parsing; on max_tokens, re-request with a larger max_tokens (streamed) or split the document, and never store partial output.",
+   "B": "Add a repair step that closes open brackets and quotes so the truncated JSON parses and keeps the lines it did capture.",
+   "C": "Add \"keep every invoice response under 4000 tokens\" to the prompt so the output fits within the existing limit.",
+   "D": "Retry the identical request on JSONDecodeError with exponential backoff until the response parses cleanly."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "stop_reason \"max_tokens\" means the response was cut off, so it is incomplete rather than final, and parsing it silently loses data. The pipeline must branch on stop_reason and either raise the limit or reduce the work per call. Repairing truncated JSON (B) fabricates a plausible-looking but incomplete record. A length instruction (C) is probabilistic against a hard limit. An identical retry (D) hits the same ceiling every time.",
+  "evidence": "Check stop_reason before reading content; max_tokens means a truncated response.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/handling-stop-reasons",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a23",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Manage session state, resumption, and forking",
+  "question": "Scenario: Structured Data Extraction. An overnight agent session extracting 500 vendor PDFs crashed at document 312. Each extracted record is already saved in a database keyed by document ID. Meanwhile finance re-uploaded corrected versions of about 20 of the first 311 documents, and the crashed transcript holds roughly 600K tokens of tool results. What is the more reliable recovery?",
+  "options": {
+   "A": "Resume the crashed session and instruct it to disregard any earlier tool results for the 20 re-uploaded documents.",
+   "B": "Start a new session seeded with a structured summary of completed IDs and results, then process the 20 replaced and the 189 remaining documents.",
+   "C": "Fork the crashed session at document 311 and run the remaining documents in the forked branch.",
+   "D": "Resume the crashed session so the earlier results stay in context, and continue from document 312 onward."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "When prior tool results are stale (20 documents changed) and the transcript is huge, a fresh session with an injected structured summary is more reliable than resuming, and the database already holds the durable state. Resuming (D) carries stale results and a bloated context forward. Telling the resumed agent to ignore some results (A) leaves them in context and depends on the model complying. A fork (C) copies the same stale history.",
+  "evidence": "Starting fresh with a structured summary is more reliable than resuming with stale tool results.",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/sessions",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-a24",
+  "source": "curated",
+  "domain": "Agentic Architecture & Orchestration",
+  "task": "Orchestrate multi-agent systems with coordinator-subagent patterns",
+  "question": "Scenario: Structured Data Extraction. Your pipeline has invoice-extraction, contract-extraction, and validation subagents. To save a hop, the validation subagent calls the extraction subagents directly to re-extract failed fields. In production some documents cycle between extraction and validation dozens of times, and the logs do not show which subagent retried what. Which architecture change is best?",
+  "options": {
+   "A": "Route re-extraction requests through the coordinator, which owns retry limits, error handling, and logging.",
+   "B": "Add a shared retry counter variable that every subagent reads and increments before it calls another subagent in the pipeline.",
+   "C": "Keep the direct calls, but have the validation subagent append each retry to a log file for later offline analysis.",
+   "D": "Merge validation into each extraction subagent so that no handoff between subagents is needed at all in production."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "In a hub-and-spoke design the coordinator manages all inter-subagent communication, which gives one place for retry limits, consistent error handling, and observability. A shared counter (B) and a side log (C) bolt monitoring onto a topology that still hides control flow from the coordinator. Merging validation into each extractor (D) removes the independent check and duplicates validation logic.",
+  "evidence": "Route all subagent communication through the coordinator for observability, consistent error handling, and controlled information flow.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b01",
+  "source": "curated",
+  "domain": "Claude Code Configuration & Workflows",
+  "task": "Configure CLAUDE.md files with appropriate hierarchy, scoping, and modular organization",
+  "question": "Scenario: Code Generation with Claude Code. Two developers on one repository get different behavior: Priya's sessions always use pnpm, while Marcus's sessions keep running npm install. This is the memory listing from Priya's machine:\n\n```text\n/memory (Priya)\n  user     ~/.claude/CLAUDE.md   \"Use pnpm, never npm. Run pnpm lint before every commit.\"\n  project  ./CLAUDE.md           \"Services live under /services. Tests: pnpm test.\"\n  local    ./CLAUDE.local.md     \"Sandbox API: https://sandbox.internal:8443\"\n```\n\nThe team wants every current and future contributor to follow the pnpm rule with no per-person setup. What should you change?",
+  "options": {
+   "A": "Add an @~/.claude/CLAUDE.md import to the project CLAUDE.md so each session pulls in the user-level file as well.",
+   "B": "Move the pnpm and lint rules into the committed ./CLAUDE.md, so that every clone loads them as shared project instructions.",
+   "C": "Copy the pnpm and lint rules into ./CLAUDE.local.md and commit that file so it ships with the repository clone.",
+   "D": "Deploy the rules as a managed-policy CLAUDE.md in /etc/claude-code on each developer laptop through the company's device-management tooling."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "The rule sits in Priya's user-level file, which exists only on her machine, so Marcus never receives it. Project instructions that must reach every contributor belong in the committed ./CLAUDE.md (B). An @ import of a home-directory file (A) points at a file teammates do not have. CLAUDE.local.md (C) is the personal, gitignored layer; committing it defeats its purpose and mixes private sandbox URLs into the repo. A managed-policy file (D) is an organization-wide mechanism that needs per-machine deployment, which is far more than a single repository's convention requires.",
+  "evidence": "User-level ~/.claude/CLAUDE.md is personal and not shared; project-level ./CLAUDE.md is committed and loaded for everyone who works in the repo.",
+  "ref": "https://code.claude.com/docs/en/memory",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b02",
+  "source": "curated",
+  "domain": "Claude Code Configuration & Workflows",
+  "task": "Apply path-specific rules for conditional convention loading",
+  "question": "Scenario: Developer Productivity with Claude. A platform team keeps its Terraform conventions in `.claude/rules/terraform.md`, but Claude ignores them in nested modules. Edits to infra/main.tf load the rule; edits to infra/modules/vpc/main.tf do not. The rule's frontmatter:\n\n```yaml\n---\npaths:\n  - \"infra/*.tf\"\n---\n```\n\nWhat is the cause?",
+  "options": {
+   "A": "The single `*` stops at directory boundaries, so only files directly in infra/ match; use `infra/**/*.tf`.",
+   "B": "The `paths` field accepts only absolute filesystem paths, so the relative `infra/` prefix prevents any deeper match.",
+   "C": "Rule files must live in a `.claude/rules/` folder beside each module, because the root rules folder cannot reach nested directories.",
+   "D": "Path-scoped rules are triggered only by Read calls, so edits to nested files never load them unless Claude reads the file first."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Glob semantics decide this: `infra/*.tf` matches .tf files directly under infra/, and `*` never matches a path separator, so modules/vpc/main.tf falls outside it. Using `infra/**/*.tf` (A) covers every depth. Path-scoped rules also load on Write and Edit, not only Read (D). One root `.claude/rules/` folder is enough because the globs are resolved relative to the project (C). Relative patterns are exactly what `paths` expects; absolute paths are not required (B), and the file in infra/ already matched.",
+  "evidence": "A path-scoped rule loads when Claude reads, writes or edits a file matching its paths globs, relative to the rule's base directory.",
+  "ref": "https://code.claude.com/docs/en/memory",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b03",
+  "source": "curated",
+  "domain": "Claude Code Configuration & Workflows",
+  "task": "Create and configure custom slash commands and skills",
+  "question": "Scenario: Code Generation with Claude Code. Your team's deploy skill runs the production release script. Twice this week Claude started a deployment on its own right after a developer typed \"looks ready to ship\"; nobody had typed /deploy. The skill's frontmatter:\n\n```yaml\n---\nname: deploy\ndescription: Deploy the current branch to production. Use when the change is ready to ship.\nallowed-tools: Bash(./scripts/release.sh *)\n---\n```\n\nWhich change stops Claude from starting this skill on its own while still letting developers run /deploy?",
+  "options": {
+   "A": "Add `context: fork` so the skill executes in an isolated subagent instead of the main conversation.",
+   "B": "Set `disable-model-invocation: true` so that only a developer typing /deploy can start the skill.",
+   "C": "Delete the `allowed-tools` line so that every release command raises a permission prompt before it runs.",
+   "D": "Reword the description to say the skill should only run when the user explicitly types /deploy."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "The skill is being auto-invoked because its description matches the situation. `disable-model-invocation: true` (B) removes it from Claude's own invocation path and leaves the slash command for people, which is the intended control for side-effect workflows. Removing `allowed-tools` (C) only adds prompts; Claude can still start the skill and a hurried approval ships it. `context: fork` (A) changes where the skill runs, not who may start it. A reworded description (D) is still a probabilistic instruction to the model rather than a setting.",
+  "evidence": "disable-model-invocation: true stops Claude from auto-invoking a skill; use it for workflows with side effects such as /deploy or /commit.",
+  "ref": "https://code.claude.com/docs/en/skills",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b04",
+  "source": "curated",
+  "domain": "Claude Code Configuration & Workflows",
+  "task": "Determine when to use plan mode vs direct execution",
+  "question": "Scenario: Code Generation with Claude Code. Two tickets are in your queue. Ticket 1: a stack trace shows a NullPointerException at OrderMapper.java:88 when the discount field is absent. Ticket 2: replace moment.js with date-fns across 60 files, where several call sites rely on moment's timezone behavior and the team wants the approach reviewed before any file changes. How should you work each ticket?",
+  "options": {
+   "A": "Use plan mode for both tickets, so that every change follows the same review process regardless of size.",
+   "B": "Use direct execution for ticket 1; start ticket 2 in plan mode to map call sites and design the migration, then execute the approved plan.",
+   "C": "Use direct execution for ticket 1; for ticket 2, spawn one subagent per file to migrate in parallel and review the combined diff.",
+   "D": "Use direct execution for both tickets and run the full test suite after each file to catch regressions as they appear."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Ticket 1 is a clearly scoped fix with a stack trace, so planning adds ceremony without value. Ticket 2 spans many files, has behavioral subtleties and an explicit review requirement, which is what plan mode (read-only exploration, then an approved plan) is for, followed by direct execution of that plan (B). Planning both (A) over-processes the small fix. Executing ticket 2 directly (D) discovers the timezone problems only after files are changed. Parallel per-file subagents (C) edit before anyone has designed or approved the approach, and each subagent lacks the cross-file picture.",
+  "evidence": "Plan mode suits large multi-file changes with multiple valid approaches; direct execution suits small, well-scoped fixes; plan for investigation then execute.",
+  "ref": "https://code.claude.com/docs/en/permission-modes",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b05",
+  "source": "curated",
+  "domain": "Claude Code Configuration & Workflows",
+  "task": "Apply iterative refinement techniques for progressive improvement",
+  "question": "Scenario: Code Generation with Claude Code. You ask Claude Code to write a converter from legacy CSV exports to a normalized JSON format. Your prose specification is read differently from run to run: empty quoted fields become null in some runs and empty strings in others, and dates come out in two formats. You need to (1) remove the ambiguity about the expected transformation, and (2) make each refinement round verifiable instead of judged by eye. (Select TWO.)",
+  "options": {
+   "A": "Run the converter three times on the sample file and keep whichever output appears most often.",
+   "B": "Ask Claude to rate its confidence in the converter from 1 to 10 after each round and stop at 9 or above.",
+   "C": "Add two or three concrete input and output examples that cover the empty quoted field and the mixed date formats.",
+   "D": "Repeat the empty-field rule three times in the specification so that the instruction carries more weight.",
+   "E": "Write a test suite with the expected outputs first, then iterate by sharing the failing test results with Claude."
+  },
+  "answer": [
+   "C",
+   "E"
+  ],
+  "rationale": "Requirement 1 is an interpretation problem, which concrete input/output examples (C) resolve better than more prose. Requirement 2 is verification, which a test suite written first, with failures fed back each round (E), provides objectively. Repeating the rule (D) is more prose, not clearer prose. Majority-vote over runs (A) hides the ambiguity instead of removing it and still has no definition of correct. Self-reported confidence (B) is an unreliable proxy for whether the output matches the intended transformation.",
+  "evidence": "Concrete input/output examples fix inconsistent prose interpretation; writing tests first and sharing failures gives test-driven iteration.",
+  "ref": "https://code.claude.com/docs/en/best-practices",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b07",
+  "source": "curated",
+  "domain": "Claude Code Configuration & Workflows",
+  "task": "Integrate Claude Code into CI/CD pipelines",
+  "question": "Scenario: Claude Code for Continuous Integration. Developers have started dismissing every automated review comment, including the security ones. Last month's triage data:\n\n```text\ncategory            posted  dismissed\nsecurity                41          3\nlogic bug               88         11\nnaming and style       212        187\nperformance hint        64         58\n```\n\nYou need to restore trust quickly without losing the categories developers still act on. What should you do first?",
+  "options": {
+   "A": "Run each review three times and post only the findings that appear in at least two of the three runs, across all categories.",
+   "B": "Add an instruction to report only findings the model is highly confident about, applying it uniformly to every category in the review prompt.",
+   "C": "Cap every category at ten comments per pull request, ranked by severity, so the volume developers see drops sharply.",
+   "D": "Temporarily disable the naming and performance categories, then rewrite their criteria with explicit report-and-skip rules and examples."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Dismissal rates show two categories with roughly 90% false positives while security and logic findings are mostly accepted. Pausing the noisy categories keeps the trusted ones credible, and explicit categorical criteria with examples are what actually improve precision (D). A generic 'be confident' instruction (B) does not change what the model considers reportable. Consensus voting (A) multiplies cost and keeps consistent false positives. A volume cap (C) hides real findings along with noise and leaves the bad criteria in place.",
+  "evidence": "A reviewer asked to find problems will always find something; scope it with explicit criteria (report correctness gaps, skip style) rather than generic filters.",
+  "ref": "https://code.claude.com/docs/en/best-practices",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b08",
+  "source": "curated",
+  "domain": "Claude Code Configuration & Workflows",
+  "task": "Integrate Claude Code into CI/CD pipelines",
+  "question": "Scenario: Claude Code for Continuous Integration. Your pipeline has Claude Code write a patch with `claude -p`, then continues the same session (`--continue`) with \"review the changes you just made\" before opening the PR. Over two months, 7 of 40 merged PRs shipped logic errors that this review step had approved. What change most improves the review's ability to catch them?",
+  "options": {
+   "A": "Have the same session review each changed file in a separate follow-up turn, so that every file gets its own dedicated look.",
+   "B": "Keep the same session but add a prompt line telling Claude to act as a skeptical senior reviewer who assumes the patch contains bugs.",
+   "C": "Run the review as a separate, fresh `claude -p` invocation that sees only the diff and the review criteria in CLAUDE.md.",
+   "D": "Keep the same session and raise the effort level for the review turn, so Claude reasons for longer about the patch it wrote."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "A session that wrote the code carries the reasoning that produced it, so it tends to justify its own choices rather than challenge them. An independent instance that starts from the diff and the written review criteria (C) is not anchored on that reasoning. A skeptical persona (B), more effort (D) and per-file turns (A) all keep the author's context in the room, so the same blind spots persist.",
+  "evidence": "A reviewer that has not seen how the code was written, such as a fresh instance, is more effective than the session that generated the changes.",
+  "ref": "https://code.claude.com/docs/en/best-practices",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b09",
+  "source": "curated",
+  "domain": "Claude Code Configuration & Workflows",
+  "task": "Integrate Claude Code into CI/CD pipelines",
+  "question": "Scenario: Claude Code for Continuous Integration. Your CI job runs Claude Code on every push to a pull request. Three problems appear: after each new commit the review re-posts comments that developers already addressed or acknowledged; generated unit tests repeat scenarios the suite already covers; and generated tests ignore the team's fixture helpers. You need a fix for each problem. (Select THREE.)",
+  "options": {
+   "A": "Include prior review findings in each re-run's context and tell Claude to report only new or still-unaddressed issues.",
+   "B": "Supply the existing test files in context so that test generation can skip scenarios that are already covered.",
+   "C": "Document testing standards, what makes a test worth writing, and the available fixtures in CLAUDE.md for the CI run.",
+   "D": "Increase `--max-turns` so that Claude explores more of the repository before it writes each comment or each test.",
+   "E": "Have Claude score each generated test from 1 to 10 and keep only the tests that score 8 or higher in its own rating."
+  },
+  "answer": [
+   "A",
+   "B",
+   "C"
+  ],
+  "rationale": "Duplicate comments come from the re-run not knowing what was already said, so prior findings plus an instruction to report only new or unresolved items (A) address it. Duplicate test scenarios need the existing tests visible (B). Ignoring fixtures and low-value tests is a project-context gap that CLAUDE.md fills for CI-invoked runs (C). More turns (D) adds exploration cost without supplying the missing information. Self-scored quality (E) is an uncalibrated filter that does not know what the suite already covers.",
+  "evidence": "Include prior findings on re-runs, provide existing tests to avoid duplicates, and document testing standards and fixtures in CLAUDE.md.",
+  "ref": "https://code.claude.com/docs/en/headless",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b10",
+  "source": "curated",
+  "domain": "Claude Code Configuration & Workflows",
+  "task": "Create and configure custom slash commands and skills",
+  "question": "Scenario: Developer Productivity with Claude. Your team wants every developer to get the issue-tracker MCP server automatically when they clone the repository. A developer proposes committing this .mcp.json as it stands:\n\n```json\n{\n  \"mcpServers\": {\n    \"tracker\": {\n      \"type\": \"http\",\n      \"url\": \"https://mcp.tracker.example.com/mcp\",\n      \"headers\": { \"Authorization\": \"Bearer trk_live_9f2c41d8e7\" }\n    }\n  }\n}\n```\n\nWhat should you do before committing it?",
+  "options": {
+   "A": "Replace the literal with `Bearer ${TRACKER_TOKEN}` in the header and have each developer export their own token in their shell environment.",
+   "B": "Base64-encode the token inside the header value so the credential is not readable in the committed file.",
+   "C": "Keep the literal token, add .mcp.json to .gitignore, and share the file with new developers through the team wiki.",
+   "D": "Remove .mcp.json from the repository and have each developer run `claude mcp add --scope user` with their own token."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": ".mcp.json is the project-scoped, version-controlled place for shared server definitions, and it supports `${VAR}` expansion in headers, so the structure can be shared while each person's secret stays in their environment (A). Gitignoring the file (C) removes the automatic sharing. User-scope registration on every laptop (D) works but is manual per developer, which is what the team wants to avoid. Base64 (B) is encoding, not protection, and still commits a shared credential.",
+  "evidence": ".mcp.json at the project root is shared via version control and supports ${VAR} expansion in command, args, env, url and headers.",
+  "ref": "https://code.claude.com/docs/en/mcp",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b11",
+  "source": "curated",
+  "domain": "Claude Code Configuration & Workflows",
+  "task": "Integrate Claude Code into CI/CD pipelines",
+  "question": "Scenario: Customer Support Resolution Agent. A nightly CI job runs `claude -p` to regression-test the support agent's prompts against the order-lookup MCP server defined in the repository's .mcp.json. The job exits 0, but every transcript shows the agent answering without ever calling an order tool.\n\n```json\n{\n  \"mcpServers\": {\n    \"orders\": {\n      \"url\": \"https://mcp.shop.example.com/orders\",\n      \"headers\": { \"Authorization\": \"Bearer ${ORDERS_TOKEN}\" }\n    }\n  }\n}\n```\n\nWhat is the cause, and what is the right safeguard?",
+  "options": {
+   "A": "The server needs more than the default startup time, so raise `MCP_TIMEOUT` and add `--bare` so the run starts faster and more predictably.",
+   "B": "Environment variable expansion is not supported in HTTP headers, so the literal `${ORDERS_TOKEN}` is rejected and the token must be hard-coded in the file.",
+   "C": "The entry has a `url` but no `type`, so it is skipped; add `\"type\": \"http\"` and fail the job when `orders` is absent from `mcp_servers` in the init event.",
+   "D": "Project servers wait for an interactive approval that a CI job cannot give, so run `claude mcp reset-project-choices` before every job."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "A remote entry without `type` is read as stdio, fails validation and is skipped, yet the run continues and exits cleanly; a skipped server is simply absent from `mcp_servers` in the system/init event, which a CI gate can check (C). In `-p` runs project servers load without an approval prompt (D). A longer startup timeout and `--bare` (A) would not help, and `--bare` skips .mcp.json entirely. Header expansion is supported (B), and hard-coding a secret would be a regression.",
+  "evidence": "A url entry with no type is skipped as a config error; -p runs still exit cleanly, and the system/init event lists the servers that actually loaded.",
+  "ref": "https://code.claude.com/docs/en/headless",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b12",
+  "source": "curated",
+  "domain": "Claude Code Configuration & Workflows",
+  "task": "Create and configure custom slash commands and skills",
+  "question": "Scenario: Developer Productivity with Claude. Your team's shared settings block force-pushes. A developer needs one exception for hotfix branches and adds an allow rule locally, but Claude still refuses `git push --force origin hotfix/1.4`.\n\n```text\n.claude/settings.json         (committed)\n  permissions.deny:  [\"Bash(git push --force *)\"]\n.claude/settings.local.json   (this developer only)\n  permissions.allow: [\"Bash(git push --force origin hotfix/*)\"]\n```\n\nWhy does the push stay blocked, and what is the correct way to permit the exception?",
+  "options": {
+   "A": "Local settings outrank the committed file only for scalar keys, so the allow entry must also be repeated in the committed file itself.",
+   "B": "Pass the allow rule with `--settings`, which sits above both files and so overrides the committed deny rule.",
+   "C": "Rules in the local file load only at session start, so restarting the session applies the allow rule and ends the block on this push.",
+   "D": "Deny is evaluated before allow, so no narrower allow can create an exception; change the shared deny rule through review."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Permission lists from every scope are combined and evaluated deny first, then ask, then allow, with the first match deciding; specificity does not change that. The exception therefore has to come from narrowing or removing the deny rule where the team owns it (D). Repeating the allow in the committed file (A) would still lose to the deny. Settings changes reload without a restart (C), and the command-line layer (B) merges its list with the others instead of overriding a deny.",
+  "evidence": "Rules are evaluated deny, then ask, then allow; the first match wins, and an allow rule cannot carve an exception out of a deny rule.",
+  "ref": "https://code.claude.com/docs/en/permissions",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b14",
+  "source": "curated",
+  "domain": "Claude Code Configuration & Workflows",
+  "task": "Create and configure custom slash commands and skills",
+  "question": "Scenario: Structured Data Extraction. The extraction platform team maintains a validation-retry slash command, a subagent for schema review, a PostToolUse hook that lints JSON schemas, and the configuration for a document-store MCP server. Twelve repositories need the same bundle, and updates must reach all of them without a commit in each repository. How should you distribute it?",
+  "options": {
+   "A": "Package everything as a plugin in a team marketplace that each repository enables and updates from.",
+   "B": "Write the standards into a managed-policy CLAUDE.md and describe the setup in prose.",
+   "C": "Install the files into each engineer's `~/.claude/` through an onboarding script so that they apply across projects.",
+   "D": "Copy the `.claude/` directory into every repository, and re-copy it with a script whenever the team changes anything."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Plugins bundle commands, agents, skills, hooks and MCP servers into one versioned unit that a marketplace distributes and updates, which fits twelve repositories with central updates (A). Copying directories (D) means a commit in every repository for every change and drift between copies. Per-engineer installs in `~/.claude/` (C) are personal, depend on each person running the script, and do not follow the repository. A managed CLAUDE.md (B) can carry instructions but cannot install a hook, subagent or server.",
+  "evidence": "Plugins bundle commands, agents, skills, hooks and MCP servers and are distributed through marketplaces.",
+  "ref": "https://code.claude.com/docs/en/plugins",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b15",
+  "source": "curated",
+  "domain": "Context Management & Reliability",
+  "task": "Manage conversation context to preserve critical information across long interactions",
+  "question": "Scenario: Customer Support Resolution Agent. In long sessions the agent sometimes offers the wrong remedy. A trace from one session:\n\n```text\nturn 3   customer: \"Order 88213, the blender arrived cracked. I paid\n                    $129.99 on Oct 3 and want a full refund, not store credit.\"\nturn 12  [history summarized] \"Customer reported a damaged item and wants a remedy.\"\nturn 31  agent: \"I've applied $129.99 store credit to your account.\"\n```\n\nWhich change addresses the root cause?",
+  "options": {
+   "A": "Summarize every five turns instead of every twelve, so that less detail is lost between each pair of consecutive summaries.",
+   "B": "Move to a model with a larger context window so that summarization is rarely triggered in typical support sessions, and keep the summary prompt as it is.",
+   "C": "Persist order numbers, amounts, dates and stated preferences in a case-facts block sent with every prompt, outside the summarized history.",
+   "D": "Replace summarization with a sliding window that keeps only the most recent ten turns of the conversation verbatim."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Progressive summarization turned 'full refund, not store credit' and the exact figures into 'a remedy', and the agent then acted on the vague version. Transactional facts need their own persistent layer that is re-sent each turn and never passes through the summarizer (C). More frequent summaries (A) compress the same facts more often. A sliding window (D) would drop turn 3 outright. A larger context (B) only delays the problem and raises cost without preserving the facts.",
+  "evidence": "Progressive summarization can lose amounts, dates and customer expectations; persist transactional facts in a case-facts block outside summarized history.",
+  "ref": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b16",
+  "source": "curated",
+  "domain": "Context Management & Reliability",
+  "task": "Manage conversation context to preserve critical information across long interactions",
+  "question": "Scenario: Multi-Agent Research System. The synthesis agent receives 14 subagent reports concatenated in arrival order, about 90,000 tokens, followed by the instructions. Findings from reports 5 through 10 appear in the final answer much less often than findings from reports 1 to 3 and 12 to 14, although every report is accurate. What change most directly addresses this?",
+  "options": {
+   "A": "Raise `max_tokens` on the synthesis call so that the final answer has enough room to cover every one of the reports.",
+   "B": "Add an instruction telling the synthesis agent to read the middle reports twice before it starts drafting.",
+   "C": "Open the input with a short summary of key findings, and wrap each report in a labeled section with an explicit header.",
+   "D": "Shuffle the report order on each run and keep whichever answer ends up covering the most reports."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Models attend most reliably to the beginning and end of a very long input, so findings in the middle are the ones that get dropped. Putting key findings first and giving each report a clear header makes the middle content easier to locate and use (C). The output limit (A) is not the constraint, since the omitted findings were never drafted. Shuffling (D) spreads the loss randomly and adds selection cost. An instruction to read twice (B) cannot change how attention is distributed over the input.",
+  "evidence": "Put long documents near the top of the prompt, above the query, and structure multi-document input clearly; middle-of-input findings are the ones most often omitted.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/long-context-tips",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b17",
+  "source": "curated",
+  "domain": "Context Management & Reliability",
+  "task": "Manage conversation context to preserve critical information across long interactions",
+  "question": "Scenario: Developer Productivity with Claude. An internal code-search MCP tool returns each hit with the full file contents plus about 40 metadata fields, while the agent only needs path, symbol, line range and a short snippet. After roughly 15 searches in a large repository the session hits its context limit, and the agent must still be able to refer back to every earlier hit. What is the best fix?",
+  "options": {
+   "A": "Clear tool results older than the five most recent searches so that old hits stop consuming context in the session.",
+   "B": "Raise `MAX_MCP_OUTPUT_TOKENS` so that larger search results fit in the response before any truncation is applied.",
+   "C": "Make the tool return only path, symbol, line range and a short snippet, plus a read-by-id call for full bodies.",
+   "D": "Have the agent write a prose summary of each result after every search and discard the raw output."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "The waste is in what enters context: dozens of fields and entire files that are never used. Trimming the payload at the source keeps every hit referable at a few lines each and lets the agent fetch a full body only when needed (C). A bigger output limit (B) lets more unused data in. Clearing older results (A) breaks the requirement that earlier hits stay available. Prose summaries (D) lose exact paths and line numbers, and the agent still reads the large raw result once before discarding it.",
+  "evidence": "Tool results accumulate in context; trim verbose outputs to only the relevant fields before they are added to the conversation.",
+  "ref": "https://www.anthropic.com/engineering/writing-tools-for-agents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b18",
+  "source": "curated",
+  "domain": "Context Management & Reliability",
+  "task": "Design effective escalation and ambiguity resolution patterns",
+  "question": "Scenario: Customer Support Resolution Agent. First-contact resolution is 62% against an 80% target. Logs show two patterns: customers who write \"I want to talk to a person\" are first walked through an order investigation and many abandon the chat, and the agent confidently improvises when policy is silent, for example a request to match a competitor's price when the policy covers only own-site adjustments. Which two changes address these patterns? (Select TWO.)",
+  "options": {
+   "A": "Escalate automatically whenever a sentiment score computed on the customer's message falls below a configured threshold.",
+   "B": "Train a classifier on historical tickets and let it decide which requests skip the agent and go straight to a human queue.",
+   "C": "Escalate immediately when a customer explicitly asks for a human, without first attempting any investigation of the order.",
+   "D": "Add explicit escalation criteria with few-shot examples: policy gaps and exceptions escalate, standard cases such as damage replacements resolve autonomously.",
+   "E": "Have the agent report a confidence score from 1 to 10 for each reply and route the conversation to a human below 7."
+  },
+  "answer": [
+   "C",
+   "D"
+  ],
+  "rationale": "An explicit request for a human is honored immediately (C). Policy gaps are an escalation trigger the agent does not recognize on its own, and explicit criteria with examples teach the boundary between exceptions and routine cases (D). Sentiment (A) measures mood, not case complexity, and frustrated customers with simple issues would be escalated. Self-reported confidence (E) is poorly calibrated, especially when the agent is wrong with confidence. A separate trained classifier (B) adds a component and a training burden without addressing either observed pattern.",
+  "evidence": "Escalate on explicit customer requests and on policy gaps; sentiment and self-reported confidence are unreliable proxies for case complexity.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b19",
+  "source": "curated",
+  "domain": "Context Management & Reliability",
+  "task": "Design effective escalation and ambiguity resolution patterns",
+  "question": "Scenario: Customer Support Resolution Agent. A customer writes: \"This is Maria Lopez and I'd like a refund for the blender I bought last week.\" The agent calls get_customer and receives:\n\n```json\n{\"matches\": [\n  {\"id\": \"C-4412\", \"name\": \"Maria Lopez\", \"city\": \"Austin\", \"last_order\": \"2026-10-28\"},\n  {\"id\": \"C-7790\", \"name\": \"Maria Lopez\", \"city\": \"Austin\", \"last_order\": \"2026-11-01\"},\n  {\"id\": \"C-1038\", \"name\": \"Maria Lopez\", \"city\": \"Dallas\", \"last_order\": \"2026-08-15\"}\n]}\n```\n\nWhat should the agent do next?",
+  "options": {
+   "A": "Call lookup_order for all three customer IDs and continue with whichever account has a blender order in its history.",
+   "B": "Escalate to a human agent because the lookup could not identify a unique customer from the information given.",
+   "C": "Ask the customer for another identifier, such as the email or an order number, then repeat the lookup.",
+   "D": "Select C-7790 because its latest order date is the most recent and falls within the phrase \"last week\" in the message."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Two accounts in the same city both fit 'last week', so any pick is a guess, and a wrong guess issues or exposes another person's refund. When a lookup returns multiple matches the agent should request an additional identifier and then verify (C). Choosing by recency (D) is a heuristic that fails exactly here. Querying orders for all three (A) pulls data for people who may not be this customer and can still match more than one. Escalating (B) is premature because one simple question resolves the ambiguity.",
+  "evidence": "When tool results return multiple customer matches, ask for additional identifiers rather than selecting by heuristic.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b20",
+  "source": "curated",
+  "domain": "Context Management & Reliability",
+  "task": "Implement error propagation strategies across multi-agent systems",
+  "question": "Scenario: Multi-Agent Research System. A published report claims that no sources exist on a topic that has abundant coverage. The trace for that subtopic:\n\n```text\ncoordinator -> web_search_agent: \"EU battery recycling targets 2026\"\nweb_search_agent: search API timeout after 30s (attempt 1)\nweb_search_agent: search API timeout after 30s (attempt 2)\nweb_search_agent -> coordinator: {\"status\": \"ok\", \"results\": []}\nsynthesis_agent -> report: \"No published sources address EU battery recycling targets.\"\n```\n\nWhat change to error handling fixes the root cause?",
+  "options": {
+   "A": "Return a structured error (failure type, query, partial results, alternatives), distinct from a valid empty result, so the report flags the gap.",
+   "B": "Stop the whole research run as soon as any subagent search times out, and show the exception to the user.",
+   "C": "Instruct the synthesis agent to treat every empty search result as a coverage gap and say so in the report.",
+   "D": "Have the subagent retry until three attempts have failed, then return an empty list marked successful so the coordinator can keep the research run moving."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The subagent converted an access failure into a successful empty result, so the coordinator and synthesis agent could not tell 'searched, found nothing' from 'could not search'. Structured error context lets the coordinator retry, reroute or annotate the gap (A). Returning empty as success after retries (D) keeps the same silent suppression. Treating all empties as gaps (C) mislabels genuinely empty queries and the synthesis agent still lacks the failure details. Aborting everything (B) discards the other subagents' good work.",
+  "evidence": "Distinguish access failures from valid empty results; return structured error context so the coordinator can recover; avoid silent suppression.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b21",
+  "source": "curated",
+  "domain": "Context Management & Reliability",
+  "task": "Manage context effectively in large codebase exploration",
+  "question": "Scenario: Developer Productivity with Claude. During a three-hour exploration of a 2,000-file monolith, the agent starts answering with \"typical service-layer patterns\" instead of the actual class names it found earlier, and each search sweep floods the context with raw output. You need to (1) keep earlier findings reliable across context boundaries and compaction, and (2) stop verbose discovery output from consuming the main session's context. (Select TWO.)",
+  "options": {
+   "A": "Raise the effort level so that the agent reasons harder about the files and classes it saw earlier in the session.",
+   "B": "Have the agent record key findings (class names, file paths, call relationships) in a scratchpad file it re-reads for later questions.",
+   "C": "Delegate specific questions, such as tracing the refund flow, to subagents that return condensed summaries to the main session.",
+   "D": "Clear the conversation every hour and restart from the original one-line goal so that the session stays fresh and focused.",
+   "E": "Switch to a model with a larger context window so that the entire three-hour exploration fits in a single session."
+  },
+  "answer": [
+   "B",
+   "C"
+  ],
+  "rationale": "Requirement 1 is persistence: a scratchpad file survives compaction and context degradation, and the agent can re-read exact names instead of falling back on generic patterns (B). Requirement 2 is isolation: a subagent absorbs the noisy search output in its own context and returns only a summary (C). A larger window (E) delays degradation without removing it. Restarting hourly (D) throws away the findings. More reasoning effort (A) cannot recover facts that are no longer reliably in context.",
+  "evidence": "Scratchpad files persist key findings across context boundaries; subagents isolate verbose exploration output and return summaries.",
+  "ref": "https://code.claude.com/docs/en/sub-agents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b22",
+  "source": "curated",
+  "domain": "Context Management & Reliability",
+  "task": "Manage context effectively in large codebase exploration",
+  "question": "Scenario: Structured Data Extraction. A nightly job extracts 5,000 invoices and posts each one to the ERP. After a crash at invoice 3,100 the operator restarted the job from the beginning, and the ERP now holds 3,100 duplicate postings. How should the pipeline be redesigned so that a crash followed by a rerun is safe?",
+  "options": {
+   "A": "Checkpoint the job every 500 invoices and resume from the last checkpoint, accepting a small overlap window.",
+   "B": "Keep a per-invoice status manifest that the job loads on restart, and give ERP writes an idempotency key based on the document ID.",
+   "C": "Run a nightly deduplication job in the ERP that merges postings with the same vendor and the same amount.",
+   "D": "Disable automatic restarts so that an operator inspects the ERP before every rerun of the job begins."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Safe recovery needs two things: knowing exactly which documents completed (a manifest the coordinator loads on resume) and making each write idempotent so that any replay is harmless (B). Coarse checkpoints (A) leave an overlap window of up to 499 duplicate postings. Vendor-and-amount merging (C) would also merge legitimate repeat invoices. Manual inspection before reruns (D) slows recovery and still offers no guarantee against duplicates.",
+  "evidence": "Persist agent state to a known location and load a manifest on resume; combine with idempotent writes so a rerun does not duplicate effects.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b23",
+  "source": "curated",
+  "domain": "Context Management & Reliability",
+  "task": "Design human review workflows and confidence calibration",
+  "question": "Scenario: Structured Data Extraction. An extraction pipeline reports 97.3% field accuracy against a 95% target, and management proposes auto-approving every extraction with confidence of 0.90 or higher to cut human review by about 90%. Results from the labeled validation set:\n\n```text\ndoc_type          docs  field_acc  conf>=0.90\ninvoice_pdf       6200     99.0%        5900\npurchase_order    2100     98.0%        1950\nhandwritten_rcpt   700     80.0%         620\noverall           9000     97.3%        8470\n```\n\nWhat should you do before approving the proposal?",
+  "options": {
+   "A": "Measure accuracy of high-confidence extractions by document type and field; keep review on segments below target.",
+   "B": "Raise the global confidence threshold to 0.97, which keeps most of the savings while filtering out the weakest extractions.",
+   "C": "Approve the proposal, since the 97.3% overall accuracy already exceeds the 95% target that management set for the pipeline.",
+   "D": "Review a uniform random 2% sample of all auto-approved extractions each month, and approve the rollout if the sample is accurate."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The aggregate hides a segment problem: handwritten receipts are at 80% while the large invoice and purchase-order populations pull the average up. Accuracy has to be validated by document type and field, ideally with stratified sampling of the high-confidence extractions, before human review is reduced there (A). Relying on the overall figure (C) repeats the aggregate trap. A global threshold (B) was not calibrated per segment and may still pass wrong handwritten fields. A uniform sample (D) would contain too few handwritten receipts to expose the weakness.",
+  "evidence": "Aggregate accuracy can mask poor performance on specific document types or fields; use stratified sampling and segment-level validation before automating.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-b24",
+  "source": "curated",
+  "domain": "Context Management & Reliability",
+  "task": "Preserve information provenance and handle uncertainty in multi-source synthesis",
+  "question": "Scenario: Multi-Agent Research System. In final reports, statistics sometimes lose their sources after summarization, and two credible sources give different market sizes ($4.2B and $3.1B) for what looks like the same market. Investigation shows the sources were published two years apart and define the segment differently. You need to (1) keep every claim traceable to its source through synthesis, (2) handle the conflicting figures without hiding either, and (3) stop a time difference from being read as a contradiction. (Select THREE.)",
+  "options": {
+   "A": "Keep the figure from the source with the higher relevance score and drop the other figure entirely to keep the report concise.",
+   "B": "Average the two figures into one estimate and cite both sources for the resulting number in the report's summary.",
+   "C": "Require subagents to output structured claim-source mappings (URL, document name, excerpt) that the synthesis agent must preserve and merge.",
+   "D": "Require publication or data-collection dates in every subagent's structured output so synthesis can interpret differences over time.",
+   "E": "Report both figures side by side with their sources and methodological context, marking the finding as contested."
+  },
+  "answer": [
+   "C",
+   "D",
+   "E"
+  ],
+  "rationale": "Traceability survives summarization only if claim-to-source mappings are structured data that synthesis merges rather than prose that gets compressed (C). Conflicting credible figures should be shown with attribution and context, not arbitrarily resolved (E). Dates in the structured output let the reader see that a gap may reflect time or definition rather than error (D). Averaging (B) manufactures a number no source reported. Dropping the lower-ranked source (A) hides a legitimate conflict behind a relevance score.",
+  "evidence": "Preserve structured claim-source mappings, annotate conflicting statistics with attribution, and require publication or collection dates.",
+  "ref": "https://www.anthropic.com/engineering/multi-agent-research-system",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c01",
+  "source": "curated",
+  "domain": "Prompt Engineering & Structured Output",
+  "task": "Design prompts with explicit criteria to improve precision and reduce false positives",
+  "question": "Scenario: Claude Code for Continuous Integration. Your pull-request review job uses the prompt below. Over two weeks developers dismissed 64% of the \"comment accuracy\" findings but only 9% of the security findings, and several now skim past every review comment. The security category is working well.\n\n```text\nYou are a code reviewer. For each changed file:\n1. Check that comments are accurate.\n2. Check for security problems.\n3. Check that error handling is adequate.\nBe conservative: only report findings you are highly confident about.\n```\n\nWhich revision most directly reduces the false positives in the comment category?",
+  "options": {
+   "A": "Replace item 1 with a rule: report a comment only if the behavior it claims contradicts the code, and skip wording and style remarks.",
+   "B": "Run the comment check as a second pass over the same diff and post only the findings that both passes report.",
+   "C": "Strengthen the last line to say false positives destroy trust, and that the model should stay silent whenever any doubt remains.",
+   "D": "Have the model attach a 0-100 confidence score to every comment finding, and have the pipeline drop any finding scored below 90 before it is posted."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The fix is a specific, categorical criterion for what counts as a comment finding and what to skip (A). \"Be conservative\" is already in the prompt and clearly did not help, so a stronger version of the same vague instruction (C) will not either. Self-reported confidence (D) is poorly calibrated and filters by a number rather than by category of issue. Requiring two agreeing passes (B) doubles cost and still lets a vague criterion produce the same wrong findings in both runs.",
+  "evidence": "Explicit categorical criteria (flag a comment only when its claim contradicts the code) improve precision; generic conservatism or confidence filtering does not.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c02",
+  "source": "curated",
+  "domain": "Prompt Engineering & Structured Output",
+  "task": "Design prompts with explicit criteria to improve precision and reduce false positives",
+  "question": "Scenario: Claude Code for Continuous Integration. Your automated reviewer reports four categories. Dismissal rates last month were: naming conventions 71%, test-coverage remarks 58%, bugs 12%, security 7%. Developers have started ignoring all reviewer output, and the \"high\" and \"medium\" severity labels vary from run to run on similar issues. You want to restore trust quickly and make severity labels stable. (Select TWO.)",
+  "options": {
+   "A": "Ask the model to rank findings against each other within each PR so that the top few are always labeled high and the rest medium.",
+   "B": "Switch off the naming and test-coverage categories while you rewrite their criteria and re-measure dismissals on past PRs.",
+   "C": "Add one global instruction telling the model to report only findings it is highly confident about, across all four categories of findings.",
+   "D": "Define every severity level with explicit criteria and a code example, such as high meaning unvalidated input reaches a SQL string.",
+   "E": "Filter out every finding labeled low or medium severity before it is posted, and keep only the high-severity ones in each review."
+  },
+  "answer": [
+   "B",
+   "D"
+  ],
+  "rationale": "Temporarily disabling the two noisy categories (B) restores trust in the accurate ones while the prompts are fixed, and concrete severity definitions with code examples (D) are what make labels consistent. A global confidence instruction (C) is the same vague approach that fails to improve precision. Filtering by severity (E) hides real medium bugs while the label inconsistency stays unsolved. Relative ranking inside a PR (A) makes labels depend on what else is in the diff, which is less stable across runs, not more.",
+  "evidence": "High false-positive categories undermine trust in accurate ones; disable them temporarily, and define severity with explicit criteria and concrete examples.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c03",
+  "source": "curated",
+  "domain": "Prompt Engineering & Structured Output",
+  "task": "Enforce structured output using tool use and JSON schemas",
+  "question": "Scenario: Structured Data Extraction. Your invoice extractor uses the strict tool schema below. About 8% of invoices have no purchase order number and 5% have no delivery date. Auditors found that for those invoices the tool returns plausible values such as \"PO-0000\" and the current date.\n\n```json\n{\"name\": \"record_invoice\", \"strict\": true,\n \"input_schema\": {\"type\": \"object\",\n  \"properties\": {\n   \"vendor\": {\"type\": \"string\"},\n   \"po_number\": {\"type\": \"string\"},\n   \"delivery_date\": {\"type\": \"string\", \"format\": \"date\"},\n   \"total\": {\"type\": \"number\"}},\n  \"required\": [\"vendor\", \"po_number\", \"delivery_date\", \"total\"],\n  \"additionalProperties\": false}}\n```\n\nWhat schema change best stops the fabrication?",
+  "options": {
+   "A": "Keep the schema and add a description telling the model to write \"N/A\" when the document has no such value.",
+   "B": "Add a minLength of 1 to po_number and a regex pattern to delivery_date so empty or malformed placeholders fail schema validation.",
+   "C": "Keep both fields required and add a post-check that rejects values like PO-0000, then re-ask the model up to three times.",
+   "D": "Declare po_number and delivery_date as string-or-null, keep them in required, and let a missing value come back as null."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Required non-nullable fields force the model to emit something, so a missing value gets invented. Allowing null (D) gives it an honest way to say the value is absent. Length constraints are not supported in strict schemas and a pattern would still demand a value (B). A sentinel string (A) is still a made-up string that downstream code must special-case. Retrying (C) cannot succeed because the information is not in the document.",
+  "evidence": "Make fields nullable when the source may not contain them, so the model is not pushed to fabricate values to satisfy required fields.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/structured-outputs",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c04",
+  "source": "curated",
+  "domain": "Prompt Engineering & Structured Output",
+  "task": "Enforce structured output using tool use and JSON schemas",
+  "question": "Scenario: Customer Support Resolution Agent. The agent files each ticket with a category enum: billing, shipping, returns, product_defect, account_access. In a sample of 300 tickets, 11% were gift-card or loyalty-point issues forced into billing, and 6% were messages too vague to categorize that landed on whichever value the model leaned toward. You want new topics visible for later taxonomy work and vague tickets sent to a human queue. (Select TWO.)",
+  "options": {
+   "A": "Add an \"other\" value paired with a nullable category_detail string where the model describes the topic in a few words.",
+   "B": "Add an \"unclear\" value reserved in the prompt for ambiguous or underspecified messages, and route it to human review.",
+   "C": "Add a numeric confidence field and drop any ticket scoring under 0.5 from the pipeline, since low-confidence labels are unreliable.",
+   "D": "Expand the enum to 40 granular categories that cover every topic seen in the last year of tickets, so nothing is forced anywhere.",
+   "E": "Change category to a free-text string and map it onto the fixed list with fuzzy matching in the nightly CRM sync job afterward."
+  },
+  "answer": [
+   "A",
+   "B"
+  ],
+  "rationale": "An \"other\" value with a detail string (A) keeps novel topics honest and collectable, and an \"unclear\" value (B) gives ambiguous tickets a defined exit to people. A 40-value enum (D) just moves the same forced-fit problem to the long tail and is costly to maintain. Free text plus fuzzy matching (E) throws away the closed set the schema was meant to guarantee. Dropping low-confidence tickets (C) silently loses them and relies on a poorly calibrated number.",
+  "evidence": "Add enum values like \"unclear\" for ambiguous cases and \"other\" plus a detail field for extensible categorization.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/structured-outputs",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c05",
+  "source": "curated",
+  "domain": "Prompt Engineering & Structured Output",
+  "task": "Implement validation, retry, and feedback loops for extraction quality",
+  "question": "Scenario: Structured Data Extraction. Your pipeline retries a failed extraction up to three times, appending the validation error to the prompt. Part of last night's retry log is below.\n\n```text\nINV-2291 total  err=\"sum(line_items)=1240.00 != total=1.24\"  retry#1 -> ok\nINV-3310 date   err=\"2024-13-04 is not a valid date\"          retry#1 -> ok\nINV-4407 tax_id err=\"required field is null\"                  retry#1 -> fail\nINV-4407 tax_id err=\"required field is null\"                  retry#2 -> fail\nINV-4407 tax_id err=\"required field is null\"                  retry#3 -> fail\nnote: INV-4407 text reads \"Tax ID: see attached Schedule B\" (no attachment uploaded)\n```\n\nWhich kind of failure should the pipeline stop retrying and send to a human-review queue?",
+  "options": {
+   "A": "Quantities that were placed in the unit-price field instead of the quantity field in a multi-column table",
+   "B": "Line items that fail to sum to the stated total because a decimal separator in the document was misread",
+   "C": "Dates that fail validation because the day and the month were swapped when the model read an ambiguous format",
+   "D": "Required values that are null because the document cites an attachment that was never supplied"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Retry with error feedback works for format and structural mistakes where the answer is in the document (A, B, C all show or imply a successful retry in the log). It cannot work when the information is simply absent: the tax ID lives in an attachment that was not provided (D), as three identical failures show. Those documents should go to review or trigger a request for the missing file.",
+  "evidence": "Retries are ineffective when the required information is absent from the source; they work for format mismatches and structural errors.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/structured-outputs",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c06",
+  "source": "curated",
+  "domain": "Prompt Engineering & Structured Output",
+  "task": "Implement validation, retry, and feedback loops for extraction quality",
+  "question": "Scenario: Structured Data Extraction. Your extraction tool uses strict schemas, so every response parses. Even so, 3% of invoices reach downstream systems with line items that do not add up to the stated total, and in some of those the printed invoice itself is inconsistent. Finance wants these caught automatically without manually checking the other 97%. What design change achieves this?",
+  "options": {
+   "A": "Enable strict mode on the nested line_items objects so the grammar guarantees the arithmetic is consistent.",
+   "B": "Add minimum and maximum constraints to the total field so that out-of-range sums are rejected while the model generates.",
+   "C": "Extract stated_total as printed plus a calculated_total from the line items, add a conflict_detected flag, and route mismatches to review.",
+   "D": "Instruct the model to double-check that the line items sum to the total, and rerun any invoice that still fails up to five times."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Strict schemas remove syntax errors but not semantic ones such as totals that disagree. Extracting both totals and flagging the conflict (C) turns the discrepancy into data the pipeline can route, including cases where the source is itself wrong. Numeric range limits are not supported by the grammar and would not check a sum anyway (B). A prompt reminder with reruns (D) cannot fix a source that is inconsistent. Strict mode (A) is already on and guarantees shape, not arithmetic.",
+  "evidence": "Strict schemas do not prevent semantic errors; extract calculated_total alongside stated_total and add conflict_detected to flag discrepancies.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/structured-outputs",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c07",
+  "source": "curated",
+  "domain": "Prompt Engineering & Structured Output",
+  "task": "Apply few-shot prompting to improve output consistency and quality",
+  "question": "Scenario: Customer Support Resolution Agent. The agent labels each inbound message with one of nine intents before choosing tools. The prompt already defines every intent clearly, yet in a 200-message audit about 35% of messages like \"the blender arrived cracked and I want my money back, not a new one\" flipped between damage_claim and refund_request across runs. Which change most reliably improves consistency?",
+  "options": {
+   "A": "Add 25 more examples of unambiguous messages so that each of the nine intents has at least three typical cases to learn from.",
+   "B": "Label every message twice and accept the label only when both runs agree, escalating the rest.",
+   "C": "Ask the agent to rate its confidence from 1 to 10 on each label, and send the low-rated messages to a human agent for review.",
+   "D": "Add 3-4 few-shot examples of borderline messages with a one-line reason for picking one intent over its rival."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "The definitions are already clear; what is missing is demonstrated judgment at the boundary. A few targeted examples with the reasoning for the choice (D) teach the model how to resolve this kind of ambiguity and generalize to new cases. More typical examples (A) do not touch the ambiguous region. Self-reported confidence (C) is poorly calibrated. Double labeling (B) detects disagreement but does not remove it, and sends a third of the traffic to escalation.",
+  "evidence": "Create 2-4 targeted few-shot examples for ambiguous scenarios that show why one action was chosen over plausible alternatives.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c08",
+  "source": "curated",
+  "domain": "Prompt Engineering & Structured Output",
+  "task": "Apply few-shot prompting to improve output consistency and quality",
+  "question": "Scenario: Code Generation with Claude Code. Your /gen-tests command writes unit tests for TypeScript modules. The command file already has detailed written instructions, but output is inconsistent: some runs cover only the happy path, others skip branches that return early, and test names follow no pattern. You will add few-shot examples to the command so that branch gaps get covered and reviewers get one predictable layout. (Select TWO.)",
+  "options": {
+   "A": "Include one example for every module in the repository so the model has seen all of the code it could be asked to test.",
+   "B": "Show the exact layout wanted in every example: a describe block per function and names in the form \"should X when Y\".",
+   "C": "Include 2-4 examples on modules with early returns and error branches, showing the test for each branch and why it is needed.",
+   "D": "Write each example as a complete suite of 20 or more tests so that every possible pattern appears at least once.",
+   "E": "Use one happy-path example only, because the written instructions already describe the edge cases in words."
+  },
+  "answer": [
+   "B",
+   "C"
+  ],
+  "rationale": "Examples that demonstrate branch-level gaps with the reasoning (C) address the skipped-branch problem, and examples that all use the required layout (B) fix naming and structure. One example per module (A) is unfocused and bloats the command. Very long suites (D) bury the pattern. A happy-path-only example (E) reinforces the very behavior that is going wrong.",
+  "evidence": "A few targeted examples can demonstrate ambiguous-case handling such as branch-level coverage gaps and the desired output format.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c09",
+  "source": "curated",
+  "domain": "Prompt Engineering & Structured Output",
+  "task": "Enforce structured output using tool use and JSON schemas",
+  "question": "Scenario: Multi-Agent Research System. The synthesis subagent must return findings as JSON with a claim, a source URL, and a supporting quote, which the report builder validates. A developer enabled citations on the source documents and an output_config.format JSON schema in the same request, and every call now fails with a 400. The builder only needs claim, URL, and a quote it can verify. What is the best fix?",
+  "options": {
+   "A": "Keep both settings and retry with exponential backoff and jitter, since a 400 on a large request usually indicates transient capacity pressure.",
+   "B": "Turn the schema off, keep citations, and tell the model to reply with only a JSON object and no other text.",
+   "C": "Turn citations off, add source_url and supporting_quote fields to the schema, and verify each quote against the source text in code.",
+   "D": "Prefill the assistant turn with an opening brace so the model continues in JSON while citations stay enabled."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Citations cannot be combined with a JSON-schema output format, and a 400 is not retryable (A). Since the builder only needs a verifiable quote, putting source_url and supporting_quote in the schema and verifying the quote programmatically (C) keeps guaranteed structure. Asking for JSON only with citations (B) tends to produce few or no citations and loses schema enforcement. Assistant prefill (D) is rejected on current models.",
+  "evidence": "Citations are incompatible with output_config.format (400); JSON-only prompts can yield few citations; prefill is not supported on current models.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/citations",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c10",
+  "source": "curated",
+  "domain": "Prompt Engineering & Structured Output",
+  "task": "Design efficient batch processing strategies",
+  "question": "Scenario: Customer Support Resolution Agent. Every night you re-score 20,000 closed tickets for QA with the Message Batches API, and supervisors read the results at 8 a.m. Last night the job submitted fine, but results were joined to the ticket table by line position and 1,900 tickets received the wrong score. Separately, 140 requests came back errored or expired. (Select TWO.)",
+  "options": {
+   "A": "Resubmit the whole batch of 20,000 so that every ticket is scored by the same run.",
+   "B": "Collect only the errored and expired requests and submit them again in a new batch once the causes are fixed.",
+   "C": "Poll the batch every second so each result is read as soon as its request finishes.",
+   "D": "Rely on the results file matching submission order, and sort both sides by timestamp before joining.",
+   "E": "Give each request a custom_id equal to its ticket ID and join results to tickets by that ID."
+  },
+  "answer": [
+   "B",
+   "E"
+  ],
+  "rationale": "Batch results can come back in any order, so correlation must use custom_id (E) rather than position (D). Only failed or expired requests need another try, and a targeted resubmission (B) keeps the cost saving, while rerunning everything (A) pays again for 19,860 good results. Results are available only once the batch has ended, so aggressive polling (C) gains nothing.",
+  "evidence": "Batch results may be returned in any order; use custom_id to correlate, and resubmit only failed requests.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c11",
+  "source": "curated",
+  "domain": "Prompt Engineering & Structured Output",
+  "task": "Design efficient batch processing strategies",
+  "question": "Scenario: Claude Code for Continuous Integration. A nightly job generates unit tests for 600 modules: one request per module writes the tests, your CI runner executes them, and each failing suite gets one repair attempt using the failure output. Results are needed by 7 a.m., and leadership wants the batch discount on both steps. How should you structure the repair step?",
+  "options": {
+   "A": "Send the repair step as real-time calls for all 600 modules, since a batch cannot take a second turn or run a tool for you.",
+   "B": "Run generation as one batch, run tests in your own job, then batch only the failing modules with their output.",
+   "C": "Give each batch request a run_tests tool so that the model executes the suite and repairs failures inside the same request.",
+   "D": "Put the generation prompt and a repair prompt for each module in one request as consecutive user turns, in a single batch."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Each batch request is an independent single pass: it cannot pause while your runner executes tests and then continue. Chaining two batches around your own test run (B) keeps the 50% saving on both steps and meets a morning deadline. A client-side tool cannot be executed mid-request in a batch (C). The repair prompt cannot see test output that does not exist yet at submission time (D). Real-time calls for all 600 modules (A) gives up the discount, and most modules will not need repair.",
+  "evidence": "Batch requests are independent and cannot execute client tools mid-request; chain batches around the step your own system runs.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c12",
+  "source": "curated",
+  "domain": "Prompt Engineering & Structured Output",
+  "task": "Enforce structured output using tool use and JSON schemas",
+  "question": "Scenario: Developer Productivity with Claude. Your agent files issues through a create_issue tool whose schema defines priority as an enum (p0 to p3) and estimate_points as an integer. About 3% of calls arrive with priority \"urgent\" or estimate_points \"5 pts\", and the issue API rejects them. The agent runs on Sonnet 5.5. Which change guarantees that tool inputs conform to the schema?",
+  "options": {
+   "A": "Add several few-shot examples of valid create_issue calls to the system prompt.",
+   "B": "Set strict: true on create_issue, with every field in required and additionalProperties set to false.",
+   "C": "Set tool_choice to the named create_issue tool so the model is forced to produce a call that conforms to the schema.",
+   "D": "Set output_config.format to the same schema so that the model's final answer is validated against it as well."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Strict tool use constrains the generated tool input to the schema (B). Forcing a tool (C) does not validate content and is rejected on Sonnet 5.5 anyway. output_config.format shapes the model's final reply, not tool-call arguments (D). Examples (A) improve the odds but remain probabilistic, so they cannot guarantee conformance.",
+  "evidence": "Strict tool use (strict: true with additionalProperties false and required) guarantees schema-valid tool inputs; forced tool_choice is not supported on current models.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/strict-tool-use",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c13",
+  "source": "curated",
+  "domain": "Tool Design & MCP Integration",
+  "task": "Design effective tool interfaces with clear descriptions and boundaries",
+  "question": "Scenario: Multi-Agent Research System. Traces show the agent picks the wrong one of the two tools below in about 30% of calls. Both calls succeed, but the output has the wrong shape for the task.\n\n```json\n{\"name\": \"analyze_content\",\n \"description\": \"Analyzes content and returns the key information.\",\n \"input_schema\": {\"type\": \"object\", \"properties\": {\"content\": {\"type\": \"string\"}}}}\n{\"name\": \"analyze_document\",\n \"description\": \"Analyzes a document and returns the key information.\",\n \"input_schema\": {\"type\": \"object\", \"properties\": {\"document\": {\"type\": \"string\"}}}}\n```\n\nWeb results arrive as HTML text and papers arrive as extracted PDF text. What is the most effective fix?",
+  "options": {
+   "A": "Rename them to extract_web_results and extract_paper_claims, and rewrite each description with its input, output, and when not to use it.",
+   "B": "Add a code-level router that checks each input for HTML tags and calls the matching tool itself.",
+   "C": "Merge the two into a single analyze tool with a source_type parameter that the model sets on every call.",
+   "D": "Add few-shot examples to the coordinator prompt showing which tool to call for web pages and which for papers."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The two descriptions are nearly identical, so selection is a coin flip. Distinct names and descriptions that state the input, the output, and the boundary (A) fix the cause. Examples (D) work around a poor interface and add prompt weight. A merged tool (C) pushes the same ambiguity into a parameter the model must guess. A router (B) adds a deterministic layer that duplicates a decision the descriptions should make clear.",
+  "evidence": "Overlapping, near-identical descriptions cause misrouting; rename tools and rewrite descriptions to differentiate purpose, inputs, outputs, and boundaries.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c14",
+  "source": "curated",
+  "domain": "Tool Design & MCP Integration",
+  "task": "Design effective tool interfaces with clear descriptions and boundaries",
+  "question": "Scenario: Customer Support Resolution Agent. The descriptions of get_customer and lookup_order were recently rewritten with clear boundaries, and the customer ID is already verified at session start. Even so, the agent calls get_customer for order-status questions in about 20% of conversations. Part of the system prompt is below.\n\n```text\nYou are a support agent for Northwind.\n- Be concise and friendly.\n- Treat any message that mentions an order as a customer-account question.\n- Escalate when a customer asks for a manager.\n```\n\nWhat is the best fix?",
+  "options": {
+   "A": "Add six few-shot examples to the system prompt in which an order-status question goes straight to lookup_order without a customer lookup.",
+   "B": "Reword the second bullet so it stops tying order mentions to account handling, since it overrides the tool descriptions.",
+   "C": "Rename get_customer to fetch_account_profile so that its name no longer matches the word \"customer\" in the prompt.",
+   "D": "Add disable_parallel_tool_use so the agent can call only one tool per turn and must choose more carefully."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "System prompt wording can create keyword-driven tool associations that override even good descriptions. The second bullet links any order mention to the customer-account path, so fixing that instruction (B) removes the cause. Examples (A) would fight an instruction that stays in place. A rename (C) is cosmetic and leaves the misleading rule. Limiting parallel calls (D) does not change which tool is chosen.",
+  "evidence": "Keyword-sensitive instructions in the system prompt can create unintended tool associations that override well-written tool descriptions.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c15",
+  "source": "curated",
+  "domain": "Tool Design & MCP Integration",
+  "task": "Implement structured error responses for MCP tools",
+  "question": "Scenario: Code Generation with Claude Code. Your team's MCP server exposes a run_tests tool, and the agent keeps retrying calls that cannot succeed. All three of the server's failure paths return the same payload:\n\n```json\n{\"isError\": true, \"content\": [{\"type\": \"text\", \"text\": \"Operation failed\"}]}\n```\n\nThe paths are: the CI runner is busy (clears within a minute), the requested test path does not exist in the repo, and the caller's token lacks access to the protected suite. Which redesign lets the agent choose between retrying, correcting its input, and stopping?",
+  "options": {
+   "A": "Return an empty test report with isError false for the two non-transient paths so the agent stops looping.",
+   "B": "Retry every failure inside the server three times and return only the final failure, so the agent never sees a transient error.",
+   "C": "Put numeric codes such as 503, 404, and 403 in the message text and document their meaning in the project's CLAUDE.md file.",
+   "D": "Keep isError true and add errorCategory (transient, validation, permission), an isRetryable flag, and what to change."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "A uniform \"Operation failed\" hides the information needed to recover. Structured metadata (D) separates transient, validation, and permission failures and says whether retrying is worthwhile. Bare codes in text with a separate documentation file (C) is fragile and not machine-readable. Server-side retries of everything (B) waste time on errors that can never succeed. An empty successful report (A) disguises failures as results.",
+  "evidence": "Return isError with structured metadata (errorCategory, isRetryable, description) so agents can tell transient, validation, and permission errors apart.",
+  "ref": "https://modelcontextprotocol.io/specification/2025-06-18/server/tools",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c16",
+  "source": "curated",
+  "domain": "Tool Design & MCP Integration",
+  "task": "Implement structured error responses for MCP tools",
+  "question": "Scenario: Multi-Agent Research System. The search subagent's tool returns an empty list with no error flag both when a query truly matches nothing and when the search index times out. The coordinator has been writing \"no relevant sources exist\" into reports after outages. You are redesigning error handling between the tool, the subagent, and the coordinator. (Select TWO.)",
+  "options": {
+   "A": "Return an empty list with a warning inside the text and let the coordinator infer whether the search was really attempted.",
+   "B": "Propagate every tool error to the coordinator immediately so that one component owns all recovery decisions.",
+   "C": "Let the subagent retry transient failures with backoff, and report only unresolved ones with the query and any partial results.",
+   "D": "Return isError true with a transient category and isRetryable on timeouts, and a normal empty result when nothing matches.",
+   "E": "Raise the index timeout to 120 seconds so that timeouts no longer produce empty responses in the first place."
+  },
+  "answer": [
+   "C",
+   "D"
+  ],
+  "rationale": "An access failure and a valid empty result must look different, which the error flag and category in (D) provide. Handling transient errors inside the subagent and escalating only what it cannot resolve, with context and partial results (C), keeps the coordinator informed without noise. A warning buried in text (A) is not a reliable signal. Escalating everything (B) floods the coordinator with errors the subagent could fix. A longer timeout (E) treats the symptom, and outages would still look like empty results.",
+  "evidence": "Distinguish access failures from valid empty results; recover from transient errors locally and propagate only unresolved errors with partial results.",
+  "ref": "https://modelcontextprotocol.io/specification/2025-06-18/server/tools",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c17",
+  "source": "curated",
+  "domain": "Tool Design & MCP Integration",
+  "task": "Integrate MCP servers into Claude Code and agent workflows",
+  "question": "Scenario: Code Generation with Claude Code. A teammate committed this .mcp.json so the whole team gets the Jira server. Security has flagged the committed token.\n\n```json\n{\"mcpServers\": {\"jira\": {\n  \"type\": \"http\",\n  \"url\": \"https://mcp.example-jira.net/mcp\",\n  \"headers\": {\"Authorization\": \"Bearer jira_pat_9f31c0d2e7\"}}}}\n```\n\nWhich change keeps a single shared definition and removes the secret from version control?",
+  "options": {
+   "A": "Move the server to user scope in each developer's ~/.claude.json so that the repository no longer contains the token at all.",
+   "B": "Base64-encode the token in the header value so that it is no longer readable in the repository history.",
+   "C": "Change the header to \"Bearer ${JIRA_TOKEN}\", have developers export it locally, and rotate the token.",
+   "D": "Add .mcp.json to .gitignore and have each developer recreate the file by hand from a page on the team wiki."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Project-scoped .mcp.json supports environment variable expansion, so the committed file can reference ${JIRA_TOKEN} while each developer supplies the value locally (C); the leaked token must also be rotated. User scope (A) removes the shared definition. Ignoring the file (D) defeats sharing and drifts. Encoding (B) is not protection, since anyone can decode it.",
+  "evidence": "Project-scoped .mcp.json supports ${VAR} environment variable expansion for credentials without committing secrets.",
+  "ref": "https://code.claude.com/docs/en/mcp",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c18",
+  "source": "curated",
+  "domain": "Tool Design & MCP Integration",
+  "task": "Integrate MCP servers into Claude Code and agent workflows",
+  "question": "Scenario: Developer Productivity with Claude. Your agent works against a 400-table analytics warehouse and spends its first several tool calls each session listing and describing tables. Separately, one engineer wants to try an unvetted community MCP server that parses query plans, without it appearing for teammates. (Select TWO.)",
+  "options": {
+   "A": "Add the experimental server to the committed .mcp.json on a feature branch and ask teammates not to approve it.",
+   "B": "Add a list_tables tool to the shared server and instruct the agent to call it first in every session.",
+   "C": "Expose the schema catalog from the shared server as an MCP resource so tables and columns are visible without exploratory calls.",
+   "D": "Paste the full 400-table schema into the project CLAUDE.md so it loads at the start of every session.",
+   "E": "Add the experimental server at local or user scope so its configuration stays in ~/.claude.json and out of the repository."
+  },
+  "answer": [
+   "C",
+   "E"
+  ],
+  "rationale": "MCP resources are designed to expose content catalogs such as database schemas so the agent can see what exists without exploratory calls (C). A personal or experimental server belongs in local or user scope, which is private to that developer (E). A 400-table dump in CLAUDE.md (D) permanently consumes context and goes stale. A list_tables tool (B) still costs a call each session. A committed .mcp.json (A) puts the experiment in front of the whole team.",
+  "evidence": "MCP resources expose content catalogs like database schemas; personal or experimental servers go in local/user scope, shared ones in project .mcp.json.",
+  "ref": "https://modelcontextprotocol.io/specification/2025-06-18/server/resources",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c19",
+  "source": "curated",
+  "domain": "Tool Design & MCP Integration",
+  "task": "Integrate MCP servers into Claude Code and agent workflows",
+  "question": "Scenario: Developer Productivity with Claude. Your team added an MCP server with a find_references tool that resolves symbol usage through the language server, handling aliases, re-exports, and renamed imports. Traces show the agent still uses built-in Grep for most reference searches and misses re-exported symbols. The tool's current description reads \"Finds references.\" What is the best first step?",
+  "options": {
+   "A": "Rewrite the description: it resolves aliases and re-exports, returns file and line locations, and should be preferred over Grep for symbols.",
+   "B": "Add find_references to the permission allow list so that its calls run without interrupting approval prompts each time.",
+   "C": "Add a deny rule for Grep so the agent has no alternative to find_references when it searches for symbols.",
+   "D": "Move the server's configuration from project scope to user scope so that it outranks the built-in tools."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The agent chooses tools by their descriptions, and a two-word description gives no reason to prefer the MCP tool over a familiar built-in (A). Denying Grep (C) removes a tool that is still right for plain text searches. Permissions (B) control approval, not selection. Scope (D) controls where a server loads and does not rank tools against built-ins.",
+  "evidence": "Enhance MCP tool descriptions to explain capabilities and outputs so the agent does not prefer built-in tools like Grep over more capable MCP tools.",
+  "ref": "https://code.claude.com/docs/en/mcp",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c20",
+  "source": "curated",
+  "domain": "Tool Design & MCP Integration",
+  "task": "Select and apply built-in tools (Read, Write, Edit, Bash, Grep, Glob) effectively",
+  "question": "Scenario: Code Generation with Claude Code. You ask Claude to change the retry count in one of three identical lines (retries: 3) in a 900-line config file. The Edit call fails because the old text matches more than one location, and you want only the retries line in the payments block changed. What is the most reliable next step?",
+  "options": {
+   "A": "Use Bash to run sed over the whole file, then read the git diff to find out which lines were changed.",
+   "B": "Use Write to recreate the whole file without first reading its current contents from disk.",
+   "C": "Re-run Edit with a longer old_string that includes neighboring lines unique to the payments block.",
+   "D": "Re-run Edit with replace_all so every match is updated, then revert the other two lines by hand afterward."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Edit requires old_string to match exactly once, and adding surrounding lines that pin down the intended occurrence (C) makes it unique while leaving everything else untouched. replace_all (D) changes all three and creates cleanup work. A global sed (A) has the same all-match problem and is a blunter tool. Writing the file blind (B) risks dropping the other 899 lines; if Edit cannot be made unique, Read followed by Write is the fallback.",
+  "evidence": "Edit's old_string must appear exactly once; supply more surrounding context to pin one occurrence, or use replace_all to change all.",
+  "ref": "https://code.claude.com/docs/en/tools-reference",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c21",
+  "source": "curated",
+  "domain": "Tool Design & MCP Integration",
+  "task": "Select and apply built-in tools (Read, Write, Edit, Bash, Grep, Glob) effectively",
+  "question": "Scenario: Developer Productivity with Claude. You are writing guidance for a codebase-exploration agent that uses the Agent SDK's built-in tools. Which pairings of task and tool are correct? (Select THREE.)",
+  "options": {
+   "A": "Listing every file that matches **/*.test.tsx: Glob with that pattern.",
+   "B": "Finding every caller of parseInvoice across the repository: Grep for the identifier.",
+   "C": "Listing every file named like *.test.tsx: Grep, with \"test.tsx\" as the search pattern over file contents.",
+   "D": "Changing one function in a large file: Read to see the current text, then Edit with a unique snippet.",
+   "E": "Changing one line in a 2,000-line file: Write with the complete new contents so nothing is missed."
+  },
+  "answer": [
+   "A",
+   "B",
+   "D"
+  ],
+  "rationale": "Grep searches file contents, so it finds call sites (B). Glob matches file paths by pattern (A). A targeted change is best done by reading the file and then using Edit with a unique snippet (D). Grep over contents (C) does not match file names. Rewriting a 2,000-line file to change one line (E) is wasteful and risks accidental changes elsewhere.",
+  "evidence": "Grep searches file contents, Glob matches file paths, Read loads files, and Edit makes targeted changes using unique text.",
+  "ref": "https://code.claude.com/docs/en/tools-reference",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c22",
+  "source": "curated",
+  "domain": "Tool Design & MCP Integration",
+  "task": "Distribute tools appropriately across agents and configure tool choice",
+  "question": "Scenario: Structured Data Extraction. Your pipeline receives mixed documents and offers three extraction tools. It used tool_choice any to guarantee a tool call, and after a move to Sonnet 5.5 every request fails with a 400.\n\n```python\nresp = client.messages.create(\n    model=\"claude-sonnet-5-5\",\n    max_tokens=2048,\n    tools=[extract_invoice, extract_receipt, extract_contract],\n    tool_choice={\"type\": \"any\"},\n    messages=[{\"role\": \"user\", \"content\": doc_text}],\n)\n```\n\nWhat is the right fix that keeps schema-valid structured output?",
+  "options": {
+   "A": "Use tool_choice auto with strict: true on all three tools, tell the model to call one, and handle a reply with no tool_use.",
+   "B": "Set tool_choice to none and ask for a JSON object in plain text, validating it with a schema library afterward.",
+   "C": "Catch the 400 and resend without tools, then parse the JSON in the text reply with a regular expression.",
+   "D": "Change tool_choice to the named extract_invoice tool, and run the other two extraction tools in a second pass when they are needed."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Forced tool use (any or a named tool) is not supported on Sonnet 5.5; the supported pattern is auto plus an instruction naming the expected behavior, strict: true to guarantee valid inputs, and handling the case where no tool is called (A). A named tool (D) is also forced and also returns 400. Dropping tools and parsing text with a regex (C) gives up schema enforcement. Plain-text JSON (B) removes the guarantee that the tool-based design was meant to provide.",
+  "evidence": "Forced tool_choice (any or tool) returns 400 on current models; use auto with strict tool use or structured outputs for guaranteed schema-valid results.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c23",
+  "source": "curated",
+  "domain": "Tool Design & MCP Integration",
+  "task": "Distribute tools appropriately across agents and configure tool choice",
+  "question": "Scenario: Multi-Agent Research System. The coordinator and its four subagents share one registry of 19 tools (web search, fetch, PDF parsing, citation lookup, database queries, report templating, and more). Traces show the synthesis subagent running its own web searches and the report subagent calling database queries, and wrong-tool errors rose from 4% to 17% as tools were added. Which change best addresses the cause?",
+  "options": {
+   "A": "Upgrade the subagents to a larger model so they can reason reliably over all 19 tools at once.",
+   "B": "Combine related tools into six broader tools that take a mode parameter, to shrink the registry.",
+   "C": "Add a line to each subagent's prompt listing the specific tools that this subagent must not use.",
+   "D": "Give each subagent only the 4-5 tools its role needs, plus at most one narrow cross-role tool"
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Selection quality degrades as the tool count grows, and agents tend to misuse tools outside their specialty. Scoping each subagent to its role's tools (D) removes both problems at once. A prompt prohibition (C) is probabilistic and keeps the tools visible. Merged mode-based tools (B) trade clear boundaries for parameters the model must guess. A bigger model (A) spends more without removing the unneeded choices.",
+  "evidence": "Too many tools degrades selection; give each agent only the tools its role needs, with limited cross-role tools for high-frequency needs.",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "architect-foundations-cur-c24",
+  "source": "curated",
+  "domain": "Tool Design & MCP Integration",
+  "task": "Distribute tools appropriately across agents and configure tool choice",
+  "question": "Scenario: Claude Code for Continuous Integration. Your PR review job connects a GitHub MCP server that exposes 40 tools, including merge_pull_request and delete_branch. The job only needs to read the diff and post review comments. Last week a prompt-injected code comment made the agent attempt a merge, which branch protection blocked. Which is the most robust change?",
+  "options": {
+   "A": "Allow only the read and comment tools the review needs by name, and deny the rest of the server's tools in the job's permission rules.",
+   "B": "Add a system prompt rule that the reviewer must never merge, close, or delete anything in the repository.",
+   "C": "Add a second Claude call that reviews each planned tool call and approves it before it runs.",
+   "D": "Scan each tool call for names containing merge or delete and cancel the matches in a wrapper script."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The safest tool is one the agent does not have. Restricting the job to the few tools it needs by explicit name, enforced by permission rules outside the model (A), also cuts the tool count from 40 to a handful. A prompt rule (B) is probabilistic and injection can override it. A second model call (C) adds cost and can be fooled by the same injected text. A name-based blocklist (D) is brittle: it misses tools with other names, such as force-pushing or editing branch settings.",
+  "evidence": "Scope tools to what the role needs and enforce restrictions with permission rules outside the model; prompts alone are probabilistic.",
+  "ref": "https://code.claude.com/docs/en/permissions",
+  "calibrated": "2026-11-04T23:27:00Z"
+ }
+]

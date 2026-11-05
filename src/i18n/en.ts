@@ -244,7 +244,8 @@ export const en = {
     correct: 'Correct',
     yourAnswer: 'Your answer',
     explanation: 'Explanation',
-    evidence: (e: string) => `Source: ${e}`,
+    evidence: (e: string) => `Cited source (notes or official blueprint): “${e}”`,
+    evidenceNote: (e: string) => `Source: ${e}`,
     officialSource: 'Official documentation',
   },
   tutor: {

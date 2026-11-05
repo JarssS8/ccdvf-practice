@@ -1,0 +1,1482 @@
+[
+ {
+  "id": "associate-foundations-cur-a01",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Identify hallucinations, inconsistencies, and biases in responses",
+  "question": "A policy analyst asks Claude for three peer-reviewed studies on remote work and productivity for a board memo due tomorrow. The chat has no web access. Claude returns three references with authors, journal names, volumes and DOIs. Which step best checks them before they go into the memo?",
+  "options": {
+   "A": "Keep only the reference with the fullest details, such as volume, page range and DOI, because sparse entries are likelier inventions.",
+   "B": "Check that each journal name is genuine, since an invented reference would not be attributed to a real journal.",
+   "C": "Look up each title and DOI in a library database or on the publisher's site, and confirm the paper exists and supports the claim.",
+   "D": "Ask Claude in the same chat to confirm that the three references are real, and to list each DOI again for you."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Only an independent lookup can show that a paper exists and says what Claude claims; models can produce realistic citations for papers that do not exist. Asking Claude to re-confirm (D) just repeats the same source of error, a real journal name (B) is easy to attach to an invented article, and detailed-looking entries (A) are often exactly where fabricated specifics appear.",
+  "evidence": "Models can fabricate plausible citations and details; verify claims against authoritative sources before relying on them.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a02",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Evaluate Claude-generated outputs for accuracy and completeness",
+  "question": "A finance analyst pasted a quarterly revenue table into Claude and asked for a two-sentence summary for the CFO. She has five minutes to check it before sending.\n\n```text\nRegion   Q2 revenue   Q3 revenue\nNorth    $4.1M        $4.6M\nSouth    $3.8M        $3.7M\nWest     $4.5M        $5.6M\nTotal    $12.4M       $13.9M\n\nClaude: \"Total revenue grew 18% quarter over quarter, led by\nWest (+24%). South was the only region to decline.\"\n```\n\nWhich correction is needed?",
+  "options": {
+   "A": "The West growth figure: $5.6M against $4.5M is closer to 12%, so the regional percentage needs recalculating.",
+   "B": "Nothing, because Claude only repeated numbers from the pasted table, so the summary is as reliable as the table.",
+   "C": "The total growth figure: the table implies about 12%, not 18%, so recompute it from the pasted totals first.",
+   "D": "The South description: a $0.1M change is too small to call a decline, so it should be described as flat."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "The 18% total growth is wrong: $13.9M over $12.4M is about 12%. West (+24%) and the South decline are both correct against the table. Claims that are computed rather than copied need re-checking even when every input is pasted, which is why (B) fails; (A) misstates the West arithmetic, and (D) is an editorial preference, not an error.",
+  "evidence": "Derived figures such as percentages can be wrong even when the inputs are provided; recheck calculations against the source data.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a03",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Edit, adapt, refine, and compare outputs for the intended audience",
+  "question": "An HR lead must announce a new parental leave policy to 400 warehouse employees, most of whom read messages on their phones between shifts. Claude's first draft reuses the policy's legal phrasing. Which follow-up instruction best adapts the draft to this audience?",
+  "options": {
+   "A": "Rewrite it in plain language for warehouse staff: who qualifies, what changes, and where to ask questions.",
+   "B": "Make the tone more professional, and attach the full policy document as an appendix so that nothing is left out.",
+   "C": "Keep the policy's exact legal wording for accuracy, and add a warm greeting and closing line to soften the tone.",
+   "D": "Cut it to under fifty words and drop the eligibility rules, so that nobody can misread the detailed conditions."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Adapting for an audience means choosing the reading level, length and content that those readers need: eligibility, what changes and who to ask. A more formal tone (B) moves away from phone-reading staff, cutting eligibility (D) removes what they most need to know, and keeping legal wording with a greeting (C) leaves the comprehension problem unsolved.",
+  "evidence": "Specify the audience, purpose and desired tone and format so the response fits the people who will read it.",
+  "ref": "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/be-clear-and-direct",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a04",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Organize and curate information and select appropriate output formats (artifacts, inline, structured data)",
+  "question": "A sales operations manager wants two things from Claude. First, a monthly view of regional results that her team can filter by region and refresh with each month's new numbers. Second, a three-sentence update to paste into a Slack channel. Which two approaches fit what she needs? (Select TWO.)",
+  "options": {
+   "A": "Describe the filterable view in text, and have the team rebuild the chart in a spreadsheet every month.",
+   "B": "Create the regional view as an interactive artifact that the team can reopen and regenerate with each month's numbers.",
+   "C": "Return the three-sentence update inline in the chat, where it can be copied straight into Slack.",
+   "D": "Put the Slack update inside the artifact as well, so that everything for the month lives in one place.",
+   "E": "Save the regional view as a static image in the chat, so everyone sees the same numbers each month."
+  },
+  "answer": [
+   "B",
+   "C"
+  ],
+  "rationale": "A reusable, filterable, refreshable view is what an artifact is for (B), while a short piece of text that will be pasted elsewhere belongs inline (C). A text description (A) forces manual rebuilding, folding the Slack message into the artifact (D) adds a step to copy it out, and a static image (E) cannot be filtered or refreshed.",
+  "evidence": "Artifacts are for standalone, reusable content such as interactive pages and documents; short conversational text stays inline.",
+  "ref": "https://support.claude.com/en/articles/9487310-what-are-artifacts-and-how-do-i-use-them",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a05",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Identify hallucinations, inconsistencies, and biases in responses",
+  "question": "An HR coordinator asked Claude to rank four finalists for an Operations Lead role from the interviewers' notes. She plans to use the ranking to decide who gets a final interview.\n\n```text\nPrompt: Summarize each finalist's fit for the Operations Lead role\nfrom the interview notes below, and rank them.\n\nClaude:\n1. Mark   - \"decisive, a natural leader, strong cultural fit\"\n2. Daniel - \"confident and assertive, good energy\"\n3. Priya  - \"pleasant and supportive, could grow in assertiveness\"\n4. Sofia  - \"warm; two-year career gap may raise commitment questions\"\n```\n\nWhat should she do before using the ranking?",
+  "options": {
+   "A": "Ask Claude whether its ranking is biased, and go ahead with the final interviews if it answers that it is not.",
+   "B": "Rerun it against written, job-related criteria, then have a person compare each rating with the notes to see whether traits or the career gap drove the order.",
+   "C": "Remove the finalists' names from the notes and rerun it, since taking out names is enough to make the ranking free of bias.",
+   "D": "Accept it, because a model has no personal stake in who is hired and so cannot favor one candidate over another."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "The ranking leans on subjective traits and an inference from a career gap rather than stated job criteria, which are common routes for bias. Rerunning against explicit criteria and having a person check the reasoning against the notes addresses that. Having no stake (D) does not prevent biased patterns, removing names (C) leaves the descriptors and gap in place, and Claude's self-assessment (A) is not a bias audit.",
+  "evidence": "Review outputs for bias, define evaluation criteria in advance, and keep a human accountable for decisions affecting people.",
+  "ref": "https://www.anthropic.com/legal/aup",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a06",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Determine when human review or additional verification is required",
+  "question": "A small-business owner used Claude to prepare four documents this week, and every draft reads well. Before sending, she wants to know which one should be reviewed by a qualified professional. Which draft is it?",
+  "options": {
+   "A": "A reworded agenda for an internal planning workshop, based on the owner's own bullet points and timings.",
+   "B": "A list of interview questions for a customer research call, adapted from the owner's existing call script and notes.",
+   "C": "A letter telling a supplier that the company will withhold payment because of an alleged breach of their contract.",
+   "D": "A plain-language version of the company's already approved returns policy, for the footer of the website."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "A letter asserting a contract breach and withholding payment creates legal and financial consequences that a fluent draft cannot guarantee are correct, so a lawyer or similar expert should review it (C). The workshop agenda (A), interview questions (B) and a plain-language rewrite of an approved policy (D) are low-stakes or already approved content that the owner can check herself.",
+  "evidence": "Outputs with legal, financial or other high-stakes consequences should be reviewed by qualified people before use.",
+  "ref": "https://www.anthropic.com/legal/aup",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a07",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Evaluate Claude-generated outputs for accuracy and completeness",
+  "question": "A support lead asked Claude to summarize the refund policy for new agents. Before publishing, she compares the summary with the source.\n\n```text\nSource: \"Annual plans may be refunded within 30 days of\npurchase. Monthly plans are non-refundable. Refunds are\nissued to the original payment method only.\"\n\nClaude's summary: \"All plans can be refunded within 30 days.\nRefunds go to the original payment method.\"\n```\n\nWhat is the problem, and what is the best fix?",
+  "options": {
+   "A": "A condition was dropped, so monthly plans look refundable; list each rule with its conditions and check the source.",
+   "B": "The payment-method sentence is unsupported; ask Claude for a citation for that line and leave the rest unchanged.",
+   "C": "The tone is informal; ask for a formal rewrite, so that agents treat the summary as the authoritative policy text from now on.",
+   "D": "The summary is too short; ask Claude to expand it with worked examples, so that new agents can see more of the policy."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The summary generalized 'annual plans' to 'all plans', silently dropping an exclusion, a common summarization failure that makes the text sound clean while changing its meaning. Listing rules with their conditions and comparing line by line fixes that. Length (D) and tone (C) are not the defect, and the payment-method line (B) is actually accurate.",
+  "evidence": "Summaries can omit conditions and exceptions; compare outputs against the source text to check completeness.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a08",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Apply fact-checking and validation techniques",
+  "question": "A procurement analyst used Claude's research mode to assess a supplier. The report ends with 'No recent regulatory actions were found against the supplier,' and the analyst wants to enter that in a risk register. How should the statement be treated?",
+  "options": {
+   "A": "As confirmed, because Claude searched across many sources and found nothing, which shows that no action exists.",
+   "B": "As 'none found in the sources searched'; check the regulator's own database before recording it as fact.",
+   "C": "As confirmed, because a research report with cited sources is accurate about what it says is absent, too.",
+   "D": "As unusable, because Claude cannot report on the absence of anything, so the line should be deleted from the report."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "A search finding nothing shows only that nothing turned up in the places searched, not that nothing exists; sources can be incomplete or miss recent filings. Checking the regulator's database closes that gap (B). Citations support what is present (C), a broad search still cannot prove absence (A), and a 'not found' result is useful as a lead, so deleting it (D) overcorrects.",
+  "evidence": "Research results reflect the sources reached; important findings, especially absences, should be verified against primary sources.",
+  "ref": "https://support.claude.com/en/articles/11095361-using-research-on-claude",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a09",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Determine when human review or additional verification is required",
+  "question": "A chief of staff used Claude to draft a board update with three kinds of content: sales statistics, a quote from a customer call, and a sentence saying the new product 'meets all GDPR requirements.' She has one day to verify the draft. Which three checks should she run? (Select THREE.)",
+  "options": {
+   "A": "Trace each statistic to the original report or dataset, and confirm both the number and the period it covers.",
+   "B": "Send the GDPR sentence to the privacy or legal team, because a compliance claim needs expert sign-off.",
+   "C": "Check the customer quote against the call recording or ticket, since it may be paraphrased or invented.",
+   "D": "Ask Claude to rate its confidence in each statistic, and keep the ones it describes as highly certain.",
+   "E": "Regenerate the draft in a second chat, and treat every statement that appears in both versions as verified."
+  },
+  "answer": [
+   "A",
+   "B",
+   "C"
+  ],
+  "rationale": "Each content type has its own check: statistics go back to the data (A), quotes go back to the recording or ticket (C), and a compliance claim goes to people qualified to approve it (B). Claude's self-rated confidence (D) is not evidence, and agreement between two generations (E) shows consistency, not truth.",
+  "evidence": "Verify numbers, quotes and compliance claims against authoritative sources; self-reported confidence is not a reliable signal.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a10",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Identify hallucinations, inconsistencies, and biases in responses",
+  "question": "A project manager asked Claude to turn her planning notes into a summary for the steering committee. She skims the result before sending.\n\n```text\nClaude's summary\n- Kickoff: Monday, March 3\n- Duration: 12 weeks\n- Phase 3 starts: Monday, April 21 (week 9)\n- Launch: Monday, May 12\n```\n\nWhat is the best way to handle this summary?",
+  "options": {
+   "A": "Accept it, because every date falls on a Monday, which shows that Claude handled the calendar correctly.",
+   "B": "Ask Claude whether its dates are right and, if it says that they are, send the summary to the committee.",
+   "C": "Rerun the prompt several times, and keep whichever set of dates appears most often across the runs.",
+   "D": "The dates conflict: week 9 would start April 28 and 12 weeks ends in late May, so recompute them from the kickoff and check the real plan."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Starting March 3, week 9 begins April 28, not April 21, and a 12-week plan runs into late May, so the summary contradicts itself. Recomputing from the kickoff date and checking the actual plan is the right check. All-Monday dates (A) prove nothing about the arithmetic, the most frequent answer (C) can repeat the same error, and asking for self-confirmation (B) is not independent verification.",
+  "evidence": "Check outputs for internal inconsistencies and recompute calculations or dates rather than trusting fluent text.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a11",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Organize and curate information and select appropriate output formats (artifacts, inline, structured data)",
+  "question": "A marketing coordinator has 200 free-text survey comments. She needs each one tagged with a theme and a sentiment, plus a representative quote per theme, ready to paste into a spreadsheet. Which output format best fits?",
+  "options": {
+   "A": "A narrative summary of about 500 words that walks through each theme and quotes customers inside the paragraphs.",
+   "B": "An interactive artifact dashboard with charts, filters and a theme explorer, built once for the whole marketing team to reuse.",
+   "C": "A bulleted list grouped by theme, with the sentiment of each comment described in a short phrase after it.",
+   "D": "A table with fixed columns for comment ID, theme, sentiment and quote, returned in the chat so it can be pasted into cells."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "The destination is a spreadsheet, so a table with defined columns gives structured data that pastes cleanly and can be sorted (D). Prose (A) and loosely formatted bullets (C) have to be re-parsed by hand, and a dashboard artifact (B) is more than the task needs and still does not hand her cells to paste.",
+  "evidence": "Choose the output format by how the result will be used; ask for explicit columns or structure when it will go into another tool.",
+  "ref": "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a12",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Edit, adapt, refine, and compare outputs for the intended audience",
+  "question": "A software company must tell small-business customers, most of them non-technical, about a dashboard outage. Claude produced two drafts, and the support lead has not yet confirmed the engineering details.\n\n```text\nDraft 1: \"At 02:14 UTC a failover in our primary database\ncluster exceeded replication-lag thresholds, causing elevated\n5xx rates for 47 minutes. A fix has been deployed.\"\n\nDraft 2: \"Early Tuesday, some customers could not open their\ndashboards for about 45 minutes. The cause was on our side,\nit is fixed, and no customer data was lost. We apologize.\"\n```\n\nWhat is the best approach?",
+  "options": {
+   "A": "Merge both drafts so the message contains every detail, and each reader can find the level they prefer to read.",
+   "B": "Use Draft 2 after engineering confirms the duration, the cause and the claim that no customer data was lost.",
+   "C": "Send Draft 2 as written, since it is already pitched at the right level and the apology covers the tone.",
+   "D": "Send Draft 1, since its precise times and technical detail demonstrate transparency and will reassure customers."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Draft 2 suits non-technical readers, but it contains factual claims, especially that no data was lost, that Claude could not know and a customer message makes public. Those need confirming with engineering before sending (B). Draft 1 (D) is pitched at the wrong audience, sending Draft 2 unchecked (C) publishes unverified claims, and merging (A) recreates the jargon problem.",
+  "evidence": "Tailor drafts to the audience, and verify factual claims in a draft before it is sent to customers.",
+  "ref": "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/be-clear-and-direct",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a13",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Identify hallucinations, inconsistencies, and biases in responses",
+  "question": "A team lead used Claude to turn managers' notes into annual performance-review summaries for 30 employees. She worries the wording may treat similar employees differently. (Select TWO.)",
+  "options": {
+   "A": "Remove employee names from the notes before drafting, since that eliminates bias from the output text.",
+   "B": "Ask Claude at the end whether any summary is biased, and keep all of them if it answers that none is.",
+   "C": "Shorten every summary to three sentences, so that there is much less room for subjective language.",
+   "D": "Have each manager check that every claim in a summary traces to their notes and the review criteria.",
+   "E": "Compare the descriptors used for employees with similar ratings, looking for differences in tone or traits."
+  },
+  "answer": [
+   "D",
+   "E"
+  ],
+  "rationale": "Bias in generated text shows up as systematic differences in wording for comparable people, so comparing descriptors across similar cases (E) surfaces it, and managers tying each claim to evidence and criteria (D) keeps a person accountable. Removing names (A) leaves the notes' content, self-assessment by Claude (B) is not an audit, and shorter text (C) can hide the same patterns.",
+  "evidence": "Check outputs for biased patterns, tie claims to evidence and criteria, and keep human reviewers accountable for people-related decisions.",
+  "ref": "https://www.anthropic.com/legal/aup",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a14",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Apply fact-checking and validation techniques",
+  "question": "A communications manager uploaded a CEO's earnings-call transcript and asked Claude for three direct quotes for a press brief. The quotes look right and fit her story. What is the most reliable quick check?",
+  "options": {
+   "A": "Open a new chat, repeat the request, and use the quotes only if both chats return the same three.",
+   "B": "Search the transcript for each quote and confirm it appears word for word, said by the CEO.",
+   "C": "Ask Claude to add a page number beside each quote, and send the brief if every quote has one.",
+   "D": "Skip the check, because a quote taken from an uploaded document cannot be invented by Claude."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "A text search of the source is a direct, independent test of whether the quote exists verbatim and who said it (B). Matching results across chats (A) shows consistency, not accuracy, and models can alter or blend wording even when a document is provided (D). Page numbers (C) can be wrong in the same way as the quotes.",
+  "evidence": "Verify quotations against the original document; ground answers in source quotes and check that they exist.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a15",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Identify hallucinations, inconsistencies, and biases in responses",
+  "question": "A procurement analyst, in a chat with no web access, asks Claude for a supplier's results for last month. Claude answers with exact revenue and margin figures and no source. The analyst needs the numbers for a negotiation call tomorrow. What is the right handling?",
+  "options": {
+   "A": "Use the figures as a negotiating baseline, since a model's estimates tend to land close to the real numbers.",
+   "B": "Ask Claude to state its confidence in each figure, and use only the ones it rates above ninety percent.",
+   "C": "Treat the figures as unverified, and get them from the supplier's own filings or a source-cited search, because Claude cannot know recent results here.",
+   "D": "Use the figures but round them, since rounded values are less likely to be wrong in an exact way."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Without web access or provided documents, Claude has no basis for last month's results, so precise unsourced numbers are likely fabricated. They must come from a primary source or a search that shows its citations (C). Rounding (D) keeps invented data, self-rated confidence (B) is unreliable, and a baseline estimate (A) is still an unsupported figure in a negotiation.",
+  "evidence": "Models can state specific figures confidently without a basis; verify facts about recent events against current, authoritative sources.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a16",
+  "source": "curated",
+  "domain": "Output Evaluation and Validation",
+  "task": "Evaluate Claude-generated outputs for accuracy and completeness",
+  "question": "A support manager pasted 40 tickets into Claude and asked for the billing share to put on a slide for the leadership team.\n\n```text\nPrompt: Here are 40 support tickets (pasted below). What share\nrelate to billing?\n\nClaude: \"Of the 500 tickets, about 73% relate to billing, which\nshows billing is the main driver of contact volume across all\nof our customers.\"\n```\n\nWhat is the most serious problem with this answer?",
+  "options": {
+   "A": "It should have listed the ticket numbers in the billing group, which would make the answer more complete.",
+   "B": "The percentage is too precise; it should be given as a range, so that readers do not over-trust a single number on the slide.",
+   "C": "It makes billing sound dominant; it should add that other ticket categories also exist in the data set.",
+   "D": "It cites 500 tickets and all customers when only 40 were supplied, so recount and label the result a sample."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "The answer invents a population (500 tickets, all customers) that the prompt never supplied and draws a company-wide conclusion from a 40-ticket sample. The figure should be recounted from the pasted tickets and framed as a sample result (D). Precision (B), missing ticket IDs (A) and caveats about other categories (C) are secondary to that unsupported scope.",
+  "evidence": "Check that claims stay within the provided data; do not generalize beyond the sample supplied.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a17",
+  "source": "curated",
+  "domain": "Troubleshooting and Optimization",
+  "task": "Identify, diagnose, and resolve issues with underperforming prompts or poor outputs",
+  "question": "A marketing manager types 'Write a campaign brief for our new product.' Claude returns a generic brief that could fit any company. She knows the audience, budget and launch date, but none of it is in the prompt. What is the best fix?",
+  "options": {
+   "A": "Repeat the request in new chats several times, and then pick whichever brief happens to fit the product best.",
+   "B": "Ask for a much longer brief, so that Claude has more room to cover audience, budget and launch date.",
+   "C": "Tell Claude to write as an award-winning creative director, so that the brief is more distinctive and original.",
+   "D": "Add the audience, budget, launch date and goal, and ask Claude to pose clarifying questions before it drafts."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "A generic output usually means missing context, not missing effort. Supplying the facts Claude cannot know, and inviting questions about gaps, fixes the cause (D). A longer brief (B) just lengthens the generic text, regenerating (A) leaves the context gap, and a persona (C) changes style without supplying the product details.",
+  "evidence": "Give Claude clear, specific context about the goal, audience and constraints; it can also ask clarifying questions before starting.",
+  "ref": "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/be-clear-and-direct",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a18",
+  "source": "curated",
+  "domain": "Troubleshooting and Optimization",
+  "task": "Adjust approach based on feedback and results",
+  "question": "An operations analyst answers quick executive questions with Claude, but its replies run past 500 words. The executives want an answer they can read in ten seconds. Which change to the prompt works best?",
+  "options": {
+   "A": "Keep the long replies, but ask Claude to bold the key sentence in each so executives can skim.",
+   "B": "Add 'be concise' once at the start of the chat, and trust Claude to keep it up in later replies.",
+   "C": "Ask for the conclusion first in at most three sentences, with detail only on request.",
+   "D": "Switch to the smallest model tier, since smaller models always give shorter answers than larger ones."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Output length is controlled by stating the format and limit the reader needs: the answer first, a hard sentence cap, and detail only when asked (C). A vague 'be concise' (B) is easily drifted from, model tier (D) does not set reply length, and bolding (A) keeps the long reply the executives do not want to read.",
+  "evidence": "Specify the desired length and format explicitly in the prompt, and iterate on the output.",
+  "ref": "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/be-clear-and-direct",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a19",
+  "source": "curated",
+  "domain": "Troubleshooting and Optimization",
+  "task": "Identify, diagnose, and resolve issues with underperforming prompts or poor outputs",
+  "question": "During a three-hour chat to plan a product launch, Claude starts contradicting decisions made earlier and drops constraints the team set at the start. The team will keep working on this launch for weeks. (Select TWO.)",
+  "options": {
+   "A": "Switch to a more capable model tier in the same long chat, since contradictions come from the model tier.",
+   "B": "Paste the entire earlier conversation into a new chat, so that nothing from the long discussion is lost.",
+   "C": "Move the standing material, such as constraints and terminology, into a Project so every new chat starts with it.",
+   "D": "Keep working in the same chat, but begin every message with 'remember everything we agreed earlier'.",
+   "E": "Ask Claude to summarize the decisions, constraints and open questions, then continue in a new chat that begins with that summary."
+  },
+  "answer": [
+   "C",
+   "E"
+  ],
+  "rationale": "Very long chats can degrade, so summarizing the key decisions and restarting (E) fixes the immediate problem, and persisting standing knowledge in a Project (C) prevents re-explaining it in every future chat. A reminder line (D) does not shorten the context, a bigger tier (A) does not remove the length issue, and pasting the full transcript (B) recreates the long context.",
+  "evidence": "Long conversations can degrade; summarize and start fresh, and keep standing knowledge in a Project.",
+  "ref": "https://support.claude.com/en/articles/9519177-how-can-i-create-and-manage-projects",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a20",
+  "source": "curated",
+  "domain": "Troubleshooting and Optimization",
+  "task": "Identify, diagnose, and resolve issues with underperforming prompts or poor outputs",
+  "question": "Three analysts run the same weekly-report prompt and get reports with different section orders, headings and lengths, so the director spends time reformatting them. The content is accurate. What fixes the inconsistency?",
+  "options": {
+   "A": "Put a fixed report template and one completed example in a shared Project's instructions, so each analyst starts from the same structure.",
+   "B": "Tell Claude in each run to be consistent with the other analysts' reports and to keep the same format.",
+   "C": "Have a single analyst generate all three reports in one long chat, so that the model keeps one writing style.",
+   "D": "Have each analyst rerun the prompt until the report looks like last week's, and send that version."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Inconsistent structure comes from an unspecified format; a defined template plus a worked example, stored where everyone shares it, makes the format part of every run (A). Rerunning until it matches (D) wastes time, asking for consistency with reports Claude cannot see (B) has no reference, and one long chat (C) risks the context degradation described for long chats.",
+  "evidence": "Define the output format explicitly and provide examples of the desired output; Projects let a team share instructions.",
+  "ref": "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/multishot-prompting",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a21",
+  "source": "curated",
+  "domain": "Troubleshooting and Optimization",
+  "task": "Adjust approach based on feedback and results",
+  "question": "A team lead has refined an email to hiring managers with Claude for three rounds, and the output keeps drifting from what she wants.\n\n```text\nRound 1  Lead: \"Write an email asking managers for interview\n         availability next week.\"\nRound 2  Lead: \"Not quite. Make it better.\"\nRound 3  Lead: \"Still not right. Less boring.\"\nRound 4  Lead: ???\n```\n\nWhich message is the best next reply?",
+  "options": {
+   "A": "\"Try again, and this time think carefully about what I want, and get it right.\"",
+   "B": "\"Keep the opening and date list. It reads like a form letter, so make it a short, friendly note under 100 words.\"",
+   "C": "\"Switch to the largest model tier, then answer my Round 2 message again, please.\"",
+   "D": "\"Paste my Round 1 request again in full, and do exactly what it says this time, with no changes at all.\""
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Useful feedback says what to keep, what is wrong, and what to change in measurable terms (B). 'Make it better' and 'less boring' gave Claude nothing to act on, and (A) repeats that gap with more pressure. Repeating the original request (D) discards the progress made, and a bigger tier (C) cannot guess an unstated preference.",
+  "evidence": "Iterate by giving specific feedback on what to keep and change, rather than general dissatisfaction.",
+  "ref": "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a22",
+  "source": "curated",
+  "domain": "Troubleshooting and Optimization",
+  "task": "Optimize workflows for efficiency and effectiveness",
+  "question": "A legal operations analyst asked Claude, in a single prompt, to read five vendor contracts, extract renewal and liability terms, compare them, and recommend which vendor to keep. The answer is shallow and misses clauses. (Select TWO.)",
+  "options": {
+   "A": "Split the work into steps: extract the terms contract by contract, then compare them, then recommend.",
+   "B": "Run the single prompt three times, and then merge the three answers into one combined comparison.",
+   "C": "Check each step's output against the contracts before using it in the next step, so errors do not carry on.",
+   "D": "Add 'be exhaustive and do not skip any clause' to the same single prompt, and then rerun the whole thing.",
+   "E": "Ask for the recommendation first and the supporting extraction afterward, all in the same response."
+  },
+  "answer": [
+   "A",
+   "C"
+  ],
+  "rationale": "Overloaded prompts produce shallow work; breaking the task into extraction, comparison and recommendation steps (A) gives each stage focus, and checking each output before the next step (C) stops an early miss from silently flowing into the recommendation. A stronger instruction (D), merged reruns (B) and reordering the same response (E) keep everything in one pass.",
+  "evidence": "Break complex tasks into smaller sequential steps, and review intermediate outputs before building on them.",
+  "ref": "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/chain-prompts",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a23",
+  "source": "curated",
+  "domain": "Troubleshooting and Optimization",
+  "task": "Optimize workflows for efficiency and effectiveness",
+  "question": "A vendor manager spends 45 minutes each Friday building a report with Claude. She wants the biggest time saving without lowering quality.\n\n```text\nWeekly routine\n1. Open a new chat and retype three paragraphs of instructions\n2. Paste last week's report as a style example\n3. Paste the six vendor spreadsheets\n4. Fix the same three layout errors by hand\n5. Soften the tone, which is always too blunt\n```\n\nWhich change removes the most repeated effort?",
+  "options": {
+   "A": "Store the instructions, layout rules, tone guidance and an example in a Project, so Friday starts with new files.",
+   "B": "Keep one chat open all year and continue it each Friday, so the instructions are already in the whole conversation.",
+   "C": "Ask Claude to proofread its own finished report each time, so that the manual layout and tone fixes disappear for good.",
+   "D": "Move to a faster model tier so that the report is generated sooner and the manual steps take less time."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Steps 1, 2, 4 and 5 repeat the same setup and corrections every week, so moving that standing knowledge into a Project removes them at the source (A). A year-long chat (B) will degrade as it grows, a self-proofread (C) does not know the unwritten layout and tone rules, and a faster tier (D) speeds only generation, not the manual work.",
+  "evidence": "Projects hold custom instructions and knowledge that carry into every conversation, avoiding repeated setup.",
+  "ref": "https://support.claude.com/en/articles/9519177-how-can-i-create-and-manage-projects",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-a24",
+  "source": "curated",
+  "domain": "Troubleshooting and Optimization",
+  "task": "Optimize workflows for efficiency and effectiveness",
+  "question": "An operations team labels about 300 short customer emails each morning into six categories using the largest model tier. Results are accurate, but the job is slow and uses a large share of the team's usage allowance. What is the best optimization?",
+  "options": {
+   "A": "Move the whole job to the smallest tier straight away, since labeling short emails is a simple task.",
+   "B": "Cut the six categories down to two, so that the job is simpler and finishes faster on the same tier.",
+   "C": "Keep the largest tier but split the 300 emails across several parallel chats, so the job runs faster.",
+   "D": "Compare a smaller tier with the current one on a sample of emails already labeled by a person."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Optimizing means testing whether a cheaper, faster tier still meets the quality bar on this specific task; a labeled sample gives a measured answer (D). Removing categories (B) changes the business output, switching without testing (A) risks lower accuracy, and parallel chats (C) do not reduce the usage consumed by the larger tier.",
+  "evidence": "Match the model to the task by testing quality, speed and cost on representative examples.",
+  "ref": "https://docs.claude.com/en/docs/about-claude/models/overview",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b01",
+  "source": "curated",
+  "domain": "Workflow Integration and Solution Design",
+  "task": "Integrate Claude into existing workflows to augment or redesign them",
+  "question": "A finance operations team of three runs the monthly expense audit shown below and wants Claude to cut the elapsed time. The controller must remain personally accountable for every write-off.\n\n```text\nMonthly expense audit (3 people, about 6 working days)\n1. Export 2,400 expense lines from the ERP to a spreadsheet\n2. Read each line and flag travel-policy breaks (about 2 days)\n3. Write a one-line query to the employee for each flag\n4. Controller reviews flags and approves write-offs\n5. Write the summary memo for the CFO\n```\n\nWhich redesign best meets both requirements?",
+  "options": {
+   "A": "Let Claude approve the write-offs in step 4 using the uploaded policy, and have the controller review a random 5% sample after each month closes.",
+   "B": "Claude screens lines against the uploaded travel policy and drafts the queries; staff spot-check, and the controller still approves write-offs.",
+   "C": "Ask Claude to condense the travel policy into a shorter version first, so the manual read in step 2 goes faster, and keep all other steps unchanged.",
+   "D": "Use Claude only for the CFO memo in step 5, since writing is the one task there that does not require reading policy rules."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "The redesign targets the slowest steps (2 and 3), where Claude can screen against the supplied policy and draft queries, while staff spot-checks and the controller's approval keep a human accountable for write-offs (B). Letting Claude approve write-offs (A) moves the decision, and a post-hoc 5% sample does not restore accountability. Automating only the memo (D) leaves the main time sink untouched. Condensing the policy (C) is a fix at the wrong layer: the manual reading would still happen.",
+  "evidence": "Assign Claude the high-volume reading and drafting steps; keep accountable humans on decisions with consequences.",
+  "ref": "https://support.claude.com/en/articles/9517075-what-are-projects",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b02",
+  "source": "curated",
+  "domain": "Workflow Integration and Solution Design",
+  "task": "Apply Claude to analyze requirements and use cases",
+  "question": "A sales director says, \"We want Claude to help the sales team.\" Before anything is built or rolled out, you are asked to analyze the requirements and the use case. Which TWO actions belong at this stage? (Select TWO.)",
+  "options": {
+   "A": "Ask Claude to brainstorm sales use cases from general knowledge, then adopt its top three as the project scope.",
+   "B": "Standardize on the highest model tier now, so capability can never become a limiting factor once the pilot starts.",
+   "C": "Open access to all 60 reps in week one, so the sheer volume of feedback quickly reveals the best use cases.",
+   "D": "Shadow three or four reps for a week to see which tasks eat their time and what a good finished output looks like.",
+   "E": "Record how long proposals and follow-up emails take today and how often they are corrected, to give the pilot a baseline to beat."
+  },
+  "answer": [
+   "D",
+   "E"
+  ],
+  "rationale": "Requirements analysis starts with the people and the work: observing real tasks and defining what good output looks like (D), and measuring today's effort and correction rate so success can be judged against a baseline (E). Choosing a tier up front (B) is a solution decision made before the need is known, and a tier should be picked by evidence of what the task requires. A full rollout (C) skips scoping and makes failures costly. Claude can help brainstorm, but adopting its generic list as scope (A) substitutes general knowledge for the team's actual needs.",
+  "evidence": "Define measurable success criteria and baselines for a use case before building or scaling it.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/define-success",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b03",
+  "source": "curated",
+  "domain": "Workflow Integration and Solution Design",
+  "task": "Communicate Claude's value and limitations to stakeholders",
+  "question": "After a four-week pilot, the legal team measured that Claude-assisted contract summaries cut review time by 40%. Lawyers also corrected a misstated termination clause in 6 of the 50 summaries checked. The COO is preparing a slide for the board. Which framing is most accurate and useful?",
+  "options": {
+   "A": "The 40% saving is a projection from published benchmark results, so no measurement on our own contracts is needed.",
+   "B": "Review time fell 40%, and the corrections are left off the slide so the board focuses on the outcome.",
+   "C": "Claude reads contracts accurately, since 44 of 50 summaries needed no change, and that rate can be expected on any contract type.",
+   "D": "Review time fell 40% in the pilot, and 6 of 50 summaries needed a lawyer's correction, so lawyers will keep verifying key clauses."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Stakeholders need the measured benefit and the measured limitation together, plus what the process does about it (D): the corrections show why human verification stays. Omitting the corrections (B) hides a material risk, and a misstated termination clause is not trivial. Extrapolating one sample to every contract type (C) overstates what 50 documents show. Replacing the pilot's own measurements with benchmark claims (A) discards the evidence that is specific to your documents.",
+  "evidence": "Claude can state things that look correct but are wrong, so users should scrutinize high-stakes output rather than rely on it as a single source of truth.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b04",
+  "source": "curated",
+  "domain": "Workflow Integration and Solution Design",
+  "task": "Communicate Claude's value and limitations to stakeholders",
+  "question": "A VP sends the message below after a demo. You support the pilot and must reply honestly about both the value and the limits.\n\n```text\nFrom: Priya Nair, VP Operations\nGreat demo! Claude summarizes our 300-page supplier contracts in about a minute.\nLet's drop the legal review for renewals under $50k and just have Claude flag\nanything unusual. Can this be live by the 1st?\n```\n\nWhich reply is best?",
+  "options": {
+   "A": "Agree for the lowest-value renewals first, then restore legal review if a dispute or loss appears after go-live.",
+   "B": "Agree, but ask Claude to attach a confidence level to every flag, so legal can skip the flagged items that Claude itself rates as high confidence.",
+   "C": "Decline, because contract work is not an appropriate use for Claude and the demo does not show otherwise.",
+   "D": "Propose a parallel run: Claude flags while legal reviews as usual for a few cycles, then compare Claude's misses before changing the review step."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "A demo shows speed, not reliability. Running Claude alongside the existing review measures its misses on your own contracts and lets the decision about removing legal review rest on evidence (D). A self-reported confidence level (B) is not a reliable accuracy signal. Removing review for low-value renewals and waiting for disputes (A) uses customers or suppliers to find the errors. Declining outright (C) ignores a use case where Claude can add real value as an assistant.",
+  "evidence": "A confident-sounding summary can still contain mistakes, and users should not treat Claude as a single source of truth for high-stakes decisions.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b05",
+  "source": "curated",
+  "domain": "Workflow Integration and Solution Design",
+  "task": "Leverage Claude for research, planning, and process optimization",
+  "question": "A team lead must compare the public security documentation of four software vendors by Friday and brief a buying committee. The committee will act on the certifications and data-residency claims. Which approach is strongest?",
+  "options": {
+   "A": "Use Claude's research capability with the four vendors and criteria named, then check the cited sources behind the decisive claims.",
+   "B": "Run four separate chats, one per vendor, and paste the answers into a single table without recording where each claim came from.",
+   "C": "Ask Claude in a standard chat for a table of each vendor's certifications from memory, then ask it to double-check its own table before the committee meets.",
+   "D": "Have Claude choose the winning vendor and write the committee recommendation, then forward it unchanged to save time before Friday."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Multi-source questions suit a research workflow that searches and cites, and the lead still checks the cited originals for the claims that drive the decision (A). A table from memory (C) is not grounded in current vendor documents, and asking Claude to re-check itself does not add an independent source. Untracked claims (B) cannot be verified later. A forwarded recommendation (D) skips the human judgment the committee needs.",
+  "evidence": "When working with search results, review the cited sources; the originals may hold context the synthesis misses.",
+  "ref": "https://support.claude.com/en/articles/11088861-use-research-on-claude",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b06",
+  "source": "curated",
+  "domain": "Workflow Integration and Solution Design",
+  "task": "Leverage Claude for research, planning, and process optimization",
+  "question": "A support operations manager wants to reduce handling time for complaints while keeping refund authority with the team lead. The current process is shown below.\n\n```text\nComplaint handling (average 1 day 17 min)\n1. Agent reads the complaint and tags the category      2 min\n2. Agent searches three wikis for the matching policy    9 min\n3. Agent writes the reply                                6 min\n4. Team lead approves refunds over $200                  1 day wait\n5. Agent sends the reply\n```\n\nWhich TWO changes cut handling time without moving refund authority? (Select TWO.)",
+  "options": {
+   "A": "Remove step 1, because tagging by hand is the slowest agent step and Claude can infer categories later.",
+   "B": "Let Claude approve refunds over $200 against the policy text so the one-day wait in step 4 disappears.",
+   "C": "Have Claude draft the reply in step 3 from the complaint and the policy, and let the agent edit and send it.",
+   "D": "Load the current policy documents into a Project's knowledge so Claude can quote the matching policy for step 2.",
+   "E": "Have Claude send replies directly to customers so the agent no longer needs to review them in step 5."
+  },
+  "answer": [
+   "C",
+   "D"
+  ],
+  "rationale": "The agent steps with the most minutes are policy search (9) and drafting (6). Giving Claude the policy documents as knowledge speeds the lookup (D), and a Claude draft that the agent edits and sends speeds the writing while the agent remains responsible (C). Letting Claude approve refunds (B) moves authority away from the team lead, which the manager ruled out. Step 1 (A) is the fastest step, not the slowest. Sending replies unreviewed (E) removes the human check on customer-facing content.",
+  "evidence": "Projects keep reference documents available in every chat so Claude can work from your own material.",
+  "ref": "https://support.claude.com/en/articles/9517075-what-are-projects",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b07",
+  "source": "curated",
+  "domain": "Workflow Integration and Solution Design",
+  "task": "Use Claude to support solution design, development, and iteration",
+  "question": "An operations lead is designing a new-hire equipment request process for a 400-person company with remote and on-site staff. Claude produced a first flow that looks tidy and complete. What is the best way to use Claude to improve the design before rollout?",
+  "options": {
+   "A": "Ask Claude to rate the flow from 1 to 10 against the requirements, then revise it until Claude reports a score of 9 or higher.",
+   "B": "Regenerate the flow five times from the same request and adopt the version that appears most often across the five attempts.",
+   "C": "Ask Claude to confirm the flow complies with the company's procurement rules, relying on its general knowledge of such rules.",
+   "D": "Have Claude play an IT admin, a remote hire and an auditor to find breakpoints, then test fixes with the real teams."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Iterating a design works best by stress-testing it against specific perspectives and failure cases, then confirming the revisions with the people who will use or control the process (D). A self-assigned score (A) measures Claude's opinion, not the flow's quality. The most frequent version (B) is just the most typical one, not the most robust. Claude does not know your procurement rules unless you provide them (C), so a confirmation would be a guess.",
+  "evidence": "Claude can write plausible text that is wrong; check what matters against your own sources and people.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b08",
+  "source": "curated",
+  "domain": "Workflow Integration and Solution Design",
+  "task": "Communicate Claude's value and limitations to stakeholders",
+  "question": "You are writing the one-page summary of a three-month Claude pilot for drafting weekly status reports. The steering group has asked for an honest account of value and limitations. Which THREE items belong in the summary? (Select THREE.)",
+  "options": {
+   "A": "Minutes saved per report, measured against the pre-pilot baseline for the same teams.",
+   "B": "Which steps still require a named person's review before a report is sent.",
+   "C": "The published benchmark scores for the model, presented as the accuracy to expect on our reports.",
+   "D": "A promise that accuracy will keep improving by itself as the team uses Claude, with no change to prompts or review.",
+   "E": "The types of errors reviewers found, such as wrong figures or invented details, and how often each occurred."
+  },
+  "answer": [
+   "A",
+   "B",
+   "E"
+  ],
+  "rationale": "An honest summary shows measured benefit against a baseline (A), the observed error types and their frequency (E), and which human checks remain (B). Quality does not rise simply from use (D); it improves through better instructions, examples and review, so that promise could not be kept. Public benchmark scores (C) describe tests, not the team's own reports, and are not a substitute for local measurement.",
+  "evidence": "Claude can produce responses that look correct but are mistaken, so users should scrutinize high-stakes output.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b09",
+  "source": "curated",
+  "domain": "Workflow Integration and Solution Design",
+  "task": "Apply Claude to analyze requirements and use cases",
+  "question": "You pasted interview notes into Claude and asked it to help turn them into requirements for a quarterly business review (QBR) deck. The notes contain statements from three stakeholders.\n\n```text\nQBR deck project: first deck due in 3 weeks, 60 accounts\nSales VP: \"One slide per account, no more.\"\nFinance:  \"Every account needs the full 8-quarter revenue table.\"\nCS lead:  \"Show risks in plain language, not numbers.\"\n```\n\nWhat is the best next step with Claude?",
+  "options": {
+   "A": "Ask Claude to rank the three stakeholders by seniority and keep the requirements of the highest-ranked ones.",
+   "B": "Ask Claude to predict which requirements most stakeholders would accept and design the template around those.",
+   "C": "Ask Claude to build one template that satisfies all three statements exactly as written, and send it to the team for use on the first deck.",
+   "D": "Ask Claude to surface the conflicts between the statements and draft questions to put to the three stakeholders in a single review."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "The statements clash: one slide per account cannot hold a full 8-quarter table plus plain-language risks without a trade-off. Claude is useful for surfacing those conflicts and preparing the questions, but the resolution belongs to the stakeholders (D). Ranking by seniority (A) discards needs without testing them. A template built to the letter (C) hides the conflict in a cramped slide. Predicting what most people accept (B) guesses at preferences instead of asking.",
+  "evidence": "Claude can structure and analyze stakeholder input, but resolving conflicting requirements takes the stakeholders' decision.",
+  "ref": "https://www.anthropic.com/constitution",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b10",
+  "source": "curated",
+  "domain": "Workflow Integration and Solution Design",
+  "task": "Integrate Claude into existing workflows to augment or redesign them",
+  "question": "A legal operations team receives about 200 NDAs a month, and roughly 70% use the company's standard form with minor edits. Attorneys are the bottleneck, and the team wants to redesign the intake process rather than only speed up each step. Which design fits?",
+  "options": {
+   "A": "Keep the current process and use Claude only to reformat attorney review comments into the standard email template.",
+   "B": "Let Claude classify each NDA as standard or non-standard and sign the standard ones, with attorneys auditing the signed NDAs each quarter.",
+   "C": "Send every NDA through Claude and have the attorneys open one only when the counterparty, a business owner or Claude itself raises an objection.",
+   "D": "Run two lanes: Claude compares each NDA with the playbook, near-standard ones get a brief attorney check, and the rest get full review."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "A redesign can match effort to risk: Claude does the comparison against the playbook, a short attorney check covers routine documents, and complex ones receive full review (D). Making attorneys optional (C) or letting Claude sign (B) removes legal accountability from binding contracts, with a quarterly audit finding problems only after they bind the company. Reformatting comments (A) leaves the bottleneck untouched.",
+  "evidence": "Claude can draft and compare documents, but its output needs human verification when the stakes are high.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b11",
+  "source": "curated",
+  "domain": "Workflow Integration and Solution Design",
+  "task": "Leverage Claude for research, planning, and process optimization",
+  "question": "You asked Claude for a 10-week plan to move a 120-person office into a new building. The draft looks thorough and well organized. Before circulating it to the workstream owners, which TWO checks matter most? (Select TWO.)",
+  "options": {
+   "A": "Compare dates and dependencies with facts only you hold, such as lease end dates, vendor lead times and building access windows.",
+   "B": "Ask Claude to expand the plan to about 200 tasks, since a more granular plan is less likely to miss anything.",
+   "C": "Ask Claude whether the plan is complete and circulate it as soon as the answer comes back as yes, to keep the schedule.",
+   "D": "Keep the plan as drafted, because it already covers the standard steps of an office move and reads as well organized.",
+   "E": "Have each workstream owner review the tasks and durations in their own area and mark what is unrealistic."
+  },
+  "answer": [
+   "A",
+   "E"
+  ],
+  "rationale": "Claude does not know your lease terms, vendor lead times or internal constraints, so the plan must be checked against those facts (A), and the people who will do the work are best placed to judge tasks and durations (E). Claude's yes (C) is a self-assessment that has no access to what is missing. Typical steps (D) are not a fit with your specific constraints. Extra tasks (B) add length, not validity.",
+  "evidence": "Claude can produce plausible content that is mistaken, so verify what the work depends on.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b12",
+  "source": "curated",
+  "domain": "Workflow Integration and Solution Design",
+  "task": "Communicate Claude's value and limitations to stakeholders",
+  "question": "A compliance lead wants Claude to write the risk-rating rationale for vendor files and asks whether it will produce the same text every time the same file is submitted, because she wants the process to be auditable. How should you explain it?",
+  "options": {
+   "A": "Adding an instruction to give the same rating every time removes the variation, so no further control is needed.",
+   "B": "Identical inputs always produce identical text as long as the prompt is saved in a Project, so audit trails are not a concern.",
+   "C": "Variation means Claude cannot be used in any process that needs an audit trail, so it should be excluded from vendor reviews.",
+   "D": "Wording can differ between runs, so the human-approved rationale becomes the record, and a fixed template keeps ratings comparable."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Responses can vary from run to run, so auditability comes from the process: a fixed template and criteria for comparability, and the reviewed, approved text kept as the record (D). Saving a prompt in a Project (B) fixes the instructions, not the wording of each response. Excluding Claude entirely (C) overreacts, since assisted drafting with human approval is auditable. An instruction (A) can reduce variation but cannot guarantee identical output.",
+  "evidence": "Claude's responses can be wrong or inconsistent, so users should scrutinize important output instead of treating it as a single source of truth.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b13",
+  "source": "curated",
+  "domain": "Governance, Risk, and Responsible Use",
+  "task": "Apply data sensitivity, regulatory, and privacy considerations",
+  "question": "An HR business partner drafts the prompt below for Claude. Company policy says to minimize personal data, treat health information as specially protected, and keep consequential employment decisions with accountable people.\n\n```text\nSummarize the performance concerns below and recommend whether we terminate.\nEmployee: Marta Gil, ID 44721, DOB 03/14/1986\nContext: on medical leave since May (chemotherapy)\nManager notes: missed 3 deadlines; \"seems distracted\"; \"not a culture fit\"\n```\n\nWhich TWO problems does the draft have? (Select TWO.)",
+  "options": {
+   "A": "It is written as one instruction, and a prompt on this topic should be split into at least five shorter ones.",
+   "B": "It uses Claude for HR work at all, because summarizing manager notes is never an appropriate task.",
+   "C": "It never tells Claude to act as an employment lawyer, so any summary will lack legal weight.",
+   "D": "It asks Claude to decide a termination, handing a consequential decision about a person to the tool instead of accountable staff.",
+   "E": "It includes health details and direct identifiers that a summary of the manager's notes does not need."
+  },
+  "answer": [
+   "D",
+   "E"
+  ],
+  "rationale": "The draft over-shares: name, ID, date of birth and a medical diagnosis are not needed to summarize the notes, which breaches data minimization and special-category handling (E). It also asks for a termination recommendation, a consequential decision that must stay with accountable HR and legal staff, with Claude at most supporting analysis (D). Assigning a lawyer role (C) would not make the output legal advice. Splitting into five prompts (A) is not a policy requirement. Summarizing notes with minimized data (B) can be appropriate, so a blanket ban is wrong.",
+  "evidence": "Be thoughtful about sharing highly sensitive personal details such as health records and confidential documents in chats.",
+  "ref": "https://support.claude.com/en/articles/8325621-i-would-like-to-input-sensitive-data-into-my-chats-with-claude-who-can-view-my-conversations",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b14",
+  "source": "curated",
+  "domain": "Governance, Risk, and Responsible Use",
+  "task": "Follow organizational AI policies and governance standards",
+  "question": "A marketing manager has a press release that mentions an unannounced acquisition. She wants Claude to polish it, but the company workspace login is slow today, and she has a personal Claude account open in another tab. Her company's policy says:\n\n```text\nAcme AI Use Policy (excerpt)\n3.1 Approved tool: Claude in the company workspace only.\n3.2 Confidential and Restricted information may be entered only in approved tools.\n3.3 Unannounced transactions are classified Restricted.\n3.4 External content must be reviewed by its named owner before release.\n```\n\nWhat should she do?",
+  "options": {
+   "A": "Paste the draft into her personal account and ask Claude whether doing so is allowed under the policy.",
+   "B": "Use the approved company workspace once it responds, or edit by hand if the deadline cannot wait for the slow login.",
+   "C": "Replace the acquired company's name with a placeholder, then paste the draft into her personal account.",
+   "D": "Switch off model-improvement sharing in her personal account's privacy settings, then paste the draft there and delete the chat afterward."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "The release is Restricted (3.3), and Restricted information may only go into the approved workspace (3.1, 3.2). A privacy setting (D) does not make a personal account an approved tool. Masking one name (C) leaves other deal details that still make the content Restricted. Asking Claude (A) cannot grant permission: it does not know Acme's policy, and the paste would already have happened. Organizational policy outranks personal convenience.",
+  "evidence": "Be thoughtful about sharing confidential business documents; consumer-account privacy settings do not replace your organization's rules.",
+  "ref": "https://support.claude.com/en/articles/8325621-i-would-like-to-input-sensitive-data-into-my-chats-with-claude-who-can-view-my-conversations",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b15",
+  "source": "curated",
+  "domain": "Governance, Risk, and Responsible Use",
+  "task": "Understand the ethical implications of AI usage",
+  "question": "A recruiter wants Claude to rank 300 applications for a customer-service role. She suggests including the profiles of the last 20 people the company hired and promoted as the model for a good candidate. The company is committed to fair hiring. Which approach is most responsible?",
+  "options": {
+   "A": "Strip names and photos from the applications, then trust the ranking because the identity signals are no longer present.",
+   "B": "Ask Claude to state at the end of its ranking whether any bias affected the result, and accept its answer as the check.",
+   "C": "Have Claude summarize against criteria set in advance; recruiters decide and compare outcomes across groups.",
+   "D": "Let Claude rank against the profiles of past hires and promotions, since proven performers define success in this role."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Fair use keeps humans deciding, ties evaluation to job-relevant criteria set beforehand, and checks results for disparities (C). Removing names and photos (A) leaves proxies such as school, address or gaps in employment. Claude's self-report (B) is not a reliable bias test. Modeling candidates on past hires (D) copies whatever patterns shaped who was hired and promoted before, including historical bias.",
+  "evidence": "Claude can reflect patterns in its inputs; fair outcomes require people to define criteria, make decisions and check results.",
+  "ref": "https://www.anthropic.com/constitution",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b16",
+  "source": "curated",
+  "domain": "Governance, Risk, and Responsible Use",
+  "task": "Identify appropriate and inappropriate use cases",
+  "question": "A department's AI policy says Claude may assist with work, but it may not make or finalize consequential decisions about people, and anyone who uses its output remains accountable for it. Which THREE uses fit that policy? (Select THREE.)",
+  "options": {
+   "A": "Summarizing a public regulatory notice for an analyst who will check the cited sections before using them.",
+   "B": "Brainstorming names and angles for a public product launch that a team will then evaluate.",
+   "C": "Issuing final medical-leave eligibility decisions to employees directly from the submitted forms, without review.",
+   "D": "Ranking 40 grant applicants and automatically sending funding to the ten highest-ranked ones without further sign-off.",
+   "E": "Drafting talking points for a manager's planned performance conversation, which the manager edits and owns."
+  },
+  "answer": [
+   "A",
+   "B",
+   "E"
+  ],
+  "rationale": "The permitted uses keep a person accountable and involve no automated consequence for an individual: a summary checked against the source (A), talking points the manager edits and owns (E), and brainstorming evaluated by a team (B). Awarding funding automatically (D) and issuing final leave decisions (C) are consequential decisions about people made by the tool, which the policy forbids.",
+  "evidence": "Anthropic's usage policy expects human oversight and disclosure for high-stakes automated decisions affecting people.",
+  "ref": "https://www.anthropic.com/legal/aup",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b17",
+  "source": "curated",
+  "domain": "Governance, Risk, and Responsible Use",
+  "task": "Understand the ethical implications of AI usage",
+  "question": "A manager used Claude to draft an annual performance review, then rewrote parts of it using her own observations of the employee's work. The employee asks, \"Did you write this yourself?\" Which answer is most honest and sustainable?",
+  "options": {
+   "A": "It is Claude's assessment of the employee's work, and she cannot explain its conclusions beyond what it wrote.",
+   "B": "She should withdraw the review and rewrite it from scratch without AI to avoid any dispute about authorship.",
+   "C": "Yes, because she edited every section and the final judgments are entirely hers, so no mention of Claude is needed.",
+   "D": "Claude helped draft it, but the assessments reflect her own observations, and she can walk through them."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Transparency means being open that AI helped while taking ownership of the content: she reviewed it, the judgments are based on what she observed, and she can explain them (D). Claiming sole authorship (C) is misleading even if she edited heavily. Withdrawing the review (B) is unnecessary if disclosure and ownership are in place. Handing responsibility to the tool (A) abandons the accountability that remains with the manager.",
+  "evidence": "Claude should not deceive people about the use of AI, and the people who use its output remain accountable for it.",
+  "ref": "https://www.anthropic.com/constitution",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b18",
+  "source": "curated",
+  "domain": "Governance, Risk, and Responsible Use",
+  "task": "Apply data sensitivity, regulatory, and privacy considerations",
+  "question": "A QA analyst posts the plan below in the support team's channel. The company's approved workspace for Claude exists, but no one from privacy or legal has seen this project.\n\n```text\n#support-ops\nDan: Plan for the QA pilot: export last quarter's 5,000 call transcripts\n(callers read out card numbers and give names). Paste them into Claude\nin batches to score agent empathy. It's internal analytics, so it's fine.\n```\n\nWhat is the best response?",
+  "options": {
+   "A": "Redact card numbers and names, then get privacy and legal to confirm the approved tool may handle the rest.",
+   "B": "Go ahead in batches of 50 transcripts, so that no single paste exposes more than a small amount of customer data.",
+   "C": "Go ahead, because analytics kept inside the company do not count as sharing personal data, and the approved workspace is already in place.",
+   "D": "Go ahead, and instruct Claude in the prompt to disregard the card numbers while it scores each agent's empathy."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "The task, scoring empathy, does not need card numbers or names, so minimize the data first, and a project that handles customer personal data needs privacy and legal review before it starts (A). Calling it internal (C) does not change what the data is or how it is regulated. Smaller batches (B) expose the same data in total. An instruction to ignore card numbers (D) still sends them to the tool, which is the exposure.",
+  "evidence": "Be thoughtful about sharing financial information such as card numbers and confidential documents.",
+  "ref": "https://support.claude.com/en/articles/8325621-i-would-like-to-input-sensitive-data-into-my-chats-with-claude-who-can-view-my-conversations",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b19",
+  "source": "curated",
+  "domain": "Governance, Risk, and Responsible Use",
+  "task": "Understand the ethical implications of AI usage",
+  "question": "A product launch is tomorrow, and the landing page has an empty testimonials section. The marketing manager asks Claude for five customer quotes with first names and job titles \"to hold the spot until real ones arrive.\" What is the most appropriate response?",
+  "options": {
+   "A": "Skip invented quotes: use consented customer quotes or a result you can substantiate, such as a pilot metric.",
+   "B": "Publish the quotes now and swap in real ones as they arrive, since the page is only live for a few days.",
+   "C": "Have Claude imitate the tone of genuine review sites so the invented quotes read as believable.",
+   "D": "Publish the quotes with first names shortened to initials, since the people could not be identified from them and the page is temporary."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Fabricated testimonials present invented people as real customers, which deceives readers and is a legal and trust problem whatever the intended duration. A substantiated alternative meets the deadline honestly (A). Initials (D) still imply real customers. A short run (B) is still deception while it is live. Making them more believable (C) increases the deception.",
+  "evidence": "Claude should not help create false impressions in people's minds.",
+  "ref": "https://www.anthropic.com/constitution",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b20",
+  "source": "curated",
+  "domain": "Governance, Risk, and Responsible Use",
+  "task": "Apply data sensitivity, regulatory, and privacy considerations",
+  "question": "An HR team of 12 wants to connect a shared drive to Claude so it can answer onboarding questions. The drive holds onboarding guides and also salary files that only the compensation team may see. Which TWO actions best protect the salary data? (Select TWO.)",
+  "options": {
+   "A": "Add an instruction telling Claude not to open any file that has \"salary\" in its file name or title.",
+   "B": "Ask Claude to anonymize the salary files and summarize them for the team, so the figures can be shared.",
+   "C": "Confirm the salary files' sharing settings limit them to the compensation team, since Claude works with each person's own access.",
+   "D": "Connect one administrator's account for the whole team, so everyone gets identical answers and the same view.",
+   "E": "Connect only the onboarding folder, so the salary files sit outside what Claude can reach for this task."
+  },
+  "answer": [
+   "C",
+   "E"
+  ],
+  "rationale": "Protection comes from access, not from instructions: limit what is connected to what the task needs (E), and make sure the underlying permissions on the salary files are correct, since a connection can only reach what the connecting person can reach (C). An instruction (A) is probabilistic and can fail. A shared administrator account (D) gives everyone the administrator's reach. Summarizing the salary files (B) exposes their content to people who may not see them.",
+  "evidence": "Claude mirrors the connected person's existing permissions in Google Workspace; it can only access what that account can.",
+  "ref": "https://support.claude.com/en/articles/10166901-use-google-workspace-connectors",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b21",
+  "source": "curated",
+  "domain": "Governance, Risk, and Responsible Use",
+  "task": "Follow organizational AI policies and governance standards",
+  "question": "While summarizing a spreadsheet, an analyst notices that it contains customers' government ID numbers. Policy prohibits entering that data in any AI tool, and she had already pasted the sheet into a chat. What is the best next step?",
+  "options": {
+   "A": "Delete the conversation right away and carry on; with the chat gone, there is nothing to report.",
+   "B": "Tell the security or privacy contact promptly what was shared and where, and follow their instructions.",
+   "C": "Say nothing unless someone asks, since the summary she needed is already complete.",
+   "D": "Ask Claude to confirm that it has forgotten the numbers, and continue if it agrees."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Incidents involving regulated data are reported promptly so the people responsible can assess exposure and decide on remediation, and early reporting is what limits harm (B). Deleting the chat quietly (A) skips the required report and may not remove everything. Waiting (C) delays response. Claude's statement that it forgot (D) is not evidence of anything and is not a control.",
+  "evidence": "Avoid sharing highly sensitive details such as financial identifiers; follow your organization's process when it happens.",
+  "ref": "https://support.claude.com/en/articles/8325621-i-would-like-to-input-sensitive-data-into-my-chats-with-claude-who-can-view-my-conversations",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-b22",
+  "source": "curated",
+  "domain": "Governance, Risk, and Responsible Use",
+  "task": "Identify appropriate and inappropriate use cases",
+  "question": "An insurance claims team uses Claude to draft a recommendation for each claim, and reviewers must approve it. In the first month, reviewers approved 98% of the drafts in under 30 seconds each, and no one has checked the claim files in those cases. What is the right conclusion?",
+  "options": {
+   "A": "Reviewers should accept recommendations that Claude marks as high confidence and examine only those it marks as uncertain.",
+   "B": "The 98% approval rate shows Claude's recommendations are accurate, so reviewer time can safely be reduced to speed up payouts.",
+   "C": "Reviews are becoming rubber stamps, so require reviewers to verify key facts in the file and track how often they overturn a draft.",
+   "D": "Claude should decide the lowest-value claims on its own, since reviewers approve nearly all of them anyway."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "Fast, near-universal approval suggests reviewers may be trusting the draft instead of checking it, so the human step needs to be a real control: required verification of key facts against the file and a measure of overturned drafts (C). An approval rate (B) can reflect complacency, not accuracy. Confidence labels from Claude (A) are not a reliable accuracy signal. Removing the human from low-value claims (D) turns a weak control into none, for decisions that still affect customers.",
+  "evidence": "Language models can state incorrect things persuasively, so human reviewers need to check the underlying facts.",
+  "ref": "https://support.claude.com/en/articles/8525154-claude-is-providing-incorrect-or-misleading-responses-what-s-going-on",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c01",
+  "source": "curated",
+  "domain": "Prompting and Task Execution",
+  "task": "Create effective prompts for business and technical tasks",
+  "question": "A communications lead sent Claude the prompt below with the Q3 results deck attached. Every draft is either a two-line blurb or a six-page document, and she cannot tell why the length keeps swinging. What should she change first?\n\n```text\nSummarize the attached Q3 results for the leadership team in under 100 words.\nMake sure to cover every region, every product line, all 12 KPIs, and the main risks in detail.\nKeep it punchy.\n```",
+  "options": {
+   "A": "Repeat the 100-word limit at the end of the prompt and mark it as the top priority, so Claude stops expanding.",
+   "B": "Swap \"punchy\" for \"thorough\" so the tone instruction agrees with the amount of coverage requested.",
+   "C": "Decide which demand wins: ask for a short summary now and the full region and KPI detail as a second piece.",
+   "D": "Give Claude the role of a senior financial communications expert, so it knows how to balance brevity and coverage."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "The prompt asks for two incompatible things: under 100 words and every region, product line and KPI in detail. Claude resolves the conflict differently each time, so the fix is to decide what the reader needs and split it into two deliverables (C). Repeating the limit (A) still leaves an impossible coverage demand. A role (D) does not settle which instruction wins, and changing the tone word (B) leaves the length conflict untouched.",
+  "evidence": "Prompting guidance asks for clear, direct instructions; contradictory requirements in one prompt produce inconsistent output.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/be-clear-and-direct",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c02",
+  "source": "curated",
+  "domain": "Prompting and Task Execution",
+  "task": "Apply task decomposition techniques to structure complex requests",
+  "question": "A legal operations analyst asks Claude, in one prompt, to compare a 45-page vendor contract with the company's 20-point clause checklist, rate the risk of each gap, and draft a negotiation memo. The memo reads well but misses two gaps an attorney spots at once, and nobody can see where the checking went wrong. Which approach fixes both problems?",
+  "options": {
+   "A": "Add \"check every clause exhaustively\" to the prompt and ask Claude to double-check the memo before it finishes it.",
+   "B": "Run it in stages: match clauses to each checklist point, assess the gaps, then draft the memo, reviewing each output.",
+   "C": "Ask for the memo first, then request the clause-by-clause comparison afterward as evidence supporting the memo.",
+   "D": "Split the contract into three equal page ranges, run the same combined prompt on each range, and merge the three memos."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Decomposing the task into stages makes each intermediate result visible, so a missed clause is caught at the matching stage instead of surfacing only in a polished memo (B). Cutting the contract into page ranges (D) breaks cross-references between clauses and still hides the reasoning. An emphasis line plus self-check (A) leaves everything in one opaque step. Producing the comparison after the memo (C) turns it into after-the-fact justification rather than a check.",
+  "evidence": "Breaking a complex task into sequential subtasks improves accuracy and makes each step easier to inspect.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/chain-prompts",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c03",
+  "source": "curated",
+  "domain": "Prompting and Task Execution",
+  "task": "Iterate prompts to improve output quality",
+  "question": "A development officer asked Claude for a donor thank-you email. The draft is accurate but stiff and twice as long as she wanted, and she has a meeting in ten minutes. Which TWO follow-up messages are most likely to get a usable version quickly? (Select TWO.)",
+  "options": {
+   "A": "Quote the two stiffest sentences, say what tone you want instead, and offer a past email you liked as a model.",
+   "B": "Reply \"make it better and more personal\" and let Claude decide what to change, since it can see the draft.",
+   "C": "Ask Claude to score its own draft against your preferences and keep revising until it gives itself a nine.",
+   "D": "Open a new chat, paste the original request unchanged, and regenerate until one version is short enough.",
+   "E": "Give a target of about 120 words, name the facts that must stay (gift amount, program name), and ask for a revision."
+  },
+  "answer": [
+   "A",
+   "E"
+  ],
+  "rationale": "Effective iteration gives specific, actionable feedback on what to change. Pointing to the stiff sentences and the tone wanted fixes the style (A), and a length target with must-keep facts fixes the length without losing content (E). A vague request for \"better\" (B) leaves Claude guessing. Regenerating from scratch (D) throws away the useful draft and relies on luck. Self-scoring (C) rewards Claude's own opinion rather than the officer's stated needs.",
+  "evidence": "Follow-up feedback that names the specific change wanted, with examples, steers the next draft more than a vague request.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/be-clear-and-direct",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c04",
+  "source": "curated",
+  "domain": "Prompting and Task Execution",
+  "task": "Adapt prompting strategies based on task type (analysis, research, drafting, brainstorming)",
+  "question": "A marketing manager asks Claude for launch ideas for a reusable water bottle and gets five similar, safe taglines. She wants a wide spread to bring to her team this afternoon, and she will choose the best herself. Which prompt change fits a brainstorming task best?",
+  "options": {
+   "A": "Ask for thirty ideas from distinct angles (humor, price, community), judging them in a later step.",
+   "B": "Add last year's winning campaign as an example and ask for new ideas in the same style as that campaign.",
+   "C": "Require each idea to be backed by a market statistic, so every suggestion is grounded in real evidence.",
+   "D": "Ask for the single strongest campaign idea with a full justification, so weaker options do not dilute the answer."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Brainstorming rewards quantity and variety, with evaluation deferred. Asking for many ideas from deliberately different angles, and judging later, widens the spread (A). Requesting one best idea (D) is the opposite of what she needs. A winning example (B) anchors Claude on one style and narrows the output. Demanding evidence for each idea (C) applies an analysis constraint that filters out unusual options too early.",
+  "evidence": "Prompts should match the task type; open-ended generation benefits from asking for varied options before narrowing.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c05",
+  "source": "curated",
+  "domain": "Prompting and Task Execution",
+  "task": "Adapt prompting strategies based on task type (analysis, research, drafting, brainstorming)",
+  "question": "A finance analyst pastes a table of monthly revenue by region and asks Claude, \"What's going on here?\" The answer is a fluent story about seasonal trends that she cannot trace to any figure, and she must defend her findings to the CFO. What should she change?",
+  "options": {
+   "A": "Ask Claude to fill the table's missing months with estimates first, so the trend analysis works from complete data.",
+   "B": "Ask a specific question with a comparison base, and request the calculation behind each claim plus any data gaps.",
+   "C": "Ask for several different interpretations of the trends, then pick the one that reads most convincingly.",
+   "D": "Ask Claude to give only its conclusion in one sentence, so there is no explanation to second-guess."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "Analysis prompts need a precise question, a comparison base, and visible working so each claim can be traced to the data and checked (B). Letting Claude invent missing months (A) adds made-up data to the analysis. Collecting several interpretations (C) produces narratives, not defended findings. A one-sentence conclusion (D) removes the very working she needs to verify.",
+  "evidence": "For analysis, state the question and criteria and ask Claude to show its reasoning so results can be checked against the data.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c06",
+  "source": "curated",
+  "domain": "Prompting and Task Execution",
+  "task": "Adapt prompting strategies based on task type (analysis, research, drafting, brainstorming)",
+  "question": "A strategy associate wrote the prompt below to research competitors of the company's payroll software. The result is a long, generic overview with no clear use, and the director cannot tell where any claim came from. Which TWO changes would most improve it? (Select TWO.)\n\n```text\nYou are an expert analyst. Research our payroll software competitors.\nBe thorough and include everything relevant.\nPut a table at the end.\n```",
+  "options": {
+   "A": "Ask for a source link beside every claim, and for any claim resting on a single source to be flagged.",
+   "B": "Ask Claude to answer from memory only, since web pages may carry marketing claims that distort the facts.",
+   "C": "Expand the role to \"a world-leading analyst with 25 years of experience in HR technology\".",
+   "D": "Cap the answer at 100 words so that Claude is forced to include only the most important points.",
+   "E": "State the decision the research supports and its scope: which competitors, which markets, which time period."
+  },
+  "answer": [
+   "A",
+   "E"
+  ],
+  "rationale": "Research prompts work when the purpose and scope are explicit, so Claude knows what \"relevant\" means (E), and when sources are requested so claims can be verified and thin evidence is visible (A). A longer role description (C) adds no direction. A 100-word cap (D) cannot hold a competitor comparison. Answering from memory (B) removes the traceable sources the director needs and invites outdated or invented detail.",
+  "evidence": "Good research prompts define scope and purpose and ask for sources so claims can be verified.",
+  "ref": "https://support.claude.com/en/articles/11088861-use-research-on-claude",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c07",
+  "source": "curated",
+  "domain": "Prompting and Task Execution",
+  "task": "Create effective prompts for business and technical tasks",
+  "question": "An operations manager needs a shift-swap policy for 120 warehouse staff. She does not know what the union agreement says about notice periods, and Claude cannot know it either. She wants a draft to take to HR, not guesses dressed up as policy. Which opening prompt fits best?",
+  "options": {
+   "A": "Ask Claude to write the policy and trust it to choose sensible defaults for anything left unspecified.",
+   "B": "Paste a shift-swap policy from another employer and ask Claude to adapt it to a warehouse setting.",
+   "C": "Ask for three complete policies, each built on a different assumption about notice periods, to compare them.",
+   "D": "Describe the site and goals, then tell Claude to ask the questions it needs answered before drafting."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "When key facts are missing and only the requester has them, inviting Claude to ask clarifying questions first surfaces the gaps instead of hiding them (D). Three assumption-based versions (C) multiply drafts built on facts nobody confirmed. Adapting another employer's policy (B) imports that employer's rules and anchors the draft. Trusting defaults (A) is exactly the guessing she wants to avoid.",
+  "evidence": "Prompting guidance suggests giving context and letting Claude ask for missing information instead of assuming it.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/be-clear-and-direct",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c08",
+  "source": "curated",
+  "domain": "Prompting and Task Execution",
+  "task": "Create effective prompts for business and technical tasks",
+  "question": "A support team lead used the prompt below to turn 40 customer complaints into case summaries. The summaries are neatly formatted, but every one, including billing disputes and login problems, ends with \"replace item and review packaging vendor\". What is the most likely cause and the best fix?\n\n```text\nConvert each complaint into a case summary in our standard format.\nExample:\nComplaint: \"Order 4471 arrived broken, third time this year!!\"\nSummary: Product damage (repeat). Order 4471. Action: replace item and review packaging vendor.\nComplaints:\n1. ...\n```",
+  "options": {
+   "A": "Claude is copying the lone example's content along with its format; add varied examples and say only the format is fixed.",
+   "B": "Processing 40 complaints in one batch makes Claude lose track of each one, so run them in groups of five.",
+   "C": "The example is too short for Claude to infer the format, so write a longer example with more fields and detail.",
+   "D": "Claude is ignoring the example, so drop it and describe the format in words, since examples invite memorizing."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "With a single example, Claude treats everything in it, including the action line, as part of the pattern. Several varied examples, plus a note that only the structure is fixed, show what changes between cases (A). A longer single example (C) adds more content to copy. Batch size (B) would cause missing or mixed-up cases, not one repeated action. Dropping the example (D) discards the strongest way to specify format; the problem is its lack of variety.",
+  "evidence": "Examples are powerful for format; make them diverse and relevant so Claude does not over-copy a single pattern.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/multishot-prompting",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c09",
+  "source": "curated",
+  "domain": "Prompting and Task Execution",
+  "task": "Apply task decomposition techniques to structure complex requests",
+  "question": "An analyst pastes three vendor proposals and her question into one message, with no separators. Claude's comparison credits Vendor C with Vendor B's support terms and overlooks a pricing clause. Which TWO changes best address this? (Select TWO.)",
+  "options": {
+   "A": "Label each proposal with its vendor name, and keep the question and instructions apart from the text.",
+   "B": "Ask Claude to tag each point with the vendor and section it came from, so errors can be checked.",
+   "C": "Add a line telling Claude to pay very close attention and to be careful not to mix up the vendors' terms.",
+   "D": "Delete the instructions and ask only \"compare these\", so the proposals take up most of the message.",
+   "E": "Merge the three proposals into one combined document so Claude reads them as a single source of truth."
+  },
+  "answer": [
+   "A",
+   "B"
+  ],
+  "rationale": "Mixed-up attributions come from unstructured input. Clear labels and a separation of instructions from material let Claude tell the documents apart (A), and asking for a vendor and section tag on every point makes any remaining error easy to spot and verify (B). Merging the proposals (E) erases the boundaries that matter. A warning line (C) changes nothing structural. Removing the instructions (D) leaves Claude to guess what to compare.",
+  "evidence": "Structure multi-document prompts with clear labels and separate instructions from content; ask for references to sources.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/use-xml-tags",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c10",
+  "source": "curated",
+  "domain": "Prompting and Task Execution",
+  "task": "Iterate prompts to improve output quality",
+  "question": "A marketing analyst is improving a prompt that classifies survey comments. In one round she rewrote the role, added three rules, changed the output format, and shortened the examples. Accuracy on her ten test comments dropped, and she cannot tell which edit hurt. What should she do next?",
+  "options": {
+   "A": "Reapply the edits one at a time, rerunning the same ten comments after each to see which one hurt.",
+   "B": "Return to the first version for good, since the later edits only added complexity and tend not to help.",
+   "C": "Keep adding rules aimed at the worst comments until all ten come out correct.",
+   "D": "Ask Claude which of her four changes caused the drop and apply its answer as the fix."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Iterating well means changing one element at a time and comparing against the same test inputs, so each change's effect is measurable (A). Abandoning all edits (B) throws away improvements that may have worked. Claude cannot know which edit hurt without testing (D), and its guess is untested. Adding rules for the failing comments (C) overfits to ten examples and risks new failures elsewhere.",
+  "evidence": "Test prompt changes against a fixed set of examples and change one thing at a time to see what helps.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c11",
+  "source": "curated",
+  "domain": "Product and Model Selection",
+  "task": "Differentiate between Claude model types (Haiku, Sonnet, Opus)",
+  "question": "A legal team uses Claude to review 60-page acquisition agreements, about three a month, with two days per agreement. Last month a Sonnet-tier pass missed a conflict between an indemnity clause and a liability cap, which an attorney caught. Missed conflicts are costly. Which model choice best fits?",
+  "options": {
+   "A": "Try the most capable tier, Opus, for this low-volume, high-stakes task, keeping attorney review.",
+   "B": "Switch to Haiku, because the fastest model would leave more of the two days available for human review.",
+   "C": "Keep Sonnet and run each review twice, treating agreement between the two runs as proof of correctness.",
+   "D": "Choose whichever model accepts the longest document, since the miss came from the agreement's length."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Volume is low, time is not the constraint, and a missed conflict is expensive, so deeper reasoning is worth the extra cost; the attorney's review stays as the safeguard (A). Haiku (B) trades depth for speed the team does not need. Two identical runs (C) can repeat the same oversight, and agreement proves nothing. A 60-page agreement is not the limiting factor (D); the miss was a reasoning failure across clauses.",
+  "evidence": "The more capable tier suits complex, high-stakes reasoning; faster, cheaper tiers suit simple or high-volume work.",
+  "ref": "https://platform.claude.com/docs/en/about-claude/models/overview",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c12",
+  "source": "curated",
+  "domain": "Product and Model Selection",
+  "task": "Align model selection with task requirements (cost, speed, quality)",
+  "question": "An operations team assigned models to three recurring Claude tasks, as shown. Monthly spend is high and the director rates the strategy memo as shallow. Which reassignment best matches model tier to task?\n\n```text\nTask                               Per day   Model\nTag incoming tickets by topic       2,400    Opus\nDraft the quarterly strategy memo       1    Haiku\nSummarize 5-line status updates       300    Opus\n```",
+  "options": {
+   "A": "Move all three tasks to Sonnet, so one balanced model serves the whole team.",
+   "B": "Move the memo to Opus and leave the two high-volume tasks where they are, for consistency.",
+   "C": "Move ticket tagging to Haiku and keep status summaries on Opus, because summarizing needs depth.",
+   "D": "Move ticket tagging and status summaries to Haiku, and move the strategy memo to Opus."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "The exhibit has the tiers upside down: the heavy, simple tasks run on the most expensive model and the single demanding task on the lightest. Putting routine tagging and short summaries on Haiku and giving the memo the deepest model cuts cost and improves quality (D). Fixing only the memo (B) leaves most of the spend. A single middle tier (A) overpays for the simple tasks and may still underserve the memo. Five-line updates (C) do not need Opus.",
+  "evidence": "Match the model tier to task difficulty and volume: lightweight models for simple, high-volume work, stronger ones for complex reasoning.",
+  "ref": "https://platform.claude.com/docs/en/about-claude/models/overview",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c13",
+  "source": "curated",
+  "domain": "Product and Model Selection",
+  "task": "Select appropriate Claude product features (Projects, research mode, chat, artifacts)",
+  "question": "A four-person finance team builds the monthly board deck. Each month someone pastes the brand guidelines and last month's deck into a new chat, and each person's deck comes out styled differently. Which setup would fix the inconsistency most directly?",
+  "options": {
+   "A": "Switch the team to research mode, so Claude looks up the brand rules each time it builds a deck.",
+   "B": "Keep a single long chat open all month, so the guidelines stay in context and everyone adds to the same chat.",
+   "C": "Ask each person to save the brand rules in their personal preferences, so Claude applies them in every chat.",
+   "D": "Create a Project with the guidelines and last deck as knowledge plus style instructions, used by everyone."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "A Project gives every team member the same standing knowledge and instructions in each new chat, so output no longer depends on who pastes what (D). A month-long chat (B) degrades as it grows and is not shared among four people. Personal preferences (C) belong to one individual's account, so the four decks stay inconsistent. Research mode (A) searches for outside information and has no access to the company's brand rules.",
+  "evidence": "Projects keep documents and instructions available to every chat in the project.",
+  "ref": "https://support.claude.com/en/articles/9517075-what-are-projects",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c14",
+  "source": "curated",
+  "domain": "Product and Model Selection",
+  "task": "Select appropriate Claude product features (Projects, research mode, chat, artifacts)",
+  "question": "A strategy analyst must brief her director by Friday on how five national regulators treat AI-generated advertising. The material is public, sources must be current, and every claim needs a traceable link. Which feature is the best fit?",
+  "options": {
+   "A": "An artifact, so the findings are presented as an interactive page the director can open and explore.",
+   "B": "A Project, with instructions that list the five regulators and the sections the briefing should cover.",
+   "C": "A standard chat, asking Claude to summarize each regulator from its own knowledge and add references.",
+   "D": "Research mode, which searches many web sources and returns a report with citations she can check."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "The task needs current, multi-source public information with citations, which is what research mode is built for; she still checks the cited links (D). A plain chat answering from Claude's own knowledge (C) can be out of date and may produce references that do not exist. A Project (B) organizes standing context but does not search the web. An artifact (A) is a way to present content, not a way to find it.",
+  "evidence": "Research searches across the web and other sources and returns a cited report for questions that need multiple sources.",
+  "ref": "https://support.claude.com/en/articles/11088861-use-research-on-claude",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c15",
+  "source": "curated",
+  "domain": "Product and Model Selection",
+  "task": "Understand and manage context limitations and memory considerations (when to restart, summarize, or persist)",
+  "question": "During a three-hour chat, a customer-insights lead and Claude defined segments, set exclusion rules, and agreed a scoring method. Now Claude has started applying an earlier, rejected scoring rule and misstating a segment definition. What is the best next step?",
+  "options": {
+   "A": "Ask Claude to summarize the settled definitions and rules, then start a new chat from that summary.",
+   "B": "Switch the same chat to a more capable model, which can hold more of the earlier conversation at once.",
+   "C": "Keep going in the same chat and restate each rule again whenever Claude gets one of them wrong.",
+   "D": "Ask Claude to forget the rejected scoring rule so that it no longer influences its answers."
+  },
+  "answer": [
+   "A"
+  ],
+  "rationale": "Very long conversations accumulate superseded material that competes with current decisions. Summarizing the settled definitions, checking the summary, and starting fresh from it keeps the useful context and drops the noise (A). Patching errors one at a time (C) leaves the clutter in place. Changing the model (B) does not remove the rejected rule from the conversation. Claude cannot delete earlier messages from its context on request (D).",
+  "evidence": "Long conversations can degrade; summarizing and starting a new chat preserves key context.",
+  "ref": "https://support.claude.com/en/articles/8606394-how-large-is-the-context-window-on-paid-claude-plans",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c16",
+  "source": "curated",
+  "domain": "Product and Model Selection",
+  "task": "Understand and manage context limitations and memory considerations (when to restart, summarize, or persist)",
+  "question": "A consultant works with Claude on one client engagement over six weeks. Each new chat starts without the client glossary and earlier decisions, and she spends ten minutes re-explaining. She wants continuity without a bloated single conversation. Which TWO practices help most? (Select TWO.)",
+  "options": {
+   "A": "Paste the full transcripts of all earlier chats into each new chat so that nothing is ever lost.",
+   "B": "Keep the glossary and a running decisions log as Project knowledge, updated after each work session.",
+   "C": "Keep one chat open for the whole six-week engagement so that everything stays in view for Claude.",
+   "D": "Use a fresh chat for each deliverable inside the Project, starting from the current knowledge.",
+   "E": "Assume Claude will recall earlier chats unprompted, and skip writing any decisions down yourself."
+  },
+  "answer": [
+   "B",
+   "D"
+  ],
+  "rationale": "Persisting standing facts in Project knowledge means every new chat begins with the same agreed context (B), and one chat per deliverable keeps each conversation short and focused (D). A six-week chat (C) grows long and degrades. Pasting transcripts (A) refills the context with noise. Counting on Claude to recall earlier chats (E) leaves critical decisions unrecorded and unchecked.",
+  "evidence": "Project knowledge is available to every chat in the project; context is not shared between chats unless added to knowledge.",
+  "ref": "https://support.claude.com/en/articles/9519177-how-can-i-create-and-manage-projects",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c17",
+  "source": "curated",
+  "domain": "Product and Model Selection",
+  "task": "Select appropriate Claude product features (Projects, research mode, chat, artifacts)",
+  "question": "An HR coordinator wants a tool that colleagues can open, enter an employee's start date and contract type, and see the leave entitlement, with no formulas to remember. The rules are simple and rarely change. Which feature fits best?",
+  "options": {
+   "A": "A standard chat in which she pastes a table of the leave rules for colleagues to read.",
+   "B": "A Project whose instructions hold the leave rules, with colleagues asking Claude for each entitlement in chat.",
+   "C": "An artifact: a small interactive calculator built with Claude that holds the rules and can be shared.",
+   "D": "A research report on how leave entitlement is usually calculated, with the sources cited."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "She needs a reusable, self-contained tool that people open and use, which is what an artifact provides: a working calculator that can be shared and revised by asking Claude (C). A Project (B) would have each colleague phrase a request and rely on Claude's arithmetic every time. A research report (D) explains common practice but is not her company's rules or a tool. A pasted table (A) still leaves colleagues to do the calculation.",
+  "evidence": "Artifacts let Claude create standalone, interactive content such as documents and small apps that can be shared.",
+  "ref": "https://support.claude.com/en/articles/9547008-share-artifacts",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c18",
+  "source": "curated",
+  "domain": "Product and Model Selection",
+  "task": "Align model selection with task requirements (cost, speed, quality)",
+  "question": "A support department piloted three models on 200 sample emails, rated by two team leads. The requirement is at least 90% acceptable drafts and a reply shown within 6 seconds, at the lowest cost that qualifies. Which model should it adopt?\n\n```text\nModel    Acceptable drafts   Avg time   Relative cost\nHaiku         81%              2 s          1x\nSonnet        93%              5 s          4x\nOpus          94%             11 s         12x\n```",
+  "options": {
+   "A": "Haiku, because it is fastest and cheapest, and agents review every draft before it is sent anyway.",
+   "B": "Haiku, escalating drafts to Opus whenever Haiku reports that it is unsure of its own answer.",
+   "C": "Opus, because it scored the highest accuracy and accuracy matters most in customer communication.",
+   "D": "Sonnet, the least expensive tier that meets both the accuracy and the speed requirement."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Pick the cheapest tier that clears the stated bar, measured on the team's own samples: Sonnet is the only one at 90% or above within 6 seconds (D). Opus (C) is only one point better, costs three times as much, and misses the 6-second limit. Haiku (A) fails the 90% requirement and review does not change that. The cascade (B) relies on Haiku's self-reported uncertainty, which is unreliable, and sends slow Opus replies past the time limit.",
+  "evidence": "Choose the smallest model that meets quality requirements, as measured on your own evaluation examples.",
+  "ref": "https://platform.claude.com/docs/en/about-claude/models/overview",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c19",
+  "source": "curated",
+  "domain": "Configuration and Knowledge Management",
+  "task": "Configure Claude Projects with instructions and knowledge sources",
+  "question": "A support Project returns refund answers quoting the old 30-day window, and replies vary in length and tone. Its setup is shown below. Which TWO changes most directly address the problems? (Select TWO.)\n\n```text\nProject: Support Replies\nInstructions: (none)\nKnowledge:\n  refund_policy_2024.pdf   (30-day window)\n  refund_policy_2026.pdf   (14-day window)\n  tone_guide.docx\n  escalation_matrix.xlsx\n```",
+  "options": {
+   "A": "Add Project instructions that set reply length, tone, and when to escalate, instead of leaving them empty.",
+   "B": "Rename refund_policy_2026.pdf to latest_refund_policy.pdf and leave the old file in place.",
+   "C": "Ask every user to add \"use the newest refund policy\" to each message they send.",
+   "D": "Remove refund_policy_2024.pdf from the knowledge, so only the current policy remains.",
+   "E": "Add last year's full ticket archive to the knowledge so Claude can see how refunds were handled."
+  },
+  "answer": [
+   "A",
+   "D"
+  ],
+  "rationale": "Two causes are visible in the exhibit. The superseded policy sits beside the current one, so Claude can draw on either; removing it leaves a single source (D). The instructions field is empty, so nothing standardizes length, tone, or escalation; standing rules belong there (A). Asking every user to add a reminder (C) moves a configuration job onto people. Renaming a file (B) leaves the conflicting policy. A ticket archive (E) adds more material, including old answers, and makes inconsistency worse.",
+  "evidence": "Projects use knowledge files as context and instructions for every chat; outdated or conflicting files should be removed.",
+  "ref": "https://support.claude.com/en/articles/9519177-how-can-i-create-and-manage-projects",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c20",
+  "source": "curated",
+  "domain": "Configuration and Knowledge Management",
+  "task": "Manage uploaded knowledge and connectors (e.g., Google Drive, Gmail)",
+  "question": "A finance director is about to connect Claude to Google Drive. She worries it will read every file in the company, including a restricted HR salary folder she cannot open herself. Based on how connectors work, what should she expect?",
+  "options": {
+   "A": "Claude reads only files she has uploaded to a Project, because a connector cannot browse a Drive.",
+   "B": "Claude reaches only what her own account can already view, so the restricted folder stays out of reach in her chats.",
+   "C": "Claude can read shared drives across her organization regardless of her file permissions, but not personal folders.",
+   "D": "Claude gets company-wide Drive access once she connects, so an administrator should first move restricted folders elsewhere."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "A connector inherits the permissions of the person who connected it; Claude can only see what her Google account can see, which is why the real governance question is what her own account can open (B). Company-wide access (D) and permission-bypassing access to shared drives (C) both describe behavior connectors do not have. Treating the connector as an upload-only channel (A) ignores that it searches and reads connected content on request.",
+  "evidence": "Connectors let Claude access your apps; Claude inherits each person's permissions from the connected service.",
+  "ref": "https://support.claude.com/en/articles/10166901-use-google-workspace-connectors",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c21",
+  "source": "curated",
+  "domain": "Configuration and Knowledge Management",
+  "task": "Manage uploaded knowledge and connectors (e.g., Google Drive, Gmail)",
+  "question": "A compliance officer must review a policy against the version the board signed in March. Colleagues keep editing the same document in Google Drive, and Claude's Drive connector is available to her. How should she supply the policy?",
+  "options": {
+   "A": "Use the Drive connector, since it always retrieves the correct version of a document automatically.",
+   "B": "Paste a summary of the March version from memory and let Claude fill in the details through the connector.",
+   "C": "Upload a copy of the signed March version to the chat, so the review is tied to that exact text.",
+   "D": "Use the Drive connector and tell Claude to analyze the document as it stood in March."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "A connector reads the content as it is when Claude looks, which is ideal for current documents but not for a fixed, signed version. Supplying a copy of the March text pins the review to exactly what the board approved (C). Assuming the connector picks the right version (A) or that an instruction can rewind it to March (D) leaves the review to rest on whatever is live today. A summary from memory (B) introduces the officer's own recall errors into the baseline.",
+  "evidence": "Connectors give Claude access to content in connected services; uploaded files fix the exact content being analyzed.",
+  "ref": "https://support.claude.com/en/articles/11176164-use-connectors-to-extend-claude-s-capabilities",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c22",
+  "source": "curated",
+  "domain": "Configuration and Knowledge Management",
+  "task": "Create effective system-level instructions",
+  "question": "A knowledge manager wrote the Project instructions below for an internal HR Q&A assistant. Staff report that answer length varies a lot and some answers sound invented. Which revision best fixes this?\n\n```text\nYou are a helpful assistant. Answer questions about our company.\nBe concise but also very detailed. Be friendly and formal.\nUse the knowledge files when you can, otherwise use your best guess.\nDon't share anything confidential.\n```",
+  "options": {
+   "A": "Add several adjectives describing the ideal answer, such as accurate, reliable, trustworthy, precise, and consistent.",
+   "B": "Paste the company's history and org chart into the instructions, so Claude has more context for its guesses.",
+   "C": "Choose one tone, set a length and format, and tell Claude to say when the files lack an answer and point staff to HR.",
+   "D": "Delete the instructions and rely on staff to write a detailed request every time they ask a question."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "The exhibit has contradictory style rules (concise and very detailed, friendly and formal) and an instruction to guess when the files are silent, which explains the variable length and invented answers. Specific, consistent rules and a defined fallback for unanswered questions fix both (C). More adjectives (A) add no rules. Extra background (B) feeds the guessing rather than stopping it. Removing the instructions (D) gives up the standing configuration the Project exists to provide.",
+  "evidence": "Effective instructions are specific and consistent, and say what to do when the supplied material does not contain the answer.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/be-clear-and-direct",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c23",
+  "source": "curated",
+  "domain": "Configuration and Knowledge Management",
+  "task": "Inform, maintain, and update Claude configurations, knowledge sources, and instructions",
+  "question": "HR replaced the escalation file in a shared Project last week; the new process has two steps. Staff still get answers describing three steps. The Project's setup is shown below. What is the likeliest cause and the best fix?\n\n```text\nProject instructions (excerpt):\n  Tone: warm, plain language.\n  Escalations: follow the three-step process\n  (team lead, then HR partner, then legal) and name the step.\nKnowledge: escalation_process_v2.docx (two steps)\n```",
+  "options": {
+   "A": "The new file has not been indexed yet, so wait a day and then ask the same question again.",
+   "B": "Ask staff to start new chats so that the replaced file is picked up when they ask questions.",
+   "C": "The instructions still list the old steps and compete with the new file; delete that list.",
+   "D": "Add an instruction telling Claude to ignore the three-step process in favor of the knowledge file."
+  },
+  "answer": [
+   "C"
+  ],
+  "rationale": "The same process now exists in two places and they disagree; the instructions apply to every chat and spell out the old steps. Removing the duplicate so the knowledge file is the only source fixes the cause (C). Waiting (A) changes nothing because the file is already in place. A counter-instruction (D) leaves two conflicting versions for Claude to arbitrate. New chats (B) still load the same outdated instructions.",
+  "evidence": "Project instructions apply to all chats in the project; keep information in one place so knowledge and instructions do not conflict.",
+  "ref": "https://support.claude.com/en/articles/9519177-how-can-i-create-and-manage-projects",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c24",
+  "source": "curated",
+  "domain": "Configuration and Knowledge Management",
+  "task": "Create effective system-level instructions",
+  "question": "Lawyers using a contract-intake Project want to see at a glance where an incoming vendor contract departs from the company's standard template, which is stored in the Project's knowledge. Which instruction in the Project is most effective for that need?",
+  "options": {
+   "A": "Rate each contract's overall risk from 1 to 10 and explain the rating in two sentences.",
+   "B": "Quote each clause that departs from the standard template and name the template section it differs from.",
+   "C": "Summarize every clause in plain English, in the order the clauses appear, so nothing is skipped.",
+   "D": "Rewrite any clause you consider unfair, keeping the original clause numbering."
+  },
+  "answer": [
+   "B"
+  ],
+  "rationale": "The need is a fast, checkable view of deviations from a known baseline. An instruction that names the baseline, the output (quoted clause) and the cross-reference (template section) delivers exactly that and lets a lawyer verify each point (B). A full plain-English summary (C) buries deviations among conforming text. A single risk score (A) shows no clause to check. Rewriting clauses Claude finds unfair (D) substitutes its judgment for the template and the lawyers' review.",
+  "evidence": "Effective instructions state the task, the reference material to compare against, and the output format wanted.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/be-clear-and-direct",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c25",
+  "source": "curated",
+  "domain": "Configuration and Knowledge Management",
+  "task": "Configure Claude Projects with instructions and knowledge sources",
+  "question": "A 200-person company is setting up a Project to answer new-hire questions about benefits and policies. Which THREE steps give it a solid, maintainable setup? (Select THREE.)",
+  "options": {
+   "A": "Paste the full handbook text into the instructions as well, so that it is always in view of Claude.",
+   "B": "Add the current handbook and benefits guide as knowledge, and drop superseded versions.",
+   "C": "Upload each new hire's personnel file to the knowledge so Claude can personalize its answers to them.",
+   "D": "Write instructions naming the audience (new hires), the tone, and what to do when files lack an answer.",
+   "E": "Name an owner and a review date for the files and instructions, revisited whenever policies change."
+  },
+  "answer": [
+   "B",
+   "D",
+   "E"
+  ],
+  "rationale": "A good Project separates standing knowledge from standing behavior and keeps both current: the right, current documents (B), instructions covering audience, tone and the fallback for unanswered questions (D), and a named owner with a review cadence so the setup does not go stale (E). Duplicating the handbook in the instructions (A) creates two copies that will drift apart. Uploading personnel files (C) puts personal data into a shared Project with no need or policy approval.",
+  "evidence": "Projects combine knowledge files with instructions; knowledge must be maintained as source material changes.",
+  "ref": "https://support.claude.com/en/articles/9517075-what-are-projects",
+  "calibrated": "2026-11-04T23:27:00Z"
+ },
+ {
+  "id": "associate-foundations-cur-c26",
+  "source": "curated",
+  "domain": "Configuration and Knowledge Management",
+  "task": "Manage uploaded knowledge and connectors (e.g., Google Drive, Gmail)",
+  "question": "An analyst moves from Finance to Marketing. She still needs Claude's Drive connector for her new team's folders, but she must no longer see finance documents in her chats. Which action ensures Claude stops surfacing them?",
+  "options": {
+   "A": "Delete her past chats that referenced finance documents, so Claude cannot recall them later.",
+   "B": "Add an instruction to her Project telling Claude not to open the finance folders it can see.",
+   "C": "Ask her to avoid finance topics in prompts, and trust that Claude will not search there on its own.",
+   "D": "Remove her access to the finance folders in Drive; the connector follows her permissions there."
+  },
+  "answer": [
+   "D"
+  ],
+  "rationale": "Because a connector mirrors the user's permissions in the source service, access is enforced in Drive, not in Claude; once her account cannot open the finance folders, neither can Claude on her behalf (D). An instruction (B) is a request that a later prompt or mistake can override, not an access control. Deleting past chats (A) does nothing about future retrieval. Relying on her prompts (C) leaves the access in place.",
+  "evidence": "Claude inherits each person's permissions from the connected service; manage access at the source.",
+  "ref": "https://support.claude.com/en/articles/11176164-use-connectors-to-extend-claude-s-capabilities",
+  "calibrated": "2026-11-04T23:27:00Z"
+ }
+]

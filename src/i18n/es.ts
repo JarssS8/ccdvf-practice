@@ -246,7 +246,8 @@ export const es: Dict = {
     correct: 'Correcta',
     yourAnswer: 'Tu respuesta',
     explanation: 'Explicación',
-    evidence: (e: string) => `Fuente: ${e}`,
+    evidence: (e: string) => `Fuente citada (apuntes o temario oficial): «${e}»`,
+    evidenceNote: (e: string) => `Fuente: ${e}`,
     officialSource: 'Documentación oficial',
   },
   tutor: {

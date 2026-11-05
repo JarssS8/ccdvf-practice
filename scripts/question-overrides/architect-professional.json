@@ -1,0 +1,1202 @@
+{
+ "architect-professional-practice-1": {
+  "src": "5mi18b",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Analyze authentication and authorization requirements to identify security gaps",
+  "question": "A bank's internal CRM agent can read records, draft emails, update opportunities, and delete contacts. An access review shows account managers only read records and draft emails through it, and auditors flagged the update and delete capabilities as excessive. What is the right change under least privilege?",
+  "options": {
+   "A": "Write every update and deletion call to an immutable audit log that the sales operations lead reviews weekly",
+   "B": "Require the account manager to confirm in a dialog before any update or delete tool call is executed",
+   "C": "Restrict the update and delete tools to business hours by scheduling a permission window on the agent",
+   "D": "Remove the update and delete tools from this agent's configuration so its role holds only what it uses"
+  },
+  "rationale": "Least privilege removes capabilities the role does not need, which eliminates the error and abuse surface instead of watching it. A weekly log review (A) and a confirmation dialog (B) are compensating controls around a privilege that should not exist, and a time window (C) narrows when the risk applies without closing it.",
+  "evidence": "Grant agents only the tools and permissions the task requires; extra capabilities widen the blast radius of mistakes and injections.",
+  "ref": "https://www.anthropic.com/engineering/writing-tools-for-agents"
+ },
+ "architect-professional-practice-2": {
+  "src": "a6dsjk",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Design a RAG pipeline with appropriate chunking and indexing strategies",
+  "question": "A support team's RAG assistant began giving confident but wrong answers the morning after a nightly document refresh. The pinned model version, the prompts, and the latency dashboards are unchanged, and the refresh job reported success. Where should the architect investigate first?",
+  "options": {
+   "A": "How the refresh changed the index: chunk boundaries, embedding consistency, and any mix of stale and new vectors",
+   "B": "Whether the pinned model drifted overnight, by replaying last week's evaluation set against the same model snapshot",
+   "C": "Whether the grounding instructions in the system prompt need tighter wording about citing the retrieved passages",
+   "D": "Whether the retrieved passages are now being truncated by the context budget before they reach the model"
+  },
+  "rationale": "The only thing that changed is the document pipeline, and confident-but-wrong answers are the signature of plausible but irrelevant retrieved context, so the index is the first suspect. A pinned model (B) and an unchanged prompt (C) do not correlate with the refresh, and truncation (D) would usually show up as incomplete answers and changed token counts rather than wrong ones.",
+  "evidence": "Retrieval quality depends on how documents are chunked, embedded and indexed; a change there degrades answers even when the model is unchanged.",
+  "ref": "https://www.anthropic.com/news/contextual-retrieval"
+ },
+ "architect-professional-practice-3": {
+  "src": "2jfqh7",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Evaluate progressive discovery vs. monolithic context strategy",
+  "question": "Your platform will expose forty internal capabilities as tools to agents built by many teams. Loading all forty definitions into every agent's context bloats prompts and degrades tool selection. What is the architectural remedy?",
+  "options": {
+   "A": "Rewrite all forty tool descriptions to be shorter, keeping parameters but dropping usage guidance and examples",
+   "B": "Give each agent a small task-relevant toolset and let it find others on demand through tool search or namespaces",
+   "C": "Collapse the forty capabilities into one gateway tool that takes a mode parameter and a free-form payload",
+   "D": "Split the tools between two always-loaded agents, twenty each, and route each request between them by keyword"
+  },
+  "rationale": "At large tool counts, progressive discovery beats monolithic context: each agent sees the tools its task needs and pulls in others when required. Terser descriptions (A) trade selection quality for tokens, a mode-switch gateway tool (C) hides forty behaviors from the selection mechanism, and two always-loaded halves (D) still carry twenty tools of bloat each.",
+  "evidence": "Large tool catalogs should be loaded on demand (tool search, deferred loading, scoped toolsets) rather than all at once.",
+  "ref": "https://www.anthropic.com/engineering/writing-tools-for-agents"
+ },
+ "architect-professional-practice-4": {
+  "src": "d29d44",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Select appropriate architectural patterns (workflow, agentic, augmented LLM)",
+  "question": "A bank wants a service that answers loan officers' policy questions with citations, and separately drafts decline letters from structured decision data. A vendor proposes one autonomous multi-agent system for both. What is the sounder architecture?",
+  "options": {
+   "A": "One supervisor agent coordinating specialist sub-agents for both tasks, since both consume policy documents",
+   "B": "A single agent holding retrieval and template tools, with a routing prompt choosing the behavior per request",
+   "C": "A cited-answer retrieval service for policy questions plus a templated generation workflow for letters, each evaluated separately",
+   "D": "A model fine-tuned on policy manuals and past decline letters that handles both tasks without retrieval or templates"
+  },
+  "rationale": "Two problems with different shapes get the two simplest reliable structures, and each can be tested and governed on its own metrics. Shared document handling is not an architectural argument for a multi-agent system (A), one agent with every tool (B) couples unrelated risk profiles, and fine-tuning (D) is the costliest route to problems that retrieval and templates already solve.",
+  "evidence": "Start with the simplest pattern that works; add agentic autonomy only when the path cannot be predetermined.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-practice-5": {
+  "src": "1cn2nd3",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Select appropriate architectural patterns (workflow, agentic, augmented LLM)",
+  "question": "Your architecture review board asks why you chose a deterministic workflow rather than an autonomous agent for insurance claims intake. Which justification reflects the tested decision framework?",
+  "options": {
+   "A": "Agents are a newer pattern and less proven in production, so a workflow is the conservative choice until agents mature",
+   "B": "Workflows outperform agents on accuracy for every intake task, so the board should default to them",
+   "C": "The delivery date left no time to build and test agent tooling, so a workflow was the practical option",
+   "D": "The intake path is known in advance, so fixed orchestration is cheaper and auditable; autonomy suits open paths"
+  },
+  "rationale": "The framework is structural fit: a known path gets deterministic orchestration, an open-ended path earns an agent. Novelty (A) and a universal claim of superiority (B) are not engineering arguments, and schedule pressure (C) justifies a plan, not an architecture.",
+  "evidence": "Use workflows for well-defined tasks needing predictability; use agents when flexibility and model-driven decisions are needed at scale.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-practice-6": {
+  "src": "epvww9",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Design evaluation datasets and test frameworks using mixed methodologies",
+  "question": "A law firm's assistant summarizes contract clauses, and the partners disagree about whether the summaries are \"good\". Quality is subjective and there is no single correct summary. What makes the evaluation tractable?",
+  "options": {
+   "A": "Define a rubric of the failure modes counsel cares about, grade a labeled set with it, and add human review",
+   "B": "Compare each summary with one counsel-written reference using exact or fuzzy string matching against a pass threshold",
+   "C": "Release to a pilot group and track how many summaries lawyers edit before filing, treating edits as the quality score",
+   "D": "Have the model rate its own summaries from one to ten and average the ratings across the clause set"
+  },
+  "rationale": "Subjective quality becomes measurable through an explicit rubric, a labeled set built with domain experts, and mixed methods where humans anchor the model grader. String matching against one reference (B) fails every valid paraphrase, edit counts (C) arrive late and mix style with errors, and self-rating (D) has no calibration against human judgment.",
+  "evidence": "Combine code graders, rubric-based LLM grading calibrated to human labels, and human review for subjective tasks.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-7": {
+  "src": "wcxuwo",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Conduct A/B testing and iterative improvements",
+  "question": "A rewritten system prompt for a customer-facing assistant looks better in demos to the product owner. Before rolling it out to all users, what is the disciplined path?",
+  "options": {
+   "A": "Review twenty demo outputs with the product owner and the support lead, and ship the change if both approve",
+   "B": "Run the regression set, then A/B test against the current prompt on live traffic with predefined metrics",
+   "C": "Deploy to all users behind a feature flag and compare this week's satisfaction scores with last week's",
+   "D": "Have the team vote on blind side-by-side outputs and roll out when the new prompt wins a majority"
+  },
+  "rationale": "A prompt change is a production change: the regression set catches breakage, and an A/B test on predefined metrics shows real improvement before full exposure. Demo review (A) and a team vote (D) are anecdotes, and a full rollout compared with last week (C) has no concurrent control, so seasonality and traffic mix confound the result.",
+  "evidence": "Evaluate prompt changes against a fixed test set and compare variants on predefined success criteria before shipping.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-8": {
+  "src": "w1u9zd",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Ensure compliance with regulations (e.g., GDPR, HIPAA, FedRAMP)",
+  "question": "A hospital network requires that no protected health information (PHI) reach the model provider, yet clinicians want to ask free-text questions about patients. Which design satisfies both requirements?",
+  "options": {
+   "A": "A policy asking clinicians not to type patient identifiers, backed by annual privacy training and attestation",
+   "B": "A system prompt telling the model to ignore and never repeat any patient identifiers it sees in a query",
+   "C": "A de-identification layer that tokenizes PHI before the API call, restores it locally, and is audited at the boundary",
+   "D": "A fixed menu of pre-approved question templates so that free-text input never reaches the model at all"
+  },
+  "rationale": "Compliance boundaries are enforced by architecture: PHI is removed before it crosses, results are re-associated locally, and the control can be audited. Training and attestation (A) are not a technical control, a prompt instruction (B) acts after the data has already left, and a template menu (D) drops the free-text requirement that a compliant design can still meet.",
+  "evidence": "Minimize and de-identify sensitive data before it leaves the trust boundary, and keep the control auditable.",
+  "ref": "https://trust.anthropic.com"
+ },
+ "architect-professional-practice-9": {
+  "src": "1dobq9q",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Manage stakeholder feedback loops and expectation alignment (including SLAs)",
+  "question": "An executive sponsor demands \"99.9% accuracy or we cancel\" for a document-review solution. Measured task accuracy plateaus near 92%, and human reviewers catch most of the remaining errors. What is the architect's correct move?",
+  "options": {
+   "A": "Commit to 99.9% in the contract, relying on planned model upgrades and prompt tuning to close the gap",
+   "B": "Report accuracy on the easiest subset of cases, where the system already exceeds 99%, as the headline figure",
+   "C": "Tell the sponsor accuracy targets are an engineering matter and offer only latency and uptime commitments",
+   "D": "Reframe the target as end-to-end error rate with confidence-routed human review, showing rates and costs"
+  },
+  "rationale": "Setting expectations with explicit, honest trade-offs is the architect's job: the deliverable is the business outcome of the whole pipeline, not a raw model metric. Overpromising (A), cherry-picking a subset (B), and refusing to discuss accuracy (C) each damage the trust the role exists to build.",
+  "evidence": "Align stakeholders on measurable end-to-end outcomes and be explicit about error rates, human review, and the cost trade-off.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-10": {
+  "src": "19czgd3",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Configure Claude tools and environments for teams (e.g., Claude Code)",
+  "question": "Three product teams configure Claude Code independently. Conventions have drifted, and new engineers need days before they are productive. What is the enablement fix?",
+  "options": {
+   "A": "Publish a version-controlled baseline of shared configuration, skills, and commands, with team rules layered on",
+   "B": "Document the conventions on a wiki page and ask each engineer to paste the relevant rules into a personal CLAUDE.md",
+   "C": "Standardize on one team's configuration and copy it unchanged into every repository, with no per-team overrides allowed",
+   "D": "Run an onboarding workshop each quarter and let engineers keep whatever local settings they have found effective"
+  },
+  "rationale": "Team-level enablement means shared, versioned configuration that teams extend locally, which scales and keeps new hires on the same footing. A wiki plus personal files (B) recreates drift, a single copied configuration with no overrides (C) ignores real differences between teams, and workshops with free-form local settings (D) are the status quo with slides.",
+  "evidence": "Share project CLAUDE.md, settings and skills through version control, layered with user and local scopes for personal or team differences.",
+  "ref": "https://code.claude.com/docs/en/memory"
+ },
+ "architect-professional-practice-11": {
+  "src": "q13mi",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Evaluate connection protocols and select the appropriate integration mechanism (MCP, API/CLI, agent-to-agent)",
+  "question": "A pharmaceutical customer's security policy states that no request data may leave their AWS account, and procurement wants to reuse their existing AWS agreement. Which deployment satisfies the constraint?",
+  "options": {
+   "A": "The Claude API with a signed data processing agreement and zero data retention enabled for the organization",
+   "B": "Claude through Amazon Bedrock, invoked inside the customer's own AWS account and chosen region",
+   "C": "The Claude API called through a customer-managed VPN tunnel with all request logging disabled on their side",
+   "D": "The Claude API with TLS enforced end to end and customer-managed KMS keys on any stored logs"
+  },
+  "rationale": "A constraint that data stays inside the customer's cloud boundary is met by running Claude within that boundary, which is what Bedrock provides. A contract with zero retention (A), a VPN tunnel with logging off (C), and strong encryption with customer keys (D) are all protections for data that still leaves the account.",
+  "evidence": "Claude models are available through Amazon Bedrock, so requests run under the customer's AWS account, controls and region.",
+  "ref": "https://docs.claude.com/en/api/claude-on-amazon-bedrock"
+ },
+ "architect-professional-practice-12": {
+  "src": "77j9w7",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Evaluate connection protocols and select the appropriate integration mechanism (MCP, API/CLI, agent-to-agent)",
+  "question": "An enterprise has standardized on Google Cloud and requires identity, billing, and audit for AI workloads to flow through its existing controls. How should the architect deploy Claude?",
+  "options": {
+   "A": "Deploy on Amazon Bedrock and federate the enterprise's identities across clouds to reuse its governance",
+   "B": "Use the Claude API directly and rebuild identity, billing, and audit integration in the enterprise's tooling",
+   "C": "Deploy through Vertex AI so IAM, consolidated billing, and audit logging apply without duplicate controls",
+   "D": "Let each team pick the Claude access path that suits its workload and reconcile billing at quarter end"
+  },
+  "rationale": "Aligning with the cloud the enterprise already governs means its identity, billing and audit controls apply without duplication. A second cloud (A) adds another control plane, rebuilding controls on the direct API (B) is costly and drifts, and per-team choice (D) removes governance altogether.",
+  "evidence": "Claude is offered on Vertex AI, so Google Cloud IAM, billing and logging cover usage.",
+  "ref": "https://docs.claude.com/en/api/claude-on-vertex-ai"
+ },
+ "architect-professional-practice-13": {
+  "src": "8mw1ow",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Analyze observability challenges and select monitoring strategies at scale",
+  "question": "A platform team routes all application traffic to Claude through one internal gateway service instead of letting each application call the provider directly. What is the principal architectural benefit?",
+  "options": {
+   "A": "Token spend drops because the gateway compresses prompts and removes duplicate system content before every call",
+   "B": "Per-application evaluation becomes unnecessary because the gateway validates output quality for every caller",
+   "C": "End-to-end latency falls because the gateway keeps warm connections that skip the provider's normal network path",
+   "D": "Authentication, rate limiting, logging, and model routing are enforced and changed in one place for every application"
+  },
+  "rationale": "A single integration point is where cross-cutting concerns can be applied consistently and changed once. It does not inherently compress prompts (A), it cannot replace each application's own evaluation (B), and an extra network hop generally adds latency rather than removing it (C).",
+  "evidence": "Centralizing access gives one place to apply authentication, quotas, logging and routing for all consumers.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-practice-14": {
+  "src": "tqm1v5",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Evaluate accuracy-latency trade-offs and justify configuration decisions",
+  "question": "A legacy order system can only call synchronous endpoints with a two-second timeout, but the Claude task needs several seconds of reasoning to meet its accuracy bar. What is the appropriate design?",
+  "options": {
+   "A": "Accept the request, return a job ID inside the timeout, and deliver the result later by callback or polling",
+   "B": "Cap the output tokens so the response completes inside two seconds, and accept shorter, less complete answers",
+   "C": "Negotiate a longer timeout in the legacy system's endpoint configuration at the next scheduled release train",
+   "D": "Switch to the fastest model tier with streaming enabled so the first tokens arrive inside two seconds"
+  },
+  "rationale": "Decoupling submission from delivery lets the timeout constraint and the reasoning workload coexist without degrading either. Truncating output (B) and dropping to the fastest tier (D) sacrifice the accuracy bar the task needs, and changing the legacy timeout (C) targets a system whose limit is the stated constraint.",
+  "evidence": "Latency-bound callers need asynchronous patterns when the task's accuracy depends on longer processing.",
+  "ref": "https://docs.claude.com/en/docs/build-with-claude/streaming"
+ },
+ "architect-professional-practice-15": {
+  "src": "1ex7pug",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Evaluate connection protocols and select the appropriate integration mechanism (MCP, API/CLI, agent-to-agent)",
+  "question": "A bank must run the same Claude solution on two clouds to satisfy separate regional regulators. What is the most important design consideration?",
+  "options": {
+   "A": "Keep one prompt set byte-for-byte identical on both platforms, since identical inputs guarantee identical behavior",
+   "B": "Define which behaviors must be identical across platforms, then run the evaluation suite on each deployment",
+   "C": "Standardize on the cheaper platform's model catalog and pricing tier, and mirror that setup on the other cloud",
+   "D": "Place each deployment in the region nearest its users and track latency as the only expected variance"
+  },
+  "rationale": "Cross-platform equivalence is a requirement to be defined and then verified on each deployment, not assumed. Identical prompts (A) do not guarantee identical behavior across platforms and versions, and cost (C) or proximity (D) say nothing about consistency.",
+  "evidence": "Verify behavior on each platform with the same evaluations; platforms can differ in available features and model versions.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-16": {
+  "src": "oo3dna",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Translate business problems into Claude-based AI solutions",
+  "question": "A finance director asks for an autonomous agent to run the invoice-to-payment approval process end to end. What should the architect establish first?",
+  "options": {
+   "A": "Which Claude model tier gives the best accuracy on invoice extraction in a representative sample of documents",
+   "B": "The expected monthly token spend for the full approval volume, so the business case can be signed off",
+   "C": "Which approval decisions carry personal accountability or regulatory duty and must stay with a named person",
+   "D": "Whether the agent, its integrations, and its test suite can be delivered before the quarter-end deadline"
+  },
+  "rationale": "Where accountability sits determines what may be automated at all and shapes the whole solution. Model choice (A), spend (B), and the delivery date (D) are all downstream of that boundary.",
+  "evidence": "Keep humans in the loop for consequential, irreversible or accountable decisions and design autonomy around that boundary.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-practice-17": {
+  "src": "1pq7cq6",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Align solutions to business value pillars (efficiency, transformation, productivity, cost, performance SLAs)",
+  "question": "Two designs for a document-intake solution both meet the functional requirement. One is simpler; the other adds an extra agent for slightly higher extraction accuracy. What should decide between them?",
+  "options": {
+   "A": "Choose the more capable design, because the extra accuracy lowers the long-term support burden for the team",
+   "B": "Choose whichever design the engineering team is more excited to build, since motivation drives delivery quality",
+   "C": "Choose the design with more components, since each added agent leaves room for future requirements",
+   "D": "Whether a stated requirement needs the extra accuracy, weighed against the ongoing cost of operating the added agent"
+  },
+  "rationale": "Complexity is a cost paid continuously in operation and maintenance, so it has to be bought by a stated requirement. Capability for its own sake (A), team preference (B), and speculative flexibility (C) all pay that cost without justification.",
+  "evidence": "Add complexity only when it demonstrably improves outcomes; prefer the simplest solution that meets the requirement.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-practice-18": {
+  "src": "xuzr00",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Design end-to-end architectures (input → processing → output → feedback loops)",
+  "question": "A proposed claims design relies on the model itself to decide when a regulator-mandated disclosure must be added to customer letters. What is the correct judgment?",
+  "options": {
+   "A": "Unacceptable as designed: a mandated control must be enforced by deterministic code outside the model",
+   "B": "Acceptable if the evaluation set shows the model applies the disclosure correctly in over 99% of cases",
+   "C": "Acceptable if the rule is written into the system prompt and disclosed to the regulator as probabilistic",
+   "D": "Acceptable if the team upgrades to the largest model tier and adds a second model to double-check outputs"
+  },
+  "rationale": "A regulatory control needs a guarantee, and probabilistic behavior cannot supply one however high the measured accuracy. High accuracy (B), a disclosure to the regulator (C), and a bigger or doubled model (D) do not convert a tendency into a guarantee.",
+  "evidence": "Must-happen controls belong in code, hooks or gates outside the model; prompts are probabilistic.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-practice-19": {
+  "src": "1vof3vf",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Select appropriate architectural patterns (workflow, agentic, augmented LLM)",
+  "question": "In a design review of a customer-service solution, which finding is the clearest sign that the solution has been over-engineered?",
+  "options": {
+   "A": "The solution routes different tasks to more than one Claude model tier, chosen per task by cost and quality",
+   "B": "Components such as a planner agent and a second vector store trace to no stated requirement",
+   "C": "The evaluation suite contains more test cases than the application has lines of prompt text, built over months",
+   "D": "The workflow includes a human approval step before refunds above a set amount are issued"
+  },
+  "rationale": "Components that no requirement depends on are the definition of over-engineering and the parts that will rot. Using several model tiers (A), a thorough evaluation suite (C), and an approval step for large refunds (D) are all defensible when a requirement calls for them.",
+  "evidence": "Find the simplest solution possible and increase complexity only when needed.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-practice-20": {
+  "src": "1exeilg",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Define evaluation metrics (accuracy, latency, cost, safety, security)",
+  "question": "A team asks the architect to sign off that its claims-triage assistant is ready for production. What must exist before readiness can be claimed?",
+  "options": {
+   "A": "A stakeholder demonstration in which the assistant answered the sponsor's hand-picked questions correctly",
+   "B": "Sign-off from the engineering team that the code is complete, reviewed, and deployed in staging",
+   "C": "A stated success criterion and measured performance against it on data representative of production",
+   "D": "A finished cost model showing projected spend per request and per month at the expected volume"
+  },
+  "rationale": "Readiness is a measured claim against a stated bar, which is what separates it from an impression. A demonstration (A), engineering consensus (B), and a cost model (D) do not show whether the system works on real inputs.",
+  "evidence": "Define success criteria up front and measure against representative test cases before deployment.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-21": {
+  "src": "3reqpi",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Design evaluation datasets and test frameworks using mixed methodologies",
+  "question": "A team builds the evaluation set for its support assistant by sampling only tickets the assistant already resolves correctly. What is the consequence?",
+  "options": {
+   "A": "The scores form a reliable baseline that will expose any later regression, whatever the ticket category",
+   "B": "The set is acceptable once it exceeds a few thousand examples, because volume averages out the selection",
+   "C": "The bias matters only for regulated systems, where auditors expect coverage of rare categories",
+   "D": "It overstates performance and hides the failure modes, because hard and rare cases are missing from the sample"
+  },
+  "rationale": "An unrepresentative set measures the wrong distribution, and the failures that matter are exactly the cases left out. A baseline that cannot see them (A) is not reliable, more volume (B) does not fix a biased sample, and the problem applies to every system, not only regulated ones (C).",
+  "evidence": "Evaluation sets should be representative and include edge cases and past failures.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-22": {
+  "src": "9h43ed",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Conduct A/B testing and iterative improvements",
+  "question": "A prompt revision raised the team's target metric but silently degraded refusal behavior that nobody measures. How is this class of problem best prevented?",
+  "options": {
+   "A": "Keep a regression suite covering must-keep behaviors, and run it on every prompt change",
+   "B": "Change only one sentence of the prompt per release so any regression can be traced back to its cause",
+   "C": "Add a second reviewer to every prompt change, so that a regression is noticed before it is shipped",
+   "D": "Limit prompt changes to a monthly release window so fewer regressions can accumulate"
+  },
+  "rationale": "Silent regressions are caught by explicitly testing what must not break, on every change. Single-sentence changes (B) and extra reviewers (C) reduce risk without detecting anything, and a slower cadence (D) batches regressions instead of preventing them.",
+  "evidence": "Regression-test every prompt change against cases covering behaviors that must be preserved.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-23": {
+  "src": "411hi1",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Monitor system performance using logging and observability tools",
+  "question": "A deployed claims-summarization solution has been stable for six months. What should trigger a re-evaluation against the evaluation set?",
+  "options": {
+   "A": "A reported incident, because incidents are the only evidence that earlier measurements no longer hold",
+   "B": "A change to the model, the prompt, the input data distribution, or the requirement itself",
+   "C": "A fixed annual review date set at launch, which gives auditors a predictable evidence cycle",
+   "D": "A change in monthly spend, since cost movement is a reliable signal that quality has moved too"
+  },
+  "rationale": "Any change to what determines behavior invalidates the earlier measurement, so those changes trigger re-evaluation. Waiting for incidents (A) detects problems late, a fixed calendar date (C) is unrelated to actual change, and spend (D) says little about correctness.",
+  "evidence": "Re-run evaluations whenever the model, prompt, data or requirements change, and monitor production for drift.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-24": {
+  "src": "6byisv",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Ensure compliance with regulations (e.g., GDPR, HIPAA, FedRAMP)",
+  "question": "A compliance officer asks the architect to log full prompts and responses of an HR assistant for audit. Prompts may contain employee personal data. How should the architect treat the request?",
+  "options": {
+   "A": "Implement full logging immediately, because audit requirements override data-protection duties",
+   "B": "Decline the request, because retaining prompts and responses creates a privacy exposure the client cannot accept",
+   "C": "Establish what the audit must evidence, then log the minimum, protected and retained, that satisfies it",
+   "D": "Log responses only, because prompts hold user input while responses are merely derived content"
+  },
+  "rationale": "Audit and data protection are both real constraints, so the design should satisfy the audit purpose without retaining more than is warranted. Blanket logging (A) and blanket refusal (B) each ignore one side, and a responses-only rule (D) is arbitrary and may still capture personal data.",
+  "evidence": "Apply data minimization, purpose limitation and retention limits while keeping the evidence trail auditors need.",
+  "ref": "https://trust.anthropic.com"
+ },
+ "architect-professional-practice-25": {
+  "src": "3yy2be",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Implement guardrails and safety controls",
+  "question": "An agent summarizes inbound emails and web pages and can call internal tools to open tickets and update records. How should the architect treat content retrieved from untrusted sources?",
+  "options": {
+   "A": "Safe once a filter strips known injection phrases, because the remaining text can no longer carry instructions",
+   "B": "Safe when the system prompt tells the model to ignore any instructions that appear inside retrieved text",
+   "C": "Safe when it arrives over TLS from a domain on the company's allow-list of approved partner sites",
+   "D": "Untrusted data throughout, so the agent's tool permissions must be bounded whatever the content persuades it to try"
+  },
+  "rationale": "The durable control is that the agent cannot exceed its permissions no matter what the content says, with approval for risky actions. String filters (A) and prompt instructions (B) can be bypassed, and transport security or an allow-list (C) says nothing about whether the content itself is hostile.",
+  "evidence": "Treat tool results and documents as untrusted data; use least-privilege tools, approvals and isolation outside the model.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks"
+ },
+ "architect-professional-practice-26": {
+  "src": "bphvw2",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Address ethical AI considerations (bias, fairness, transparency)",
+  "question": "An automated Claude workflow wrongly denies a customer's refund, and the customer escalates to the regulator. Who is accountable for the decision?",
+  "options": {
+   "A": "The deploying organization, which owns the outcomes of decisions it chose to automate",
+   "B": "Anthropic as the model provider, since its model generated the faulty decision that the customer received",
+   "C": "The engineer who wrote the prompt, since the prompt defined the decision logic that was applied here",
+   "D": "No single party, since an automated decision has no human decision-maker to attribute it to"
+  },
+  "rationale": "Deploying an automated decision means owning its outcomes, which is why the boundaries of automation are an architectural decision. The provider (B) supplies a capability, individual authorship (C) does not transfer organizational responsibility, and automation does not dissolve accountability (D).",
+  "evidence": "Organizations deploying AI remain responsible for its decisions; design human oversight and transparency accordingly.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-practice-27": {
+  "src": "t7zipp",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Communicate architectural decisions and trade-offs",
+  "question": "An executive sponsor asks the architect for a single number that shows how good the new solution is. What is the right response?",
+  "options": {
+   "A": "Provide the headline accuracy percentage from the latest evaluation, since it is simple and comparable",
+   "B": "Provide the one measure tied to the decision the sponsor faces, with what it does not cover stated",
+   "C": "Explain that a language model's quality cannot be reduced to one figure and offer a dashboard instead",
+   "D": "Provide the model's published benchmark score, since it is independently verified and widely recognized"
+  },
+  "rationale": "A useful metric is tied to the decision at hand and honest about its limits. A bare accuracy figure (A) and a public benchmark (D) can mislead about this workload, and refusing to summarize (C) fails the sponsor.",
+  "evidence": "Report metrics that map to business outcomes and be explicit about their limits and assumptions.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-28": {
+  "src": "1q7aeen",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Support lifecycle phases (discovery, design, handoff, monitoring, iteration)",
+  "question": "A pilot with ten users succeeded, and the business wants to roll the assistant out to two thousand. What should the architect raise first?",
+  "options": {
+   "A": "The cost of licenses and API spend for two thousand users compared with the budget approved for the pilot",
+   "B": "Whether a larger model tier is needed to sustain quality across a much wider range of users",
+   "C": "Which pilot assumptions about users, inputs, and edge cases may not hold at scale",
+   "D": "The schedule for training the new users and publishing documentation before the wider launch"
+  },
+  "rationale": "Scale invalidates assumptions about inputs, support, and edge cases, and naming them is the architect's contribution before committing to a rollout. Cost (A), model size (B), and training (D) are downstream of knowing what breaks.",
+  "evidence": "Validate pilot assumptions against production scale and representative data before expanding.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-29": {
+  "src": "h46zf4",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Document architectures and provide implementation guidance",
+  "question": "A consultancy is handing a Claude solution to the client's operations team. What most reduces the risk that the solution decays after handover?",
+  "options": {
+   "A": "Comprehensive architecture documentation delivered and signed off at handover",
+   "B": "An extended warranty obliging the vendor to fix defects for twelve months after go-live",
+   "C": "Live training sessions for every end user during the first month after go-live",
+   "D": "A named owner with a standing evaluation, monitoring, and update routine"
+  },
+  "rationale": "Decay is prevented by ongoing ownership and a routine, not by artifacts produced once. Documentation (A) and training (C) age, and a warranty (B) covers defects rather than the drift of models, data and requirements.",
+  "evidence": "Handoff should include owners and operating procedures for monitoring, evaluation and iteration.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-30": {
+  "src": "rzuonz",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Select appropriate Claude models based on trade-offs",
+  "question": "A document-processing solution has three tasks: bulk classification, contract clause analysis, and drafting executive summaries. How should the architect choose models?",
+  "options": {
+   "A": "Pick for each task the cheapest tier that meets its quality bar on an evaluation, and re-test when models change",
+   "B": "Standardize on a single mid-tier model for all three tasks so prompts, caching, and monitoring stay uniform",
+   "C": "Use the most capable tier for every task, since the hardest task sets the quality requirement for the others",
+   "D": "Use whichever model was released most recently for all tasks, since each generation beats the last on every task"
+  },
+  "rationale": "Different tasks have different quality bars, and matching each to the cheapest tier that passes an evaluation keeps cost proportionate while evidence supports the choice. One mid-tier model (B), the top tier everywhere (C), and the newest release (D) each choose by convenience or assumption rather than measured fit.",
+  "evidence": "Choose the cheapest model tier that meets the quality bar measured by an eval, and pin and re-evaluate versions.",
+  "ref": "https://docs.claude.com/en/docs/about-claude/models/overview"
+ },
+ "architect-professional-practice-31": {
+  "src": "1rhicml",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Optimize context windows and manage token usage",
+  "question": "An architect is designing a production assistant that combines instructions, retrieved documents, and conversation state. How should the context window be treated in the design?",
+  "options": {
+   "A": "As a capacity to fill as completely as possible, since more retrieved material gives the model more evidence",
+   "B": "As a budget allocated deliberately among instructions, retrieved material, and working state, each share justified",
+   "C": "As a limit that matters only when documents are long, so short-input applications need no context planning",
+   "D": "As a setting to raise whenever answer quality drops, since quality loss usually means truncated input"
+  },
+  "rationale": "Context is a scarce resource whose allocation determines quality, so it is designed rather than consumed. Filling it (A) invites dilution and cost, it matters well beyond long documents (C), and enlarging it (D) does not fix an allocation problem.",
+  "evidence": "Treat context as a finite resource; include the smallest set of high-signal tokens that gets the desired behavior.",
+  "ref": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents"
+ },
+ "architect-professional-practice-32": {
+  "src": "1woyonv",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Implement prompt reuse strategies (caching, modular prompts, Skills)",
+  "question": "A solution's prompts are maintained by three teams and have diverged, so the same task now behaves differently across products. What is the appropriate remedy?",
+  "options": {
+   "A": "Appoint one team as sole author of every prompt, with the other teams submitting change requests by ticket",
+   "B": "Freeze all prompts at their current versions until the three teams agree on a single standard wording",
+   "C": "Keep prompts in version control with named owners, peer review, and an evaluation run on every change",
+   "D": "Move every team's instructions into one shared system prompt so the behavior is defined in a single place"
+  },
+  "rationale": "Prompts that determine production behavior deserve the same lifecycle as code: versioning, ownership, review and tests. Centralizing authorship (A) may not fit the organization, freezing (B) blocks improvement, and one merged system prompt (D) hides conflicts instead of governing them.",
+  "evidence": "Manage prompts as versioned, tested artifacts with clear ownership and reuse mechanisms.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-33": {
+  "src": "11d2gsl",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Configure Claude tools and environments for teams (e.g., Claude Code)",
+  "question": "An organization with sixty repositories wants consistent Claude Code practice across them. What is the most durable approach?",
+  "options": {
+   "A": "A conventions policy circulated by email to engineering leads each quarter and acknowledged by each team",
+   "B": "A recorded training session on Claude Code, attended by one champion per repository",
+   "C": "A manager approval step required before an engineer starts each Claude Code session",
+   "D": "A committed CLAUDE.md and shared skills in each repository, changed through pull requests like code"
+  },
+  "rationale": "Conventions travel when they live in the repository and are reviewed with the work, so every session loads them automatically. Emailed policies (A) and training (B) fade, and per-session approval (C) adds friction without conveying any practice.",
+  "evidence": "Project CLAUDE.md and skills are committed to the repo and loaded automatically for everyone working in it.",
+  "ref": "https://code.claude.com/docs/en/memory"
+ },
+ "architect-professional-practice-34": {
+  "src": "731tc0",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Improve developer workflows using AI-assisted tooling",
+  "question": "A VP asks how the organization will know whether its Claude Code enablement program is working. What is the most useful measure?",
+  "options": {
+   "A": "Movement in targeted outcomes such as cycle time, defect escapes, and onboarding time",
+   "B": "The number of engineers who completed the training sessions and certified on the tooling",
+   "C": "The share of purchased licenses that were active in a given month across the organization",
+   "D": "The total volume of completions and tool calls generated per engineer per week across the organization"
+  },
+  "rationale": "Enablement is justified by the outcome it moves, so that is what should be measured. Attendance (B), license utilization (C), and activity volume (D) show uptake, not benefit.",
+  "evidence": "Measure the outcomes the tooling was adopted to improve, not just adoption activity.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-practice-35": {
+  "src": "1h5lqvk",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Support debugging and operational issue resolution",
+  "question": "A team reports that Claude Code works well on new services but produces poor changes on a ten-year-old legacy service. What should the architect investigate first?",
+  "options": {
+   "A": "Whether the team needs a prompting refresher, since legacy code demands more precise instructions",
+   "B": "Whether the legacy service lacks committed context, such as a CLAUDE.md, conventions, and test commands",
+   "C": "Whether a larger model tier would infer the legacy service's undocumented behavior without extra context",
+   "D": "Whether the legacy service should be rewritten first so Claude Code can work with a modern structure"
+  },
+  "rationale": "A difference between codebases usually reflects a difference in the context available in each, and that context is cheap to supply. Training (A) does not supply repository context, a larger model (C) cannot infer undocumented conventions, and a rewrite (D) is a disproportionate response to a diagnosis not yet made.",
+  "evidence": "Claude Code relies on project memory (CLAUDE.md) and repository context to follow conventions and run the right checks.",
+  "ref": "https://code.claude.com/docs/en/memory"
+ },
+ "architect-professional-mock1-1": {
+  "src": "1v2avzs",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Translate business problems into Claude-based AI solutions",
+  "question": "A retailer wants Claude to answer shopper questions from a 40,000-document product catalog whose prices and stock change daily. Answers must reflect the previous day's changes. Which architecture fits?",
+  "options": {
+   "A": "Fine-tune a model on the catalog each night so product facts live in the model's weights",
+   "B": "Give an agent a web browsing tool and let it search the retailer's public site for every question",
+   "C": "Retrieve from an index refreshed as the catalog changes and answer from the retrieved passages",
+   "D": "Place the full catalog in a cached system prompt and refresh the cache each morning"
+  },
+  "rationale": "Frequently changing knowledge belongs in retrieval, not in weights or a context window, so refreshing the index keeps answers current at modest cost. Nightly fine-tuning (A) is slow and expensive, browsing the public site (B) is unreliable and uncontrolled, and a forty-thousand-document prompt (D) exceeds practical context and cache economics.",
+  "evidence": "Use retrieval to ground answers in current external knowledge instead of baking facts into the model.",
+  "ref": "https://www.anthropic.com/news/contextual-retrieval"
+ },
+ "architect-professional-mock1-2": {
+  "src": "1l98wqd",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Design a RAG pipeline with appropriate chunking and indexing strategies",
+  "question": "After a catalog re-index, your retrieval system returns semantically similar but commercially wrong products, such as the right style in the wrong product generation. The generation prompt and model version are unchanged. Which investigation comes first?",
+  "options": {
+   "A": "The generation prompt, to tell the model to prefer the newest product among the retrieved items",
+   "B": "The model version, by comparing today's answers with a snapshot taken before the re-index",
+   "C": "The chat interface, which may be sending a truncated or reworded version of the shopper's question",
+   "D": "Chunking and embedding settings, and whether every vector was rebuilt consistently"
+  },
+  "rationale": "Degradation right after a re-index points at chunking, embeddings, and index consistency, since retrieval is what returned the wrong items. Prompt wording (A) papers over a retrieval fault, the unchanged model (B) does not correlate with the re-index, and the interface (C) would not produce semantically near but wrong matches.",
+  "evidence": "Retrieval quality depends on chunking, embedding and index construction; rebuilds can silently change all three.",
+  "ref": "https://www.anthropic.com/news/contextual-retrieval"
+ },
+ "architect-professional-mock1-3": {
+  "src": "sh89lg",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Evaluate tool/agent configuration for capability bloat",
+  "question": "An agent used by 300 employees exposes 45 tools across eight systems, and tool-selection quality is degrading. What is the architectural response?",
+  "options": {
+   "A": "Scope toolsets per role or task and load the rest by progressive discovery",
+   "B": "Shorten every tool description so all 45 definitions occupy a smaller share of the context",
+   "C": "Merge related tools into a few multi-mode tools that take an action parameter and a payload",
+   "D": "Move to the most capable model tier so it can choose correctly among all 45 definitions"
+  },
+  "rationale": "At large tool counts, scoping toolsets and loading the rest on demand preserves selection quality and trims context. Shorter descriptions (B) remove the guidance the model needs, multi-mode tools (C) move the ambiguity inside the parameters, and a bigger model (D) pays more to tolerate the same bloat.",
+  "evidence": "Few well-scoped tools beat many overlapping ones; load large catalogs on demand with tool search.",
+  "ref": "https://www.anthropic.com/engineering/writing-tools-for-agents"
+ },
+ "architect-professional-mock1-4": {
+  "src": "dv41yd",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Design evaluation datasets and test frameworks using mixed methodologies",
+  "question": "A legal-operations team ships a summarization feature whose quality is judged subjectively by reviewers. Which evaluation design best fits?",
+  "options": {
+   "A": "Score each summary by exact match against one human-written reference summary for the same document",
+   "B": "Apply a rubric of key failure modes with model graders, calibrated by periodic audits on a human-labeled set",
+   "C": "Compare each summary's length with the reference length and flag anything outside a tolerance band",
+   "D": "Rely on user thumbs-up and thumbs-down counts from production as the only quality signal"
+  },
+  "rationale": "Subjective quality becomes measurable through rubrics, labeled sets, and mixed methodology with humans anchoring the grader. Exact match (A) rejects valid paraphrases, length comparison (C) measures size rather than quality, and thumbs counts alone (D) are sparse, biased, and arrive after release.",
+  "evidence": "Use LLM-as-judge with a rubric calibrated against human labels, with human review for subtle cases.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-mock1-5": {
+  "src": "jn4zyh",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Conduct A/B testing and iterative improvements",
+  "question": "A fraud-triage team wants to ship a revised prompt to all analysts this week. What is the disciplined sequence before it reaches everyone?",
+  "options": {
+   "A": "Ship it and watch the support queue for complaints during the first week of operation",
+   "B": "Hold a team vote on side-by-side samples, then roll out to all users if the new prompt wins",
+   "C": "Regression evaluation, then a controlled A/B on predefined metrics, then rollout",
+   "D": "Roll out to all analysts with an in-product feedback form and revert if ratings fall noticeably"
+  },
+  "rationale": "Prompt changes are production changes: regression evaluation first, then a controlled comparison on predefined metrics, then rollout. Complaint-watching (A) and a feedback form with rollback (D) test on everyone with no control, and a vote (B) is opinion rather than measurement.",
+  "evidence": "Compare prompt variants against the current one on predefined metrics, and regression-test before release.",
+  "ref": "https://docs.claude.com/en/docs/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-mock1-6": {
+  "src": "1tcl664",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Ensure compliance with regulations (e.g., GDPR, HIPAA, FedRAMP)",
+  "question": "A hospital network's compliance office has ruled that protected health information may not be sent to any model provider, yet clinicians need free-text search over notes that contain patient names and record numbers. Which design meets both requirements?",
+  "options": {
+   "A": "Sign a business associate agreement with the provider and send notes unchanged, since the contract covers the disclosure",
+   "B": "Instruct the model in the system prompt to ignore and never repeat any identifiers found in the clinical notes it receives",
+   "C": "Limit search to structured fields such as diagnosis codes and drop free-text queries, since notes cannot be protected",
+   "D": "Tokenize identifiers in a local de-identification step before the call, re-attach them locally afterward, and audit every substitution"
+  },
+  "rationale": "A boundary that says PHI must not reach the provider is satisfied only by an architectural control that strips identifiers before data crosses it, with re-association kept on the hospital side and an audit trail, which is what (D) does. A contract (A) permits the disclosure the office prohibited. A prompt instruction (B) acts after the data has already been sent. Dropping free text (C) fails the clinicians' stated need.",
+  "evidence": "Compliance boundaries are enforced by controlling what data crosses to the model; de-identification with local re-linking keeps sensitive data inside the customer's environment.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/claude-on-amazon-bedrock"
+ },
+ "architect-professional-mock1-7": {
+  "src": "1wgylka",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Apply human-in-the-loop validation strategies",
+  "question": "A claims assistant handles about 40,000 claims a month, and the six-person review team can read roughly 2,000. Leadership wants human review to prevent costly mistakes without hiring more staff. Which review policy fits?",
+  "options": {
+   "A": "Send claims to reviewers when confidence is low or the payout is high, and let routine low-value claims proceed automatically",
+   "B": "Review a uniform random 5% of all claims so reviewers see an unbiased picture of every claim type the system handles",
+   "C": "Let every claim pay out first, then have reviewers audit batches afterward and reverse any payments found to be wrong",
+   "D": "Review only the claims the claimant disputes, since disputes surface the real errors without spending reviewer time on other claims"
+  },
+  "rationale": "Review capacity is scarce, so it should go where error likelihood and consequence are highest: (A) routes by confidence and impact. Uniform sampling (B) spends most reviews on routine cases and misses most high-impact errors. Post-payout audits (C) detect harm after it happens. Dispute-driven review (D) only catches errors claimants notice and challenge.",
+  "evidence": "Human oversight is most effective when concentrated at checkpoints where risk and uncertainty are highest, rather than applied uniformly.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-mock1-8": {
+  "src": "1xkcqp9",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Communicate architectural decisions and trade-offs",
+  "question": "A VP sponsoring a contract-extraction project asks for one accuracy number for the board deck. Your evaluation shows 97% on typed invoices but 71% on handwritten scans, which are 20% of volume and are checked by staff before filing. What should you present?",
+  "options": {
+   "A": "Present the 97% invoice figure, and note that handwritten scans will be improved in a later phase of the delivery roadmap",
+   "B": "Report results per document type with the blended figure, how it was measured, and the outcome after human review",
+   "C": "Give the blended figure alone, rounded to a whole number, and place the per-type breakdown in an appendix for anyone who asks",
+   "D": "Decline to give any number until scan accuracy has been raised to the same level as the invoice accuracy"
+  },
+  "rationale": "A single headline number hides the segment that carries the risk, so the architect should show the breakdown with method and the end-to-end result after review, as (B) does. Quoting only the best segment (A) misleads. A blended figure buried in an appendix (C) hides the variation from the decision-makers. Refusing to quantify (D) withholds information the sponsor needs.",
+  "evidence": "Evaluation results should be reported against defined success criteria and broken out by task type so stakeholders can see where performance differs.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-mock1-9": {
+  "src": "2mm2ai",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Ensure compliance with regulations (e.g., GDPR, HIPAA, FedRAMP)",
+  "question": "A retailer is deploying a support assistant that will see EU customers' order history and messages. Counsel asks which GDPR-derived requirements should shape the architecture itself, beyond the contract. Which should the architect prioritize?",
+  "options": {
+   "A": "Selecting a model provider headquartered in the EU, so that no transfer analysis is needed for any of the customer data",
+   "B": "Encrypting stored conversations at rest, which on its own satisfies the regulation's obligations for any personal data held",
+   "C": "Collecting only needed data, using it for the stated purpose, and being able to locate and erase one person's data",
+   "D": "Recording a consent checkbox at account creation, which then covers every later processing purpose the retailer may add"
+  },
+  "rationale": "Data protection principles translate into design: collect minimally, bind use to a stated purpose, and support erasure on request, as in (C). Provider location (A) does not remove the need to analyze transfers and processing. Encryption (B) protects confidentiality but not minimization, purpose, or erasure. A one-time consent box (D) does not cover new purposes.",
+  "evidence": "Minimization, purpose limitation and erasure are design-level data-protection requirements that must be supported by how data is collected, stored and deleted.",
+  "ref": "https://privacy.claude.com"
+ },
+ "architect-professional-mock1-10": {
+  "src": "r0udtk",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Select appropriate architectural patterns (workflow, agentic, augmented LLM)",
+  "question": "An insurer's document intake always runs the same steps: classify, extract fields, validate against policy rules, then file. A vendor proposes a fully autonomous agent for flexibility. What is the strongest reason to prefer a workflow here?",
+  "options": {
+   "A": "Workflows yield more accurate field extraction than an agent that uses the same model and the same prompts",
+   "B": "Agents lack the tool-calling support needed to read PDF files and write records to a filing system",
+   "C": "A workflow consumes no model context for sequencing, so each document costs less than under an agent",
+   "D": "The path is known in advance, so fixed orchestration is cheaper, easier to test, and gives a reproducible audit trail"
+  },
+  "rationale": "Autonomy earns its complexity only when the path cannot be predicted. With fixed steps, code-orchestrated sequencing is cheaper, testable, and auditable, which is (D). Accuracy depends on prompts and model, not the pattern (A). Agents can call tools (B). The model still uses context in each workflow step (C).",
+  "evidence": "Use workflows for well-defined tasks needing predictability and consistency; use agents only when flexibility and model-driven decisions are needed at scale.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-mock1-11": {
+  "src": "5rplw9",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Implement prompt reuse strategies (caching, modular prompts, Skills)",
+  "question": "A benefits-advisor app prepends the same 12,000-token policy preamble to every request, followed by the employee's question. Both latency and input cost are over budget. Which change addresses both?",
+  "options": {
+   "A": "Place the preamble first, keep the volatile question after it, and mark the preamble as a prompt-cache breakpoint",
+   "B": "Split the preamble across two sequential calls so that each request carries only half of the repeated tokens at a time",
+   "C": "Have the model summarize the preamble at request time and send only that summary with each question",
+   "D": "Move the preamble into a few-shot example block so the model treats it as learned behavior, not input"
+  },
+  "rationale": "Prompt caching reuses a stable prefix, which cuts time to first token and the price of repeated input together; the static text must come first and the changing question after it (A). Splitting (B) adds a round trip and still resends tokens. Summarizing at request time (C) adds a model call and loses policy detail. Few-shot framing (D) does not reduce tokens sent.",
+  "evidence": "Prompt caching reuses a cached prompt prefix across requests, reducing latency and cost for repeated content placed at the start of the prompt.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching"
+ },
+ "architect-professional-mock1-12": {
+  "src": "1uvzw82",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Document architectures and provide implementation guidance",
+  "question": "A new architect joins a Claude-based claims platform and asks why the team chose a retrieval workflow over an agent. Nobody can remember the reasoning. What should the team's architecture decision records have captured?",
+  "options": {
+   "A": "The final component diagram showing the chosen design, versioned alongside the application source code and tests",
+   "B": "The decision, the alternatives rejected, the trade-offs weighed, and the constraints that drove the choice",
+   "C": "The timeline, the owners, and the sign-off dates, so each decision can be traced to the people who approved it",
+   "D": "The prompts and model versions in use when the decision was made, for reproducing behavior"
+  },
+  "rationale": "A decision record exists to preserve the reasoning: what was chosen, what else was considered, what was traded off, and which constraints decided it (B). A diagram (A) shows the outcome but not why. Dates and owners (C) show who and when, not why. Prompts and versions (D) support reproducibility, not rationale.",
+  "evidence": "Design guidance should record the trade-offs between simpler and more complex patterns so that added complexity is justified by requirements.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-mock1-13": {
+  "src": "xzlnrz",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Monitor system performance using logging and observability tools",
+  "question": "A production support agent intermittently refunds the wrong order. The logs hold only the final answer and p95 latency, so the team cannot tell whether retrieval, a tool call, or the model's reasoning failed. What should be captured?",
+  "options": {
+   "A": "Full text of every user message and final answer, retained for ninety days so that incidents can be replayed",
+   "B": "Per-tool latency and error-rate dashboards, broken down by endpoint and refreshed every minute across regions",
+   "C": "Per-request traces linking each tool call, retrieved context, and decision point to the final output",
+   "D": "A thumbs-up or thumbs-down rating with free-text comments, gathered at the end of every support session"
+  },
+  "rationale": "To localize a failure to retrieval, a tool, or the model, each step must be visible: traces connecting tool calls, retrieved context, and decisions to the output (C). Inputs and outputs alone (A) hide the intermediate steps. Per-tool latency and error rates (B) show health, not whether a wrong order was selected. User ratings (D) show that something went wrong, not where.",
+  "evidence": "Agent evaluation and debugging rely on transcripts and traces of every step so failures can be attributed to a specific layer.",
+  "ref": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents"
+ },
+ "architect-professional-mock1-14": {
+  "src": "1nwvk2b",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Configure Claude tools and environments for teams (e.g., Claude Code)",
+  "question": "A partner business unit wants to adopt your Claude Code setup after seeing a demo. A similar handoff last year faded within a quarter as engineers drifted back to defaults. What makes adoption durable this time?",
+  "options": {
+   "A": "A recorded walkthrough of the workflow plus a written FAQ stored in the partner team's wiki",
+   "B": "A dedicated chat channel where members of the original team answer questions as they arise",
+   "C": "One-to-one coaching for each engineer during the first two weeks, tailored to their individual habits and current projects",
+   "D": "Version-controlled shared configuration, common skills and commands, and a defined onboarding path for new engineers"
+  },
+  "rationale": "Durable adoption comes from setup that travels with the repository and a path that new joiners follow: versioned shared configuration, common skills and commands, and onboarding (D). Recordings and FAQs (A) go stale, a support channel (B) depends on the original team staying available, and coaching (C) helps only the people coached.",
+  "evidence": "Project memory and shared configuration committed to the repository give every team member the same conventions, commands and context.",
+  "ref": "https://code.claude.com/docs/en/memory"
+ },
+ "architect-professional-mock1-15": {
+  "src": "hd5lly",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Evaluate tool/agent configuration for capability bloat",
+  "question": "An operations agent can query and update production customer records through one database credential. An audit finding says a single mistaken tool call could alter thousands of rows. Which change best reduces the risk?",
+  "options": {
+   "A": "Split read from write into scoped tools, limit write to roles that need it, and gate writes on approval",
+   "B": "Write every modification to an append-only log that an engineer reviews each morning for unexpected or unauthorized changes",
+   "C": "Add a section to the system prompt explaining that record changes are sensitive and must be double-checked first",
+   "D": "Restrict the agent to business hours so engineers can catch any mistaken changes quickly"
+  },
+  "rationale": "Least privilege shrinks what a mistake can do: separate read and write capabilities, scope write access, and gate writes on approval (A). A morning log review (B) detects damage after it occurs. A cautionary prompt (C) is probabilistic and does not limit the credential. Business-hours operation (D) changes timing, not blast radius.",
+  "evidence": "Grant agents the minimum permissions needed and require approval for risky actions; permission rules enforce limits outside the model.",
+  "ref": "https://code.claude.com/docs/en/security"
+ },
+ "architect-professional-mock2-1": {
+  "src": "11rva0x",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Evaluate connection protocols and select the appropriate integration mechanism (MCP, API/CLI, agent-to-agent)",
+  "question": "A bank's policy says all inference must run inside its own AWS account and approved region, under its existing network controls. Which deployment option does this requirement point to?",
+  "options": {
+   "A": "The Claude API with a signed data processing agreement and a zero data retention arrangement in place",
+   "B": "The Claude API reached over a private network link from the bank's virtual private cloud",
+   "C": "Amazon Bedrock, invoked from the bank's own AWS account in the approved region",
+   "D": "Vertex AI, in a Google Cloud region geographically close to the bank's primary data center"
+  },
+  "rationale": "The requirement is about where inference runs and under whose controls, so the model must be consumed through the cloud service in the bank's own account and region, which is (C). A contract and retention terms (A) do not move processing into the account. A private link to the vendor API (B) still sends traffic to a service outside the account. Vertex AI (D) is a different cloud.",
+  "evidence": "Claude models are available through Amazon Bedrock, running within the customer's AWS account and chosen region under AWS controls.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/claude-on-amazon-bedrock"
+ },
+ "architect-professional-mock2-2": {
+  "src": "1eew32h",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Evaluate connection protocols and select the appropriate integration mechanism (MCP, API/CLI, agent-to-agent)",
+  "question": "A manufacturer standardized on Google Cloud requires identity, billing, and audit for any AI service to flow through its existing IAM, committed-spend agreement, and audit logs. How should Claude be deployed?",
+  "options": {
+   "A": "Through Vertex AI, so existing identity, billing, and audit controls apply without rebuilding them",
+   "B": "Through the Claude API directly, then build matching identity and audit controls inside an internal gateway",
+   "C": "Through Amazon Bedrock, because its feature set is the closest match to the direct Claude API",
+   "D": "Through whichever channel each product team prefers, governed by a shared policy document"
+  },
+  "rationale": "When the organization's controls already live on a given cloud, using the model through that platform reuses them: Vertex AI for a Google Cloud shop (A). Direct API access with a rebuilt gateway (B) duplicates controls and risks drift. Bedrock (C) adds a second control plane. Team-by-team choice (D) removes central governance.",
+  "evidence": "Claude is offered through Vertex AI on Google Cloud, so organizations can use their existing Google Cloud identity, billing and audit tooling.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/claude-on-vertex-ai"
+ },
+ "architect-professional-mock2-3": {
+  "src": "q9t30j",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Analyze authentication and authorization requirements to identify security gaps",
+  "question": "Seven product teams each call the Claude API with their own keys, and the platform lead proposes one internal gateway for all model traffic. Security asks what the main architectural benefit is.",
+  "options": {
+   "A": "Pooling volume under one key lets the company negotiate lower unit token prices with the provider",
+   "B": "Teams no longer need their own evaluation suites, because the gateway validates every output centrally for correctness",
+   "C": "Every call becomes faster, since requests skip per-team connection setup and share one warm connection to the provider",
+   "D": "Authentication, rate limiting, logging, and routing are enforced and changed in one place for all teams"
+  },
+  "rationale": "A single integration point is where cross-cutting controls such as authentication, rate limits, logging, and routing are applied consistently and updated once (D). A gateway does not change list pricing (A), cannot replace per-use-case evaluation (B), and adds a hop rather than guaranteeing speed (C).",
+  "evidence": "Central enforcement of credentials, limits and logging reduces scattered keys and makes controls consistent across applications.",
+  "ref": "https://code.claude.com/docs/en/security"
+ },
+ "architect-professional-mock2-4": {
+  "src": "1jesddp",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Select appropriate architectural patterns (workflow, agentic, augmented LLM)",
+  "question": "Two designs for an HR-policy Q&A assistant both meet the accuracy and latency targets. One is retrieval plus a single model call; the other adds a planner agent and three specialist subagents. What should decide between them?",
+  "options": {
+   "A": "The design with more headroom, since later requirements are likely to be harder than the current ones are",
+   "B": "Whether any stated requirement needs the added capability, against the ongoing cost of maintaining it",
+   "C": "The design the team finds more interesting to build, since motivation affects delivery quality and speed on the project",
+   "D": "The design whose model ranks higher on public benchmarks, since that predicts accuracy on HR questions in particular"
+  },
+  "rationale": "Complexity is paid for continuously, so it must be bought by a real requirement; the simpler design wins unless a stated need demands the extra capability, which is (B). Speculative headroom (A), team preference (C), and generic benchmark rank (D) are not tied to any requirement the client has.",
+  "evidence": "Start with the simplest solution and add complexity only when it demonstrably improves outcomes against requirements.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-mock2-5": {
+  "src": "wrrgs9",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Design end-to-end architectures (input → processing → output → feedback loops)",
+  "question": "A payments client's compliance control says refunds above $500 need two approvers. The design relies on the model to notice the amount and request approval; testing shows 99.4% compliance. Is this acceptable?",
+  "options": {
+   "A": "Yes, once the 0.6% of misses are logged and reviewed every week as a documented residual risk accepted by compliance",
+   "B": "No, enforce the threshold in code outside the model; a mandatory control needs a guarantee, not a high rate",
+   "C": "Yes, if the system prompt is strengthened and the workload moves to a larger model tier",
+   "D": "No, unless measured compliance reaches 99.9% on a larger evaluation set drawn from production"
+  },
+  "rationale": "A control that must hold has to be enforced deterministically outside the model, in code or a gate the model cannot bypass (B). Documenting residual risk (A), strengthening the prompt or enlarging the model (C), and demanding a higher measured rate (D) all still leave a probabilistic tendency standing in for a guarantee.",
+  "evidence": "Rules that must always hold should be enforced by deterministic permission rules or hooks outside the model, not by prompting alone.",
+  "ref": "https://code.claude.com/docs/en/security"
+ },
+ "architect-professional-mock2-6": {
+  "src": "6uzjjt",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Translate business problems into Claude-based AI solutions",
+  "question": "A lender wants Claude to automate loan-eligibility decisions end to end. Testing is strong, but the regulator expects a named person to be accountable for each adverse decision. Where should the automation boundary sit?",
+  "options": {
+   "A": "At the level where offline testing shows the model matching experienced underwriters on past decisions",
+   "B": "At the volume the operations team can staff for review, with everything above that automated",
+   "C": "At the scope the business sponsor requested in the original statement of work for the project",
+   "D": "Where accountability for the decision sits, so adverse decisions stay with a named person using Claude's output"
+  },
+  "rationale": "Accountability decides what may be automated at all, and it is an architectural boundary: adverse decisions stay with a person who owns them (D). Test performance (A), staffing capacity (B), and the original scope statement (C) do not answer who is responsible for the outcome.",
+  "evidence": "Autonomy suits tasks where errors are recoverable and oversight is possible; consequential decisions need human checkpoints.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-mock2-7": {
+  "src": "1dwk3q",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Define evaluation metrics (accuracy, latency, cost, safety, security)",
+  "question": "A retailer's returns-triage assistant impressed executives in a live demo, and the sponsor wants to go live next Monday. What evidence must exist before it is declared ready for production?",
+  "options": {
+   "A": "A stated success criterion and measured results against it on real, representative traffic",
+   "B": "A signed-off cost model showing the run cost per ticket compared with the current manual process, month by month",
+   "C": "A clean run of the demo script in the production environment, witnessed by the executive sponsor",
+   "D": "Approval from the engineering lead and the security reviewer, recorded in the release ticket before launch"
+  },
+  "rationale": "Readiness is a measured claim against a stated bar on realistic data (A). A cost model (B), a repeated demo (C), and recorded approvals (D) may all be needed for launch but none shows whether the assistant performs well enough on real returns.",
+  "evidence": "Define success criteria first, then build evaluations that measure performance against them on representative cases.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-mock2-8": {
+  "src": "1t7h8kj",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Design evaluation datasets and test frameworks using mixed methodologies",
+  "question": "An eval set for a loan-document classifier was built from 3,000 tickets the current system already resolves correctly. Scores sit at 98%, and the team wants to use the set to approve a prompt change. What is the effect of how the set was built?",
+  "options": {
+   "A": "It gives a conservative estimate, because easy cases make regressions easier to detect in later runs",
+   "B": "It is harmless at 3,000 cases, because a large sample washes out any selection effects in how it was built",
+   "C": "It overstates quality and hides the failure types that matter, since it does not reflect real traffic",
+   "D": "It matters only in regulated domains, where auditors examine sampling"
+  },
+  "rationale": "A set made only of cases the system already handles measures the wrong distribution, so it inflates scores and hides the hard cases that would reveal regressions (C). Size does not repair selection bias (B), easy cases do not make regression detection stricter (A), and the problem applies in every domain (D).",
+  "evidence": "Evaluation sets should be representative and include edge cases and past failures, not only cases already handled well.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-mock2-9": {
+  "src": "nbtjza",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Implement guardrails and safety controls",
+  "question": "A bank's internal auditors ask that every prompt and response from a customer-facing assistant be logged indefinitely. Privacy counsel notes that conversations contain account details. How should the architect respond?",
+  "options": {
+   "A": "Implement full logging as requested, because audit requirements take precedence over privacy concerns in a regulated bank",
+   "B": "Decline logging of prompts and responses and rely on aggregate metrics, since stored conversations are a liability",
+   "C": "Log responses only, because prompts carry the customer's personal data while responses do not carry any",
+   "D": "Establish what the audit actually requires, then log to meet that purpose with limited access and bounded retention"
+  },
+  "rationale": "Audit and data protection are both real, so the design should serve the audit purpose without keeping more than is warranted, using scoped access and defined retention (D). Blanket logging (A) and refusal (B) each ignore one side. Splitting prompts from responses (C) is arbitrary, since responses can echo personal data.",
+  "evidence": "Logging for audit should be balanced against data minimization: define the purpose, restrict access and limit how long conversation data is kept.",
+  "ref": "https://privacy.claude.com"
+ },
+ "architect-professional-mock2-10": {
+  "src": "4nme5d",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Identify risks, limitations, and failure modes of LLM systems",
+  "question": "An automated Claude workflow at an insurer wrongly denies a batch of claims. The vendor terms disclaim liability, and the engineer who wrote the prompt has since left. Who is accountable?",
+  "options": {
+   "A": "Anthropic, as the provider whose model generated the incorrect decisions across the whole affected batch",
+   "B": "The engineer who wrote the prompt, as the author of the faulty instructions the workflow ran on",
+   "C": "The insurer that deployed the workflow, which owns the outcomes of decisions it automates",
+   "D": "No one in particular, since an automated process rather than a person made the decision"
+  },
+  "rationale": "Deploying an automated decision means owning its outcomes, so the insurer is accountable (C). The provider (A) supplies a capability, one engineer's authorship (B) does not transfer organizational responsibility, and automation (D) does not remove accountability.",
+  "evidence": "Organizations that deploy AI systems remain responsible for how outputs are used in decisions that affect people.",
+  "ref": "https://privacy.claude.com"
+ },
+ "architect-professional-mock2-11": {
+  "src": "2hhk2d",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Manage stakeholder feedback loops and expectation alignment (including SLAs)",
+  "question": "A COO asks for one number showing whether the new claims-summarization tool is working. Adjusters care about time saved per claim, while legal cares about missed exclusions. What is the right response?",
+  "options": {
+   "A": "Give the headline accuracy figure from the evaluation, since it is the standard indicator of quality",
+   "B": "Give the metric tied to the decision she must make, and state plainly what that metric leaves out",
+   "C": "Explain that quality has several dimensions and cannot responsibly be reduced to one figure",
+   "D": "Give the model's published benchmark score, since an independent source validates it for the whole industry"
+  },
+  "rationale": "A useful single number matches the decision the sponsor faces and is candid about its limits (B). A bare accuracy figure (A) and a generic benchmark (D) can mislead about this workflow, and refusing to reduce the answer (C) fails a sponsor who needs something actionable.",
+  "evidence": "Choose metrics that reflect the business outcome and the risks that matter, and communicate what each metric does and does not measure.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-mock2-12": {
+  "src": "17bokd8",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Support lifecycle phases (discovery, design, handoff, monitoring, iteration)",
+  "question": "A ten-user legal-research pilot has gone well, and leadership wants it open to 2,000 staff next quarter. What should the architect raise first?",
+  "options": {
+   "A": "Which assumptions held with ten users that may break at 2,000, such as input variety, support load, and edge cases",
+   "B": "The license and token budget at 2,000 users, with a month-by-month spending forecast",
+   "C": "Whether a larger model tier is needed to cope with the wider range of questions",
+   "D": "The training and rollout plan, including named champions in each department"
+  },
+  "rationale": "Scale invalidates assumptions about inputs, support, and edge cases, so surfacing them is the architect's first contribution (A). Budget (B), model tier (C), and training (D) are follow-on questions that can only be answered once it is known what changes at 2,000 users.",
+  "evidence": "Pilot results should be validated against the broader distribution of inputs and use before scaling to a wider population.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-mock2-13": {
+  "src": "1mkwnzw",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Select appropriate Claude models based on trade-offs",
+  "question": "An insurance solution does intake classification, policy-clause lookup, and drafting of customer letters. The team wants a single model decision for the whole system. How should models be chosen?",
+  "options": {
+   "A": "Match each task to the smallest model that meets its measured bar, and confirm each choice with evals",
+   "B": "Use one mid-tier model across all tasks, to simplify pinning, monitoring, and prompt maintenance",
+   "C": "Use the largest tier everywhere, so the hardest task sets the quality floor for all the others as well",
+   "D": "Use the newest release everywhere, since it will also be the best choice for the simple tasks"
+  },
+  "rationale": "Tasks differ in difficulty, so each should get the cheapest model that clears its own evaluated bar (A). A single uniform choice of mid-tier (B), largest (C), or newest (D) optimizes for convenience or perceived safety rather than fit, and costs more or risks quality somewhere.",
+  "evidence": "Models differ in capability, speed and cost; choose the one that meets the quality bar for each task, validated by evaluation.",
+  "ref": "https://platform.claude.com/docs/en/about-claude/models/overview"
+ },
+ "architect-professional-mock2-14": {
+  "src": "tls7rm",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Optimize context windows and manage token usage",
+  "question": "A contract-review assistant's quality fell as features were added and every request began carrying all retrieved clauses, the full playbook, and the complete chat history, nearly filling the window. How should the context window be treated in the design?",
+  "options": {
+   "A": "As capacity to fill, since more material gives the model more evidence to reason from",
+   "B": "As a budget allocated on purpose among instructions, retrieved material, and working state, keeping only what the task needs",
+   "C": "As a concern only for very long documents, not for chat-style interactions like this one",
+   "D": "As a setting to raise to the maximum whenever answers degrade, until quality recovers"
+  },
+  "rationale": "Context is a limited resource whose allocation affects quality, so it should be budgeted deliberately across instructions, retrieval, and working state (B). Filling it (A) dilutes relevant content, it matters beyond long documents (C), and enlarging it (D) does not fix poor allocation.",
+  "evidence": "Context is a finite resource; more tokens do not always improve results, so curate what goes into the window.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/context-windows"
+ },
+ "architect-professional-mock2-15": {
+  "src": "xa3i10",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Configure Claude tools and environments for teams (e.g., Claude Code)",
+  "question": "A bank with 60 repositories wants consistent Claude Code practice across its engineering teams. Which approach is most durable?",
+  "options": {
+   "A": "A policy memo signed by engineering leadership and reissued each quarter to every repository owner and team lead",
+   "B": "A mandatory training session with a completion certificate for every engineer, repeated each year with refresher content",
+   "C": "Committed project memory and shared skills in each repository, reviewed like any other code change",
+   "D": "A central approval step before any engineer may start a Claude Code session in a repository"
+  },
+  "rationale": "Conventions persist when they live in the repository and are reviewed like code: project memory and shared skills (C). Memos (A) and one-off training (B) fade, and per-session approval (D) adds friction without conveying how to work well.",
+  "evidence": "Project CLAUDE.md files committed to the repo and shared skills give consistent context to everyone who works in it.",
+  "ref": "https://code.claude.com/docs/en/memory"
+ },
+ "architect-professional-mock3-1": {
+  "src": "camexa",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Analyze observability challenges and select monitoring strategies at scale",
+  "question": "A healthcare client's auditor will not accept any solution whose behavior cannot be explained for a given decision. What does this requirement constrain most?",
+  "options": {
+   "A": "The model selection, since only the largest tier can produce explanations an auditor will accept",
+   "B": "The deployment region, which must match the auditor's jurisdiction so records are admissible",
+   "C": "The architecture, which must make each decision traceable and its controls inspectable",
+   "D": "The cost model, which must budget for external audit support each release"
+  },
+  "rationale": "Explainability to an auditor is a property of the whole system: decisions must be traceable and controls inspectable by design (C). Picking a larger model (A), a region (B), or a budget line (D) does not by itself make a given decision explicable.",
+  "evidence": "Recording full traces of each step makes it possible to explain and review how an agent reached a particular outcome.",
+  "ref": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents"
+ },
+ "architect-professional-mock3-2": {
+  "src": "m57zw1",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Evaluate connection protocols and select the appropriate integration mechanism (MCP, API/CLI, agent-to-agent)",
+  "question": "A team calls one cloud's model service directly from fifty places in application code, with no wrapper. The CTO asks what the main architectural risk is.",
+  "options": {
+   "A": "Changing provider or access path later becomes expensive, because the coupling reaches into application code",
+   "B": "Token costs will run higher, because direct calls skip the volume pricing that a shared gateway can negotiate for the company",
+   "C": "Accuracy will be lower, since models hosted on a cloud service lag behind the direct API",
+   "D": "Responses will be slower, since each call passes through the cloud provider's shared endpoint"
+  },
+  "rationale": "Coupling sets the cost of change, which is the architectural concern: with fifty direct call sites, switching provider or path means touching application code (A). The coupling itself does not raise token prices (B), lower accuracy (C), or slow responses (D).",
+  "evidence": "Keep integrations simple and transparent, and avoid framework or vendor abstractions that obscure the underlying calls only when they are not needed.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-mock3-3": {
+  "src": "1aupqvj",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Evaluate connection protocols and select the appropriate integration mechanism (MCP, API/CLI, agent-to-agent)",
+  "question": "A SaaS vendor serves users in the EU and in a country whose law requires its citizens' data to stay in-country. Latency to either region is acceptable. What follows?",
+  "options": {
+   "A": "One deployment in the cheaper region, with application-layer encryption of all stored records",
+   "B": "A single global deployment, with TLS and customer-managed keys protecting data in transit",
+   "C": "One deployment in the region with the lowest combined latency for both user groups",
+   "D": "Separate regional deployments in which each region's data is stored and processed only inside its boundary"
+  },
+  "rationale": "Residency is satisfied by keeping data within each legal boundary, which means separate regional deployments (D). Encryption (A) and (B) protect data but do not keep it in-country, and optimizing for latency (C) addresses neither rule.",
+  "evidence": "Cloud deployments let customers choose the region where models run so that data stays within required geographic boundaries.",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/claude-on-amazon-bedrock"
+ },
+ "architect-professional-mock3-4": {
+  "src": "1em77xe",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Translate business problems into Claude-based AI solutions",
+  "question": "A client's requirements say only: make the claim-triage assistant as accurate as possible. The budget is fixed and the pilot starts in six weeks. What should the architect do first?",
+  "options": {
+   "A": "Choose the largest model tier and tune prompts until gains flatten, then report the ceiling reached",
+   "B": "Establish the accuracy the use case needs and what each error costs, as a testable target",
+   "C": "Design the most capable architecture the budget allows, then let the pilot reveal the right level",
+   "D": "Accept the wording and define the target once the pilot has produced real data from live users"
+  },
+  "rationale": "An unbounded requirement cannot be designed against or verified, so it must be turned into a target based on the needed accuracy and the cost of errors (B). Maximizing capability (A) or architecture (C) spends without a target, and deferring the target (D) leaves the pilot unanchored.",
+  "evidence": "Define specific, measurable success criteria tied to the use case before building and evaluating a solution.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-mock3-5": {
+  "src": "1axqc87",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Design end-to-end architectures (input → processing → output → feedback loops)",
+  "question": "In a multi-step mortgage workflow, an extraction component and a validation component each pass their own tests, yet intermittent failures occur when records move between them; rare null values appear in the hand-off. What does this suggest?",
+  "options": {
+   "A": "The extraction component's model tier is too small and should be upgraded",
+   "B": "The contract between them is underspecified, especially for missing values and error cases",
+   "C": "A third component should be added to reconcile what the other two produce",
+   "D": "The failures are transient, so retry with exponential backoff at the boundary will absorb them reliably"
+  },
+  "rationale": "Failures at the boundary between components that each work alone point at the interface contract, especially for missing values and errors (B). A bigger model (A) and an extra reconciler (C) do not define the interface, and retries (D) mask a deterministic gap.",
+  "evidence": "Reliable multi-step systems depend on clearly defined interfaces and gates between steps, with checks at each hand-off.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-mock3-6": {
+  "src": "1bthqu",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Ensure compliance with regulations (e.g., GDPR, HIPAA, FedRAMP)",
+  "question": "A design for an HR assistant proposes storing every model interaction indefinitely in case it is needed. The interactions include health and grievance details. What should the architect raise?",
+  "options": {
+   "A": "That the transcripts should be encrypted with customer-managed keys, which resolves the exposure",
+   "B": "That growth in stored volume will make the retention bucket costly after the second year",
+   "C": "That indexing years of transcripts will slow retrieval and degrade response times",
+   "D": "Why the data is needed, for how long, and what obligations holding it creates"
+  },
+  "rationale": "Retention creates obligations and risk, so purpose and duration must justify it before storage is designed (D). Encryption (A) protects confidentiality but not purpose or duration, and storage cost (B) and speed (C) are secondary to whether the data should be kept.",
+  "evidence": "Data should be retained only as long as needed for a defined purpose, with retention periods and deletion built into the design.",
+  "ref": "https://privacy.claude.com"
+ },
+ "architect-professional-mock3-7": {
+  "src": "12krl7r",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Identify risks, limitations, and failure modes of LLM systems",
+  "question": "A tax-advice assistant sometimes states a wrong deduction with high confidence, and the errors cost customers penalties. How should the design handle confident-but-wrong outputs?",
+  "options": {
+   "A": "Verify consequential outputs against an independent source, such as rules or reference data",
+   "B": "Escalate only answers where the model reports low confidence, and release the rest directly to the customer",
+   "C": "Add a second pass in which the same model critiques its own answer before the customer sees the final text",
+   "D": "Run two different models and release only answers on which both of them agree"
+  },
+  "rationale": "Independent verification is what catches confident error: check consequential outputs against rules or reference data (A). Stated confidence (B) is not evidence of correctness, self-critique (C) is not independent, and two models can agree and both be wrong (D).",
+  "evidence": "Reduce hallucination risk by grounding answers in provided sources and verifying claims against them.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations"
+ },
+ "architect-professional-mock3-8": {
+  "src": "1958m7d",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Define evaluation metrics (accuracy, latency, cost, safety, security)",
+  "question": "A pilot of a contract-clause extractor reports 94% accuracy, and the sponsor wants a go or no-go decision. What else must be known before the number is actionable?",
+  "options": {
+   "A": "How the score compares with the published benchmark for the model version in use today",
+   "B": "Whether the score held across three consecutive runs, to rule out run-to-run variance",
+   "C": "What the 6% of failures look like, and what each failure type costs the business",
+   "D": "How long the evaluation took and how much compute it consumed, to budget the next round"
+  },
+  "rationale": "A headline rate means little without the shape and cost of its failures: which errors occur and what each one costs (C). Benchmark comparison (A), run-to-run variance (B), and evaluation time or compute (D) do not describe the risk of deploying.",
+  "evidence": "Aggregate scores need error analysis: read the failing cases to see their nature and impact before acting on a metric.",
+  "ref": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents"
+ },
+ "architect-professional-mock3-9": {
+  "src": "16alc6u",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Conduct A/B testing and iterative improvements",
+  "question": "The provider announces a newer snapshot of the model your claims solution is pinned to, with the current one deprecated in three months. What should happen before the new version reaches production traffic?",
+  "options": {
+   "A": "Switch on the announcement, since successor snapshots are designed to be backward compatible with prior behavior",
+   "B": "Switch immediately and watch dashboards more closely for a week, rolling back if metrics dip",
+   "C": "Wait until the deprecation date, so that other customers surface any regressions first",
+   "D": "Re-run the evaluation suite on the new version and compare it with the baseline before switching"
+  },
+  "rationale": "A change to what determines behavior invalidates earlier measurements, so the suite must be re-run and compared with the baseline before production sees it (D). Assuming compatibility (A) is unsafe, and switching then monitoring (B) or waiting passively (C) either detects problems after users are affected or skips testing entirely.",
+  "evidence": "Migrating to a new model version requires testing and evaluating behavior on your own use case before moving traffic.",
+  "ref": "https://platform.claude.com/docs/en/about-claude/model-deprecations"
+ },
+ "architect-professional-mock3-10": {
+  "src": "1h850x3",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Manage stakeholder feedback loops and expectation alignment (including SLAs)",
+  "question": "A product VP asks why the loan-review solution cannot simply be fully automated, since pilot accuracy looks good. What is the most useful answer?",
+  "options": {
+   "A": "The technology is not mature enough yet, and revisiting the question in a year or so would be sensible",
+   "B": "Fully automated systems of this kind carry unacceptable risk, and human review is the industry norm for lending",
+   "C": "Name the decisions that carry accountability or can't be verified, and the risk of automating them",
+   "D": "The budget covers a review team but not the engineering that full automation would need to be reliable"
+  },
+  "rationale": "A specific, reasoned boundary is actionable and can be revisited as evidence changes: naming the decisions that carry accountability or cannot be verified (C). Generic claims about maturity (A) or risk (B) give the VP nothing to act on, and budget (D) is not the real reason.",
+  "evidence": "Explain trade-offs in terms of the specific tasks where autonomy raises cost or error risk, and where human checkpoints are required.",
+  "ref": "https://www.anthropic.com/engineering/building-effective-agents"
+ },
+ "architect-professional-mock3-11": {
+  "src": "qhnxeq",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Document architectures and provide implementation guidance",
+  "question": "A consultancy is handing a document-processing solution to the client's IT team, who will own it for a year without the original builders. What should be handed over so the solution survives?",
+  "options": {
+   "A": "The repository with full source code and deployment scripts, plus a runbook for redeploying",
+   "B": "The evaluation suite, the success criteria, a named owner, and a routine for re-checking performance",
+   "C": "A recorded demonstration of the system and a walkthrough of the architecture diagram",
+   "D": "The final prompts and the list of model settings, with comments explaining each choice"
+  },
+  "rationale": "Continuity depends on being able to measure and maintain the system with someone responsible: evaluations, criteria, an owner, and a re-check routine (B). Code and runbooks (A), demos (C), and prompts (D) are artifacts without the means to verify they still work.",
+  "evidence": "Maintain evaluation suites and success criteria over time so changes to prompts, models or data can be checked for regressions.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-mock3-12": {
+  "src": "j3shsf",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Optimize context windows and manage token usage",
+  "question": "A support team reports that their Claude-based summarizer has become noticeably worse over two months. The model ID is pinned, and no deploys or prompt edits occurred. What is the most likely explanation to check first?",
+  "options": {
+   "A": "The inputs or usage changed, such as new ticket types or longer threads",
+   "B": "The pinned model was quietly degraded by the provider as load on it grew over the period",
+   "C": "The prompts lose effectiveness with age and need periodic rewording to stay sharp",
+   "D": "The original evaluation was flawed, so earlier quality was never as good as reported"
+  },
+  "rationale": "Behavior changes with what is fed to it, and drift in inputs or usage is the usual cause when nothing was deployed (A). Pinned snapshots do not change underneath you (B), prompts do not wear out (C), and doubting the original evaluation (D) is not the first suspect.",
+  "evidence": "Pinned model snapshots are fixed, so behavior changes in production usually come from changes in inputs, data or surrounding configuration.",
+  "ref": "https://platform.claude.com/docs/en/about-claude/model-deprecations"
+ },
+ "architect-professional-mock3-13": {
+  "src": "14z1eny",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Design system prompts, templates, and guardrails",
+  "question": "A bank's customer-chat assistant is steered by a 3,000-word system prompt. Two incidents were traced to someone editing it in a shared document the day before. How should prompts that determine production behavior be managed?",
+  "options": {
+   "A": "Versioned, owned, reviewed, and evaluated on every change, as code is",
+   "B": "Kept in a shared document with edit history, so every change is visible and reversible",
+   "C": "Edited by whoever notices a problem, with a note posted in the team channel afterward",
+   "D": "Frozen at launch and changed only through a formal annual revision process"
+  },
+  "rationale": "Anything that determines production behavior needs the lifecycle of code: version control, ownership, review, and evaluation on change (A). A shared document (B) and ad hoc edits (C) allow unreviewed change, and freezing (D) blocks needed improvement.",
+  "evidence": "Treat prompts as versioned artifacts and re-run evaluations whenever a prompt changes to catch regressions.",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests"
+ },
+ "architect-professional-mock3-14": {
+  "src": "14gxhx7",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Improve developer workflows using AI-assisted tooling",
+  "question": "A CFO asks whether Claude Code is worth its license cost after six months. The usage dashboard shows thousands of sessions per week. What should be measured?",
+  "options": {
+   "A": "Weekly session and tool-invocation counts, trended per team against license spend",
+   "B": "Change in the delivery outcomes the tool was adopted to improve, such as cycle time and escaped defects",
+   "C": "The share of engineers onboarded and active each week against the rollout target",
+   "D": "Hours spent in the tool per engineer, compared with time spent in the editor"
+  },
+  "rationale": "Value is the outcome moved, not the activity generated: delivery outcomes the tool was adopted to improve (B). Session and invocation counts (A), adoption share (C), and hours in the tool (D) measure usage rather than benefit.",
+  "evidence": "Usage telemetry shows adoption activity; business value must be judged against the outcomes the organization set out to improve.",
+  "ref": "https://code.claude.com/docs/en/monitoring-usage"
+ },
+ "architect-professional-mock3-15": {
+  "src": "du7167",
+  "calibrated": "2026-11-04T23:27:00Z",
+  "task": "Configure Claude tools and environments for teams (e.g., Claude Code)",
+  "question": "A team working on a 600,000-line Java monolith finds that Claude Code produces changes that ignore their conventions and module boundaries. What most likely explains the poor results?",
+  "options": {
+   "A": "The repository is too large for Claude Code to work in at all, whatever context it is given",
+   "B": "Java is less well supported than newer languages, which limits the quality of output on large codebases",
+   "C": "The repository has no committed context, such as a CLAUDE.md, describing its conventions and module structure",
+   "D": "Too many contributors commit to the repository, which makes its style inconsistent for the model"
+  },
+  "rationale": "Missing project context is the usual cause, and the team can fix it by committing conventions and structure to project memory (C). Size (A), language (B), and contributor count (D) do not by themselves prevent good results.",
+  "evidence": "Claude Code works best when CLAUDE.md documents project conventions, structure and commands so changes follow the codebase's norms.",
+  "ref": "https://code.claude.com/docs/en/best-practices"
+ }
+}

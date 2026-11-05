@@ -1,0 +1,885 @@
+{
+ "calibrated": {},
+ "original": {
+  "architect-professional-practice-1": {
+   "question": "Un agente interno para gestores de cuentas puede leer registros del CRM, redactar correos, actualizar oportunidades y eliminar contactos. Los gestores solo leen registros y redactan correos a través de él. Según el principio de mínimo privilegio, ¿cuál es el cambio correcto?",
+   "options": {
+    "A": "Registrar cada actualización y eliminación para una auditoría posterior",
+    "B": "Añadir un cuadro de confirmación antes de las actualizaciones y eliminaciones",
+    "C": "Restringir las eliminaciones al horario laboral",
+    "D": "Quitar por completo de la configuración del agente las capacidades de actualizar y eliminar"
+   },
+   "rationale": "El mínimo privilegio elimina las capacidades que el rol no necesita, suprimiendo la superficie de ataque y de error en lugar de monitorizarla. El registro (A) y las confirmaciones (B) son controles compensatorios alrededor de un privilegio que no debería existir, y la restricción horaria (C) reduce la ventana sin cerrarla.",
+   "src": "18q7k51"
+  },
+  "architect-professional-practice-2": {
+   "question": "Tras una actualización nocturna de documentos, las respuestas de tu asistente RAG pasaron a ser seguras pero erróneas. La versión del modelo, los prompts y la latencia no han cambiado. ¿Dónde miras primero?",
+   "options": {
+    "A": "La capa de recuperación e indexación: si la actualización rompió el índice, cambió el chunking o introdujo embeddings incompatibles",
+    "B": "El modelo, que pudo degradarse durante la noche",
+    "C": "La redacción del system prompt",
+    "D": "El ajuste de temperature"
+   },
+   "rationale": "Lo único que ha cambiado es el pipeline de documentos, y que las respuestas sean seguras pero erróneas es la firma de un contexto recuperado plausible pero irrelevante. El modelo fijado (B), el prompt sin cambios (C) y el muestreo (D) no guardan relación con la actualización.",
+   "src": "1w9pn1z"
+  },
+  "architect-professional-practice-3": {
+   "question": "Tu plataforma va a exponer cuarenta capacidades internas a agentes de muchos equipos. Cargar las cuarenta definiciones de herramientas en el contexto de cada agente está inflando los prompts y empeorando la selección de herramientas. ¿Cuál es el remedio arquitectónico?",
+   "options": {
+    "A": "Descripciones de herramientas más cortas en todos los casos",
+    "B": "Descubrimiento progresivo: los agentes cargan un conjunto reducido de herramientas relevantes para la tarea, con búsqueda o espacios de nombres para incorporar otras cuando haga falta",
+    "C": "Una única megaherramienta con un parámetro de modo que seleccione entre cuarenta comportamientos",
+    "D": "Limitar la plataforma a diez capacidades"
+   },
+   "rationale": "Con muchas herramientas, el descubrimiento progresivo supera al contexto monolítico: cada agente ve lo que su tarea necesita. Unas descripciones uniformemente más escuetas (A) sacrifican calidad de selección por tokens, una megaherramienta con selector de modo (C) oculta cuarenta comportamientos al mecanismo de selección por completo, y limitar la plataforma (D) sacrifica el requisito.",
+   "src": "4t4niz"
+  },
+  "architect-professional-practice-4": {
+   "question": "Un banco quiere un sistema que responda con citas a las preguntas de política de los gestores de préstamos y que, por separado, redacte cartas de denegación a partir de datos estructurados de la decisión. Un proveedor propone un único sistema multiagente autónomo para ambas cosas. ¿Cuál es la arquitectura más sólida?",
+   "options": {
+    "A": "El sistema multiagente propuesto, ya que ambas tareas implican documentos",
+    "B": "Un agente con todas las herramientas y un prompt de enrutado",
+    "C": "Dos componentes simples: un servicio de respuestas con recuperación aumentada para las preguntas de política y un workflow de generación con plantillas para las cartas, cada uno evaluado con sus propias métricas",
+    "D": "Un único modelo con fine-tuning para ambas tareas"
+   },
+   "rationale": "Dos problemas bien conocidos con formas distintas merecen las dos estructuras fiables más económicas, comprobables y gobernables de forma independiente. Que ambas tareas impliquen documentos (A) no es un argumento arquitectónico, un agente con todo (B) acopla perfiles de riesgo no relacionados, y el fine-tuning (D) es el camino más caro para problemas que la recuperación y las plantillas ya resuelven.",
+   "src": "11siksq"
+  },
+  "architect-professional-practice-5": {
+   "question": "Tu comité de revisión de arquitectura pregunta por qué elegiste un workflow determinista en lugar de un agente autónomo para la recepción de siniestros. ¿Qué justificación refleja el marco de decisión evaluado?",
+   "options": {
+    "A": "Los agentes son un patrón más reciente y, en general, menos probado",
+    "B": "Los workflows siempre superan a los agentes",
+    "C": "Al equipo le faltó tiempo para construir un agente",
+    "D": "El recorrido de la recepción se conoce por completo de antemano, así que la orquestación determinista es más barata, auditable y fiable; la autonomía solo justifica su complejidad donde el modelo debe elegir el camino"
+   },
+   "rationale": "El marco es de ajuste estructural: camino conocido, orquestación determinista; camino abierto, agente. La novedad (A) y las afirmaciones universales (B) no son argumentos de ingeniería, y los recursos (C) justifican un calendario, no una arquitectura.",
+   "src": "18yglyb"
+  },
+  "architect-professional-practice-6": {
+   "question": "La calidad de la revisión legal es subjetiva y tu equipo discrepa sobre si los resúmenes de cláusulas del asistente son «buenos». ¿Qué hace abordable la evaluación?",
+   "options": {
+    "A": "Definir una rúbrica con los modos de fallo que importan, construir con los letrados un conjunto de evaluación etiquetado y combinar la calificación por modelo basada en la rúbrica con revisión humana periódica",
+    "B": "Lanzar y contar las quejas",
+    "C": "Coincidencia exacta de cadenas con un único resumen de referencia por cláusula",
+    "D": "Calificar las salidas por su longitud"
+   },
+   "rationale": "La calidad subjetiva se vuelve medible mediante rúbricas, conjuntos etiquetados y una metodología mixta en la que las personas anclan el criterio. Contar quejas (B) mide demasiado tarde, la coincidencia exacta (C) rechaza toda paráfrasis válida y la longitud (D) no mide nada.",
+   "src": "qlhgd6"
+  },
+  "architect-professional-practice-7": {
+   "question": "Un cambio de prompt se ve mejor en las demos. Antes de desplegarlo a todos los usuarios, ¿cuál es el camino disciplinado?",
+   "options": {
+    "A": "Desplegarlo; las demos son representativas",
+    "B": "Ejecutarlo contra el conjunto de evaluación de regresión y después hacer un A/B frente al prompt actual con tráfico real y métricas predefinidas antes del despliegue completo",
+    "C": "Pedir al equipo que vote",
+    "D": "Desplegarlo a todos con un banner de comentarios"
+   },
+   "rationale": "Los cambios de prompt son cambios de producción: la evaluación de regresión detecta roturas y un A/B con métricas definidas establece la mejora antes de la exposición. Las demos (A) y las votaciones (C) son anécdotas, y el despliegue completo con un banner (D) es el experimento sin el control.",
+   "src": "dugfz6"
+  },
+  "architect-professional-practice-8": {
+   "question": "Un cliente del sector sanitario exige que ninguna información sanitaria protegida (PHI) llegue al proveedor del modelo, mientras que los clínicos quieren hacer consultas en texto libre sobre pacientes. ¿Qué diseño cumple ambas cosas?",
+   "options": {
+    "A": "Confiar en que los clínicos eviten escribir identificadores",
+    "B": "Un system prompt que ordene al modelo olvidar la PHI",
+    "C": "Una capa de desidentificación que elimine o tokenice la PHI antes de la llamada a la API, reasociando los resultados en local, con registro y auditorías periódicas del límite",
+    "D": "Bloquear por completo las consultas en texto libre"
+   },
+   "rationale": "Los límites de cumplimiento se imponen mediante la arquitectura: la PHI se elimina antes de cruzar y el control es auditable. La confianza (A) no es un control, las instrucciones al modelo (B) actúan cuando los datos ya cruzaron, y un bloqueo total (D) incumple la necesidad de negocio planteada, que un diseño conforme sí puede satisfacer.",
+   "src": "1ivxass"
+  },
+  "architect-professional-practice-9": {
+   "question": "El patrocinador ejecutivo de tu solución con Claude pide «un 99,9 % de precisión o cancelamos». La precisión en la tarea se estanca cerca del 92 % y la revisión humana detecta el resto. ¿Cuál es la actuación correcta del arquitecto?",
+   "options": {
+    "A": "Prometer el 99,9 % y confiar en que las mejoras del modelo cierren la brecha",
+    "B": "Negarse a hablar de cifras con quienes no son ingenieros",
+    "C": "Redefinir discretamente la precisión para que la cifra parezca mayor",
+    "D": "Reformular el objetivo en torno al proceso de extremo a extremo: el sistema más la revisión humana enrutada por confianza logra el resultado de negocio, con tasas medidas, costes y la curva de compromisos explícitos"
+   },
+   "rationale": "Gestionar las expectativas con compromisos explícitos y honestos es material evaluado a este nivel: el entregable es el resultado de negocio de todo el pipeline, no una métrica bruta del modelo. Prometer de más (A), cerrarse en banda (B) y los juegos con la métrica (C) destruyen la confianza que el rol existe para construir.",
+   "src": "5ym3g9"
+  },
+  "architect-professional-practice-10": {
+   "question": "Tres equipos configuran Claude Code por separado: las convenciones divergen y los nuevos ingenieros tardan días en ser productivos. ¿Cuál es la solución de capacitación?",
+   "options": {
+    "A": "Aportar una base compartida: configuración de equipo bajo control de versiones, skills y comandos comunes y un itinerario de incorporación, con reglas específicas de cada equipo añadidas encima",
+    "B": "Exigir que los ingenieros memoricen las convenciones",
+    "C": "Prohibir Claude Code hasta que las convenciones se asienten",
+    "D": "Dejar que cada ingeniero mantenga únicamente su configuración personal"
+   },
+   "rationale": "La capacitación a nivel de equipo consiste en una configuración compartida y versionada con extensión local, que es lo que hace productiva la herramienta a escala de organización. Memorizar (B) no configura nada, prohibir (C) descarta la productividad que el dominio existe para aportar, y la configuración solo personal (D) es la divergencia de la que partías.",
+   "src": "1l1k38u"
+  },
+  "architect-professional-practice-11": {
+   "question": "Un cliente exige que ningún dato de las peticiones salga de su cuenta de AWS. ¿Qué despliegue cumple la restricción?",
+   "options": {
+    "A": "La Claude API con un acuerdo de tratamiento de datos firmado",
+    "B": "Claude a través de Amazon Bedrock dentro de la propia cuenta y región del cliente",
+    "C": "La Claude API con el registro de peticiones desactivado",
+    "D": "Cualquier despliegue, siempre que los datos se cifren en tránsito"
+   },
+   "rationale": "Una restricción de residencia de este tipo se cumple ejecutando dentro del perímetro de nube del propio cliente, que es lo que ofrece Bedrock. Un acuerdo contractual (A), el registro desactivado (C) y el cifrado en el transporte (D) siguen implicando que los datos salen de la cuenta.",
+   "src": "4vc1t8"
+  },
+  "architect-professional-practice-12": {
+   "question": "Una empresa estandarizada en Google Cloud exige que la identidad, la facturación y la auditoría se rijan por sus controles existentes. ¿Qué se deduce?",
+   "options": {
+    "A": "Desplegar en Bedrock por paridad de funciones",
+    "B": "Usar la Claude API y replicar los controles",
+    "C": "Desplegar mediante Vertex AI para que se apliquen la identidad, la facturación y la auditoría de la plataforma",
+    "D": "Dejar que cada equipo elija su propio camino"
+   },
+   "rationale": "Alinearse con la plataforma que la empresa ya gobierna es lo que hace que los controles existentes se apliquen sin duplicación. Otra nube (A) crea un segundo plano de control, replicar (B) es caro y acaba divergiendo, y la elección por equipo (D) elimina el gobierno.",
+   "src": "1hdmuih"
+  },
+  "architect-professional-practice-13": {
+   "question": "Un diseño sitúa a Claude detrás de un servicio interno al que llaman todas las aplicaciones. ¿Cuál es el beneficio principal?",
+   "options": {
+    "A": "Reduce el coste de tokens",
+    "B": "Elimina la necesidad de evaluación",
+    "C": "Garantiza una menor latencia",
+    "D": "La autenticación, la limitación de tasa, el registro y el enrutado de modelos se aplican en un solo lugar"
+   },
+   "rationale": "Un único punto de integración es donde las preocupaciones transversales pueden aplicarse de forma coherente y cambiarse una sola vez. No reduce el coste de tokens (A) ni elimina la necesidad de evaluar (B), y un salto adicional suele añadir latencia (C).",
+   "src": "ldqq1v"
+  },
+  "architect-professional-practice-14": {
+   "question": "Un sistema heredado solo puede llamar a endpoints síncronos con un timeout de dos segundos, pero la tarea requiere un razonamiento largo. ¿Cuál es el diseño adecuado?",
+   "options": {
+    "A": "Aceptar la petición, devolver un identificador de inmediato y entregar el resultado de forma asíncrona",
+    "B": "Forzar al modelo a responder en dos segundos",
+    "C": "Aumentar el timeout del sistema heredado",
+    "D": "Usar el modelo más pequeño disponible"
+   },
+   "rationale": "Desacoplar el envío de la entrega permite que la restricción y la carga de trabajo convivan sin degradar ninguna. Truncar el razonamiento (B, D) sacrifica la tarea, y modificar el sistema heredado (C) suele ser la propia restricción y no una opción.",
+   "src": "1mxccxw"
+  },
+  "architect-professional-practice-15": {
+   "question": "¿Qué es lo más importante cuando una solución debe ejecutarse en dos nubes?",
+   "options": {
+    "A": "Usar prompts idénticos en ambas",
+    "B": "Establecer qué comportamientos deben ser idénticos y evaluarlos en cada plataforma",
+    "C": "Elegir la plataforma más barata para las dos",
+    "D": "Desplegar en la región más cercana"
+   },
+   "rationale": "La equivalencia entre plataformas es un requisito que se define y luego se verifica, no se da por supuesto. Los prompts idénticos (A) no garantizan un comportamiento idéntico, y el coste (C) y la proximidad (D) no abordan la coherencia.",
+   "src": "15dhmnk"
+  },
+  "architect-professional-practice-16": {
+   "question": "Una parte interesada pide un agente autónomo que gestione de extremo a extremo un proceso de aprobación financiera. ¿Qué debe establecer primero el arquitecto?",
+   "options": {
+    "A": "Qué modelo usar",
+    "B": "El coste esperado en tokens",
+    "C": "Qué decisiones conllevan responsabilidad y deben seguir en manos de una persona",
+    "D": "Si el agente puede construirse en el tiempo disponible"
+   },
+   "rationale": "Dónde reside la responsabilidad determina la forma de la solución y qué puede automatizarse en absoluto. La elección de modelo (A), el coste (B) y el calendario (D) dependen todos de ese límite.",
+   "src": "1okyv2g"
+  },
+  "architect-professional-practice-17": {
+   "question": "Dos diseños cumplen el requisito funcional. Uno es más simple y algo menos capaz. ¿Qué debe decidir?",
+   "options": {
+    "A": "El diseño más capaz, ya que la capacidad es el objetivo",
+    "B": "El diseño que el equipo encuentre más interesante",
+    "C": "El diseño con más componentes, por flexibilidad futura",
+    "D": "Si un requisito declarado necesita la capacidad adicional, sopesada frente al coste de la complejidad"
+   },
+   "rationale": "La complejidad es un coste que se paga de forma continua en operación y mantenimiento, así que debe comprarse con un requisito real. La capacidad por sí misma (A), la preferencia (B) y la flexibilidad especulativa (C) pagan ese coste sin justificación.",
+   "src": "s99ihs"
+  },
+  "architect-professional-practice-18": {
+   "question": "Una arquitectura propuesta depende de que el modelo se comporte correctamente en un control que exige la normativa. ¿Cuál es el juicio correcto?",
+   "options": {
+    "A": "Inaceptable: un control obligatorio debe aplicarse de forma determinista fuera del modelo",
+    "B": "Aceptable si la evaluación muestra una precisión alta",
+    "C": "Aceptable con un aviso al regulador",
+    "D": "Aceptable si se usa un modelo más grande"
+   },
+   "rationale": "Un control normativo necesita una garantía, y el comportamiento probabilístico no puede proporcionarla por alta que sea la precisión medida. La precisión (B), la divulgación (C) y el tamaño del modelo (D) no convierten una tendencia en una garantía.",
+   "src": "9591rn"
+  },
+  "architect-professional-practice-19": {
+   "question": "¿Cuál es la señal más clara de que una solución está sobrediseñada?",
+   "options": {
+    "A": "Usa más de un modelo",
+    "B": "Existen componentes de los que no depende ningún requisito declarado",
+    "C": "Tiene un conjunto de evaluación",
+    "D": "Incluye un paso de aprobación humana"
+   },
+   "rationale": "Los componentes injustificados son la definición de sobreingeniería y las partes que acabarán pudriéndose. Los varios modelos (A), la evaluación (C) y los pasos de aprobación (D) son defendibles cuando un requisito los exige.",
+   "src": "14ftgyw"
+  },
+  "architect-professional-practice-20": {
+   "question": "¿Qué debe existir antes de poder afirmar que una solución está lista para producción?",
+   "options": {
+    "A": "Una demostración que impresionó a los stakeholders",
+    "B": "El acuerdo del equipo de ingeniería",
+    "C": "Un criterio de éxito definido y un rendimiento medido sobre datos representativos",
+    "D": "Una estimación de costes completada"
+   },
+   "rationale": "Estar listo es una afirmación medida frente a un listón declarado, lo que la distingue de una impresión. Las demostraciones (A), el consenso (B) y el coste (D) no establecen si el sistema funciona.",
+   "src": "1ys16k"
+  },
+  "architect-professional-practice-21": {
+   "question": "Un conjunto de evaluación está formado íntegramente por casos que el sistema ya resuelve bien. ¿Cuál es la consecuencia?",
+   "options": {
+    "A": "Ofrece una medida fiable de la calidad",
+    "B": "Es aceptable si es lo bastante grande",
+    "C": "Solo importa en sistemas regulados",
+    "D": "Sobrestima el rendimiento y oculta los modos de fallo que importan"
+   },
+   "rationale": "Un conjunto no representativo mide la distribución equivocada, y el tamaño no puede corregir una muestra sesgada. No es fiable (A), la escala no corrige el sesgo (B) y el problema es universal, no propio de un sector (C).",
+   "src": "4m8f05"
+  },
+  "architect-professional-practice-22": {
+   "question": "Un cambio de prompt mejora la métrica objetivo pero degrada un comportamiento que no se mide. ¿Cuál es la mejor forma de evitarlo?",
+   "options": {
+    "A": "Mantener una suite de regresión que cubra los comportamientos que el sistema no debe perder",
+    "B": "Cambiar una sola cosa cada vez",
+    "C": "Revisar los cambios con más cuidado",
+    "D": "Limitar la frecuencia con que cambian los prompts"
+   },
+   "rationale": "Las regresiones silenciosas se detectan probando de forma explícita lo que no debe romperse. Los cambios aislados (B) y la revisión cuidadosa (C) reducen el riesgo sin detectarlo, y frenar el cambio (D) no lo hace seguro.",
+   "src": "7bzubt"
+  },
+  "architect-professional-practice-23": {
+   "question": "¿Qué debe desencadenar la reevaluación de una solución desplegada?",
+   "options": {
+    "A": "Solo un incidente notificado",
+    "B": "Un cambio en el modelo, el prompt, la distribución de los datos o el requisito",
+    "C": "Un calendario anual fijo",
+    "D": "Un cambio en el coste"
+   },
+   "rationale": "Cualquier cambio en lo que determina el comportamiento invalida la medición previa. Esperar a los incidentes (A) detecta tarde, un calendario fijo (C) no guarda relación con el cambio real, y el coste (D) no afecta a la corrección.",
+   "src": "16pmrv9"
+  },
+  "architect-professional-practice-24": {
+   "question": "¿Cómo debe tratar un arquitecto la petición de registrar los prompts y las respuestas completos para auditoría?",
+   "options": {
+    "A": "Implementarla, ya que los requisitos de auditoría tienen prioridad",
+    "B": "Rechazarla, ya que el registro crea riesgo",
+    "C": "Establecer qué exige realmente la auditoría, ya que los prompts y las respuestas pueden contener datos personales o confidenciales",
+    "D": "Registrar solo las respuestas"
+   },
+   "rationale": "La auditoría y la protección de datos son restricciones reales, y el diseño debe satisfacer el propósito de la auditoría sin conservar más de lo justificado. La implementación sin matices (A) y el rechazo sin matices (B) ignoran uno de los lados, y una regla parcial (D) es arbitraria sin conocer el requisito.",
+   "src": "uie2zl"
+  },
+  "architect-professional-practice-25": {
+   "question": "¿Cuál es el tratamiento correcto del contenido recuperado de una fuente no confiable antes de que llegue al modelo?",
+   "options": {
+    "A": "Es seguro una vez analizado en busca de cadenas de ataque conocidas",
+    "B": "Es seguro si se indica al modelo que ignore las instrucciones que contenga",
+    "C": "Es seguro si llega por un canal cifrado",
+    "D": "Son datos no confiables en todo momento, y la autoridad del modelo debe estar acotada sea cual sea su contenido"
+   },
+   "rationale": "El control duradero es que el modelo no pueda exceder sus permisos por mucho que el contenido lo persuada de intentarlo. El análisis de cadenas (A) y las instrucciones en el prompt (B) pueden eludirse, y la seguridad del transporte (C) no dice nada sobre el contenido.",
+   "src": "1ecaxkp"
+  },
+  "architect-professional-practice-26": {
+   "question": "¿Quién es responsable de una decisión errónea producida por un workflow automatizado con Claude?",
+   "options": {
+    "A": "La organización que desplegó el workflow",
+    "B": "El proveedor del modelo",
+    "C": "El ingeniero que escribió el prompt",
+    "D": "Nadie, ya que la salida fue automatizada"
+   },
+   "rationale": "Desplegar una decisión automatizada implica asumir sus resultados, por lo que los límites de la automatización son una decisión arquitectónica. El proveedor (B) suministra una capacidad, la autoría individual (C) no traslada la responsabilidad de la organización, y la automatización no elimina la responsabilidad (D).",
+   "src": "1v9nft0"
+  },
+  "architect-professional-practice-27": {
+   "question": "Un patrocinador ejecutivo pide una única cifra que muestre lo buena que es la solución. ¿Cuál es la respuesta correcta?",
+   "options": {
+    "A": "Proporcionar la cifra de precisión principal",
+    "B": "Proporcionar la medida que corresponde a la decisión a la que se enfrenta, indicando sus límites",
+    "C": "Explicar que la calidad no puede resumirse",
+    "D": "Proporcionar la puntuación de benchmark del modelo"
+   },
+   "rationale": "Una métrica útil es la que está ligada a la decisión en juego y es honesta sobre lo que no cubre. Una cifra de precisión sin más (A) y una puntuación de benchmark (D) pueden inducir a error, y negarse a resumir (C) deja en la estacada al patrocinador.",
+   "src": "18fxbgl"
+  },
+  "architect-professional-practice-28": {
+   "question": "Un piloto tuvo éxito con diez usuarios y el negocio quiere desplegarlo a dos mil. ¿Qué debe plantear primero el arquitecto?",
+   "options": {
+    "A": "El coste de las licencias adicionales",
+    "B": "La necesidad de un modelo más grande",
+    "C": "Qué supuestos se cumplían con diez usuarios y podrían no cumplirse con dos mil",
+    "D": "El calendario de formación"
+   },
+   "rationale": "La escala invalida supuestos sobre entradas, soporte y casos límite, y nombrarlos es la aportación del arquitecto. Las licencias (A), el tamaño del modelo (B) y la formación (D) dependen de saber qué se rompe.",
+   "src": "1qd8l9x"
+  },
+  "architect-professional-practice-29": {
+   "question": "¿Qué reduce más el riesgo de que una solución entregada se deteriore tras el traspaso?",
+   "options": {
+    "A": "Documentación completa en la entrega",
+    "B": "Un periodo de garantía más largo",
+    "C": "Formar a todos los usuarios",
+    "D": "Un responsable designado con una rutina definida de evaluación, monitorización y actualización"
+   },
+   "rationale": "El deterioro se previene con una responsabilidad continua y una rutina, no con artefactos producidos una sola vez. La documentación (A) y la formación (C) envejecen, y una garantía (B) cubre defectos, no la deriva.",
+   "src": "32vgnn"
+  },
+  "architect-professional-practice-30": {
+   "question": "¿Cómo debe elegir un arquitecto el modelo para una solución con varias tareas distintas?",
+   "options": {
+    "A": "Asignar a cada tarea el modelo más pequeño que cumpla su requisito y evaluar las elecciones",
+    "B": "Un solo modelo para todo, por simplicidad",
+    "C": "El modelo más grande para todo, por seguridad",
+    "D": "El modelo más reciente para todo"
+   },
+   "rationale": "Cada tarea tiene requisitos distintos, y ajustar cada una mantiene el coste proporcionado mientras la evidencia respalda la elección. Las elecciones uniformes (B, C, D) optimizan la comodidad en lugar del ajuste.",
+   "src": "1w91c6g"
+  },
+  "architect-professional-practice-31": {
+   "question": "¿Cuál es el tratamiento correcto de la ventana de contexto en un diseño de producción?",
+   "options": {
+    "A": "Una capacidad que hay que llenar tanto como sea posible",
+    "B": "Un presupuesto que se reparte deliberadamente entre instrucciones, material recuperado y estado de trabajo",
+    "C": "Un límite que solo importa con documentos largos",
+    "D": "Un ajuste que se aumenta cuando baja la calidad"
+   },
+   "rationale": "El contexto es un recurso escaso cuya asignación determina la calidad, así que se diseña en lugar de consumirse. Llenarlo (A) invita a la dilución, importa mucho más allá de los documentos largos (C), y ampliarlo (D) no corrige un problema de asignación.",
+   "src": "1xfly7t"
+  },
+  "architect-professional-practice-32": {
+   "question": "Los prompts de una solución los mantienen tres equipos y han divergido. ¿Cuál es el remedio adecuado?",
+   "options": {
+    "A": "Designar a un equipo como responsable de todo el prompting",
+    "B": "Congelar los prompts",
+    "C": "Versionar los prompts como artefactos con responsabilidad, revisión y evaluación definidas ante cada cambio",
+    "D": "Mover todos los prompts al system prompt"
+   },
+   "rationale": "Los prompts que determinan el comportamiento en producción merecen el mismo ciclo de vida que el código. Centralizar la responsabilidad (A) puede no encajar con la organización, congelar (B) bloquea la mejora, y reubicar (D) no aborda el gobierno.",
+   "src": "1fh8rqk"
+  },
+  "architect-professional-practice-33": {
+   "question": "Una organización quiere una práctica coherente de Claude Code en muchos repositorios. ¿Cuál es el enfoque más duradero?",
+   "options": {
+    "A": "Una política escrita difundida por correo electrónico",
+    "B": "Una sesión de formación puntual",
+    "C": "Exigir aprobación para cada uso",
+    "D": "Memoria de proyecto y skills compartidas versionadas en cada repositorio, revisadas como código"
+   },
+   "rationale": "Las convenciones se transmiten cuando viven en el repositorio y se revisan junto con el trabajo. Las políticas (A) y la formación (B) se desvanecen, y la aprobación por uso (C) crea fricción sin transmitir práctica.",
+   "src": "1b8763m"
+  },
+  "architect-professional-practice-34": {
+   "question": "¿Cuál es la medida más útil de si un programa de capacitación de desarrolladores funciona?",
+   "options": {
+    "A": "El cambio en los resultados que la herramienta se adoptó para mejorar",
+    "B": "El número de personas formadas",
+    "C": "La utilización de licencias",
+    "D": "El volumen de llamadas a herramientas"
+   },
+   "rationale": "La capacitación se justifica por el resultado que mueve, y eso es lo que debe medirse. La asistencia (B), la utilización (C) y la actividad (D) miden la adopción, no el beneficio.",
+   "src": "1x9r3a0"
+  },
+  "architect-professional-practice-35": {
+   "question": "Un equipo informa de que Claude Code ayuda con el código nuevo pero perjudica en un servicio heredado. ¿Qué debe investigar el arquitecto?",
+   "options": {
+    "A": "Si el equipo necesita más formación",
+    "B": "Si al servicio heredado le faltan el contexto y las convenciones versionados que el modelo necesita",
+    "C": "Si ayudaría un modelo más grande",
+    "D": "Si el servicio heredado debería reescribirse"
+   },
+   "rationale": "Una diferencia entre bases de código suele reflejar una diferencia en el contexto disponible en cada una. La formación (A) no aporta contexto del repositorio, un modelo más grande (C) no puede inferir convenciones sin documentar, y una reescritura (D) es una respuesta desproporcionada a un diagnóstico que aún no se ha hecho.",
+   "src": "1oe80u7"
+  },
+  "architect-professional-mock1-1": {
+   "question": "Un minorista quiere que Claude responda preguntas sobre productos a partir de un catálogo de 40.000 documentos que cambia a diario. ¿Qué arquitectura encaja?",
+   "options": {
+    "A": "Hacer fine-tuning de un modelo con el catálogo cada noche",
+    "B": "Cargar el catálogo en el system prompt",
+    "C": "Recuperación sobre un índice que se actualiza a medida que cambia el catálogo, con el modelo respondiendo a partir del contexto recuperado",
+    "D": "Un agente autónomo que navegue por el sitio web público"
+   },
+   "rationale": "El conocimiento que cambia con frecuencia pertenece a la recuperación, no a los pesos ni a una ventana de contexto",
+   "src": "nyrsc"
+  },
+  "architect-professional-mock1-2": {
+   "question": "Tras una reindexación, tu sistema de recuperación devuelve productos semánticamente similares pero comercialmente erróneos. ¿Qué investigación va primero?",
+   "options": {
+    "A": "El prompt de generación",
+    "B": "La versión del modelo",
+    "C": "La interfaz de usuario",
+    "D": "La configuración de chunking y embeddings, y si el índice se reconstruyó de forma coherente"
+   },
+   "rationale": "Una degradación posterior a una reindexación apunta al chunking, a los embeddings y a la coherencia del índice",
+   "src": "1xbj8ot"
+  },
+  "architect-professional-mock1-3": {
+   "question": "Un agente utilizado por 300 empleados expone 45 herramientas en ocho sistemas. La calidad de la selección se está degradando. ¿Cuál es la respuesta arquitectónica?",
+   "options": {
+    "A": "Acotar los conjuntos de herramientas por tarea o rol, con descubrimiento progresivo para el resto",
+    "B": "Acortar todas las descripciones de herramientas",
+    "C": "Fusionar las herramientas en unas pocas herramientas multimodo",
+    "D": "Sustituir el agente por un modelo más grande"
+   },
+   "rationale": "Con muchas herramientas, acotar los conjuntos y el descubrimiento progresivo preservan la calidad de la selección",
+   "src": "1csdesh"
+  },
+  "architect-professional-mock1-4": {
+   "question": "¿Qué diseño de evaluación encaja mejor con una función de resumen cuya calidad es subjetiva?",
+   "options": {
+    "A": "Coincidencia exacta con resúmenes de referencia",
+    "B": "Una rúbrica que cubra los modos de fallo que importan, aplicada por modelos evaluadores y auditada periódicamente por personas sobre un conjunto etiquetado",
+    "C": "Longitud media de las salidas comparada con las referencias",
+    "D": "Solo el recuento de pulgares arriba de los usuarios"
+   },
+   "rationale": "La calidad subjetiva se vuelve medible mediante rúbricas, conjuntos etiquetados y una metodología mixta",
+   "src": "1h6ht0j"
+  },
+  "architect-professional-mock1-5": {
+   "question": "Antes de que un cambio de prompt llegue a todos los usuarios, ¿cuál es la secuencia disciplinada?",
+   "options": {
+    "A": "Lanzarlo y vigilar las quejas",
+    "B": "Votación del equipo seguida de despliegue",
+    "C": "Evaluación de regresión, luego un A/B controlado frente al prompt actual con métricas predefinidas y después el despliegue",
+    "D": "Despliegue con un formulario de comentarios"
+   },
+   "rationale": "Los cambios de prompt son cambios de producción: primero la regresión y después una comparación controlada",
+   "src": "1yngvgf"
+  },
+  "architect-professional-mock1-6": {
+   "question": "Un sistema hospitalario exige que la información sanitaria protegida (PHI) nunca llegue al proveedor del modelo, mientras que los clínicos necesitan búsqueda en texto libre. ¿Qué diseño satisface ambas cosas?",
+   "options": {
+    "A": "Una política que indique a los clínicos que no escriban identificadores",
+    "B": "Un system prompt que ordene al modelo ignorar la PHI",
+    "C": "Restringir la función a consultas estructuradas únicamente",
+    "D": "Una capa de desidentificación que elimine o tokenice la PHI antes de la llamada, con reasociación local y auditoría"
+   },
+   "rationale": "Los límites de cumplimiento se imponen mediante la arquitectura antes de que los datos crucen, y se auditan",
+   "src": "zrxgoz"
+  },
+  "architect-professional-mock1-7": {
+   "question": "¿Cuál es la aplicación correcta de la revisión human-in-the-loop a escala?",
+   "options": {
+    "A": "Enrutar según confianza y consecuencia, de modo que los casos de baja confianza y alto impacto lleguen a personas mientras los rutinarios siguen su curso",
+    "B": "Revisar todas las salidas sin importar el riesgo",
+    "C": "Revisar una muestra fija del 10 % elegida al azar",
+    "D": "Revisar solo lo que los usuarios reclamen"
+   },
+   "rationale": "El enrutado por confianza y consecuencia hace que la revisión humana sea asequible y eficaz",
+   "src": "mxchaz"
+  },
+  "architect-professional-mock1-8": {
+   "question": "Un patrocinador ejecutivo exige una única cifra de precisión para un sistema cuyo rendimiento varía mucho según el tipo de documento. ¿Qué presenta un arquitecto competente?",
+   "options": {
+    "A": "La cifra más alta observada",
+    "B": "El rendimiento desglosado por tipo de documento junto con el agregado, el método de medición y cuál es el resultado de negocio tras la revisión humana",
+    "C": "Una negativa a cuantificar",
+    "D": "Una media ponderada para que parezca favorable"
+   },
+   "rationale": "Una segmentación honesta, junto con el método y el resultado de extremo a extremo, es lo que genera y mantiene la confianza",
+   "src": "aglvyh"
+  },
+  "architect-professional-mock1-9": {
+   "question": "Tu diseño debe cumplir el RGPD para los datos de clientes de la UE. ¿Qué requisito condiciona más directamente la arquitectura?",
+   "options": {
+    "A": "Los objetivos de latencia de respuesta",
+    "B": "La elección del lenguaje de programación",
+    "C": "La minimización de datos, la limitación de la finalidad y la capacidad de eliminar datos personales cuando se solicite",
+    "D": "El número de proveedores de modelos"
+   },
+   "rationale": "El RGPD impone la minimización, la limitación de la finalidad y la supresión, y todo ello condiciona el diseño",
+   "src": "1dc5gxp"
+  },
+  "architect-professional-mock1-10": {
+   "question": "¿Cuál es el motivo correcto para preferir un workflow a un agente en un proceso de ingesta de documentos?",
+   "options": {
+    "A": "Los workflows siempre son más precisos",
+    "B": "Los agentes no pueden procesar documentos",
+    "C": "Los workflows usan menos contexto",
+    "D": "El camino de procesamiento se conoce de antemano, así que la orquestación determinista es más barata, testeable y auditable"
+   },
+   "rationale": "Camino conocido, orquestación determinista; la autonomía solo compensa su complejidad cuando el camino no se conoce",
+   "src": "y7cy65"
+  },
+  "architect-professional-mock1-11": {
+   "question": "Una aplicación envía en cada petición un preámbulo de políticas idéntico de 12.000 tokens. ¿Qué optimización mejora a la vez la latencia y el coste?",
+   "options": {
+    "A": "Colocar primero el preámbulo estático y activar prompt caching (caché de prompts)",
+    "B": "Dividir el preámbulo en dos peticiones",
+    "C": "Resumir el preámbulo con el modelo en el momento de la petición",
+    "D": "Mover el preámbulo a un bloque de few-shot"
+   },
+   "rationale": "Un prefijo estable en caché reduce a la vez el tiempo hasta el primer token y el coste por petición",
+   "src": "y73eye"
+  },
+  "architect-professional-mock1-12": {
+   "question": "¿Qué debe incluir un registro de decisión de arquitectura (ADR) para un sistema con Claude?",
+   "options": {
+    "A": "Solo el diseño final",
+    "B": "La decisión, las alternativas consideradas, los compromisos (tradeoffs) y las restricciones que motivaron la elección",
+    "C": "Los miembros del equipo implicados",
+    "D": "El calendario de implementación"
+   },
+   "rationale": "Un registro de decisión recoge las alternativas y los compromisos, no solo el resultado",
+   "src": "11dt4gk"
+  },
+  "architect-professional-mock1-13": {
+   "question": "¿Cuál de las siguientes cosas debería capturar la observabilidad de un agente en producción para que los incidentes se puedan diagnosticar?",
+   "options": {
+    "A": "Solo las salidas finales",
+    "B": "Solo métricas agregadas de latencia",
+    "C": "Trazas de las llamadas a herramientas, del contexto recuperado y de los puntos de decisión, junto con las salidas",
+    "D": "Solo el feedback de los usuarios"
+   },
+   "rationale": "Sin trazas de las llamadas a herramientas y del contexto recuperado, los fallos no se pueden localizar en una capa",
+   "src": "1f4jioz"
+  },
+  "architect-professional-mock1-14": {
+   "question": "Un equipo asociado quiere adoptar tu configuración de Claude Code. ¿Qué hace que la adopción sea duradera en lugar de una entrega puntual?",
+   "options": {
+    "A": "Un recorrido grabado en vídeo",
+    "B": "Un canal de chat compartido",
+    "C": "Sesiones individuales de coaching",
+    "D": "Configuración compartida bajo control de versiones, skills y comandos comunes, y una ruta de onboarding que sigan los nuevos ingenieros"
+   },
+   "rationale": "Una configuración compartida y versionada, con una ruta de onboarding, es lo que hace que la adopción se consolide",
+   "src": "1qyf9cn"
+  },
+  "architect-professional-mock1-15": {
+   "question": "¿Qué cambio reduce mejor el riesgo en un agente que puede leer y modificar registros de producción?",
+   "options": {
+    "A": "Separar las capacidades de lectura y escritura, conceder acceso de escritura solo donde lo requiera el rol y condicionar las escrituras a una aprobación explícita",
+    "B": "Registrar las modificaciones para revisarlas más tarde",
+    "C": "Exigir un system prompt más largo sobre la precaución",
+    "D": "Ejecutar el agente solo en horario laboral"
+   },
+   "rationale": "El mínimo privilegio junto con puertas de aprobación en las escrituras reduce la superficie en lugar de limitarse a monitorizarla",
+   "src": "1vjhwk2"
+  },
+  "architect-professional-mock2-1": {
+   "question": "Un cliente exige que la inferencia se ejecute dentro de su propia cuenta de AWS. ¿Qué determina esto?",
+   "options": {
+    "A": "Solo la familia de modelos",
+    "B": "Que basta con un acuerdo de tratamiento de datos",
+    "C": "El despliegue mediante Amazon Bedrock en la cuenta y la región del cliente",
+    "D": "Que el registro de peticiones debe estar desactivado"
+   },
+   "rationale": "Ejecutarse dentro del perímetro de la nube del propio cliente es lo que describe el requisito. Un contrato (B) y los ajustes de registro (D) no mantienen los datos en la cuenta, y la familia de modelos (A) es una decisión aparte",
+   "src": "yp41xp"
+  },
+  "architect-professional-mock2-2": {
+   "question": "Una empresa estandarizada en Google Cloud quiere que la identidad y la auditoría las gestionen los controles que ya tiene. ¿Qué se deduce?",
+   "options": {
+    "A": "Desplegar mediante Vertex AI para que se apliquen la identidad, la facturación y la auditoría de la plataforma",
+    "B": "Usar la Claude API y reconstruir los controles",
+    "C": "Usar Bedrock por la paridad de funcionalidades",
+    "D": "Dejar que cada equipo decida"
+   },
+   "rationale": "Alinearse con la plataforma gobernada hace que los controles existentes se apliquen sin duplicarlos. Reconstruirlos (B) genera divergencias, otra nube (C) crea un segundo plano de control, y la elección por equipo (D) elimina la gobernanza",
+   "src": "q2hi4y"
+  },
+  "architect-professional-mock2-3": {
+   "question": "¿Cuál es el principal beneficio arquitectónico de encaminar todo el tráfico hacia los modelos a través de un único servicio interno?",
+   "options": {
+    "A": "Precios de tokens más bajos",
+    "B": "Elimina la necesidad de evaluación",
+    "C": "Garantiza una menor latencia",
+    "D": "La autenticación, el rate limiting, el registro y el enrutamiento se aplican de forma coherente en un solo lugar"
+   },
+   "rationale": "Un único punto de integración es donde las preocupaciones transversales se aplican y se cambian una sola vez. No modifica el precio unitario (A), no elimina la evaluación (B) ni reduce la latencia (C)",
+   "src": "1px7r2v"
+  },
+  "architect-professional-mock2-4": {
+   "question": "Dos diseños cumplen el requisito; uno es sensiblemente más sencillo. ¿Qué decide?",
+   "options": {
+    "A": "El diseño más capaz, porque el margen de holgura es valioso",
+    "B": "Si algún requisito declarado necesita la capacidad adicional, frente al coste continuo de la complejidad",
+    "C": "El que prefiera construir el equipo",
+    "D": "El que tenga más componentes, por la flexibilidad"
+   },
+   "rationale": "La complejidad se paga de forma continua, así que debe estar justificada por un requisito real. El margen de holgura (A), la preferencia (C) y la flexibilidad especulativa (D) pagan ese coste sin justificación",
+   "src": "2roks3"
+  },
+  "architect-professional-mock2-5": {
+   "question": "Un control de cumplimiento obligatorio depende de que el modelo se comporte correctamente. ¿Cuál es el juicio correcto?",
+   "options": {
+    "A": "Es aceptable si la precisión medida es muy alta",
+    "B": "No es aceptable: un control obligatorio debe aplicarse de forma determinista fuera del modelo",
+    "C": "Es aceptable con un riesgo residual documentado",
+    "D": "Es aceptable si se usa un modelo más grande"
+   },
+   "rationale": "Un control que debe cumplirse necesita una garantía, y el comportamiento probabilístico no puede ofrecerla. Una precisión alta (A), la documentación (C) y el tamaño del modelo (D) no convierten una tendencia en una garantía",
+   "src": "1n59ies"
+  },
+  "architect-professional-mock2-6": {
+   "question": "¿Dónde debe trazarse el límite de la automatización en una solución que toma decisiones que afectan a los clientes?",
+   "options": {
+    "A": "Donde el modelo rinda bien en las pruebas",
+    "B": "Hasta donde permita el presupuesto",
+    "C": "En lo que pida el cliente",
+    "D": "Donde reside la responsabilidad de la decisión, manteniendo esas decisiones en manos de una persona"
+   },
+   "rationale": "La responsabilidad determina qué puede automatizarse en absoluto, y ese límite es una decisión arquitectónica. El rendimiento en pruebas (A), el presupuesto (B) y las peticiones sin examinar (C) no abordan la responsabilidad",
+   "src": "1il8lf5"
+  },
+  "architect-professional-mock2-7": {
+   "question": "¿Qué debe existir antes de declarar una solución lista para producción?",
+   "options": {
+    "A": "Un criterio de éxito definido y un rendimiento medido sobre datos representativos",
+    "B": "Una demostración exitosa",
+    "C": "La aprobación del equipo de ingeniería",
+    "D": "Un modelo de costes completado"
+   },
+   "rationale": "Estar listo es una afirmación medida frente a un listón declarado. Una demostración (B), el consenso (C) y el coste (D) no establecen si funciona",
+   "src": "1y66nhu"
+  },
+  "architect-professional-mock2-8": {
+   "question": "Un conjunto de evaluación contiene únicamente casos que el sistema ya resuelve. ¿Qué efecto tiene?",
+   "options": {
+    "A": "Proporciona una medida de calidad fiable",
+    "B": "Es aceptable si es grande",
+    "C": "Sobrestima el rendimiento y oculta los fallos que importan",
+    "D": "Solo importa en contextos regulados"
+   },
+   "rationale": "Una muestra no representativa mide la distribución equivocada, y el tamaño no corrige el sesgo. No es fiable (A), la escala no lo arregla (B) y el problema es general (D)",
+   "src": "1iwyn6y"
+  },
+  "architect-professional-mock2-9": {
+   "question": "¿Cómo debe gestionarse una petición de registrar cada prompt y cada respuesta con fines de auditoría?",
+   "options": {
+    "A": "Implementarla, porque la auditoría tiene prioridad",
+    "B": "Rechazarla, porque el registro crea riesgo",
+    "C": "Registrar las respuestas pero no los prompts",
+    "D": "Establecer qué exige la auditoría, porque los prompts y las respuestas pueden contener datos personales o confidenciales"
+   },
+   "rationale": "La auditoría y la protección de datos son ambas reales, y el diseño debe servir al propósito de la auditoría sin conservar más de lo justificado. Una acción generalizada (A) o un rechazo (B) ignora una de las partes, y una división arbitraria (C) carece de justificación",
+   "src": "rks5z6"
+  },
+  "architect-professional-mock2-10": {
+   "question": "¿Quién es responsable cuando un workflow automatizado con Claude produce una decisión perjudicial?",
+   "options": {
+    "A": "El proveedor del modelo",
+    "B": "El ingeniero que escribió el prompt",
+    "C": "La organización que lo desplegó",
+    "D": "Nadie, porque la decisión fue automatizada"
+   },
+   "rationale": "Desplegar una decisión automatizada implica asumir sus resultados. El proveedor (A) suministra una capacidad, la autoría individual (B) no transfiere la responsabilidad organizativa, y la automatización no elimina la responsabilidad (D)",
+   "src": "1lqdvm5"
+  },
+  "architect-professional-mock2-11": {
+   "question": "Un patrocinador pide una cifra que muestre si la solución está funcionando. ¿Cuál es la respuesta correcta?",
+   "options": {
+    "A": "Dar la cifra de precisión principal",
+    "B": "Dar la medida ligada a la decisión que afronta, y explicar qué no cubre",
+    "C": "Explicar que esto no se puede reducir a un número",
+    "D": "Dar la puntuación del modelo en un benchmark"
+   },
+   "rationale": "Una métrica útil se corresponde con la decisión y es honesta sobre sus límites. Una cifra de precisión sin más (A) y un benchmark (D) pueden inducir a error, y negarse (C) deja en la estacada al patrocinador",
+   "src": "16buq78"
+  },
+  "architect-professional-mock2-12": {
+   "question": "Un piloto de diez usuarios está a punto de ampliarse a dos mil usuarios. ¿Qué debería plantear primero el arquitecto?",
+   "options": {
+    "A": "Qué supuestos se cumplían con diez usuarios y podrían no cumplirse con dos mil",
+    "B": "El coste de las licencias",
+    "C": "Si hace falta un modelo más grande",
+    "D": "El plan de despliegue de la formación"
+   },
+   "rationale": "La escala invalida supuestos sobre las entradas, el soporte y los casos límite, y sacarlos a la luz es la aportación del arquitecto. El coste (B), el tamaño del modelo (C) y la formación (D) se derivan de saber qué se rompe",
+   "src": "ol9gq7"
+  },
+  "architect-professional-mock2-13": {
+   "question": "¿Cómo debe elegirse el modelo para una solución que contiene varias tareas distintas?",
+   "options": {
+    "A": "Asignar a cada tarea el modelo más pequeño que cumpla su requisito, y evaluar las elecciones",
+    "B": "Un solo modelo para todo, por simplicidad",
+    "C": "El modelo más grande para todo, por seguridad",
+    "D": "El modelo más reciente para todo"
+   },
+   "rationale": "Cada tarea tiene requisitos distintos, y ajustar cada una mantiene el coste proporcionado con base en evidencia. Las elecciones uniformes (B, C, D) optimizan la comodidad en lugar del ajuste",
+   "src": "6r5ndz"
+  },
+  "architect-professional-mock2-14": {
+   "question": "¿Cómo debe tratarse la ventana de contexto en un diseño de producción?",
+   "options": {
+    "A": "Como capacidad que hay que llenar lo máximo posible",
+    "B": "Como un presupuesto que se reparte de forma deliberada entre instrucciones, material recuperado y estado de trabajo",
+    "C": "Como una preocupación solo para documentos largos",
+    "D": "Como un ajuste que se aumenta cada vez que baja la calidad"
+   },
+   "rationale": "El contexto es escaso y su reparto determina la calidad, así que se diseña. Llenarlo (A) diluye, importa más allá de los documentos largos (C), y ampliarlo (D) no arregla el reparto",
+   "src": "1hf18y2"
+  },
+  "architect-professional-mock2-15": {
+   "question": "Una organización quiere una práctica coherente con Claude Code en decenas de repositorios. ¿Qué es lo más duradero?",
+   "options": {
+    "A": "Un documento de políticas circulado una vez",
+    "B": "Una única sesión de formación",
+    "C": "Memoria de proyecto versionada y skills compartidas en cada repositorio, revisadas como código",
+    "D": "Exigir aprobación para cada uso"
+   },
+   "rationale": "Las convenciones perduran cuando viven en el repositorio y se revisan junto con el trabajo. Las políticas (A) y la formación (B) se desvanecen, y la aprobación por uso (D) añade fricción sin transmitir la práctica",
+   "src": "o59czy"
+  },
+  "architect-professional-mock3-1": {
+   "question": "Un cliente no aceptará una solución cuyo comportamiento no pueda explicarse a su auditor. ¿Qué restringe esto?",
+   "options": {
+    "A": "Solo la familia de modelos",
+    "B": "El modelo de costes",
+    "C": "La arquitectura, que debe hacer las decisiones trazables y los controles inspeccionables",
+    "D": "La región de despliegue"
+   },
+   "rationale": "La auditabilidad es una propiedad arquitectónica que abarca la trazabilidad y los controles inspeccionables. La familia de modelos (A), el coste (B) y la región (D) no hacen por sí solos que el comportamiento sea explicable",
+   "src": "1sjgoie"
+  },
+  "architect-professional-mock3-2": {
+   "question": "¿Cuál es el principal riesgo de construir directamente sobre el servicio de modelos de una sola nube sin ninguna abstracción?",
+   "options": {
+    "A": "Migrar más adelante resulta caro, porque el acoplamiento llega hasta el código de la aplicación",
+    "B": "Mayor coste de tokens",
+    "C": "Menor precisión",
+    "D": "Respuestas más lentas"
+   },
+   "rationale": "El acoplamiento determina el coste del cambio, que es la preocupación arquitectónica. El coste (B), la precisión (C) y la latencia (D) no son consecuencias del acoplamiento en sí",
+   "src": "1hf5vin"
+  },
+  "architect-professional-mock3-3": {
+   "question": "Una solución debe dar servicio a usuarios en dos regiones con normas distintas de residencia de datos. ¿Qué se deduce?",
+   "options": {
+    "A": "Un único despliegue en la región más barata",
+    "B": "Un único despliegue con cifrado en tránsito",
+    "C": "La región que tenga la latencia más baja",
+    "D": "Despliegues separados cuyos datos permanezcan dentro del perímetro de cada región"
+   },
+   "rationale": "La residencia se cumple manteniendo los datos dentro de cada perímetro. Un único despliegue (A, B) los mueve a través de él, y la latencia (C) no aborda la norma",
+   "src": "uujwvi"
+  },
+  "architect-professional-mock3-4": {
+   "question": "Un requisito se formula como \"hazlo lo más preciso posible\". ¿Qué debería hacer el arquitecto?",
+   "options": {
+    "A": "Elegir el modelo más grande y optimizar a partir de ahí",
+    "B": "Establecer la precisión que el caso de uso realmente necesita y lo que cuesta un error",
+    "C": "Construir el diseño más complejo que permita el presupuesto",
+    "D": "Aplazar la cuestión hasta después del piloto"
+   },
+   "rationale": "Un requisito sin límites no puede diseñarse ni verificarse, así que debe concretarse. Recurrir por defecto a la máxima capacidad (A, C) gasta sin un objetivo, y aplazar (D) deja el diseño sin ancla",
+   "src": "tqo8ja"
+  },
+  "architect-professional-mock3-5": {
+   "question": "Dos componentes funcionan correctamente por separado, pero el sistema falla de forma intermitente en su frontera. ¿Qué sugiere esto?",
+   "options": {
+    "A": "Un componente necesita un modelo más grande",
+    "B": "El contrato entre ellos está infraespecificado, en particular para los casos límite y de error",
+    "C": "El sistema necesita más componentes",
+    "D": "El fallo es transitorio y se puede reintentar"
+   },
+   "rationale": "Los fallos en la frontera entre componentes correctos apuntan al contrato. La capacidad (A) y más componentes (C) no definen la interfaz, y reintentar (D) la oculta",
+   "src": "17gr63"
+  },
+  "architect-professional-mock3-6": {
+   "question": "Un diseño propone almacenar indefinidamente cada interacción con el modelo. ¿Qué debería plantear el arquitecto?",
+   "options": {
+    "A": "Nada, conservar siempre es más seguro",
+    "B": "Que el almacenamiento es caro",
+    "C": "Que ralentizará el sistema",
+    "D": "Por qué se necesitan los datos, durante cuánto tiempo y qué obligaciones crea la retención"
+   },
+   "rationale": "La retención crea obligaciones y riesgo, así que la finalidad y la duración deben justificarla. Tratar la retención como si estuviera libre de riesgo (A) es el error, y el coste (B) y la velocidad (C) son menores en comparación",
+   "src": "rxhnk2"
+  },
+  "architect-professional-mock3-7": {
+   "question": "¿Cómo debe tratar una solución el caso en que el modelo está seguro de sí mismo y se equivoca?",
+   "options": {
+    "A": "Diseñarla de modo que las salidas con consecuencias se verifiquen contra algo independiente del modelo",
+    "B": "Fiarse de la señal de confianza",
+    "C": "Pedir al modelo que lo revise de nuevo",
+    "D": "Usar dos modelos y quedarse con el acuerdo"
+   },
+   "rationale": "La independencia es lo que detecta el error seguro de sí mismo. La confianza (B) no es evidencia, la autocomprobación (C) no es independiente, y dos modelos pueden coincidir y equivocarse ambos (D)",
+   "src": "167pyg4"
+  },
+  "architect-professional-mock3-8": {
+   "question": "Una evaluación muestra un 94 % de precisión. ¿Qué más hay que saber para poder actuar con ello?",
+   "options": {
+    "A": "Solo la versión del modelo",
+    "B": "El coste en tokens de la evaluación",
+    "C": "Cómo son ese 6 % y cuánto cuesta cada fallo",
+    "D": "Cuánto tardó la evaluación"
+   },
+   "rationale": "Una tasa principal solo tiene sentido junto con la forma y el coste de los fallos. La versión (A), el coste (B) y la duración (D) no describen el riesgo",
+   "src": "1wq7xvv"
+  },
+  "architect-professional-mock3-9": {
+   "question": "¿Qué debe ocurrir cuando se actualiza la versión del modelo que hay bajo una solución en producción?",
+   "options": {
+    "A": "Nada, las versiones son compatibles",
+    "B": "Aumentar la monitorización durante una semana",
+    "C": "Revertir automáticamente si aumentan las quejas",
+    "D": "Volver a ejecutar la suite de evaluación antes de que el cambio llegue al tráfico de producción"
+   },
+   "rationale": "Un cambio en aquello que determina el comportamiento invalida la medición previa. Asumir la compatibilidad (A) es inseguro, y monitorizar (B) o reaccionar ante las quejas (C) detecta el problema una vez afectados los usuarios",
+   "src": "va465g"
+  },
+  "architect-professional-mock3-10": {
+   "question": "Un stakeholder pregunta por qué la solución no puede automatizarse por completo sin más. ¿Cuál es la respuesta más útil?",
+   "options": {
+    "A": "Que la tecnología no está lista",
+    "B": "Que la automatización siempre es arriesgada",
+    "C": "Qué decisiones concretas conllevan responsabilidad o no son verificables, y qué riesgo supondría automatizarlas",
+    "D": "Que el presupuesto no lo permite"
+   },
+   "rationale": "Un límite concreto y razonado es accionable y puede revisarse. Las afirmaciones genéricas sobre la madurez (A) o el riesgo (B) no lo son, y el presupuesto (D) no es el motivo",
+   "src": "1wfywqj"
+  },
+  "architect-professional-mock3-11": {
+   "question": "¿Qué debe entregarse junto con una solución para que sobreviva a su primer año?",
+   "options": {
+    "A": "El código fuente",
+    "B": "La suite de evaluación, los criterios, el responsable y la rutina de revisión periódica",
+    "C": "Una demostración grabada",
+    "D": "Una lista de los prompts utilizados"
+   },
+   "rationale": "La continuidad depende de poder medir y mantener, con alguien responsable. El código (A), una demostración (C) y los prompts (D) son artefactos sin los medios para verificarlos",
+   "src": "12t2hys"
+  },
+  "architect-professional-mock3-12": {
+   "question": "Un equipo informa de que la solución ha empeorado, pero no se ha desplegado nada. ¿Cuál es la explicación más probable?",
+   "options": {
+    "A": "Han cambiado las entradas o el uso que se hace de ella",
+    "B": "El modelo se degradó por sí solo",
+    "C": "Los prompts se desgastaron",
+    "D": "La evaluación estaba mal desde el principio"
+   },
+   "rationale": "El comportamiento cambia con lo que se le proporciona, y la deriva de la distribución es la causa habitual. Los modelos no se degradan espontáneamente (B), los prompts no se desgastan (C), y la evaluación original no es la primera sospechosa (D)",
+   "src": "11itqcm"
+  },
+  "architect-professional-mock3-13": {
+   "question": "¿Cómo deben gestionarse los prompts que determinan el comportamiento en producción?",
+   "options": {
+    "A": "Versionados, con responsable, revisados y evaluados al cambiar, como el código",
+    "B": "Editados directamente cuando alguien nota un problema",
+    "C": "Guardados en un documento compartido para editarlos fácilmente",
+    "D": "Congelados tras el lanzamiento"
+   },
+   "rationale": "Todo lo que determina el comportamiento en producción necesita el ciclo de vida del código. Las ediciones ad hoc (B) y los documentos abiertos (C) invitan a cambios sin revisar, y congelar (D) bloquea la mejora",
+   "src": "1liehhc"
+  },
+  "architect-professional-mock3-14": {
+   "question": "Una organización pregunta cómo medir si Claude Code compensa el coste de las licencias. ¿Qué debería medirse?",
+   "options": {
+    "A": "El número de invocaciones de herramientas",
+    "B": "El cambio en los resultados de entrega que se pretendía mejorar al adoptar la herramienta",
+    "C": "El número de usuarios incorporados",
+    "D": "Las horas dedicadas a la herramienta"
+   },
+   "rationale": "El valor es el resultado que se mueve, no la actividad que se genera. Las invocaciones (A), la incorporación (C) y el tiempo en la herramienta (D) miden el uso, no el beneficio",
+   "src": "257zu9"
+  },
+  "architect-professional-mock3-15": {
+   "question": "¿Qué es lo que más a menudo impide a un equipo obtener buenos resultados de Claude Code en una base de código existente?",
+   "options": {
+    "A": "El tamaño del repositorio",
+    "B": "El lenguaje de programación",
+    "C": "La ausencia de contexto versionado en el repositorio que describa las convenciones y la estructura",
+    "D": "El número de colaboradores"
+   },
+   "rationale": "La falta de contexto de proyecto es la causa habitual, y es la que el equipo puede arreglar. El tamaño (A), el lenguaje (B) y el número de colaboradores (D) no impiden por sí solos obtener buenos resultados",
+   "src": "kt6ve6"
+  }
+ }
+}

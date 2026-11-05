@@ -64,7 +64,7 @@ export function Explanation({ q, seed }: { q: Question; seed: number }) {
     <section className="card card-tight" aria-label={t.question.explanation}>
       <div className="eyebrow">{t.question.explanation} · {t.sources[q.source] ?? q.source}</div>
       <p style={{ fontSize: 15 }}>{relabel(q.rationale, q, seed)}</p>
-      {q.evidence && <p className="small muted">{t.question.evidence(q.evidence)}</p>}
+      {q.evidence && <p className="small muted">{q.ref ? t.question.evidenceNote(q.evidence) : t.question.evidence(q.evidence)}</p>}
       {q.ref && /^https:\/\//.test(q.ref) && <a className="small" href={q.ref} target="_blank" rel="noopener noreferrer">{t.question.officialSource}</a>}
     </section>
   )

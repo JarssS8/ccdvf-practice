@@ -350,7 +350,7 @@ ${question.question}
 ${optionText(question)}
 Key: ${question.answer.join(', ')}
 Student answer: ${shown.length ? shown.join(', ') : 'blank'}
-Bank rationale: ${question.rationale}${found.evidence ? `\nSource quote: ${found.evidence}` : ''}${found.ref ? `\nOfficial source: ${found.ref}` : ''}
+Bank rationale: ${question.rationale}${found.ref ? `\nSource note: ${found.evidence ?? ''}\nOfficial source: ${found.ref}` : ''}
 
 NOTES:
 ${materialOf(cert).notes.slice(0, 16000)}`
@@ -436,8 +436,7 @@ Rules:
 NOTES:
 ${notesText}`
 
-  // Only this domain's scenarios: the whole bank would be tens of thousands of characters on every call
-  const covered = [...bank, ...mine].filter((q) => q.domain === domain).map((q) => `- ${stemPreview(q.question).slice(0, 170)}`).join('\n')
+  const covered = [...bank, ...mine].map((q) => `- ${stemPreview(q.question).slice(0, 170)}`).join('\n')
   const userPrompt = `Write ${count} new items. Style examples (do not copy):\n\n${examples.map((q) => `${q.question}\n${optionText(q)}\nKey: ${q.answer.join(',')}`).join('\n\n')}\n\nAlready in the bank (do not reuse these scenarios):\n${covered}`
 
   let drafts: Draft[] = []

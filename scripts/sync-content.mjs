@@ -20,6 +20,8 @@ if (!existsSync(join(repo, 'question-bank.json'))) {
 }
 
 const only = process.argv[2]
+// Which certifications serve the rewritten, calibrated bank (scripts/calibrated-bank.json); the rest serve the study repo's questions as they are
+const flags = existsSync(join(here, 'calibrated-bank.json')) ? JSON.parse(readFileSync(join(here, 'calibrated-bank.json'), 'utf8')) : {}
 const read = (p) => readFileSync(join(repo, p), 'utf8')
 const bank = JSON.parse(read('question-bank.json'))
 const tsv = read('flashcards.tsv').split('\n').filter(Boolean).map((line) => {
@@ -69,8 +71,10 @@ for (const cert of CERTS) {
   // Questions: repo bank + the exam guide's sample questions + the app's own items: written for thin domains (source "app")
   // or as the calibrated bank (source "curated")
   const local = (dir) => { const f = join(here, dir, `${cert.id}.json`); return existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : [] }
+  const calibratedBank = flags[cert.id] === true
   const samples = local('guide-samples')
-  const extra = local('extra-questions')
+  // Curated items belong to the calibrated bank; items written by the app for thin domains (source "app") are always served
+  const extra = local('extra-questions').filter((q) => calibratedBank || q.source !== 'curated')
   const keyOf = (q) => (Array.isArray(q.answer) ? q.answer.join('') : String(q.answer)).replace(/[^A-E]/g, '').split('')
   const shape = (q) => ({
     id: q.id,
@@ -82,14 +86,14 @@ for (const cert of CERTS) {
     answer: keyOf(q),
     rationale: q.rationale,
     ...(q.evidence ? { evidence: q.evidence } : {}),
-    ...(q.ref ? { ref: q.ref } : {}),
-    ...(q.calibrated ? { calibrated: q.calibrated } : {}),
+    ...(calibratedBank && q.ref ? { ref: q.ref } : {}),
+    ...(calibratedBank && q.calibrated ? { calibrated: q.calibrated } : {}),
   })
   const upstream = [...bank.questions.filter((q) => q.exam === cert.id), ...samples, ...extra].map(shape)
 
   // Rewrites of upstream questions without their answer-pattern cues (scripts/question-overrides/): same id and key, new wording.
   // Each one names the upstream text it rewrote; when upstream moves, the question falls back to it, uncalibrated.
-  const overrides = local('question-overrides')
+  const overrides = calibratedBank ? local('question-overrides') : {}
   const questions = upstream.map((q) => {
     if (!Object.hasOwn(overrides, q.id)) return q
     const o = overrides[q.id]
@@ -158,9 +162,9 @@ for (const cert of CERTS) {
     syncedAt: previous?.contentHash === contentHash ? previous.syncedAt : new Date().toISOString(),
     contentHash,
     factsVerified: verified,
-    counts: { questions: questions.length, flashcards: flashcards.length, guide: samples.length, app: extra.filter((q) => q.source === 'app').length, curated: extra.filter((q) => q.source === 'curated').length, calibrated: questions.filter((q) => q.calibrated).length, distinct: pool },
+    counts: { questions: questions.length, flashcards: flashcards.length, guide: samples.length, app: extra.filter((q) => q.source === 'app').length, ...(calibratedBank ? { curated: extra.filter((q) => q.source === 'curated').length, calibrated: questions.filter((q) => q.calibrated).length } : {}), distinct: pool },
   })
-  console.log(`${cert.code}: questions ${questions.length} (${dups} near-duplicate pairs, ${samples.length} from the guide, ${extra.filter((q) => q.source === 'app').length} written by the app, ${extra.filter((q) => q.source === 'curated').length} curated, ${questions.filter((q) => q.calibrated).length} calibrated) · flashcards ${flashcards.length} · facts verified ${verified}`)
+  console.log(`${cert.code}: questions ${questions.length} (${dups} near-duplicate pairs, ${samples.length} from the guide, ${extra.filter((q) => q.source === 'app').length} written by the app${calibratedBank ? `, ${extra.filter((q) => q.source === 'curated').length} curated, ${questions.filter((q) => q.calibrated).length} calibrated` : ', calibrated bank off'}) · flashcards ${flashcards.length} · facts verified ${verified}`)
 }
 
 // Program news: "### Month: title" entries under year headings (common to every certification)

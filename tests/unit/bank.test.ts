@@ -1,34 +1,55 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 // @ts-expect-error plain ESM script without types
-import { calibratedProblems, itemProblems } from '../../scripts/lint-questions.mjs'
+import { calibratedProblems, itemProblems, nearDuplicates, setProblems } from '../../scripts/lint-questions.mjs'
+import { CERTS } from '../../src/shared/certs'
 import type { Question } from '../../src/shared/exam'
 
-const bank = JSON.parse(readFileSync('src/content/developer-foundations/questions.json', 'utf8')) as Question[]
-const overrides = JSON.parse(readFileSync('scripts/question-overrides/developer-foundations.json', 'utf8')) as Record<string, Record<string, unknown>>
+const read = <T,>(f: string): T => JSON.parse(readFileSync(f, 'utf8'))
+const flags = read<Record<string, unknown>>('scripts/calibrated-bank.json')
+/** The study repo's own practice and mock questions: the ones an override rewrites. */
+const UPSTREAM = ['practice', 'mock-1', 'mock-2', 'mock-3']
 
-describe('the calibrated Developer bank', () => {
-  it('passes every answer-pattern rule', () => {
-    expect(calibratedProblems(bank)).toEqual([])
+describe.each(CERTS.map((c) => [c.code, c.id] as const))('%s question bank', (_code, id) => {
+  const on = flags[id] === true
+  const bank = read<Question[]>(`src/content/${id}/questions.json`)
+  const overrides = existsSync(`scripts/question-overrides/${id}.json`) ? read<Record<string, Record<string, unknown>>>(`scripts/question-overrides/${id}.json`) : {}
+  const curated = (existsSync(`scripts/extra-questions/${id}.json`) ? read<Question[]>(`scripts/extra-questions/${id}.json`) : []).filter((q) => q.source === 'curated')
+
+  it('serves the original questions while the calibrated bank is off', () => {
+    if (on) return
+    expect(bank.filter((q) => q.calibrated || q.ref || q.source === 'curated').map((q) => q.id)).toEqual([])
   })
-  it('rewrites every upstream practice and mock question, and every rewrite is in use', () => {
-    const upstream = bank.filter((q) => ['practice', 'mock-1', 'mock-2', 'mock-3'].includes(q.source))
-    expect(upstream.length).toBeGreaterThan(0)
-    expect(upstream.filter((q) => !q.calibrated).map((q) => q.id)).toEqual([])
-    expect(Object.keys(overrides).sort()).toEqual(upstream.map((q) => q.id).sort())
+
+  // The calibrated bank's sources stay valid whether or not it is switched on
+  it('keeps its rewrites and new items, and they pass every answer-pattern rule', () => {
+    expect(Object.keys(overrides).length).toBeGreaterThan(0)
+    expect(curated.length).toBeGreaterThan(0)
+    const upstream = new Map(bank.map((q) => [q.id, q]))
+    const rewritten = Object.entries(overrides).map(([qid, o]) => ({ ...(upstream.get(qid) ?? { id: qid }), ...o, id: qid, source: 'curated' })) as Question[]
+    const fresh = curated.map((q) => ({ ...q, calibrated: 'x' }))
+    expect([...rewritten, ...fresh].flatMap((q) => itemProblems(q))).toEqual([])
+    expect(setProblems(fresh, { label: 'curated', curated: true })).toEqual([])
+    expect(nearDuplicates(fresh, bank.filter((q) => q.source !== 'curated'))).toEqual([])
   })
-  it('overrides never carry a key: stored answers keep their meaning', () => {
-    for (const [id, o] of Object.entries(overrides)) {
-      expect(Object.keys(o).filter((k) => !['src', 'calibrated', 'question', 'options', 'rationale', 'evidence', 'ref', 'task'].includes(k)), id).toEqual([])
-      const q = bank.find((x) => x.id === id)!
-      expect(Object.keys(o.options as object), id).toEqual(Object.keys(q.options))
-      expect(q.answer.length, id).toBe(1)
+  it('overrides cover every upstream practice and mock question and never carry a key', () => {
+    const up = bank.filter((q) => UPSTREAM.includes(q.source))
+    expect(Object.keys(overrides).sort()).toEqual(up.map((q) => q.id).sort())
+    for (const [qid, o] of Object.entries(overrides)) {
+      expect(Object.keys(o).filter((k) => !['src', 'calibrated', 'question', 'options', 'rationale', 'evidence', 'ref', 'task'].includes(k)), qid).toEqual([])
+      expect(Object.keys(o.options as object), qid).toEqual(Object.keys(bank.find((x) => x.id === qid)!.options))
+      expect(o.calibrated, qid).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/)
     }
   })
-  it('calibration times are full ISO timestamps', () => {
-    for (const q of bank.filter((x) => x.calibrated)) expect(q.calibrated, q.id).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/)
+
+  it.skipIf(!on)('passes every answer-pattern rule once switched on', () => {
+    expect(calibratedProblems(bank)).toEqual([])
+    expect(bank.filter((q) => UPSTREAM.includes(q.source) && !q.calibrated).map((q) => q.id)).toEqual([])
   })
-  it('the lint catches the cues it is meant to catch', () => {
+})
+
+describe('the lint', () => {
+  it('catches the cues it is meant to catch', () => {
     const q = { id: 'x', source: 'curated', domain: 'Claude Code', question: 'Which?', options: { A: 'a', B: 'a much longer and more specific answer', C: 'c', D: 'd' }, answer: ['B'], rationale: 'Option B is right.', ref: 'https://example.com' }
     const p = itemProblems(q).join('\n')
     expect(p).toMatch(/option lengths differ/)

@@ -11,7 +11,8 @@
    "D": "Reword the summary to sound more formal, then send it."
   },
   "answer": "B",
-  "rationale": "Language models can fabricate specific-looking details such as citation numbers, a hallucination. Validating factual claims, especially citations bound for a compliance audience, against an authoritative source is the diligence step required. Self-reported confidence (A, C) is not a reliable accuracy signal, and reformatting (D) does not address correctness."
+  "rationale": "Language models can fabricate specific-looking details such as citation numbers, a hallucination. Validating factual claims, especially citations bound for a compliance audience, against an authoritative source is the diligence step required. Self-reported confidence (A, C) is not a reliable accuracy signal, and reformatting (D) does not address correctness.",
+  "calibrated": "2026-11-04T23:27:00Z"
  },
  {
   "id": "associate-foundations-guide-2",
@@ -25,7 +26,8 @@
    "D": "Switch to a different AI platform."
   },
   "answer": "B",
-  "rationale": "Aligning model selection with task requirements means matching a faster, lower-cost model to straightforward, high-volume work, reserving the most capable model for complex reasoning. Always using the top model (A) wastes the cost and latency budget; disabling features (C) or switching platforms (D) does not address the trade-off."
+  "rationale": "Aligning model selection with task requirements means matching a faster, lower-cost model to straightforward, high-volume work, reserving the most capable model for complex reasoning. Always using the top model (A) wastes the cost and latency budget; disabling features (C) or switching platforms (D) does not address the trade-off.",
+  "calibrated": "2026-11-04T23:27:00Z"
  },
  {
   "id": "associate-foundations-guide-3",
@@ -39,6 +41,7 @@
    "D": "Skip the analysis entirely."
   },
   "answer": "B",
-  "rationale": "Applying data-sensitivity and privacy safeguards means redacting or anonymizing regulated identifiers before use, so the analysis can proceed without exposing protected data. Uploading as-is (A) violates policy; instructing the model not to retain data (C) does not satisfy the policy control; abandoning the task (D) is unnecessary when anonymization enables it."
+  "rationale": "Applying data-sensitivity and privacy safeguards means redacting or anonymizing regulated identifiers before use, so the analysis can proceed without exposing protected data. Uploading as-is (A) violates policy; instructing the model not to retain data (C) does not satisfy the policy control; abandoning the task (D) is unnecessary when anonymization enables it.",
+  "calibrated": "2026-11-04T23:27:00Z"
  }
 ]

@@ -1,0 +1,7 @@
+{
+  "_": "Per certification, true serves the rewritten, calibrated bank (see README, 'Calibrated bank'); false serves the study repo's questions as they were before the rewrite. Switch with `node scripts/calibrated-bank.mjs enable|disable <cert-id|all>`. Everything is switched off at the owner's request (2026-11-05).",
+  "associate-foundations": false,
+  "developer-foundations": false,
+  "architect-foundations": false,
+  "architect-professional": false
+}

@@ -86,8 +86,8 @@ describe('scoring and stats', () => {
   })
   it('readiness only exists once there are first attempts', () => {
     expect(readiness([], qs, DV)).toBeNull()
-    // Answered long before the Developer bank was calibrated
-    expect(readiness(exposures(d, qs, DV), qs, DV)).toBeNull()
+    // In a calibrated bank, answers given before it was calibrated don't count
+    expect(readiness(exposures(d, qs, DV), qs, DV)?.n ?? null).toBe(isCalibratedBank(inCert(qs, DV)) ? null : 10)
   })
   it('isCorrect needs the exact set of keys', () => {
     const q = qs.get(ids[0])!
@@ -120,7 +120,8 @@ describe('certifications never mix', () => {
     expect(attemptsOf(d, AF).map((a) => a.id)).toEqual(['af'])
     expect(exposures(d, qs, DV)).toHaveLength(6)
     expect(exposures(d, qs, AF)).toHaveLength(4)
-    expect(readiness(exposures(d, qs, AF), inCert(qs, AF), AF)?.n).toBe(4)
+    // In a calibrated bank, answers given before it was calibrated don't measure readiness
+    expect(readiness(exposures(d, qs, AF), inCert(qs, AF), AF)?.n ?? null).toBe(isCalibratedBank(inCert(qs, AF)) ? null : 4)
     expect(domainStats(exposures(d, qs, AF), qs, AF).map((x) => x.name)).toEqual(AF.domains.map((x) => x.name))
   })
   it('missed questions and the deck only show the certification being studied', () => {
@@ -185,7 +186,8 @@ describe('questions written by the app', () => {
   })
 })
 
-describe('a calibrated bank', () => {
+// The rewritten bank is switched off by default (scripts/calibrated-bank.json); these checks run for the certifications that serve it
+describe.skipIf(!isCalibratedBank(inCert(qs, certById('developer-foundations'))))('a calibrated bank', () => {
   const dv = questionsOf(DV)
   const since = Math.max(...dv.filter((q) => q.calibrated).map((q) => Date.parse(q.calibrated!)))
   // One per duplicate group, so each is a first exposure of its own
@@ -193,9 +195,7 @@ describe('a calibrated bank', () => {
     .filter((q, i, a) => a.findIndex((x) => (x.dupGroup ?? x.id) === (q.dupGroup ?? q.id)) === i).slice(0, 8).map((q) => q.id)
   const curated = dv.filter((q) => q.source === 'curated').slice(0, 5).map((q) => q.id)
 
-  it('Developer is calibrated, the other certifications are not yet', () => {
-    expect(isCalibratedBank(inCert(qs, DV))).toBe(true)
-    expect(isCalibratedBank(inCert(qs, AF))).toBe(false)
+  it('has curated items', () => {
     expect(curated.length).toBe(5)
   })
   it('counts only calibrated questions answered after their calibration', () => {
