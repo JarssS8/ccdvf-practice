@@ -92,6 +92,8 @@ for (const cert of CERTS) {
     ...((calibratedBank || q.source === 'lote') && q.ref ? { ref: q.ref } : {}),
     ...(calibratedBank && q.calibrated ? { calibrated: q.calibrated } : {}),
     ...(q.source === 'lote' ? { lote: q.lote } : {}),
+    // The stems of a contrastive set share a group, so an exam never shows two of them
+    ...(q.source === 'lote' && q.group ? { dupGroup: q.group } : {}),
   })
   const upstream = [...bank.questions.filter((q) => q.exam === cert.id), ...samples, ...extra, ...lotes].map(shape)
 

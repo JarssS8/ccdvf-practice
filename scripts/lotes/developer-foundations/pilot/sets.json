@@ -1,0 +1,131 @@
+[
+  {
+    "set": "q01",
+    "kind": "quad",
+    "domain": "Applications and Integration",
+    "task": "Claude API mechanics: choosing how to process requests (synchronous, streaming, batch, queue with workers)",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing",
+    "options": {
+      "A": "Make a standard synchronous call and wait for the complete response before the application continues.",
+      "B": "Stream the response with server-sent events and show or forward the text as it arrives.",
+      "C": "Submit the requests to the Message Batches API and fetch the results once the batch has finished.",
+      "D": "Put each job on a queue for background workers to call Claude, and notify the caller when it is done."
+    },
+    "stems": [
+      {
+        "id": "l4-01",
+        "answer": "A",
+        "ref": "https://platform.claude.com/docs/en/build-with-claude/streaming",
+        "stem": "A mortgage lender's intake service sends each uploaded payslip to Claude and gets back a small JSON object of about 150 tokens. The submit button stays disabled until that object has been validated against the applicant's form, which usually takes under three seconds in all. Nothing is displayed while Claude works, and the very next step needs the whole object. How should the service call Claude?",
+        "rationale": "The reply is tiny, nobody reads it as it is written, and the next step needs the complete object within seconds, so a plain synchronous call that returns the finished response is the simplest fit (A). Streaming (B) is built for showing text as it arrives or for very long outputs, and here no part of the object is usable before it is complete. A batch (C) returns results after minutes to hours, while an applicant is waiting at the button. A queue with workers (D) adds a hand-off and a notification for a call that finishes in about two seconds, far inside any gateway timeout."
+      },
+      {
+        "id": "l4-02",
+        "answer": "B",
+        "ref": "https://platform.claude.com/docs/en/build-with-claude/streaming",
+        "stem": "A language-learning app lets learners chat with a Claude tutor whose explanations often run to six or seven hundred words. In testing, learners left the screen when nothing appeared for the first ten seconds, yet they happily read along once text started to show. The reply must appear in the same chat window the learner is already watching. How should the app call Claude?",
+        "rationale": "The learner is reading the answer live in the chat window and a long reply takes many seconds to finish, so streaming the tokens as they are generated removes the blank wait (B). A synchronous call (A) shows nothing until the whole reply is complete, which is exactly what made learners leave. A batch (C) is asynchronous and can take up to hours, which is unusable in a live chat. A queue with background workers (D) delivers the answer only after it is finished and as a notification, not as text appearing in the window the learner is watching."
+      },
+      {
+        "id": "l4-03",
+        "answer": "C",
+        "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing",
+        "stem": "A utility's data team must tag 90,000 archived maintenance work orders with a fault category for a quarterly report due in four days. Nobody waits for individual results, the tags are read only once the whole set is finished, and the team wants the lowest cost per token because the same job repeats every quarter. How should the team send the requests?",
+        "rationale": "Nothing is urgent and the deadline is days away, so the Message Batches API fits: it is priced 50 percent below standard requests, most batches finish within an hour and all within 24 hours (C). A synchronous loop (A) pays the full price and has to be paced around rate limits for 90,000 calls. Streaming (B) is for text a person reads as it arrives and also pays the full price. A queue with workers (D) would work but means building and operating the workers, and it still pays the full price, which the team wants to avoid."
+      },
+      {
+        "id": "l4-04",
+        "answer": "D",
+        "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing",
+        "stem": "An insurer's claims portal lets a handler upload a claim bundle that a Claude-based reviewer analyses with many tool calls, taking four to eight minutes. The load balancer cuts any HTTP request after sixty seconds, handlers move on to other cases right after uploading, and the review must be ready within about fifteen minutes. How should the portal run the reviews?",
+        "rationale": "The work outlasts a single web request and nobody watches it, so the upload should enqueue a job that a background worker runs and then notify the handler, which also lets the team control how quickly each review starts (D). A synchronous call (A) would be cut off by the sixty-second limit. Streaming (B) assumes someone is reading the live text, but the handler has already left the page. A batch (C) has no completion time shorter than its 24-hour window, so it cannot be relied on to deliver within fifteen minutes."
+      }
+    ]
+  },
+  {
+    "set": "q02",
+    "kind": "quad",
+    "domain": "Model Selection and Optimization",
+    "task": "Cost, latency and quality levers: smaller model, effort level, prompt caching, trimming input",
+    "ref": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+    "options": {
+      "A": "Move the task to a smaller, faster model tier and check on the test set that quality holds.",
+      "B": "Lower the effort level on the current model so it spends fewer tokens on reasoning and explanations.",
+      "C": "Mark the stable leading part of the prompt with cache_control so later requests read it from the cache.",
+      "D": "Cut each request down to the passages the task needs, so the model reads fewer input tokens per call."
+    },
+    "stems": [
+      {
+        "id": "l4-05",
+        "answer": "A",
+        "ref": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+        "stem": "A parcel-tracking company labels each customer message as delivery, billing or damage with a one-word answer. The prompt is about three hundred tokens, traffic is heavy, and the label must come back in well under half a second. A trial on the team's labelled test set showed the smaller model tier matching the current model's accuracy. Which change should the team make to cut cost and latency?",
+        "rationale": "The task is a one-word label, the trial already showed the smaller tier matches accuracy, and the smaller tier has a lower price per token and a faster response, so moving to it fits (A). Lowering effort (B) cannot trim much from a one-word answer, and the team would keep paying the larger model's per-token price. Caching (C) needs a stable prefix long enough to be cacheable, and a three-hundred-token prompt is too short to save much. Trimming input (D) has little to remove from a prompt that small."
+      },
+      {
+        "id": "l4-06",
+        "answer": "B",
+        "ref": "https://platform.claude.com/docs/en/build-with-claude/effort",
+        "stem": "A procurement assistant answers about four hundred varied supplier questions a day, each with its own short prompt. Most of the billed tokens are the model's own reasoning and long explanations, even for routine lookups. On the team's test set the smaller model tier loses accuracy on the harder third of the questions, so the current model has to stay. Which change should the team make to cut cost and latency?",
+        "rationale": "The spend is in output and reasoning tokens on a model that has to stay, and the effort level controls how many tokens the model spends on thinking, explanations and tool calls, so lowering it addresses the cost directly (B). The smaller tier (A) is ruled out by its accuracy loss on the harder third. Caching (C) helps with a repeated prefix, but each prompt here is short and different. Trimming input (D) cuts input tokens, and the input is not where the tokens are going."
+      },
+      {
+        "id": "l4-07",
+        "answer": "C",
+        "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching",
+        "stem": "A pharmacy chain's help desk sends the same 45,000-token formulary manual at the start of every request, followed by a staff member's short question, and the answers run to two or three lines. Several hundred requests arrive each hour, any question can touch any section, and the team's tests show quality dropping on the smaller model tier. Which change should the team make to cut cost and latency?",
+        "rationale": "A large identical prefix is sent many times within minutes, so caching it with cache_control lets later requests read it at a fraction of the input price and with less processing time (C). The smaller tier (A) is ruled out by the quality drop. Lower effort (B) has little to cut from a two-line answer, and the 45,000 input tokens would still be billed in full. Trimming the manual (D) would risk dropping the section a question needs, since any question can touch any section."
+      },
+      {
+        "id": "l4-08",
+        "answer": "D",
+        "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-latency",
+        "stem": "A law firm's tool sends one full 300-page contract to Claude per request, with a question about a single termination clause and a two-sentence answer. Nearly all billed tokens are the contract itself, every request carries a different contract, the instructions are a couple of lines, and tests show the smaller model tier misreads the clause language. Which change should the team make to cut cost and latency?",
+        "rationale": "The cost and the delay come from reading a whole contract to answer a question about one clause, so sending only the relevant passages cuts input tokens on every call (D). The smaller tier (A) is ruled out because it misreads the clause language. Lower effort (B) has little to cut from a two-sentence answer. Caching (C) needs an identical prefix across requests, and here each request carries a different contract, so there is nothing to reuse."
+      }
+    ]
+  },
+  {
+    "set": "q03",
+    "kind": "quad",
+    "domain": "Agents and Workflows",
+    "task": "Agent architecture: single call, fixed workflow, agent loop with tools, orchestrator with subagents",
+    "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+    "options": {
+      "A": "Make one well-structured Claude call with the instructions, examples and input in the prompt, and use its answer.",
+      "B": "Chain several Claude calls in a fixed order written in code, passing each step's output to the next.",
+      "C": "Run one agent in a loop that chooses its own tool calls, reads each result and decides the next step until done.",
+      "D": "Have an orchestrator agent split the work into independent subtasks and hand each to a subagent with its own context."
+    },
+    "stems": [
+      {
+        "id": "l4-09",
+        "answer": "A",
+        "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+        "stem": "An HR team receives parental-leave requests by email and needs three fields from each: leave type, start date and manager name. A single prompt with five worked examples scored 97 percent on their 300-email test set, above the 95 percent bar they set. A colleague proposes a multi-step pipeline with a checking stage for extra safety. Which design should the team ship?",
+        "rationale": "The task is one self-contained transformation and one prompt already clears the bar, so the guidance to use the simplest solution and add complexity only when simpler ones fall short points to a single call (A). A fixed chain (B) adds calls, latency and cost for an accuracy problem the test set does not show. An agent loop (C) needs tools or outside data, and this task has neither. An orchestrator with subagents (D) has nothing to split, because each email is small and handled alone."
+      },
+      {
+        "id": "l4-10",
+        "answer": "B",
+        "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+        "stem": "A customs broker prepares import declarations from supplier invoices. Every file needs the same four steps in the same order: extract fields, map goods to tariff codes, check restrictions, draft the declaration. Auditors want each step's output stored per file, and in testing a single prompt sometimes skipped the restriction check. Which design fits best?",
+        "rationale": "The steps and their order are known in advance and auditors need the same sequence with a stored output at each stage, so a fixed chain written in code gives that predictability and gives each step its own focused prompt (B). A single call (A) already skipped a step in testing and leaves no per-step record. An agent loop (C) lets the model choose its own order and skip steps, which the audit does not allow. An orchestrator (D) assumes independent subtasks, but each step here depends on the output of the one before it."
+      },
+      {
+        "id": "l4-11",
+        "answer": "C",
+        "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+        "stem": "A telecom's network-operations assistant investigates alarm tickets using tools for device status, recent changes and topology. Some tickets are solved after two checks and others need fifteen, and what to inspect next depends entirely on what the last check returned. Nothing in the work can be split into independent parts. Which design fits best?",
+        "rationale": "The number and order of steps cannot be known in advance and each depends on the previous result, which is the open-ended case where one agent choosing its own tool calls in a loop fits (C). A single call (A) cannot reach live device data. A fixed chain (B) would need the path written in advance, and the path varies from two checks to fifteen. An orchestrator with subagents (D) has nothing to run in parallel and would add token cost and lose the shared thread of evidence."
+      },
+      {
+        "id": "l4-12",
+        "answer": "D",
+        "ref": "https://www.anthropic.com/engineering/multi-agent-research-system",
+        "stem": "A consultancy compares a new grid-connection rule across the countries a client names, usually between ten and twenty, and the list differs for every client. Each country needs dozens of searches and long regulator documents, countries can be studied independently, and one agent's context would fill up long before the last. The client accepts a higher token cost for speed. Which design fits best?",
+        "rationale": "The work is broad, the parts are independent and the list is only known once the client asks, so an orchestrator that spawns a subagent per country, each with its own context window, fits (D). A single call (A) cannot hold the material for ten to twenty countries. A fixed chain (B) needs the subtasks fixed in code, but the country list changes with each client. A single looping agent (C) would work through the countries one after another and fill its context with raw material before finishing."
+      }
+    ]
+  }
+]

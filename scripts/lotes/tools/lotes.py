@@ -5,6 +5,8 @@
                                                          key letter and key length rank, balanced across each lote
   python3 scripts/lotes/tools/lotes.py check FILE...     check author drafts against their slots (what authors run before handing in)
   python3 scripts/lotes/tools/lotes.py assemble          merge existing items + drafts/*.json into lote2.json / lote3.json
+  python3 scripts/lotes/tools/lotes.py check-sets FILE   check contrastive sets (twins and quads sharing one option list; see SPEC.md)
+  python3 scripts/lotes/tools/lotes.py assemble-sets FILE LOTE   add a file of sets to lote<LOTE>.json, each set's stems sharing a group
 
 Draft item (an author writes a JSON array of these in scripts/lotes/developer-foundations/drafts/<slice>.json):
   {"id": "l2-11", "task": "...", "stem": "...", "key": "...", "ds": ["...", "...", "..."], "rationale": "... [K] ... [1] ... [2] ... [3] ...", "ref": "https://..."}
@@ -303,9 +305,104 @@ def assemble():
         print(f"lote{lote}.json: {len(ordered)} items")
 
 
+# ---------- contrastive sets (SPEC.md, "Contrastive sets"): one option list shared by 2 (twin) or 4 (quad) stems ----------
+
+def set_problems(s):
+    out = []
+    sid = s.get("set", "?")
+    say = lambda m: out.append(f"{sid}: {m}")
+    for k in ("set", "kind", "domain", "task", "ref", "options", "stems"):
+        if k not in s:
+            say(f"missing field {k}")
+    if out:
+        return out
+    if s["domain"] not in DOMAIN.values():
+        say(f"unknown domain {s['domain']!r}")
+    opts = s["options"]
+    if list(opts) != list("ABCD"):
+        say("options must be exactly A, B, C, D"); return out
+    lens = [len(v) for v in opts.values()]
+    if max(lens) / min(lens) > 1.6:
+        say(f"options differ {max(lens) / min(lens):.2f}x in length (max 1.6)")
+    if min(lens) < 70:
+        say(f"shortest option is {min(lens)} chars (aim for 85-135)")
+    if any("`" in v for v in opts.values()):
+        say("no backticks or code in options")
+    if re.search(r"all of the above|none of the above|capital letters|\b(raise|increase|lower|reduce)\w* the temperature", " ".join(opts.values()), re.I):
+        say("template option (all/none of the above, capital letters, temperature tweaks)")
+    if not re.match(r"^https://\S+$", s["ref"]):
+        say("ref must be an https URL")
+    stems = s["stems"]
+    keys = [st.get("answer") for st in stems]
+    if s["kind"] == "quad":
+        if len(stems) != 4 or sorted(keys) != list("ABCD"):
+            say(f"a quad has 4 stems and each option is the key of exactly one (keys {keys})")
+    elif s["kind"] == "twin":
+        if len(stems) != 2 or len(set(keys)) != 2:
+            say(f"a twin has 2 stems with different keys (keys {keys})")
+    else:
+        say("kind must be quad or twin")
+    for st in stems:
+        i = st.get("id", "?")
+        for k in ("id", "stem", "answer", "rationale"):
+            if k not in st:
+                say(f"{i}: missing {k}")
+        if not all(k in st for k in ("id", "stem", "answer", "rationale")):
+            continue
+        if not re.match(r"^l\d+-\d\d$", st["id"]):
+            say(f"{i}: id must look like l4-01")
+        if not STEM_MIN <= len(st["stem"]) <= STEM_MAX:
+            say(f"{i}: stem is {len(st['stem'])} chars (want {STEM_MIN}-{STEM_MAX}; aim for 330-480)")
+        if "`" in st["stem"] + st["rationale"] or re.search(r"\n", st["stem"]):
+            say(f"{i}: stem must be one plain paragraph without code")
+        if st["answer"] not in "ABCD" or len(st["answer"]) != 1:
+            say(f"{i}: answer must be one letter")
+        if len(st["rationale"]) < 120:
+            say(f"{i}: rationale too short")
+        cited = set(re.findall(r"\(([A-D])\)", st["rationale"]))
+        if cited != set("ABCD"):
+            say(f"{i}: the rationale must cite every option as (A)..(D); it cites {sorted(cited)}")
+    if len({st.get("id") for st in stems}) != len(stems):
+        say("duplicate stem ids")
+    return out
+
+
+def check_sets(files):
+    bad = 0
+    for f in files:
+        sets = json.loads(Path(f).read_text(encoding="utf-8"))
+        for s in sets:
+            for m in set_problems(s):
+                print("  ! " + m); bad += 1
+        print(f"{f}: {len(sets)} sets, {sum(len(s.get('stems', [])) for s in sets)} stems, {bad} problem(s)")
+    return bad
+
+
+def assemble_sets(file, lote):
+    sets = json.loads(Path(file).read_text(encoding="utf-8"))
+    probs = [m for s in sets for m in set_problems(s)]
+    if probs:
+        print("\n".join(probs)); sys.exit(1)
+    target = DIR / f"lote{lote}.json"
+    keep = {q["id"]: q for q in load(target.name)}
+    for s in sets:
+        for st in s["stems"]:
+            if not st["id"].startswith(f"l{lote}-"):
+                print(f"{st['id']} does not belong to lote {lote}"); sys.exit(1)
+            qid = f"{CERT}-{st['id']}"
+            keep[qid] = {"id": qid, "cert": CERT, "source": "lote", "lote": lote, "domain": s["domain"], "task": s["task"],
+                         "question": st["stem"], "options": dict(s["options"]), "answer": [st["answer"]], "rationale": st["rationale"],
+                         "ref": st.get("ref", s["ref"]), "group": f"{CERT}-set-{s['set']}"}
+    ordered = [keep[k] for k in sorted(keep, key=lambda x: int(x.rsplit("-", 1)[1]))]
+    target.write_text(json.dumps(ordered, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"{target.name}: {len(ordered)} items")
+
+
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "plan": plan()
     elif cmd == "check": sys.exit(1 if check(sys.argv[2:]) else 0)
     elif cmd == "assemble": assemble()
+    elif cmd == "check-sets": sys.exit(1 if check_sets(sys.argv[2:]) else 0)
+    elif cmd == "assemble-sets": assemble_sets(sys.argv[2], int(sys.argv[3]))
     else: print(__doc__)

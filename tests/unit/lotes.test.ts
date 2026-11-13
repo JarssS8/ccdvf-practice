@@ -39,7 +39,8 @@ describe('lotes 2 and 3 (Developer)', () => {
 
   it('is served by the bank with its lote, source and official reference, outside every duplicate group', () => {
     expect(served).toHaveLength(lotes.reduce((n, [, s]) => n + s.length, 0))
-    expect(served.every((q) => q.ref && (q.lote === 2 || q.lote === 3) && !q.dupGroup)).toBe(true)
+    // Only the stems of a contrastive set share a group (SPEC.md); nothing else of a lote joins a duplicate group
+    expect(served.every((q) => q.ref && (q.lote ?? 1) >= 2 && (!q.dupGroup || q.dupGroup.includes('-set-')))).toBe(true)
     expect(loteCounts(qs, DV)).toEqual({ 1: questionsOf(DV).length - served.length, 2: lotes[0][1].length, 3: lotes[1][1].length })
   })
 

@@ -42,6 +42,34 @@ Everything in the key and in the rationale must be true **today** about Claude, 
 - Stay inside the CCDV-F blueprint (`developer-foundations/README.md`, "Skills measured"), at the level of a developer who has built with the API for a few months.
 - Do not copy or closely paraphrase any existing exam or practice item from anywhere. Invent the scenario. Do not repeat a scenario, product type or deciding detail of the items already in `lote2.json` or `lote3.json`, or of another slot in the plan.
 
+## Contrastive sets (from the next batch on)
+
+Lotes 2 and 3 removed the length cue, but a reader who sees only the four options still picks the key 97% of the time: the key is the only textbook best practice, and the distractors are recognisably second-best whatever the stem says. From the next batch on, items are written in **contrastive sets** that remove that cue by construction:
+
+- A **set** is one option list (A-D) shared by several stems. A **quad** has four stems and every option is the key of exactly one of them; a **twin** has two stems with different keys. Prefer quads.
+- The stems of a set share the theme and differ in the **deciding detail** (who waits, the volume, a constraint, a symptom, a side effect). Vary the surface (industry, team, numbers) so they do not read as copies, but never let a surface detail decide.
+- Every option must therefore be **the best answer in some realistic situation**. Write the options first, ask "in which situation is this the right call?" for each one, and build one stem around each answer.
+- Options must fit every stem of the set grammatically and in vocabulary: no option may mention something only one stem contains.
+- Each stem gets its own rationale: why its key wins on its deciding detail, and one sentence per other option saying which detail of *this* stem it fails. Cite options by their fixed letters, "(B)".
+- The stems of a set share a group, so an exam never shows two of them; seeing only the options, a reader can be right at most once per set (25% for a quad, 50% for a twin).
+- Everything else in this spec still applies (length, prose only, facts, refs, no tells).
+
+Sets are written to a JSON array and checked with:
+
+```
+python3 scripts/lotes/tools/lotes.py check-sets FILE
+```
+
+```
+{
+  "set": "q01", "kind": "quad", "domain": "Applications and Integration", "task": "...", "ref": "https://...",
+  "options": {"A": "...", "B": "...", "C": "...", "D": "..."},
+  "stems": [ {"id": "l4-01", "stem": "...", "answer": "B", "rationale": "... (B) ... (A) ... (C) ... (D) ..."}, ... ]
+}
+```
+
+`python3 scripts/lotes/tools/lotes.py assemble-sets FILE LOTE` appends the stems to `lote<LOTE>.json` with the set as their group.
+
 ## Output
 
 For your slice write a JSON array to `scripts/lotes/developer-foundations/drafts/<SLICE>.json`, one object per slot assigned to you, in this shape:

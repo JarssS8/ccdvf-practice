@@ -146,7 +146,8 @@ export function nearDuplicates(news, others) {
   const o = others.map((q) => [q.id, clusterTokens(q)])
   news.forEach((q, i) => {
     for (const [id, ot] of o) if (id !== q.id && jaccard(t[i], ot) >= RULES.nearDuplicate) out.push(`${q.id}: too close to ${id} (${jaccard(t[i], ot).toFixed(2)})`)
-    for (let j = 0; j < i; j++) if (jaccard(t[i], t[j]) >= RULES.nearDuplicate) out.push(`${q.id}: too close to ${news[j].id}`)
+    // Stems of one contrastive set share their options on purpose and never appear in the same exam (same group)
+    for (let j = 0; j < i; j++) if (!(q.group && q.group === news[j].group) && jaccard(t[i], t[j]) >= RULES.nearDuplicate) out.push(`${q.id}: too close to ${news[j].id}`)
   })
   return out
 }
