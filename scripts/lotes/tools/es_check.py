@@ -51,12 +51,29 @@ def problems(qid, t):
     return out
 
 
+def group_problems(d):
+    """The stems of one contrastive set share their options in English, so they must share one Spanish translation too."""
+    out, seen = [], {}
+    for qid, t in d.items():
+        g = EN.get(qid, {}).get("dupGroup")
+        if not g:
+            continue
+        if g in seen and seen[g][1] != t.get("options"):
+            out.append(f"{qid}: options differ from {seen[g][0]} although both belong to set {g}: translate the shared options once and reuse them verbatim")
+        seen.setdefault(g, (qid, t.get("options")))
+    return out
+
+
 def main():
     if sys.argv[1:] == ["--merge"]:
         es = json.loads(ES_FILE.read_text(encoding="utf-8"))
         n = 0
         for f in sorted((ROOT / "scripts/lotes/developer-foundations/es-drafts").glob("*.json")):
-            for qid, t in json.loads(f.read_text(encoding="utf-8")).items():
+            d = json.loads(f.read_text(encoding="utf-8"))
+            gp = group_problems(d)
+            if gp:
+                print("\n".join(gp)); sys.exit(1)
+            for qid, t in d.items():
                 p = problems(qid, t)
                 if p:
                     print("\n".join(p)); sys.exit(1)
@@ -71,6 +88,8 @@ def main():
         for qid, t in d.items():
             for p in problems(qid, t):
                 print("  ! " + p); bad += 1
+        for p in group_problems(d):
+            print("  ! " + p); bad += 1
         print(f"{f}: {len(d)} translations, {bad} problem(s)")
     sys.exit(1 if bad else 0)
 

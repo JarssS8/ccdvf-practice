@@ -1,0 +1,160 @@
+[
+ {
+  "set": "q07",
+  "kind": "quad",
+  "domain": "Model Selection and Optimization",
+  "task": "Choosing a model tier or serving speed: most capable tier, mid tier, smallest tier, fast mode",
+  "ref": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+  "options": {
+   "A": "Run the task on the most capable model tier, accepting a higher price per token for the strongest results.",
+   "B": "Use the mid-range model tier, which balances capability, speed and price for everyday workloads.",
+   "C": "Use the smallest model tier, which has the lowest latency and the lowest price per token.",
+   "D": "Request fast mode on a model that supports it, so the same model's output arrives faster at a premium price."
+  },
+  "stems": [
+   {
+    "id": "l4-27",
+    "answer": "A",
+    "ref": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+    "stem": "A pharmaceutical regulatory team asks Claude to compare each new 400-page submission dossier with the previous one and list every contradiction between sections. About ten dossiers arrive a week and the report is read the next morning, so nobody waits on a response. On the team's eval set the mid tier (Claude Sonnet 5.5) misses about a third of the planted contradictions, while the most capable tier (Claude Fable 5.2) finds nearly all of them. Which choice should the team make?",
+    "rationale": "Accuracy on subtle cross-section contradictions is the requirement, volume is low and the report is read the next morning, so paying for the most capable tier is justified (A). The mid tier (B) is the usual balanced pick, but the eval shows it misses a third of the contradictions. The smallest tier (C) is cheaper and faster but sits below the mid tier on capability. Fast mode (D) keeps the same model and only speeds up output at a premium price, which buys nothing when nobody is waiting and the quality gap sits in the model tier."
+   },
+   {
+    "id": "l4-28",
+    "answer": "B",
+    "ref": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+    "stem": "A sports-media company adds a feature that turns an editor's plain-English question into a SQL query over its match statistics and returns a short written summary. On the team's eval set the smallest tier scores 71 percent against a 90 percent bar, the mid tier scores 93 percent, and the most capable tier scores 94 percent at a clearly higher price. Editors are content with an answer in about two seconds. Which choice should the team make?",
+    "rationale": "The mid tier clears the 90 percent bar with margin, at a price and speed suited to an everyday workload, and editors do not need faster answers (B). The most capable tier (A) adds one point above a bar that is already met and costs clearly more. The smallest tier (C) is cheapest but scores 71 percent, well under the bar. Fast mode (D) pays a premium to speed up output, and nobody is asking for a faster answer than two seconds."
+   },
+   {
+    "id": "l4-29",
+    "answer": "C",
+    "ref": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+    "stem": "A video-streaming company writes a one-sentence alt text for each of the 3 million thumbnails it ingests every day, and a simple rubric checks every sentence. In a trial the smallest tier passed 96 percent of images against a 95 percent bar, and nobody reads a thumbnail's text until the catalogue page is published hours later. The budget is set by the lowest price per token available. Which choice should the team make?",
+    "rationale": "A routine, high-volume task that the smallest tier already passes should run on the tier with the lowest price per token and lowest latency (C). The most capable tier (A) would cost far more across 3 million images for a quality gain the rubric does not need. The mid tier (B) would also pass, but it is priced higher than the budget allows when the smallest tier meets the bar. Fast mode (D) raises the price to speed up output, while the text is not read for hours."
+   },
+   {
+    "id": "l4-30",
+    "answer": "D",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/fast-mode",
+    "stem": "A stadium operations team has a controller who waits on screen while Claude drafts a revised 1,200-word crowd-management plan after a gate closes, about thirty times a day. The current model, Claude Fable 5.2, the most capable tier, is the only one that passes every case in the team's eval, so quality is not in question, yet the plan takes 45 seconds to finish and the target is under 25. The team accepts a higher price per token for these requests. Which choice should the team make?",
+    "rationale": "Quality is already sufficient and the delay comes from generating a long output while someone waits, so fast mode on the same model, which raises output speed at a premium price, fits (D). The most capable tier (A) is what the team already runs, so choosing it changes nothing about the wait. The mid tier (B) would respond faster but is not the tier that passes the eval. The smallest tier (C) is faster still and has the same quality problem."
+   }
+  ]
+ },
+ {
+  "set": "q08",
+  "kind": "quad",
+  "domain": "Agents and Workflows",
+  "task": "Keeping an agent's state and context healthy: stored history, compaction, clearing old tool results, notes or memory",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/context-editing",
+  "options": {
+   "A": "Store the full message history outside the model and load it back into the next request when the conversation resumes.",
+   "B": "Turn on compaction so older turns are replaced by a summary Claude writes once the context nears its limit.",
+   "C": "Use context editing to clear old tool results from the conversation while the agent's own messages stay in place.",
+   "D": "Have the agent write durable facts to a notes file or the memory tool and read them back when it needs them."
+  },
+  "stems": [
+   {
+    "id": "l4-31",
+    "answer": "A",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/working-with-messages",
+    "stem": "A telecom's support chatbot talks with a customer about a router fault for ten or twelve short turns, and the customer often returns the next day. The service restarts on every deploy and keeps nothing in memory, so a returning customer is greeted as a stranger. The whole conversation is a few thousand tokens with no bulky tool output, and the agent must resume the exact thread, including what the customer said word for word. How should the team keep the state?",
+    "rationale": "The Messages API is stateless, so storing the full history and sending it again restores the exact thread with the customer's own words, and a few thousand tokens fit easily (A). Compaction (B) replaces earlier turns with a summary and only matters near the window limit, which this conversation is far from. Clearing tool results (C) has nothing to remove, as there is no bulky tool output. A notes file (D) holds what the agent chose to condense, so the customer's exact wording would be lost."
+   },
+   {
+    "id": "l4-32",
+    "answer": "B",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/compaction",
+    "stem": "A wind-farm operator uses a Claude agent as a planning partner in an eight-hour outage-planning session, where an engineer and the agent trade decisions, constraints and revised options in one continuous conversation. Almost no tools are called, so the context is filled by the discussion itself and is nearing the window limit. The engineer will not stop for a handover, and decisions are scattered through the whole discussion. What should the team do to keep the agent going?",
+    "rationale": "The conversation is one continuous session whose earlier turns all matter in condensed form, so compaction replaces the older turns with a summary and lets the session continue (B). Reloading the stored history (A) would refill the window that is already nearly full. Clearing tool results (C) has almost nothing to clear because few tools are called. A notes file (D) depends on the agent filing facts in advance and on a handover, while the decisions here are spread across the discussion and the session does not stop."
+   },
+   {
+    "id": "l4-33",
+    "answer": "C",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/context-editing",
+    "stem": "A travel-booking agent searches hotel inventory with a tool that returns about 20,000 tokens of listings each time, and a typical task makes thirty searches. After each search the agent writes a short comparison of what it found and never needs the raw listings again. The context passes the team's 250,000-token working limit around the thirteenth search, and the team wants the agent's written comparisons preserved exactly as written. Which approach fits?",
+    "rationale": "The tokens that fill the window are old tool results, and context editing clears those by rule while leaving the agent's own messages, including its comparisons, untouched (C). Compaction (B) would summarize the whole conversation and rewrite the comparisons the team wants kept verbatim. Replaying the stored history (A) would restore all the bulky listings and fill the window again. A notes file (D) solves carrying facts across sessions, and nothing here has to outlive the task."
+   },
+   {
+    "id": "l4-34",
+    "answer": "D",
+    "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool",
+    "stem": "A school district's tutoring agent meets each student once a week in a brand-new session that starts with an empty context. Teachers want it to remember each student's reading level, the topics already covered and what motivates them, which together fit in a few hundred words, while the full transcripts of past sessions would run to several million tokens by the end of the year. How should the team give the agent that continuity?",
+    "rationale": "A few hundred words of durable facts have to survive between separate sessions, which is what a notes file or the memory tool is for, and reading them back costs far less than old transcripts (D). Loading the stored history (A) would exceed the context window and bury the useful facts. Compaction (B) shrinks a conversation inside one session and does nothing for a session that starts empty. Clearing tool results (C) addresses bulky tool output inside a running context, which is not the problem here."
+   }
+  ]
+ },
+ {
+  "set": "q09",
+  "kind": "quad",
+  "domain": "Security and Safety",
+  "task": "Matching a control to a threat: least-privilege scope, human approval, redaction before the call, keeping a secret out of the model's context",
+  "ref": "https://code.claude.com/docs/en/agent-sdk/secure-deployment",
+  "options": {
+   "A": "Narrow the agent's tool permissions to the minimum the task needs, such as a read-only credential on one dataset.",
+   "B": "Require a person to approve each specific action, with its exact arguments shown, before the tool runs.",
+   "C": "Redact or replace the sensitive values in the input with placeholders before the request is sent to the API.",
+   "D": "Keep the credential in a proxy outside the agent's environment that adds it to requests, so the model never sees it."
+  },
+  "stems": [
+   {
+    "id": "l4-35",
+    "answer": "A",
+    "ref": "https://code.claude.com/docs/en/agent-sdk/secure-deployment",
+    "stem": "An energy company's overnight agent reads supplier emails, looks up the matching contract rows in a database and writes a summary to a file. It never needs to change a contract, yet it runs with the database account the developers use, which can update and delete rows. Nobody is awake while it runs, and its API key sits in a secrets manager the model never touches. How should the team limit the damage if a hostile email slips an instruction past the model?",
+    "rationale": "The job only reads, so removing write and delete rights bounds what any injected instruction can do, and it works unattended (A). A human approval gate (B) needs a person at the keyboard, and nobody is awake overnight. Redacting inputs (C) protects what the provider receives and does not limit what a manipulated agent can do with its account. A credential proxy (D) hides a secret but leaves the account's update and delete rights unchanged, so an injected instruction could still use them."
+   },
+   {
+    "id": "l4-36",
+    "answer": "B",
+    "ref": "https://code.claude.com/docs/en/agent-sdk/secure-deployment",
+    "stem": "A property-management firm's agent can issue deposit refunds through a payments tool, which is exactly its job, and it handles about a dozen refunds a day. A refund cannot be recalled once it is sent, and a mistaken or manipulated payout to the wrong account would be costly. A finance clerk is on shift all day, and the agent's credential is already limited to the refunds endpoint. What control should the team add against a wrong payout?",
+    "rationale": "The risky action is one the agent legitimately must be able to take, it is irreversible, the volume is small and a clerk is present, so a person approving each refund with its exact arguments is the right gate, and since the application runs the payments tool itself it can hold each call until the clerk approves (B). Narrowing permissions (A) has already been done, and a wrong refund sits inside the scope the agent needs. Redaction (C) does not constrain which payment goes out. A credential proxy (D) keeps the key hidden, yet the agent could still ask it to send a wrong payout."
+   },
+   {
+    "id": "l4-37",
+    "answer": "C",
+    "stem": "A municipal complaints office wants Claude to sort free-text resident letters into twelve topics. The letters often contain national ID numbers and home addresses, the legal team forbids sending those to an outside processor, and the topic never depends on them. The pipeline has no tools and no credentials, and its batches run without anyone reviewing them. What control should the team add?",
+    "rationale": "The concern is what leaves the building in the request, and the task does not need the identifiers, so replacing them with placeholders before the call is the only control that stops the identifiers from reaching the provider at all (C). Scoping tool permissions (A) is moot because the pipeline has no tools to scope. Per-action approval (B) would not remove the data from the request and nobody reviews these batches anyway. A credential proxy (D) protects secrets, and this pipeline holds no credentials.",
+    "ref": "https://platform.claude.com/docs/en/manage-claude/api-and-data-retention"
+   },
+   {
+    "id": "l4-38",
+    "answer": "D",
+    "ref": "https://code.claude.com/docs/en/agent-sdk/secure-deployment",
+    "stem": "A public-transport agency's coding agent runs hundreds of shell commands per task in a sandbox and pushes branches to the company's code host using an access token stored in an environment variable of that sandbox. The token is already limited to pushing branches in one repository, and engineers review every merge. A security review notes that a hostile web page the agent reads could make it print and send out that variable. What should the team change?",
+    "rationale": "The danger is the token's value leaking, so the credential should live in a proxy outside the sandbox that injects it into outgoing requests, leaving nothing for the agent to print (D). Narrowing the token (A) has already been done, and a leaked branch-push token is still usable by an attacker. Approving each command (B) is impractical at hundreds per task, and a reviewer reading raw shell commands could easily miss a harmful one. Redacting the input (C) addresses data sent to the API, while this secret sits in the environment."
+   }
+  ]
+ },
+ {
+  "set": "t02",
+  "kind": "twin",
+  "domain": "Eval, Testing, and Debugging",
+  "task": "Isolating an integration-layer bug from a model-output problem using the captured request and reply",
+  "ref": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+  "options": {
+   "A": "Fix the integration layer first: how the application builds the request, passes tool results back or parses the reply.",
+   "B": "Revise the instructions and add worked examples for the failing cases, then rerun the test set to confirm the change.",
+   "C": "Add the failing conversations to the evaluation set and gather more examples of each failure before deciding what to change.",
+   "D": "Switch to a more capable model tier and rerun the failing conversations to see whether the errors disappear."
+  },
+  "stems": [
+   {
+    "id": "l4-39",
+    "answer": "A",
+    "ref": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+    "stem": "A ski-resort app lets guests ask a Claude assistant for lesson slots, and 6 of 40 test conversations offered lessons on the wrong day. The team captured the exact request the application sent for one of them: the guest asked for 3 February, but the application's date formatter wrote 2 March into the prompt, and the assistant's answer is consistent with that date. The failure repeats every time for days before the 13th. What should the team do first?",
+    "rationale": "Reading the captured request before changing anything separates an integration fault from a model fault, and here it shows the model received the wrong date and answered correctly for it, so the fault is in how the application builds the request, and it fails only for days that can be read as months (A). Rewriting the instructions (B) would tune a prompt that was never the cause. Collecting more failing conversations (C) adds nothing when the failure is already explained and repeats every time. A more capable tier (D) cannot recover a date it was never given."
+   },
+   {
+    "id": "l4-40",
+    "answer": "B",
+    "ref": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+    "stem": "A university registrar's assistant answers tuition-refund questions, and 11 of 60 test conversations cite the standard clause when a medical-withdrawal exception applies. The captured request holds the full rules text and the question as intended, the reply parses without error, and replaying that request in the console gives the same wrong answer. The prompt has one sentence about exceptions and no examples, and the team already runs the most capable tier (Claude Fable 5.2). What should the team do first?",
+    "rationale": "Reading the captured request before changing anything separates an integration fault from a model fault, and here the input is correct, the parsing works and the error reproduces outside the application, so the problem is in the model's output, and the thin exception guidance and lack of examples are the cheapest thing to improve and re-test (B). Searching the integration layer (A) is pointless when the request and the parsing are verified. Gathering more examples (C) delays a fix when the failures already reproduce on demand. Moving to a more capable tier (D) is not an option, because the team already runs the most capable one."
+   }
+  ]
+ }
+]

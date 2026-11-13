@@ -71,9 +71,21 @@ describe('browser', { skip }, () => {
     await page.getByRole('button', { name: 'Discard attempt' }).click()
     await page.waitForSelector('.topbar')
     await page.goto(BASE + '/#/exams')
-    await lot(1).click()
+    // Lote 4 on its own is a full exam too: its sets are topped up with sibling stems
     await lot(2).click()
-    assert.deepEqual([await lot(1).isChecked(), await lot(2).isChecked()], [true, false])
+    await lot(4).click()
+    await lot(2).click()
+    assert.deepEqual([await lot(1).isChecked(), await lot(2).isChecked(), await lot(4).isChecked()], [false, false, true])
+    await page.getByRole('button', { name: /Mock rápido/ }).click()
+    await page.waitForSelector('.exam')
+    assert.equal(await page.locator('.chip', { hasText: /^Lote 4$/ }).count(), 1, 'the question comes from Lote 4')
+    await page.locator('.exam-head button.mono').click()
+    await page.getByRole('button', { name: 'Discard attempt' }).click()
+    await page.waitForSelector('.topbar')
+    await page.goto(BASE + '/#/exams')
+    await lot(1).click()
+    await lot(4).click()
+    assert.deepEqual([await lot(1).isChecked(), await lot(2).isChecked(), await lot(4).isChecked()], [true, false, false])
   })
 
   it('runs drills in Spanish and charts the result', async () => {

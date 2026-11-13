@@ -1,0 +1,175 @@
+[
+ {
+  "set": "q10",
+  "kind": "quad",
+  "domain": "Prompt and Context Engineering",
+  "task": "Prompt engineering: choosing the technique that fixes a symptom (examples, explicit rules, system prompt placement, structured output)",
+  "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+  "options": {
+   "A": "Add three or four varied worked examples to the prompt, each pairing a typical input with the exact output wanted.",
+   "B": "Rewrite the instruction as a specific rule that can be checked, stating the limit and what to leave out.",
+   "C": "Move the fixed role and policy into the system prompt and keep the user turn for the variable content.",
+   "D": "Request structured output with a JSON schema so every response comes back with the same fields and types."
+  },
+  "stems": [
+   {
+    "id": "l4-41",
+    "answer": "A",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+    "stem": "An air-quality agency turns inspectors' shorthand field notes into formal log entries with Claude. The written rules are already specific and complete, and ordinary notes come out right. The failures are on odd note styles, such as abbreviations mixed with sketches described in words, which the rules cannot capture, though staff can supply a correct entry for each style. A supervisor reads the entries as prose. Which change fits best?",
+    "rationale": "The rules are already precise and the gap is in unusual input styles that are easier to show than to describe, so a few varied worked examples that cover those styles steer format and handling directly (A). Rewriting the rules as a checkable rule (B) has nothing left to sharpen, since the rules are already specific. Moving content to the system prompt (C) changes placement, and nothing in the prompt is misplaced. A JSON schema (D) fixes the shape of data a program reads, while this output is prose read by a person."
+   },
+   {
+    "id": "l4-42",
+    "answer": "B",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+    "stem": "A game studio's writers use Claude to draft one short quest hook per prompt, shown in a text box for a designer to read and paste. The prompt only says to write a quest hook. The content is good, but some replies carry three alternatives, a designer's note or two hundred words. The studio wants exactly one hook of at most forty words and nothing else, and wants each hook to differ in setting and tone, so any sample would pull the drafts toward it. Which change fits best?",
+    "rationale": "The prompt never states the count, the length or what to leave out, so the model fills the gap in its own way, and writing those limits as an explicit rule that can be checked closes it (B). Worked examples (A) would pull every hook toward the samples, which the writers do not want. Placement in the system prompt (C) does not supply a rule that is missing from the prompt. A JSON schema (D) suits output that a program parses, and nobody parses this text box."
+   },
+   {
+    "id": "l4-43",
+    "answer": "C",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+    "stem": "A rail operator's passenger assistant sends each request as one user message: a 500-word block of fixed policy on refund limits, tone and languages, then the passenger's text. When passengers paste long forwarded emails, Claude sometimes answers in the voice of the forwarded sender and drops the policy. The policy is clearly worded and never changes between requests, and the replies are free text for the passenger. Which change fits best?",
+    "rationale": "The standing policy and the passenger's pasted text share one user turn. Putting the policy in the system prompt and keeping the user turn for the passenger's text, wrapped in tags, is the documented split between durable rules and variable input (C). Worked examples (A) would not explain why the policy is lost when long text is pasted. Rewriting the rules (B) is pointless because the wording is already clear. A JSON schema (D) shapes data for a program, and these replies are free text."
+   },
+   {
+    "id": "l4-44",
+    "answer": "D",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/structured-outputs",
+    "stem": "A public library's catalogue importer asks Claude to turn scanned donation forms into a JSON record that is loaded straight into the database. The prompt describes the fields in words, already contains a few examples and has been reworded twice to demand JSON only, and the content is accurate. Yet about one reply in fifty wraps the record in a sentence, renames a field or omits a required one, and the importer rejects it. Which change fits best?",
+    "rationale": "The content is right and only the shape fails, which is what structured output with a JSON schema addresses: it constrains the response to the schema so the importer gets the same fields and types each time (D). More examples (A) are already in the prompt and have not stopped the slips. Rewording the instruction as a checkable rule (B) has already been tried twice without removing the slips. Moving the policy to the system prompt (C) does not enforce field names or types."
+   }
+  ]
+ },
+ {
+  "set": "t03",
+  "kind": "twin",
+  "domain": "Prompt and Context Engineering",
+  "task": "Reliability of outputs: validating in code and retrying with the error versus verifying claims against a source",
+  "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+  "options": {
+   "A": "Validate each response in code against the format and business rules, and retry the call with the specific error added.",
+   "B": "Check each claim in the answer against the retrieved source passages, and drop or flag claims they do not support.",
+   "C": "Add a second Claude pass that rereads the first answer and corrects what it judges wrong, without consulting any outside data.",
+   "D": "Instruct Claude to answer when it is certain and to say that it does not know when it is not."
+  },
+  "stems": [
+   {
+    "id": "l4-45",
+    "answer": "A",
+    "ref": "https://www.anthropic.com/research/building-effective-agents",
+    "stem": "A tour operator's itinerary builder asks Claude for a JSON plan that its booking service checks with fixed rules: dates in order, no two activities overlapping, and line prices adding up to the stated total. About 4 percent of plans break one rule, and the checker names the exact rule that failed. Prices and times are copied correctly from the catalogue in the prompt; the faults are in how the plan is assembled. Which approach should the team add?",
+    "rationale": "Each fault is a deterministic rule that code can test and name, so validating in code and retrying with the specific error tells Claude exactly what to fix (A). Checking claims against sources (B) has no target here, because the copied prices and times are already correct. A second Claude pass (C) adds a call and relies on the model's judgment when a precise check already exists. A certainty instruction (D) does not help with arithmetic and ordering mistakes made while assembling the plan."
+   },
+   {
+    "id": "l4-46",
+    "answer": "B",
+    "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+    "stem": "A tax agency's help assistant answers taxpayers' questions from the three bulletins retrieved for each question and pasted into the prompt. Answers always pass the format check, but auditors found two that stated a filing deadline the bulletins do not contain, both worded with full confidence. No code rule can tell a true deadline from a false one, though the bulletin text is available for every answer. Which approach should the team add?",
+    "rationale": "The problem is unsupported claims, and the sources that decide whether a claim is true are at hand, so checking each claim against the retrieved passages and dropping the unsupported ones addresses it directly (B). Validation with retries (A) tests format and rules, which already pass, and cannot judge a deadline. A second pass without outside data (C) can repeat the same mistake, since it never consults the bulletins. A certainty instruction (D) lowers the rate of such claims but verifies none of them, and these two were stated with full confidence."
+   }
+  ]
+ },
+ {
+  "set": "q11",
+  "kind": "quad",
+  "domain": "Tools and MCPs",
+  "task": "Agentic customization: choosing between a custom tool, an Anthropic server tool, an MCP server and a Skill",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview",
+  "options": {
+   "A": "Define a custom client tool with an input schema and run it in the application's own code when Claude calls it.",
+   "B": "Enable an Anthropic server tool, such as web search or code execution, which runs on Anthropic's side without handler code.",
+   "C": "Expose the capability once through an MCP server that any MCP-capable Claude application can connect to.",
+   "D": "Package the procedure as a Skill, with instructions, a template and a script, that Claude loads when a task calls for it."
+  },
+  "stems": [
+   {
+    "id": "l4-47",
+    "answer": "A",
+    "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works",
+    "stem": "A dental group's scheduling service lets patients ask a Claude assistant for open appointments. The chair availability lives in a database reachable only from the service's own network, and the lookup already exists as a function in the service's code. No other application will use it, and the team does not want to deploy or operate any new server. What is the lightest way to give Claude what it needs?",
+    "rationale": "The data is private, the function already exists in one application and only that application needs it, so a custom client tool whose handler calls the function is the lightest fit (A). An Anthropic server tool (B) runs on Anthropic's side and cannot reach a database on the service's private network. An MCP server (C) pays off when several applications share a capability, and here it would be a new server to run for a single caller. A Skill (D) packages instructions and scripts, not a live lookup into a private database."
+   },
+   {
+    "id": "l4-48",
+    "answer": "B",
+    "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool",
+    "stem": "A farmers' co-op wants its Claude assistant to answer questions about this week's commodity prices and weather warnings, which public agencies publish on their websites and update daily. Nothing the assistant needs is private, and the team has no search provider contract and does not want to write or host a fetching service. What is the lightest way to give Claude what it needs?",
+    "rationale": "The information is public, fresh and on the web, and the team wants no handler or hosting, so enabling Anthropic's web search server tool lets Anthropic run the searches and return cited results (B). A custom client tool (A) would mean contracting a search provider and writing and running the handler. An MCP server (C) would still be something to build and host for a need that a built-in tool covers. A Skill (D) holds instructions and scripts that go stale, and cannot supply this week's prices."
+   },
+   {
+    "id": "l4-49",
+    "answer": "C",
+    "ref": "https://modelcontextprotocol.io/docs/getting-started/intro",
+    "stem": "A power utility's platform team owns the equipment registry. Three separate Claude applications need the same lookups: a support bot built by one team, engineers working in Claude Code, and a desktop assistant from a vendor, all able to connect to MCP servers and sharing no code. The platform team wants one implementation to maintain and one place to control access. What is the lightest way to give Claude what it needs?",
+    "rationale": "One capability must serve three unrelated applications, and exposing it once through an MCP server lets each client connect to the same implementation and the same access control (C). A custom client tool (A) lives inside one application's code, so it would be rebuilt three times. An Anthropic server tool (B) runs on Anthropic's side and cannot query the utility's registry. A Skill (D) carries instructions and scripts, not a shared, access-controlled connection to a live system."
+   },
+   {
+    "id": "l4-50",
+    "answer": "D",
+    "ref": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview",
+    "stem": "A research foundation's grants team uses Claude Code to draft proposals. Each draft must follow a 14-page house style guide, fill a fixed template and pass a small script that checks section lengths. Most sessions in the repository have nothing to do with grants, so the team does not want that material in every conversation. No outside system is involved. What is the lightest way to give Claude what it needs?",
+    "rationale": "The need is a procedure with reference material and a script, with no live system, wanted only when a grant task comes up, so a Skill loads its instructions only when the task calls for them and costs almost no context otherwise (D). A custom client tool (A) means writing a handler for something that is instructions, not a function call. A server tool (B) offers web search or code execution and does not carry the house guide or template. An MCP server (C) would be a server to run for static material with no system behind it."
+   }
+  ]
+ },
+ {
+  "set": "t04",
+  "kind": "twin",
+  "domain": "Tools and MCPs",
+  "task": "Tool implementation: error handling with is_error versus approval before irreversible actions",
+  "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/handle-tool-calls",
+  "options": {
+   "A": "Return the failure as a tool result with is_error set, saying what was wrong and what to change in the call.",
+   "B": "Stop before the tool runs, show a person the exact action, and run it only after they approve it.",
+   "C": "Add a sentence to the tool description telling Claude to double-check all of its arguments before calling the tool.",
+   "D": "Wrap the call in code that repeats the same call up to three times when it does not succeed."
+  },
+  "stems": [
+   {
+    "id": "l4-51",
+    "answer": "A",
+    "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/handle-tool-calls",
+    "stem": "A university's lab-booking assistant calls a tool to reserve a room. When the requested room is already taken, the tool throws an exception and the assistant tells the student that the system had an error, although the tool knows which rooms are free at that hour. Reservations can be cancelled at no cost. Which change should the team make?",
+    "rationale": "The call failed for a reason Claude can act on, so returning a tool result with is_error set and a message naming the problem and the free rooms lets it adjust the call and answer the student (A). Human approval (B) guards actions that cannot be undone, and these reservations cancel at no cost. A description sentence (C) would not help, because the arguments were valid and the room was simply taken. Repeating the same call (D) fails again for the same reason."
+   },
+   {
+    "id": "l4-52",
+    "answer": "B",
+    "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works",
+    "stem": "A county's emergency-communications assistant can call a tool that sends an evacuation alert to every phone in a district, and a sent alert cannot be recalled. The tool works correctly, and in testing Claude twice picked a neighbouring district from an ambiguous operator message, with arguments that passed validation. Which change should the team make?",
+    "rationale": "The call succeeds, the harm cannot be undone and the model sometimes picks the wrong target, so the application, which runs client tools itself, should hold the call and show an operator the exact action for approval (B). An error result (A) needs a failure to report, and here nothing fails. A description sentence (C) is guidance the model can still misjudge on an ambiguous message. Repeating the call (D) would send the alert more than once."
+   }
+  ]
+ },
+ {
+  "set": "t05",
+  "kind": "twin",
+  "domain": "Claude Code",
+  "task": "Claude Code workflows: non-interactive runs in CI versus interactive sessions with project skills",
+  "ref": "https://code.claude.com/docs/en/headless",
+  "options": {
+   "A": "Run Claude Code non-interactively in print mode, allow only the needed tools by permission rule, and read its JSON output.",
+   "B": "Work in an interactive session and start a project skill from the repository, so the steps run with the developer present.",
+   "C": "Run Claude Code non-interactively with permission checks switched off, so that no step of the job stalls waiting for an approval.",
+   "D": "Define a project subagent with its own tool list and context window, and delegate the work to it from a session."
+  },
+  "stems": [
+   {
+    "id": "l4-53",
+    "answer": "A",
+    "ref": "https://code.claude.com/docs/en/headless",
+    "stem": "A mobile studio's release pipeline needs store release notes after every tag. A job must read the merged commits and write drafts to the notes folder, then pass a JSON list, one entry per language, to the publishing job. The runner has no terminal and nobody watches it, and it also holds the store-publishing credentials, so the job should run only git log, git diff and file writes. Which setup fits best?",
+    "rationale": "Nobody is there to answer prompts, the next job needs machine-readable output and the runner holds credentials, so a print-mode run with permission rules limited to the needed commands and JSON output fits (A). An interactive session with a skill (B) needs a developer at a terminal. Switching permission checks off (C) removes the limit on what a job with publishing credentials may run. A subagent (D) is started from a session and does not by itself give the pipeline an unattended run or a JSON result."
+   },
+   {
+    "id": "l4-54",
+    "answer": "B",
+    "ref": "https://code.claude.com/docs/en/skills",
+    "stem": "A city GIS team adds a map layer a few times a month by following an eleven-step checklist covering naming, projection checks, a metadata form and tile builds. At step seven the developer must choose between two projections after looking at the data, wants to approve each edit as it happens, and wants teammates to run the same checklist from the repository. Which setup fits best?",
+    "rationale": "A developer is present, a judgment call falls mid-procedure and the checklist must be shared from the repository, so a project skill started inside an interactive session runs its steps in the main conversation where the developer can look, decide and approve (B). A non-interactive run (A) cannot pause at step seven to ask which projection to use. Switching permission checks off (C) removes the approvals the developer wants. A subagent (D) works in its own context window, apart from the conversation in which the developer is deciding."
+   }
+  ]
+ }
+]

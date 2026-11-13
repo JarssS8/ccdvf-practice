@@ -93,6 +93,14 @@ function pickDistinct(sorted: AiQuestion[], n: number, used: Set<string>) {
   return out
 }
 
+/** Stems of one contrastive set (Lote 4) share a group so they stay apart; a pool made only of such sets has fewer groups than an
+ *  exam has questions, so it is topped up with their sibling stems. Near-duplicate groups of the original bank are never used this way. */
+const isSetStem = (q: AiQuestion) => !!q.dupGroup?.includes('-set-')
+function siblings(sorted: AiQuestion[], chosen: AiQuestion[], n: number) {
+  const have = new Set(chosen.map((q) => q.id))
+  return n > 0 ? sorted.filter((q) => isSetStem(q) && !have.has(q.id)).slice(0, n) : []
+}
+
 export function latestByQuestion(data: Data, cert: CertDef) {
   const latest = new Map<string, Answer>()
   for (const a of Object.values(data.answers)) {
@@ -126,6 +134,7 @@ export function buildAttempt(mode: Mode, data: Data, index: Map<string, AiQuesti
     for (const d of cert.domains) chosen.push(...pickDistinct(byFreshness(picked.filter((q) => q.domain === d.name), exp, rnd), quotas[d.name], used))
     // A domain without enough distinct questions is topped up from the freshest of the rest
     if (chosen.length < spec.items) chosen.push(...pickDistinct(byFreshness(picked, exp, rnd), spec.items - chosen.length, used))
+    chosen.push(...siblings(byFreshness(picked, exp, rnd), chosen, spec.items - chosen.length))
     chosen = shuffle(chosen, rnd)
   } else if (mode.startsWith('repo-mock-')) {
     chosen = repo.filter((q) => q.source === 'mock-' + mode.slice(-1))
@@ -133,8 +142,9 @@ export function buildAttempt(mode: Mode, data: Data, index: Map<string, AiQuesti
     chosen = repo.filter((q) => q.source === 'guide')
   } else if (mode === 'drill') {
     label = opts.domain
-    const pool = picked.filter((q) => q.domain === opts.domain)
-    chosen = pickDistinct(byFreshness(pool, exp, rnd), spec.items, new Set())
+    const pool = byFreshness(picked.filter((q) => q.domain === opts.domain), exp, rnd)
+    chosen = pickDistinct(pool, spec.items, new Set())
+    chosen.push(...siblings(pool, chosen, spec.items - chosen.length))
   } else if (mode === 'ai') {
     label = opts.domain
     const pool = all.filter((q) => q.source === 'ai' && (!opts.domain || q.domain === opts.domain))

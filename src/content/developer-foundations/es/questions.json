@@ -2121,5 +2121,599 @@
   },
   "rationale": "Una entrada de caché solo está disponible después de que empiece la primera respuesta, así que las peticiones enviadas en el mismo momento fallan todas en la caché y cada una paga por escribirla. Enviar primero una petición y esperar a que empiece su respuesta permite que las demás lean la entrada ((C)). Una duración de caché mayor ((A)) ayuda cuando las peticiones llegan con minutos de diferencia, pero estas llegan juntas y la entrada aún no existe. Un punto de corte después del siniestro ((B)) almacena en caché texto que es distinto en cada petición. Más puntos de corte ((D)) multiplican las escrituras sin cambiar cuándo está disponible la entrada.",
   "src": "1bye6ph"
+ },
+ "developer-foundations-l4-01": {
+  "question": "Un servicio de admisión de un prestamista hipotecario envía a Claude cada nómina subida y recibe un pequeño objeto JSON de unos 150 tokens. El botón de enviar permanece desactivado hasta que ese objeto se ha validado contra el formulario del solicitante, lo que suele tardar menos de tres segundos en total. No se muestra nada mientras Claude trabaja, y el paso siguiente necesita el objeto completo. ¿Cómo debería llamar el servicio a Claude?",
+  "options": {
+   "A": "Hacer una llamada síncrona estándar y esperar la respuesta completa antes de que la aplicación continúe.",
+   "B": "Enviar la respuesta en streaming con server-sent events y mostrar o reenviar el texto según llega.",
+   "C": "Enviar las peticiones a la Message Batches API y recoger los resultados cuando el batch haya acabado.",
+   "D": "Poner cada trabajo en una cola para que workers en segundo plano llamen a Claude, y avisar al terminar."
+  },
+  "rationale": "La respuesta es diminuta, nadie la lee mientras se escribe, y el paso siguiente necesita el objeto completo en pocos segundos, así que una llamada síncrona sencilla que devuelve la respuesta terminada es lo que mejor encaja (A). El streaming (B) está pensado para mostrar el texto según llega o para salidas muy largas, y aquí ninguna parte del objeto es utilizable antes de estar completo. Un batch (C) devuelve resultados al cabo de minutos u horas, mientras un solicitante espera ante el botón. Una cola con workers (D) añade un traspaso y una notificación para una llamada que termina en unos dos segundos, muy por debajo de cualquier timeout de gateway.",
+  "src": "1obbfnb"
+ },
+ "developer-foundations-l4-02": {
+  "question": "Una app de aprendizaje de idiomas permite a los alumnos chatear con un tutor de Claude cuyas explicaciones suelen alcanzar las seiscientas o setecientas palabras. En las pruebas, los alumnos abandonaban la pantalla cuando no aparecía nada durante los primeros diez segundos, pero leían encantados en cuanto empezaba a mostrarse texto. La respuesta debe aparecer en la misma ventana de chat que el alumno ya está mirando. ¿Cómo debería llamar la app a Claude?",
+  "options": {
+   "A": "Hacer una llamada síncrona estándar y esperar la respuesta completa antes de que la aplicación continúe.",
+   "B": "Enviar la respuesta en streaming con server-sent events y mostrar o reenviar el texto según llega.",
+   "C": "Enviar las peticiones a la Message Batches API y recoger los resultados cuando el batch haya acabado.",
+   "D": "Poner cada trabajo en una cola para que workers en segundo plano llamen a Claude, y avisar al terminar."
+  },
+  "rationale": "El alumno lee la respuesta en directo en la ventana de chat y una respuesta larga tarda muchos segundos en completarse, así que enviar los tokens en streaming a medida que se generan elimina la espera en blanco (B). Una llamada síncrona (A) no muestra nada hasta que la respuesta entera está completa, que es justo lo que hacía que los alumnos se marcharan. Un batch (C) es asíncrono y puede tardar hasta horas, lo que es inutilizable en un chat en vivo. Una cola con workers en segundo plano (D) entrega la respuesta solo cuando ha terminado y como una notificación, no como texto que aparece en la ventana que el alumno está mirando.",
+  "src": "1bugfif"
+ },
+ "developer-foundations-l4-03": {
+  "question": "El equipo de datos de una empresa de suministros debe etiquetar con una categoría de avería 90.000 órdenes de trabajo de mantenimiento archivadas para un informe trimestral que vence dentro de cuatro días. Nadie espera resultados individuales, las etiquetas se leen solo cuando todo el conjunto ha terminado, y el equipo quiere el menor coste por token porque el mismo trabajo se repite cada trimestre. ¿Cómo debería enviar el equipo las peticiones?",
+  "options": {
+   "A": "Hacer una llamada síncrona estándar y esperar la respuesta completa antes de que la aplicación continúe.",
+   "B": "Enviar la respuesta en streaming con server-sent events y mostrar o reenviar el texto según llega.",
+   "C": "Enviar las peticiones a la Message Batches API y recoger los resultados cuando el batch haya acabado.",
+   "D": "Poner cada trabajo en una cola para que workers en segundo plano llamen a Claude, y avisar al terminar."
+  },
+  "rationale": "Nada es urgente y el plazo está a días de distancia, así que encaja la Message Batches API: cuesta un 50 por ciento menos que las peticiones estándar, la mayoría de los batches terminan en menos de una hora, y un batch que no ha terminado a las 24 horas expira (C). Un bucle síncrono (A) paga el precio completo y tiene que ajustarse al ritmo de los rate limits para 90.000 llamadas. El streaming (B) es para texto que una persona lee según llega y también paga el precio completo. Una cola con workers (D) funcionaría, pero obliga a construir y mantener los workers, y sigue pagando el precio completo, que es lo que el equipo quiere evitar.",
+  "src": "1kq79x"
+ },
+ "developer-foundations-l4-04": {
+  "question": "El portal de siniestros de una aseguradora permite a un gestor subir un expediente que un revisor basado en Claude analiza en un bucle de muchas llamadas a las propias tools de la aseguradora, durante entre cuatro y ocho minutos. El balanceador de carga corta cualquier petición HTTP a los sesenta segundos, los gestores pasan a otros casos justo después de subir el expediente, y la revisión debe estar lista en unos quince minutos. ¿Cómo debería ejecutar el portal las revisiones?",
+  "options": {
+   "A": "Hacer una llamada síncrona estándar y esperar la respuesta completa antes de que la aplicación continúe.",
+   "B": "Enviar la respuesta en streaming con server-sent events y mostrar o reenviar el texto según llega.",
+   "C": "Enviar las peticiones a la Message Batches API y recoger los resultados cuando el batch haya acabado.",
+   "D": "Poner cada trabajo en una cola para que workers en segundo plano llamen a Claude, y avisar al terminar."
+  },
+  "rationale": "El trabajo dura más que una sola petición web y nadie lo está mirando, así que la subida debería encolar un trabajo que un worker en segundo plano ejecute y luego avise al gestor, lo que además permite al equipo controlar a qué ritmo empieza cada revisión (D). Una llamada síncrona (A) se cortaría por el límite de sesenta segundos. El streaming (B) supone que alguien lee el texto en directo, pero el gestor ya ha abandonado la página. Un batch (C) no ofrece ninguna garantía de finalización inferior a su ventana de 24 horas, y cada ida y vuelta con una tool del bucle exigiría un nuevo envío, así que no se puede confiar en que entregue en quince minutos.",
+  "src": "1wh0dsu"
+ },
+ "developer-foundations-l4-05": {
+  "question": "Una empresa de seguimiento de paquetes etiqueta cada mensaje de cliente como entrega, facturación o daño con una respuesta de una sola palabra. El prompt tiene unos trescientos tokens, el tráfico es alto, y la etiqueta debe volver en bastante menos de medio segundo. Una prueba con el test set etiquetado del equipo mostró que el tier de modelo más pequeño iguala la precisión del modelo actual. ¿Qué cambio debería hacer el equipo para reducir coste y latencia?",
+  "options": {
+   "A": "Pasar la tarea a un tier más pequeño y rápido, y comprobar en el test set que la calidad se mantiene.",
+   "B": "Bajar el nivel de effort del modelo actual para que gaste menos tokens en razonamiento y explicaciones.",
+   "C": "Marcar con cache_control la parte inicial estable del prompt para que las peticiones posteriores la lean de la caché.",
+   "D": "Recortar cada petición a los pasajes que necesita la tarea, para que el modelo lea menos tokens de entrada."
+  },
+  "rationale": "La tarea es una etiqueta de una sola palabra, la prueba ya mostró que el tier más pequeño iguala la precisión, y ese tier tiene un precio por token más bajo y una respuesta más rápida, así que pasarse a él es lo que encaja (A). Bajar el effort (B) mantiene el mayor precio por token del modelo grande y su respuesta base más lenta, así que no puede llegar al objetivo de menos de medio segundo que el tier más pequeño ya cumple. El caching (C) necesita un prefijo estable lo bastante largo para poder cachearse, y un prompt de trescientos tokens es demasiado corto para ahorrar mucho. Recortar la entrada (D) tiene poco que quitar en un prompt tan pequeño.",
+  "src": "4eth11"
+ },
+ "developer-foundations-l4-06": {
+  "question": "Un asistente de compras responde unas cuatrocientas preguntas variadas al día sobre proveedores, cada una con su propio prompt corto. La mayoría de los tokens facturados son el razonamiento del propio modelo y explicaciones largas, incluso en consultas rutinarias. En el test set del equipo, el tier de modelo más pequeño pierde precisión en el tercio más difícil de las preguntas, así que el modelo actual tiene que quedarse. ¿Qué cambio debería hacer el equipo para reducir coste y latencia?",
+  "options": {
+   "A": "Pasar la tarea a un tier más pequeño y rápido, y comprobar en el test set que la calidad se mantiene.",
+   "B": "Bajar el nivel de effort del modelo actual para que gaste menos tokens en razonamiento y explicaciones.",
+   "C": "Marcar con cache_control la parte inicial estable del prompt para que las peticiones posteriores la lean de la caché.",
+   "D": "Recortar cada petición a los pasajes que necesita la tarea, para que el modelo lea menos tokens de entrada."
+  },
+  "rationale": "El gasto está en los tokens de salida y de razonamiento de un modelo que tiene que quedarse, y el nivel de effort controla cuántos tokens dedica el modelo a pensar, explicar y llamar a tools, así que bajarlo ataca directamente el coste (B). El tier más pequeño (A) queda descartado por su pérdida de precisión en el tercio más difícil. El caching (C) ayuda con un prefijo repetido, pero aquí cada prompt es corto y distinto. Recortar la entrada (D) reduce los tokens de entrada, y los tokens no se van por ahí.",
+  "src": "a07vme"
+ },
+ "developer-foundations-l4-07": {
+  "question": "El servicio de ayuda de una cadena de farmacias envía el mismo manual de formulario de 45.000 tokens al comienzo de cada petición, seguido de una breve pregunta de un empleado, y las respuestas ocupan dos o tres líneas. Llegan varios cientos de peticiones cada hora, cualquier pregunta puede afectar a cualquier sección, y las pruebas del equipo muestran que la calidad baja en el tier de modelo más pequeño. ¿Qué cambio debería hacer el equipo para reducir coste y latencia?",
+  "options": {
+   "A": "Pasar la tarea a un tier más pequeño y rápido, y comprobar en el test set que la calidad se mantiene.",
+   "B": "Bajar el nivel de effort del modelo actual para que gaste menos tokens en razonamiento y explicaciones.",
+   "C": "Marcar con cache_control la parte inicial estable del prompt para que las peticiones posteriores la lean de la caché.",
+   "D": "Recortar cada petición a los pasajes que necesita la tarea, para que el modelo lea menos tokens de entrada."
+  },
+  "rationale": "Se envía muchas veces en pocos minutos un prefijo grande e idéntico, así que cachearlo con cache_control permite que las peticiones posteriores lo lean a una fracción del precio de entrada y con menos tiempo de procesamiento (C). El tier más pequeño (A) queda descartado por la caída de calidad. Bajar el effort (B) tiene poco que recortar en una respuesta de dos líneas, y los 45.000 tokens de entrada se seguirían facturando completos. Recortar el manual (D) arriesgaría eliminar la sección que necesita una pregunta, ya que cualquier pregunta puede afectar a cualquier sección.",
+  "src": "9g1uyv"
+ },
+ "developer-foundations-l4-08": {
+  "question": "La herramienta de un despacho de abogados envía a Claude un contrato completo de 300 páginas por petición, con una pregunta sobre una única cláusula de resolución y una respuesta de dos frases. Casi todos los tokens facturados son el propio contrato, cada petición lleva un contrato distinto, el código del despacho puede localizar de forma fiable cada cláusula por su encabezado numerado, las instrucciones son un par de líneas, y las pruebas muestran que el tier de modelo más pequeño interpreta mal el lenguaje de la cláusula. ¿Qué cambio debería hacer el equipo para reducir coste y latencia?",
+  "options": {
+   "A": "Pasar la tarea a un tier más pequeño y rápido, y comprobar en el test set que la calidad se mantiene.",
+   "B": "Bajar el nivel de effort del modelo actual para que gaste menos tokens en razonamiento y explicaciones.",
+   "C": "Marcar con cache_control la parte inicial estable del prompt para que las peticiones posteriores la lean de la caché.",
+   "D": "Recortar cada petición a los pasajes que necesita la tarea, para que el modelo lea menos tokens de entrada."
+  },
+  "rationale": "El coste y el retraso vienen de leer un contrato entero para responder una pregunta sobre una sola cláusula, así que enviar solo los pasajes relevantes reduce los tokens de entrada en cada llamada (D). El tier más pequeño (A) queda descartado porque interpreta mal el lenguaje de la cláusula. Bajar el effort (B) tiene poco que recortar en una respuesta de dos frases. El caching (C) necesita un prefijo idéntico entre peticiones, y aquí cada petición lleva un contrato distinto, así que no hay nada que reutilizar.",
+  "src": "17cp5ei"
+ },
+ "developer-foundations-l4-09": {
+  "question": "Un equipo de RR. HH. recibe por correo solicitudes de permiso parental y necesita tres campos de cada una: tipo de permiso, fecha de inicio y nombre del responsable. Un único prompt con cinco ejemplos resueltos obtuvo un 97 por ciento en su test set de 300 correos, por encima del listón del 95 por ciento que se fijaron. Un compañero propone una pipeline de varios pasos con una fase de comprobación para mayor seguridad. ¿Qué diseño debería poner en producción el equipo?",
+  "options": {
+   "A": "Hacer una sola llamada a Claude bien estructurada, con instrucciones, ejemplos y entrada en el prompt, y usar su respuesta.",
+   "B": "Encadenar varias llamadas a Claude en un orden fijo escrito en código, pasando la salida de cada paso al siguiente.",
+   "C": "Ejecutar un agente en bucle que elige sus propias tools, lee cada resultado y decide el siguiente paso hasta terminar.",
+   "D": "Hacer que un agente orquestador divida el trabajo en subtareas independientes y entregue cada una a un subagent con su propio contexto."
+  },
+  "rationale": "La tarea es una única transformación autocontenida y un solo prompt ya supera el listón, así que la pauta de usar la solución más simple y añadir complejidad solo cuando las más simples se quedan cortas apunta a una sola llamada (A). Una cadena fija (B) añade llamadas, latencia y coste para un problema de precisión que el test set no muestra. Un bucle de agente (C) necesita tools o datos externos, y esta tarea no tiene ninguno de los dos. Un orquestador con subagents (D) no tiene nada que dividir, porque cada correo es pequeño y se trata por separado.",
+  "src": "ayh6jf"
+ },
+ "developer-foundations-l4-10": {
+  "question": "Un agente de aduanas prepara declaraciones de importación a partir de facturas de proveedores. Cada expediente necesita los mismos cuatro pasos en el mismo orden: extraer campos, asignar las mercancías a códigos arancelarios, comprobar restricciones y redactar la declaración. Los auditores quieren que se guarde la salida de cada paso por expediente, y en las pruebas un único prompt a veces se saltaba la comprobación de restricciones. ¿Qué diseño encaja mejor?",
+  "options": {
+   "A": "Hacer una sola llamada a Claude bien estructurada, con instrucciones, ejemplos y entrada en el prompt, y usar su respuesta.",
+   "B": "Encadenar varias llamadas a Claude en un orden fijo escrito en código, pasando la salida de cada paso al siguiente.",
+   "C": "Ejecutar un agente en bucle que elige sus propias tools, lee cada resultado y decide el siguiente paso hasta terminar.",
+   "D": "Hacer que un agente orquestador divida el trabajo en subtareas independientes y entregue cada una a un subagent con su propio contexto."
+  },
+  "rationale": "Los pasos y su orden se conocen de antemano y los auditores necesitan la misma secuencia con una salida guardada en cada etapa, así que una cadena fija escrita en código da esa previsibilidad y da a cada paso su propio prompt enfocado (B). Una sola llamada (A) ya se saltó un paso en las pruebas y no deja registro por paso. Un bucle de agente (C) deja que el modelo elija su propio orden y se salte pasos, lo que la auditoría no permite. Un orquestador (D) presupone subtareas independientes, pero aquí cada paso depende de la salida del anterior.",
+  "src": "4ejde5"
+ },
+ "developer-foundations-l4-11": {
+  "question": "El asistente de operaciones de red de una operadora de telecomunicaciones investiga tickets de alarma con tools de estado de dispositivos, cambios recientes y topología. Algunos tickets se resuelven tras dos comprobaciones y otros necesitan quince, y qué inspeccionar a continuación depende por completo de lo que devolvió la última comprobación. Nada del trabajo puede dividirse en partes independientes. ¿Qué diseño encaja mejor?",
+  "options": {
+   "A": "Hacer una sola llamada a Claude bien estructurada, con instrucciones, ejemplos y entrada en el prompt, y usar su respuesta.",
+   "B": "Encadenar varias llamadas a Claude en un orden fijo escrito en código, pasando la salida de cada paso al siguiente.",
+   "C": "Ejecutar un agente en bucle que elige sus propias tools, lee cada resultado y decide el siguiente paso hasta terminar.",
+   "D": "Hacer que un agente orquestador divida el trabajo en subtareas independientes y entregue cada una a un subagent con su propio contexto."
+  },
+  "rationale": "El número y el orden de los pasos no pueden conocerse de antemano y cada uno depende del resultado anterior, que es el caso abierto en el que encaja un agente que elige sus propias llamadas a tools en un bucle (C). Una sola llamada (A) no puede acceder a los datos en vivo de los dispositivos. Una cadena fija (B) necesitaría el camino escrito de antemano, y el camino varía de dos comprobaciones a quince. Un orquestador con subagents (D) no tiene nada que ejecutar en paralelo, añadiría coste de tokens y perdería el hilo compartido de evidencias.",
+  "src": "lpuzs4"
+ },
+ "developer-foundations-l4-12": {
+  "question": "Una consultora compara una nueva norma de conexión a la red eléctrica entre los países que indica el cliente, normalmente entre diez y veinte, y la lista es distinta para cada cliente. Cada país requiere decenas de búsquedas y documentos largos de reguladores, los países pueden estudiarse de forma independiente, y el contexto de un solo agente se llenaría mucho antes del último. El cliente acepta un mayor coste de tokens a cambio de velocidad. ¿Qué diseño encaja mejor?",
+  "options": {
+   "A": "Hacer una sola llamada a Claude bien estructurada, con instrucciones, ejemplos y entrada en el prompt, y usar su respuesta.",
+   "B": "Encadenar varias llamadas a Claude en un orden fijo escrito en código, pasando la salida de cada paso al siguiente.",
+   "C": "Ejecutar un agente en bucle que elige sus propias tools, lee cada resultado y decide el siguiente paso hasta terminar.",
+   "D": "Hacer que un agente orquestador divida el trabajo en subtareas independientes y entregue cada una a un subagent con su propio contexto."
+  },
+  "rationale": "El trabajo es amplio, las partes son independientes y la lista solo se conoce cuando el cliente la pide, así que encaja un orquestador que lance un subagent por país, cada uno con su propia ventana de contexto (D). Una sola llamada (A) no puede contener el material de diez a veinte países. Una cadena fija (B) necesita las subtareas fijadas en el código, pero la lista de países cambia con cada cliente. Un único agente en bucle (C) recorrería los países uno tras otro y llenaría su contexto de material en bruto antes de terminar.",
+  "src": "19st8gg"
+ },
+ "developer-foundations-l4-13": {
+  "question": "El servicio de ayuda de operaciones de red de una operadora responde a las preguntas de los ingenieros a partir de unos 25 millones de tokens de runbooks, boletines de proveedores y notas de averías, mucho más de lo que cabe en cualquier ventana de contexto. Los autores editan las páginas durante todo el día, cada respuesta necesita uno o dos párrafos que las propias palabras del ingeniero suelen señalar, y las respuestas deben llegar en unos pocos segundos. ¿Cómo debería dar el equipo el material a Claude?",
+  "options": {
+   "A": "Poner el texto completo en el prompt de esta petición, con los documentos colocados antes de la pregunta.",
+   "B": "Indexar el material y recuperar los pasajes que coinciden con cada pregunta, y enviar solo esos en el prompt.",
+   "C": "Subir cada archivo una vez con la Files API y citar su file_id en las peticiones que lo necesiten.",
+   "D": "Dar a Claude una tool de búsqueda y otra de lectura sobre el material, para que consulte lo que necesite."
+  },
+  "rationale": "Cada respuesta necesita uno o dos párrafos localizados a partir de las palabras del ingeniero, así que recuperar solo los pasajes que coinciden mantiene cada petición pequeña y rápida, y un índice puede actualizarse a medida que cambian las páginas (B). El material son unos 25 millones de tokens, así que ponerlo en el prompt (A) es imposible. Dejar que Claude busque y lea página tras página (D) cuesta varias llamadas, y con respuestas que se quieren en segundos y sin referencias cruzadas que seguir, no aporta nada. Los archivos subidos (C) no pueden editarse después de subirse, y el material seguiría sin caber en una sola petición.",
+  "src": "16uy8gq"
+ },
+ "developer-foundations-l4-14": {
+  "question": "Los ingenieros de un estudio de videojuegos consultan a un asistente sobre una wiki interna de unos 8 millones de tokens. Las páginas apuntan a otras páginas, y una respuesta típica, como por qué falla una compilación para consola, necesita de tres a seis páginas que solo se encuentran siguiendo esos enlaces uno tras otro. En las pruebas, una única búsqueda por similitud con la pregunta devolvió solo la primera página. ¿Cómo debería dar el estudio la wiki a Claude?",
+  "options": {
+   "A": "Poner el texto completo en el prompt de esta petición, con los documentos colocados antes de la pregunta.",
+   "B": "Indexar el material y recuperar los pasajes que coinciden con cada pregunta, y enviar solo esos en el prompt.",
+   "C": "Subir cada archivo una vez con la Files API y citar su file_id en las peticiones que lo necesiten.",
+   "D": "Dar a Claude una tool de búsqueda y otra de lectura sobre el material, para que consulte lo que necesite."
+  },
+  "rationale": "Las respuestas dependen de seguir referencias de una página a otra, algo que Claude puede hacer cuando dispone de tools: buscar, leer una página y decidir qué enlace abrir después, cargando el contexto justo a tiempo (D). Una única búsqueda por similitud por adelantado (B) devolvió solo la primera página en las pruebas, porque las páginas siguientes solo se alcanzan a través de enlaces. La wiki son unos 8 millones de tokens, así que el texto completo (A) no cabe en un prompt. Subir archivos (C) cambia cómo se envían, no cuánto tiene que caber en la ventana de contexto.",
+  "src": "1pqo43i"
+ },
+ "developer-foundations-l4-15": {
+  "question": "El abogado interno de una naviera debe decidir antes de mañana si alguna cláusula de un único contrato de fletamento de 120 páginas, de unos 85.000 tokens de texto plano, contradice a otra. Nadie volverá a preguntar por este documento, no existen archivos parecidos, y detectar una contradicción depende de leer todo el texto en conjunto. ¿Cómo debería dar la herramienta del abogado el contrato a Claude?",
+  "options": {
+   "A": "Poner el texto completo en el prompt de esta petición, con los documentos colocados antes de la pregunta.",
+   "B": "Indexar el material y recuperar los pasajes que coinciden con cada pregunta, y enviar solo esos en el prompt.",
+   "C": "Subir cada archivo una vez con la Files API y citar su file_id en las peticiones que lo necesiten.",
+   "D": "Dar a Claude una tool de búsqueda y otra de lectura sobre el material, para que consulte lo que necesite."
+  },
+  "rationale": "El contrato tiene unos 85.000 tokens, cabe con holgura en la ventana de contexto y la pregunta necesita que se lea todo el texto en conjunto, así que colocarlo en el prompt con el documento antes de la pregunta es el enfoque más simple que funciona (A). La recuperación (B) devolvería fragmentos que podrían omitir las dos cláusulas que se contradicen, y montar un índice para un solo archivo es esfuerzo perdido. Subirlo una vez (C) compensa cuando se reutiliza un archivo, y este no se reutiliza nunca. Una tool de búsqueda (D) añade un bucle de llamadas para leer un documento que puede leerse entero sin más.",
+  "src": "1h7hlq4"
+ },
+ "developer-foundations-l4-16": {
+  "question": "La app de ingeniería biomédica de un hospital permite al personal preguntar sobre un único manual de servicio de un escáner, de 90 páginas y 40 MB en PDF, lleno de diagramas de cableado anotados que pierden su sentido como texto plano. Tres servicios envían cientos de peticiones al día, cada una con el archivo completo de nuevo, y subirlo domina ya el tiempo de respuesta. Claude debe ver todas las páginas cada vez, y el coste en tokens es aceptable. ¿Cómo debería dar la app el manual a Claude?",
+  "options": {
+   "A": "Poner el texto completo en el prompt de esta petición, con los documentos colocados antes de la pregunta.",
+   "B": "Indexar el material y recuperar los pasajes que coinciden con cada pregunta, y enviar solo esos en el prompt.",
+   "C": "Subir cada archivo una vez con la Files API y citar su file_id en las peticiones que lo necesiten.",
+   "D": "Dar a Claude una tool de búsqueda y otra de lectura sobre el material, para que consulte lo que necesite."
+  },
+  "rationale": "El mismo archivo de 40 MB se envía en cientos de peticiones, y el problema es codificarlo y subirlo cada vez, así que subirlo una vez con la Files API y enviar solo su file_id elimina esa transferencia repetida mientras Claude sigue viendo todas las páginas (C). Pegar el texto extraído (A) perdería los diagramas anotados. Recuperar pasajes (B) descartaría páginas, y Claude debe ver todas las páginas cada vez. Una tool de búsqueda (D) añade llamadas para llegar a páginas que la petición podría simplemente referenciar. El contenido del archivo se sigue facturando como tokens de entrada, algo que el equipo acepta.",
+  "src": "qtf8x"
+ },
+ "developer-foundations-l4-17": {
+  "question": "Un día 12 del mes, todas las llamadas a Claude del servicio de siniestros de una aseguradora empiezan a fallar con HTTP 429. El mensaje dice que la organización ha cruzado su umbral mensual de uso y que el acceso volverá el día 1, dentro de 19 días, y la respuesta no trae cabecera retry-after. Los peritos necesitan sus resúmenes de siniestros esta semana. ¿Qué debería hacer el servicio ante estos errores?",
+  "options": {
+   "A": "Esperar los segundos indicados en la cabecera retry-after y reenviar la misma petición, con backoff y jitter si vuelve a fallar.",
+   "B": "Tratarlo como un defecto de la petición: corregir en el código el campo erróneo y publicar el arreglo en lugar de reenviar la llamada.",
+   "C": "Pausar las llamadas a la API y hacer que un propietario restablezca el acceso, subiendo el límite o el tier, antes de reanudar.",
+   "D": "Poner el trabajo en una cola o en un batch posterior y dejar que se vacíe al ritmo que permitan los límites, sin reintentar."
+  },
+  "rationale": "Este 429 viene del umbral mensual de uso, no de la tasa de peticiones: el mensaje da una fecha a 19 días y no hay cabecera retry-after, así que nada de lo que haga el código tendrá éxito hasta que un propietario restablezca el acceso subiendo el límite o el tier (C). Esperar y reenviar (A) falla hasta que se reanuda el acceso, incluidos los reintentos automáticos del SDK. Corregir la petición (B) vale para errores que señalan un problema en la petición, y este no lo hace. Poner el trabajo en cola (D) dejaría a los peritos esperando 19 días unos resúmenes que necesitan esta semana.",
+  "src": "1gmoy2m"
+ },
+ "developer-foundations-l4-18": {
+  "question": "El chat de ayuda para reservas de una naviera de ferris recibe de vez en cuando un HTTP 429 para una petición perfectamente válida. La respuesta trae un retry-after de 4 segundos, el mensaje dice que se alcanzó un rate limit, el gasto está muy lejos de cualquier tope, y el pasajero está viendo el chat. Estos picos duran menos de medio minuto. ¿Cómo debería gestionar el backend el error?",
+  "options": {
+   "A": "Esperar los segundos indicados en la cabecera retry-after y reenviar la misma petición, con backoff y jitter si vuelve a fallar.",
+   "B": "Tratarlo como un defecto de la petición: corregir en el código el campo erróneo y publicar el arreglo en lugar de reenviar la llamada.",
+   "C": "Pausar las llamadas a la API y hacer que un propietario restablezca el acceso, subiendo el límite o el tier, antes de reanudar.",
+   "D": "Poner el trabajo en una cola o en un batch posterior y dejar que se vacíe al ritmo que permitan los límites, sin reintentar."
+  },
+  "rationale": "La petición es válida, el mensaje nombra un rate limit y no un tope de gasto, y el retry-after de cuatro segundos indica cuándo volver a intentarlo, así que esperar ese tiempo y reenviar la petición (A) da al pasajero una respuesta en pocos segundos. Reescribir la petición (B) no arregla nada, porque no hay nada incorrecto en ella. Pausar a la espera de un propietario (C) es para el 429 por tope de gasto, que no trae retry-after, y aquí el gasto está lejos de cualquier tope. Una cola o un batch posterior (D) convierte una pausa de cuatro segundos en un traspaso para un pasajero que está viendo el chat.",
+  "src": "z752ew"
+ },
+ "developer-foundations-l4-19": {
+  "question": "El job nocturno de un archivo multimedia envía unas 400.000 peticiones de etiquetado, aproximadamente seis veces lo que permite su rate limit por hora, y el mismo límite sirve a la función de búsqueda en vivo. Cada 429 trae un retry-after de aproximadamente medio minuto, así que esperar a que pase mantiene bloqueados a todos los workers y ralentiza la búsqueda en vivo. Nadie lee las etiquetas antes de las 8 de la mañana. ¿Cómo debería tratar el job las respuestas 429?",
+  "options": {
+   "A": "Esperar los segundos indicados en la cabecera retry-after y reenviar la misma petición, con backoff y jitter si vuelve a fallar.",
+   "B": "Tratarlo como un defecto de la petición: corregir en el código el campo erróneo y publicar el arreglo en lugar de reenviar la llamada.",
+   "C": "Pausar las llamadas a la API y hacer que un propietario restablezca el acceso, subiendo el límite o el tier, antes de reanudar.",
+   "D": "Poner el trabajo en una cola o en un batch posterior y dejar que se vacíe al ritmo que permitan los límites, sin reintentar."
+  },
+  "rationale": "La demanda es unas seis veces el límite y nadie necesita las etiquetas antes de las 8 de la mañana, así que poner el trabajo en una cola o en batches que se vacían al ritmo que permiten los límites mantiene ocupados a los workers y protege la búsqueda en vivo; además, la Message Batches API tiene sus propios rate limits, separados de los de la Messages API (D). Respetar el retry-after (A) sirve para un pico corto, pero con seis veces el límite cada reintento vuelve a fallar y los workers siguen bloqueados. Corregir la petición (B) no sirve de nada, porque las peticiones son válidas. Pausar a la espera de un propietario (C) corresponde al 429 por límite de gasto, que no trae retry-after, y estos 429 sí lo traen.",
+  "src": "x1a9v2"
+ },
+ "developer-foundations-l4-20": {
+  "question": "Un despliegue del martes cambió una herramienta de investigación jurídica a un modelo más reciente y añadió un nuevo ajuste a la petición. Desde entonces, cada llamada a Claude falla con HTTP 400 y un invalid_request_error cuyo mensaje nombra un ajuste que el modelo elegido no acepta. No hay cabecera retry-after y el mensaje no menciona ningún límite de gasto. ¿Qué debería hacer el equipo ante estos fallos?",
+  "options": {
+   "A": "Esperar los segundos indicados en la cabecera retry-after y reenviar la misma petición, con backoff y jitter si vuelve a fallar.",
+   "B": "Tratarlo como un defecto de la petición: corregir en el código el campo erróneo y publicar el arreglo en lugar de reenviar la llamada.",
+   "C": "Pausar las llamadas a la API y hacer que un propietario restablezca el acceso, subiendo el límite o el tier, antes de reanudar.",
+   "D": "Poner el trabajo en una cola o en un batch posterior y dejar que se vacíe al ritmo que permitan los límites, sin reintentar."
+  },
+  "rationale": "El estado es 400 y el mensaje nombra un ajuste que el modelo nuevo no acepta, así que todas las peticiones están mal de la misma manera y la solución está en el código: corregir el campo y publicarlo (B). Esperar y reintentar (A) es para errores transitorios como los 429 por rate limit (respetando el retry-after), los 529 por sobrecarga y los 5xx, y aquí una petición idéntica volvería a ser rechazada. Pausar a la espera de que un propietario suba un límite (C) encaja con un límite de gasto, y el mensaje no menciona ninguno. Poner el trabajo en cola (D) solo aplaza el mismo rechazo a más tarde.",
+  "src": "r0nm49"
+ },
+ "developer-foundations-l4-21": {
+  "question": "Los desarrolladores de un fondo de pensiones usan Claude Code en un repositorio cuya carpeta de configuración contiene credenciales de producción. Los auditores quieren una prueba de que las propias tools de Claude no pueden abrir esos archivos, escriba lo que escriba un desarrollador o decida lo que decida Claude. Una línea en CLAUDE.md que le decía a Claude que no entrara en esa carpeta ya se ignoró una vez en una sesión larga. ¿Dónde debería poner el equipo la regla?",
+  "options": {
+   "A": "Poner la instrucción en el system prompt que la aplicación envía con cada petición que hace a la Messages API.",
+   "B": "Escribir la instrucción en el CLAUDE.md del proyecto, que lee cada sesión al empezar.",
+   "C": "Empaquetar la instrucción como una skill, con su plantilla y su script, que Claude carga cuando surge la tarea.",
+   "D": "Imponerla con una regla deny en el settings.json del proyecto, que Claude Code aplica decida lo que decida Claude."
+  },
+  "rationale": "Los auditores necesitan una restricción que se cumpla decida lo que decida Claude, y las reglas de permisos de settings.json las aplica el propio Claude Code en lugar de dejarlas al criterio de Claude: las reglas deny se comprueban primero y se aplican a sus tools de archivos (D), y un sandbox sería el añadido si también hubiera que bloquear scripts. CLAUDE.md (B) moldea el comportamiento pero es contexto, no configuración que se imponga, y por eso la línea ya se ignoró una vez. Una skill (C) guía una tarea cuando se carga y no bloquea nada. Un system prompt (A) pertenece a una aplicación que llama a la Messages API, y nada en este enunciado construye una.",
+  "src": "o9c4dc"
+ },
+ "developer-foundations-l4-22": {
+  "question": "Los ingenieros de una empresa de aguas usan Claude Code para una declaración regulatoria trimestral: catorce pasos, un archivo de plantilla y un script que comprueba los totales. La declaración la hacen dos personas, unas pocas veces al año, pero el CLAUDE.md del repositorio, que ya ronda las 190 líneas, lo leen al empezar cada sesión treinta ingenieros. ¿Dónde deberían ir las instrucciones de la declaración?",
+  "options": {
+   "A": "Poner la instrucción en el system prompt que la aplicación envía con cada petición que hace a la Messages API.",
+   "B": "Escribir la instrucción en el CLAUDE.md del proyecto, que lee cada sesión al empezar.",
+   "C": "Empaquetar la instrucción como una skill, con su plantilla y su script, que Claude carga cuando surge la tarea.",
+   "D": "Imponerla con una regla deny en el settings.json del proyecto, que Claude Code aplica decida lo que decida Claude."
+  },
+  "rationale": "La declaración es un procedimiento largo de varios pasos con una plantilla y un script, que necesitan dos personas unas pocas veces al año, así que una skill solo mantiene en contexto su descripción breve y carga las instrucciones completas cuando surge la tarea (C). Añadirlo a CLAUDE.md (B) lo cargaría en todas las sesiones de treinta ingenieros y llevaría un archivo que ya ronda las 190 líneas por encima del tamaño recomendado. Una regla deny (D) restringe lo que Claude Code puede hacer y no puede transportar un procedimiento. Un system prompt (A) es para una aplicación que llama a la API, no para las sesiones de Claude Code.",
+  "src": "ygvge0"
+ },
+ "developer-foundations-l4-23": {
+  "question": "Los treinta desarrolladores de una empresa de logística usan Claude Code en un mismo repositorio. Cada sesión debería usar el comando de test con pnpm del equipo, seguir su estilo de mensajes de error y mantener las migraciones en una sola carpeta, todo ello en una docena de líneas cortas que rara vez cambian. Nada de esto es un límite de seguridad ni un procedimiento largo. ¿Dónde debería ir la instrucción?",
+  "options": {
+   "A": "Poner la instrucción en el system prompt que la aplicación envía con cada petición que hace a la Messages API.",
+   "B": "Escribir la instrucción en el CLAUDE.md del proyecto, que lee cada sesión al empezar.",
+   "C": "Empaquetar la instrucción como una skill, con su plantilla y su script, que Claude carga cuando surge la tarea.",
+   "D": "Imponerla con una regla deny en el settings.json del proyecto, que Claude Code aplica decida lo que decida Claude."
+  },
+  "rationale": "Las convenciones breves que necesita cada sesión del repositorio y que comparte todo el equipo son para lo que sirve un CLAUDE.md de proyecto, que se carga al empezar cada sesión y se comparte mediante el control de versiones (B). Una skill (C) se carga bajo demanda y encaja con procedimientos largos, no con una docena de líneas que se quieren en todas las sesiones. Una regla de permisos (D) restringe lo que Claude Code puede hacer y no puede expresar estilo ni convenciones. Un system prompt (A) se aplica a las llamadas que hace una aplicación, y aquí nadie llama a la API desde su propio código.",
+  "src": "1goqaus"
+ },
+ "developer-foundations-l4-24": {
+  "question": "El chat web de un operador turístico es el propio backend de la empresa llamando a la Messages API, y nadie del equipo ejecuta Claude Code para él. Los product managers necesitan que cada conversación con un cliente siga las mismas reglas: responder en el idioma del cliente, dar precios solo a partir de las ofertas recuperadas y rechazar consejos sobre visados. ¿Dónde deberían estar esas reglas?",
+  "options": {
+   "A": "Poner la instrucción en el system prompt que la aplicación envía con cada petición que hace a la Messages API.",
+   "B": "Escribir la instrucción en el CLAUDE.md del proyecto, que lee cada sesión al empezar.",
+   "C": "Empaquetar la instrucción como una skill, con su plantilla y su script, que Claude carga cuando surge la tarea.",
+   "D": "Imponerla con una regla deny en el settings.json del proyecto, que Claude Code aplica decida lo que decida Claude."
+  },
+  "rationale": "El chat es el propio backend de la empresa llamando a la Messages API, así que las reglas que deben enmarcar cada conversación van en el system prompt que el backend envía con cada petición (A). Un CLAUDE.md de proyecto (B) lo leen las sesiones de Claude Code, y nadie ejecuta Claude Code para este chat. Una skill (C) solo se carga cuando la tarea coincide con su descripción, así que no puede garantizar que estas reglas enmarquen todas las conversaciones, y en la API además necesita el contenedor de ejecución de código. Las reglas de permisos de settings.json (D) configuran Claude Code, por lo que nunca llegan a las peticiones del backend.",
+  "src": "1on35z1"
+ },
+ "developer-foundations-l4-25": {
+  "question": "Una API de cotización de fletes devuelve un objeto JSON por cada página de un documento de envío, y ahora el equipo necesita un objeto por documento, con las páginas anidadas dentro. Las apps móviles creadas por transportistas externos leen la estructura actual y publican actualizaciones solo cada pocos meses. Campos como total significarían algo distinto en la nueva estructura. ¿Cómo debería publicar el equipo el cambio?",
+  "options": {
+   "A": "Añadir el campo nuevo como opcional junto a los existentes y dejar los campos actuales y su significado tal como están.",
+   "B": "Publicar el contrato modificado como una versión nueva del endpoint y mantener la versión antigua activa durante un periodo de deprecación.",
+   "C": "Cambiar la respuesta in situ y publicarla un mismo día junto con las actualizaciones de los servicios que la consumen.",
+   "D": "Añadir los campos nuevos junto a los antiguos, migrar los consumidores uno a uno y retirar los campos antiguos en una versión posterior anunciada."
+  },
+  "rationale": "La estructura de la respuesta cambia y campos existentes como total pasarían a significar algo nuevo, así que el contrato nuevo tiene que salir como una versión nueva mientras la antigua sigue atendiendo a las apps de los transportistas durante un periodo de deprecación (B). Un campo extra opcional (A) no puede cambiar lo que significan los campos existentes. Añadir campos junto a los antiguos y retirarlos más tarde (D) obligaría a que los mismos nombres tuvieran dos significados en una misma versión. Una publicación coordinada en un solo día (C) es imposible cuando las apps externas publican actualizaciones cada pocos meses.",
+  "src": "14ohs9c"
+ },
+ "developer-foundations-l4-26": {
+  "question": "La API de recomendación de habitaciones de un grupo hotelero devuelve un JSON que cinco servicios internos y dos sitios de socios leen por nombre de campo, y todos ellos ignoran los campos que no conocen. El equipo quiere devolver con cada recomendación una puntuación de confianza opcional adicional. Ningún campo existente cambia de tipo ni de significado. ¿Cómo debería publicar el equipo el cambio?",
+  "options": {
+   "A": "Añadir el campo nuevo como opcional junto a los existentes y dejar los campos actuales y su significado tal como están.",
+   "B": "Publicar el contrato modificado como una versión nueva del endpoint y mantener la versión antigua activa durante un periodo de deprecación.",
+   "C": "Cambiar la respuesta in situ y publicarla un mismo día junto con las actualizaciones de los servicios que la consumen.",
+   "D": "Añadir los campos nuevos junto a los antiguos, migrar los consumidores uno a uno y retirar los campos antiguos en una versión posterior anunciada."
+  },
+  "rationale": "No cambia nada de lo existente y los consumidores ignoran los campos desconocidos, así que añadir la puntuación opcional junto a los existentes es seguro y no requiere coordinación, como los cambios aditivos que hace la propia Claude API dentro de una versión (A). Una versión nueva (B) obligaría a migrar a siete consumidores sin ningún beneficio. Añadir junto a los antiguos y retirar más tarde (D) deja sin nada que retirar. Una publicación coordinada in situ (C) ataría a siete equipos a un solo día por un cambio que no rompe a ninguno.",
+  "src": "1uyvggz"
+ },
+ "developer-foundations-l4-27": {
+  "question": "Un equipo regulatorio farmacéutico pide a Claude que compare cada nuevo dossier de solicitud de 400 páginas con el anterior y enumere todas las contradicciones entre secciones. Llegan unos diez dossiers a la semana y el informe se lee a la mañana siguiente, así que nadie espera una respuesta. En el conjunto de evaluación del equipo, el nivel intermedio (Claude Sonnet 5.5) se deja aproximadamente un tercio de las contradicciones plantadas, mientras que el nivel más capaz (Claude Fable 5.2) encuentra casi todas. ¿Qué debería elegir el equipo?",
+  "options": {
+   "A": "Ejecutar la tarea en el nivel de modelo más capaz, aceptando un mayor precio por token a cambio de los mejores resultados.",
+   "B": "Usar el nivel de modelo intermedio, que equilibra capacidad, velocidad y precio para las cargas de trabajo habituales.",
+   "C": "Usar el nivel de modelo más pequeño, con la latencia más baja y el menor precio por token.",
+   "D": "Pedir el fast mode en un modelo que lo admita, para que la salida de ese mismo modelo llegue antes, a cambio de un precio superior."
+  },
+  "rationale": "Lo que se exige es precisión en contradicciones sutiles entre secciones, el volumen es bajo y el informe se lee a la mañana siguiente, así que pagar por el nivel más capaz está justificado (A). El nivel intermedio (B) es la elección equilibrada habitual, pero la evaluación muestra que se deja un tercio de las contradicciones. El nivel más pequeño (C) es más barato y rápido, pero queda por debajo del intermedio en capacidad. El fast mode (D) mantiene el mismo modelo y solo acelera la salida a un precio superior, lo que no aporta nada cuando nadie espera y la brecha de calidad está en el nivel del modelo.",
+  "src": "q3a139"
+ },
+ "developer-foundations-l4-28": {
+  "question": "Una empresa de medios deportivos añade una función que convierte la pregunta en inglés llano de un editor en una consulta SQL sobre sus estadísticas de partidos y devuelve un breve resumen escrito. En el conjunto de evaluación del equipo, el nivel más pequeño obtiene un 71 por ciento frente a un umbral del 90 por ciento, el nivel intermedio obtiene un 93 por ciento y el nivel más capaz obtiene un 94 por ciento a un precio claramente superior. A los editores les basta con una respuesta en unos dos segundos. ¿Qué debería elegir el equipo?",
+  "options": {
+   "A": "Ejecutar la tarea en el nivel de modelo más capaz, aceptando un mayor precio por token a cambio de los mejores resultados.",
+   "B": "Usar el nivel de modelo intermedio, que equilibra capacidad, velocidad y precio para las cargas de trabajo habituales.",
+   "C": "Usar el nivel de modelo más pequeño, con la latencia más baja y el menor precio por token.",
+   "D": "Pedir el fast mode en un modelo que lo admita, para que la salida de ese mismo modelo llegue antes, a cambio de un precio superior."
+  },
+  "rationale": "El nivel intermedio supera con margen el umbral del 90 por ciento, a un precio y una velocidad adecuados para una carga de trabajo habitual, y los editores no necesitan respuestas más rápidas (B). El nivel más capaz (A) suma un punto por encima de un umbral que ya se cumple y cuesta claramente más. El nivel más pequeño (C) es el más barato, pero obtiene un 71 por ciento, muy por debajo del umbral. El fast mode (D) paga un sobreprecio para acelerar la salida, y nadie pide una respuesta más rápida que dos segundos.",
+  "src": "1uq6bup"
+ },
+ "developer-foundations-l4-29": {
+  "question": "Una empresa de vídeo en streaming escribe un texto alternativo de una frase para cada una de los 3 millones de miniaturas que ingiere al día, y una rúbrica sencilla comprueba cada frase. En una prueba, el nivel más pequeño aprobó el 96 por ciento de las imágenes frente a un umbral del 95 por ciento, y nadie lee el texto de una miniatura hasta que la página del catálogo se publica horas después. El presupuesto lo marca el precio por token más bajo disponible. ¿Qué debería elegir el equipo?",
+  "options": {
+   "A": "Ejecutar la tarea en el nivel de modelo más capaz, aceptando un mayor precio por token a cambio de los mejores resultados.",
+   "B": "Usar el nivel de modelo intermedio, que equilibra capacidad, velocidad y precio para las cargas de trabajo habituales.",
+   "C": "Usar el nivel de modelo más pequeño, con la latencia más baja y el menor precio por token.",
+   "D": "Pedir el fast mode en un modelo que lo admita, para que la salida de ese mismo modelo llegue antes, a cambio de un precio superior."
+  },
+  "rationale": "Una tarea rutinaria y de gran volumen que el nivel más pequeño ya supera debe ejecutarse en el nivel con el menor precio por token y la latencia más baja (C). El nivel más capaz (A) costaría mucho más con 3 millones de imágenes por una mejora de calidad que la rúbrica no necesita. El nivel intermedio (B) también aprobaría, pero tiene un precio superior al que permite el presupuesto cuando el nivel más pequeño cumple el umbral. El fast mode (D) sube el precio para acelerar la salida, mientras que el texto no se lee durante horas.",
+  "src": "1umgl3v"
+ },
+ "developer-foundations-l4-30": {
+  "question": "En un equipo de operaciones de un estadio, un controlador espera en pantalla mientras Claude redacta un plan revisado de gestión de multitudes de 1.200 palabras tras el cierre de una puerta, unas treinta veces al día. El modelo actual, Claude Fable 5.2, el nivel más capaz, es el único que supera todos los casos de la evaluación del equipo, así que la calidad no está en duda, pero el plan tarda 45 segundos en terminar y el objetivo es menos de 25. El equipo acepta un precio por token más alto para estas peticiones. ¿Qué debería elegir el equipo?",
+  "options": {
+   "A": "Ejecutar la tarea en el nivel de modelo más capaz, aceptando un mayor precio por token a cambio de los mejores resultados.",
+   "B": "Usar el nivel de modelo intermedio, que equilibra capacidad, velocidad y precio para las cargas de trabajo habituales.",
+   "C": "Usar el nivel de modelo más pequeño, con la latencia más baja y el menor precio por token.",
+   "D": "Pedir el fast mode en un modelo que lo admita, para que la salida de ese mismo modelo llegue antes, a cambio de un precio superior."
+  },
+  "rationale": "La calidad ya es suficiente y el retraso viene de generar una salida larga mientras alguien espera, así que encaja el fast mode en el mismo modelo, que aumenta la velocidad de salida a un precio superior (D). El nivel más capaz (A) es el que el equipo ya usa, así que elegirlo no cambia nada de la espera. El nivel intermedio (B) respondería más rápido, pero no es el nivel que supera la evaluación. El nivel más pequeño (C) es aún más rápido y tiene el mismo problema de calidad.",
+  "src": "1bqcq77"
+ },
+ "developer-foundations-l4-31": {
+  "question": "El chatbot de soporte de una operadora de telecomunicaciones conversa con un cliente sobre una avería del router durante diez o doce turnos cortos, y el cliente suele volver al día siguiente. El servicio se reinicia en cada despliegue y no guarda nada en memoria, así que a un cliente que vuelve lo saludan como a un desconocido. Toda la conversación ocupa unos pocos miles de tokens, sin salidas voluminosas de tools, y el agente debe retomar el hilo exacto, incluido lo que dijo el cliente palabra por palabra. ¿Cómo debería conservar el equipo el estado?",
+  "options": {
+   "A": "Guardar el historial completo de mensajes fuera del modelo y volver a cargarlo en la siguiente petición cuando se reanude la conversación.",
+   "B": "Activar la compaction para que Claude sustituya los turnos antiguos por un resumen cerca del límite de contexto.",
+   "C": "Usar context editing para borrar los tool results antiguos de la conversación y dejar intactos los mensajes del propio agente.",
+   "D": "Hacer que el agente escriba datos duraderos en un archivo de notas o en la memory tool y los relea cuando los necesite."
+  },
+  "rationale": "La Messages API no guarda estado, así que almacenar el historial completo y volver a enviarlo restablece el hilo exacto con las palabras del propio cliente, y unos pocos miles de tokens caben de sobra (A). La compaction (B) sustituye los turnos anteriores por un resumen y solo importa cerca del límite de la ventana, del que esta conversación está muy lejos. Borrar tool results (C) no tiene nada que quitar, ya que no hay salidas voluminosas de tools. Un archivo de notas (D) contiene lo que el agente decidió condensar, así que se perdería la redacción exacta del cliente.",
+  "src": "1rbn8c7"
+ },
+ "developer-foundations-l4-32": {
+  "question": "El operador de un parque eólico usa un agente de Claude como compañero de planificación en una sesión de ocho horas de planificación de paradas, en la que un ingeniero y el agente intercambian decisiones, restricciones y opciones revisadas en una única conversación continua. Casi no se llama a ninguna tool, así que el contexto lo llena la propia discusión y se acerca al límite de la ventana. El ingeniero no va a parar para un traspaso, y las decisiones están repartidas por toda la discusión. ¿Qué debería hacer el equipo para que el agente siga funcionando?",
+  "options": {
+   "A": "Guardar el historial completo de mensajes fuera del modelo y volver a cargarlo en la siguiente petición cuando se reanude la conversación.",
+   "B": "Activar la compaction para que Claude sustituya los turnos antiguos por un resumen cerca del límite de contexto.",
+   "C": "Usar context editing para borrar los tool results antiguos de la conversación y dejar intactos los mensajes del propio agente.",
+   "D": "Hacer que el agente escriba datos duraderos en un archivo de notas o en la memory tool y los relea cuando los necesite."
+  },
+  "rationale": "La conversación es una única sesión continua en la que todos los turnos anteriores importan de forma condensada, así que la compaction sustituye los turnos más antiguos por un resumen y permite que la sesión continúe (B). Recargar el historial almacenado (A) volvería a llenar una ventana que ya está casi llena. Borrar tool results (C) casi no tiene nada que borrar, porque se llama a pocas tools. Un archivo de notas (D) depende de que el agente archive los datos de antemano y de un traspaso, mientras que aquí las decisiones están repartidas por toda la discusión y la sesión no se detiene.",
+  "src": "d96qnn"
+ },
+ "developer-foundations-l4-33": {
+  "question": "Un agente de reservas de viajes busca en el inventario de hoteles con una tool que devuelve unos 20.000 tokens de listados cada vez, y una tarea típica hace treinta búsquedas. Después de cada búsqueda, el agente escribe una breve comparación de lo que encontró y no vuelve a necesitar los listados en bruto. El contexto supera el límite de trabajo del equipo, de 250.000 tokens, hacia la decimotercera búsqueda, y el equipo quiere que las comparaciones escritas del agente se conserven exactamente como las escribió. ¿Qué enfoque encaja?",
+  "options": {
+   "A": "Guardar el historial completo de mensajes fuera del modelo y volver a cargarlo en la siguiente petición cuando se reanude la conversación.",
+   "B": "Activar la compaction para que Claude sustituya los turnos antiguos por un resumen cerca del límite de contexto.",
+   "C": "Usar context editing para borrar los tool results antiguos de la conversación y dejar intactos los mensajes del propio agente.",
+   "D": "Hacer que el agente escriba datos duraderos en un archivo de notas o en la memory tool y los relea cuando los necesite."
+  },
+  "rationale": "Los tokens que llenan la ventana son tool results antiguos, y el context editing los borra por regla y deja intactos los mensajes del propio agente, incluidas sus comparaciones (C). La compaction (B) resumiría toda la conversación y reescribiría las comparaciones que el equipo quiere conservar literalmente. Reproducir el historial almacenado (A) restauraría todos los listados voluminosos y volvería a llenar la ventana. Un archivo de notas (D) resuelve cómo llevar datos entre sesiones, y aquí nada tiene que sobrevivir a la tarea.",
+  "src": "7ie6kf"
+ },
+ "developer-foundations-l4-34": {
+  "question": "El agente de tutoría de un distrito escolar se reúne con cada alumno una vez por semana en una sesión completamente nueva que empieza con el contexto vacío. Los profesores quieren que recuerde el nivel de lectura de cada alumno, los temas ya cubiertos y lo que lo motiva, cosas que juntas caben en unos pocos cientos de palabras, mientras que las transcripciones completas de las sesiones pasadas sumarían varios millones de tokens a final de curso. ¿Cómo debería dar el equipo esa continuidad al agente?",
+  "options": {
+   "A": "Guardar el historial completo de mensajes fuera del modelo y volver a cargarlo en la siguiente petición cuando se reanude la conversación.",
+   "B": "Activar la compaction para que Claude sustituya los turnos antiguos por un resumen cerca del límite de contexto.",
+   "C": "Usar context editing para borrar los tool results antiguos de la conversación y dejar intactos los mensajes del propio agente.",
+   "D": "Hacer que el agente escriba datos duraderos en un archivo de notas o en la memory tool y los relea cuando los necesite."
+  },
+  "rationale": "Unos pocos cientos de palabras de datos duraderos tienen que sobrevivir entre sesiones separadas, que es para lo que sirven un archivo de notas o la memory tool, y volver a leerlas cuesta mucho menos que las transcripciones antiguas (D). Cargar el historial almacenado (A) superaría la ventana de contexto y enterraría los datos útiles. La compaction (B) reduce una conversación dentro de una sesión y no hace nada por una sesión que empieza vacía. Borrar tool results (C) aborda las salidas voluminosas de tools dentro de un contexto en marcha, que no es el problema aquí.",
+  "src": "zjva1o"
+ },
+ "developer-foundations-l4-35": {
+  "question": "El agente nocturno de una empresa de energía lee correos de proveedores, busca en una base de datos las filas de contrato correspondientes y escribe un resumen en un archivo. Nunca necesita modificar un contrato, pero se ejecuta con la cuenta de base de datos que usan los desarrolladores, que puede actualizar y borrar filas. Nadie está despierto mientras se ejecuta, y su API key está en un gestor de secretos que el modelo nunca toca. ¿Cómo debería limitar el equipo el daño si un correo hostil logra colar una instrucción al modelo?",
+  "options": {
+   "A": "Reducir los permisos de tools del agente al mínimo que necesita la tarea, como una credencial de solo lectura sobre un conjunto de datos.",
+   "B": "Exigir que una persona apruebe cada acción concreta, con sus argumentos exactos a la vista, antes de ejecutar la tool.",
+   "C": "Ocultar o sustituir por marcadores de posición los valores sensibles de la entrada antes de enviar la petición a la API.",
+   "D": "Mantener la credencial en un proxy situado fuera del entorno del agente, que la añada a las peticiones, de modo que el modelo nunca la vea."
+  },
+  "rationale": "El trabajo solo lee, así que quitar los permisos de escritura y borrado acota lo que puede hacer cualquier instrucción inyectada, y funciona sin supervisión (A). Una puerta de aprobación humana (B) necesita a una persona ante el teclado, y por la noche nadie está despierto. Redactar o enmascarar las entradas (C) protege lo que recibe el proveedor y no limita lo que un agente manipulado puede hacer con su cuenta. Un proxy de credenciales (D) oculta un secreto pero deja intactos los permisos de actualización y borrado de la cuenta, así que una instrucción inyectada aún podría usarlos.",
+  "src": "3fsv3w"
+ },
+ "developer-foundations-l4-36": {
+  "question": "El agente de una empresa de gestión inmobiliaria puede emitir devoluciones de fianzas mediante una tool de pagos, que es exactamente su trabajo, y gestiona aproximadamente una docena de devoluciones al día. Una devolución no se puede revocar una vez enviada, y un pago equivocado o manipulado a una cuenta incorrecta saldría caro. Un empleado de finanzas está de turno todo el día, y la credencial del agente ya está limitada al endpoint de devoluciones. ¿Qué control debería añadir el equipo contra un pago equivocado?",
+  "options": {
+   "A": "Reducir los permisos de tools del agente al mínimo que necesita la tarea, como una credencial de solo lectura sobre un conjunto de datos.",
+   "B": "Exigir que una persona apruebe cada acción concreta, con sus argumentos exactos a la vista, antes de ejecutar la tool.",
+   "C": "Ocultar o sustituir por marcadores de posición los valores sensibles de la entrada antes de enviar la petición a la API.",
+   "D": "Mantener la credencial en un proxy situado fuera del entorno del agente, que la añada a las peticiones, de modo que el modelo nunca la vea."
+  },
+  "rationale": "La acción de riesgo es una que el agente debe poder realizar legítimamente, es irreversible, el volumen es pequeño y hay un empleado presente, así que lo adecuado es que una persona apruebe cada devolución con sus argumentos exactos, y como la aplicación ejecuta ella misma la tool de pagos, puede retener cada llamada hasta que el empleado la apruebe (B). Reducir los permisos (A) ya está hecho, y una devolución equivocada cae dentro del alcance que el agente necesita. La ofuscación (C) no limita qué pago sale. Un proxy de credenciales (D) mantiene oculta la clave, pero el agente aún podría pedirle que enviara un pago equivocado.",
+  "src": "1e4ntcr"
+ },
+ "developer-foundations-l4-37": {
+  "question": "Una oficina municipal de quejas quiere que Claude clasifique en doce temas las cartas de texto libre de los vecinos. Las cartas suelen contener números de documento nacional de identidad y domicilios particulares, el departamento jurídico prohíbe enviarlos a un procesador externo y el tema nunca depende de ellos. El pipeline no tiene tools ni credenciales, y sus lotes se ejecutan sin que nadie los revise. ¿Qué control debería añadir el equipo?",
+  "options": {
+   "A": "Reducir los permisos de tools del agente al mínimo que necesita la tarea, como una credencial de solo lectura sobre un conjunto de datos.",
+   "B": "Exigir que una persona apruebe cada acción concreta, con sus argumentos exactos a la vista, antes de ejecutar la tool.",
+   "C": "Ocultar o sustituir por marcadores de posición los valores sensibles de la entrada antes de enviar la petición a la API.",
+   "D": "Mantener la credencial en un proxy situado fuera del entorno del agente, que la añada a las peticiones, de modo que el modelo nunca la vea."
+  },
+  "rationale": "Lo que preocupa es lo que sale de la organización en la petición, y la tarea no necesita los identificadores, así que sustituirlos por marcadores antes de la llamada es el único control que impide por completo que lleguen al proveedor (C). Limitar los permisos de las tools (A) no tiene sentido, porque el pipeline no tiene tools que limitar. La aprobación de cada acción (B) no quitaría los datos de la petición y, además, nadie revisa estos lotes. Un proxy de credenciales (D) protege secretos, y este pipeline no maneja ninguna credencial.",
+  "src": "1kny24t"
+ },
+ "developer-foundations-l4-38": {
+  "question": "El agente de programación de una agencia de transporte público ejecuta cientos de comandos de shell por tarea en un sandbox y sube ramas al alojamiento de código de la empresa con un token de acceso guardado en una variable de entorno de ese sandbox. El token ya está limitado a subir ramas en un único repositorio, y los ingenieros revisan cada merge. Una revisión de seguridad señala que una página web hostil que lea el agente podría hacer que imprima y envíe fuera esa variable. ¿Qué debería cambiar el equipo?",
+  "options": {
+   "A": "Reducir los permisos de tools del agente al mínimo que necesita la tarea, como una credencial de solo lectura sobre un conjunto de datos.",
+   "B": "Exigir que una persona apruebe cada acción concreta, con sus argumentos exactos a la vista, antes de ejecutar la tool.",
+   "C": "Ocultar o sustituir por marcadores de posición los valores sensibles de la entrada antes de enviar la petición a la API.",
+   "D": "Mantener la credencial en un proxy situado fuera del entorno del agente, que la añada a las peticiones, de modo que el modelo nunca la vea."
+  },
+  "rationale": "El peligro es que se filtre el valor del token, así que la credencial debería vivir en un proxy fuera del sandbox que la inyecte en las peticiones salientes, sin dejar nada que el agente pueda imprimir (D). Reducir el alcance del token (A) ya está hecho, y un token que sube ramas y se ha filtrado sigue siendo utilizable por un atacante. Aprobar cada comando (B) es inviable con cientos por tarea, y un revisor que lea comandos de shell sin procesar podría pasar por alto fácilmente uno dañino. Censurar la entrada (C) resuelve los datos que se envían a la API, mientras que este secreto está en el entorno.",
+  "src": "jg6jdm"
+ },
+ "developer-foundations-l4-39": {
+  "question": "Una app de una estación de esquí permite a los huéspedes pedir a un asistente de Claude huecos para clases, y en 6 de 40 conversaciones de prueba se ofrecieron clases en un día equivocado. El equipo capturó la petición exacta que envió la aplicación en una de ellas: el huésped pidió el 3 de febrero, pero el formateador de fechas de la aplicación escribió 2 de marzo en el prompt, y la respuesta del asistente es coherente con esa fecha. El fallo se repite siempre con los días anteriores al 13. ¿Qué debería hacer el equipo primero?",
+  "options": {
+   "A": "Corregir primero la capa de integración: cómo la aplicación construye la petición, devuelve los tool results o interpreta la respuesta.",
+   "B": "Revisar las instrucciones y añadir ejemplos resueltos para los casos fallidos, y repetir las pruebas para confirmar el cambio.",
+   "C": "Añadir las conversaciones fallidas al conjunto de evaluación y reunir más ejemplos de cada uno de los fallos antes de decidir qué se va a cambiar.",
+   "D": "Cambiar a un nivel de modelo más capaz y volver a ejecutar las conversaciones fallidas para ver si desaparecen los errores."
+  },
+  "rationale": "Leer la petición capturada antes de cambiar nada permite distinguir un fallo de integración de un fallo del modelo, y aquí muestra que el modelo recibió la fecha equivocada y respondió correctamente para ella, así que el fallo está en cómo la aplicación construye la petición y solo ocurre con los días que pueden leerse como meses (A). Reescribir las instrucciones (B) afinaría un prompt que nunca fue la causa. Reunir más conversaciones fallidas (C) no aporta nada cuando el fallo ya está explicado y se repite siempre. Un nivel más capaz (D) no puede recuperar una fecha que nunca recibió.",
+  "src": "js0fby"
+ },
+ "developer-foundations-l4-40": {
+  "question": "El asistente de la secretaría de una universidad responde preguntas sobre reembolsos de matrícula, y en 11 de 60 conversaciones de prueba cita la cláusula estándar cuando se aplica una excepción por baja médica. La petición capturada contiene el texto completo de las normas y la pregunta tal como se pretendía, la respuesta se interpreta sin errores y al reproducir esa petición en la consola se obtiene la misma respuesta equivocada. El prompt tiene una frase sobre excepciones y ningún ejemplo, y el equipo ya usa el nivel más capaz (Claude Fable 5.2). ¿Qué debería hacer el equipo primero?",
+  "options": {
+   "A": "Corregir primero la capa de integración: cómo la aplicación construye la petición, devuelve los tool results o interpreta la respuesta.",
+   "B": "Revisar las instrucciones y añadir ejemplos resueltos para los casos fallidos, y repetir las pruebas para confirmar el cambio.",
+   "C": "Añadir las conversaciones fallidas al conjunto de evaluación y reunir más ejemplos de cada uno de los fallos antes de decidir qué se va a cambiar.",
+   "D": "Cambiar a un nivel de modelo más capaz y volver a ejecutar las conversaciones fallidas para ver si desaparecen los errores."
+  },
+  "rationale": "Leer la petición capturada antes de cambiar nada permite distinguir un fallo de integración de un fallo del modelo, y aquí la entrada es correcta, la interpretación funciona y el error se reproduce fuera de la aplicación, así que el problema está en la salida del modelo, y la escasa orientación sobre excepciones y la falta de ejemplos son lo más barato de mejorar y volver a probar (B). Buscar en la capa de integración (A) no tiene sentido cuando la petición y la interpretación están verificadas. Reunir más ejemplos (C) retrasa una solución cuando los fallos ya se reproducen a demanda. Pasar a un nivel más capaz (D) no es una opción, porque el equipo ya usa el más capaz.",
+  "src": "1plr8lb"
+ },
+ "developer-foundations-l4-41": {
+  "question": "Una agencia de calidad del aire usa Claude para convertir las notas de campo abreviadas de los inspectores en entradas formales de un registro. Las reglas escritas ya son específicas y completas, y las notas habituales salen bien. Los fallos aparecen con estilos de nota poco comunes, como abreviaturas mezcladas con croquis descritos con palabras, que las reglas no pueden recoger, aunque el personal puede aportar una entrada correcta para cada estilo. Un supervisor lee las entradas como prosa. ¿Qué cambio encaja mejor?",
+  "options": {
+   "A": "Añadir al prompt tres o cuatro ejemplos resueltos variados, cada uno con una entrada típica y la salida exacta que se quiere.",
+   "B": "Reescribir la instrucción como una regla concreta y comprobable, que indique el límite y qué dejar fuera.",
+   "C": "Mover el rol y la política fijos al system prompt y dejar el turno del usuario para lo variable.",
+   "D": "Pedir salida estructurada con un esquema JSON para que todas las respuestas traigan los mismos campos y tipos."
+  },
+  "rationale": "Las reglas ya son precisas y la carencia está en estilos de entrada inusuales que es más fácil mostrar que describir, así que unos pocos ejemplos resueltos variados que cubran esos estilos orientan directamente el formato y el tratamiento (A). Reescribir las reglas como una regla comprobable (B) no deja nada por afinar, ya que las reglas ya son específicas. Mover contenido al system prompt (C) cambia la ubicación, y nada del prompt está mal colocado. Un esquema JSON (D) fija la forma de unos datos que lee un programa, mientras que esta salida es prosa que lee una persona.",
+  "src": "1xek59a"
+ },
+ "developer-foundations-l4-42": {
+  "question": "Los guionistas de un estudio de videojuegos usan Claude para redactar un gancho de misión breve por prompt, que se muestra en un cuadro de texto para que un diseñador lo lea y lo pegue. El prompt solo dice que escriba un gancho de misión. El contenido es bueno, pero algunas respuestas traen tres alternativas, una nota de diseñador o doscientas palabras. El estudio quiere exactamente un gancho de como máximo cuarenta palabras y nada más, y quiere que cada gancho sea distinto en ambientación y tono, de modo que cualquier muestra arrastraría los borradores hacia ella. ¿Qué cambio encaja mejor?",
+  "options": {
+   "A": "Añadir al prompt tres o cuatro ejemplos resueltos variados, cada uno con una entrada típica y la salida exacta que se quiere.",
+   "B": "Reescribir la instrucción como una regla concreta y comprobable, que indique el límite y qué dejar fuera.",
+   "C": "Mover el rol y la política fijos al system prompt y dejar el turno del usuario para lo variable.",
+   "D": "Pedir salida estructurada con un esquema JSON para que todas las respuestas traigan los mismos campos y tipos."
+  },
+  "rationale": "El prompt nunca indica la cantidad, la extensión ni qué dejar fuera, así que el modelo rellena ese hueco a su manera, y escribir esos límites como una regla explícita y comprobable lo cierra (B). Los ejemplos resueltos (A) arrastrarían todos los ganchos hacia las muestras, algo que los guionistas no quieren. Ubicar el contenido en el system prompt (C) no aporta una regla que falta en el prompt. Un esquema JSON (D) sirve para una salida que analiza un programa, y nadie analiza este cuadro de texto.",
+  "src": "14dvhc7"
+ },
+ "developer-foundations-l4-43": {
+  "question": "El asistente para pasajeros de una operadora ferroviaria envía cada petición como un único mensaje de usuario: un bloque de 500 palabras de política fija sobre límites de reembolso, tono e idiomas, y después el texto del pasajero. Cuando los pasajeros pegan correos reenviados largos, Claude a veces responde con la voz del remitente reenviado y se salta la política. La política está claramente redactada y no cambia nunca entre peticiones, y las respuestas son texto libre para el pasajero. ¿Qué cambio encaja mejor?",
+  "options": {
+   "A": "Añadir al prompt tres o cuatro ejemplos resueltos variados, cada uno con una entrada típica y la salida exacta que se quiere.",
+   "B": "Reescribir la instrucción como una regla concreta y comprobable, que indique el límite y qué dejar fuera.",
+   "C": "Mover el rol y la política fijos al system prompt y dejar el turno del usuario para lo variable.",
+   "D": "Pedir salida estructurada con un esquema JSON para que todas las respuestas traigan los mismos campos y tipos."
+  },
+  "rationale": "La política permanente y el texto pegado por el pasajero comparten un mismo turno de usuario. Poner la política en el system prompt y reservar el turno del usuario para el texto del pasajero, envuelto en etiquetas, es la separación documentada entre reglas duraderas y entrada variable (C). Los ejemplos resueltos (A) no explicarían por qué se pierde la política cuando se pega un texto largo. Reescribir las reglas (B) no tiene sentido porque la redacción ya es clara. Un esquema JSON (D) da forma a datos para un programa, y estas respuestas son texto libre.",
+  "src": "p0n6t0"
+ },
+ "developer-foundations-l4-44": {
+  "question": "El importador del catálogo de una biblioteca pública pide a Claude que convierta formularios de donación escaneados en un registro JSON que se carga directamente en la base de datos. El prompt describe los campos con palabras, ya contiene algunos ejemplos y se ha reformulado dos veces para exigir solo JSON, y el contenido es correcto. Sin embargo, una de cada cincuenta respuestas, más o menos, envuelve el registro en una frase, cambia el nombre de un campo u omite uno obligatorio, y el importador la rechaza. ¿Qué cambio encaja mejor?",
+  "options": {
+   "A": "Añadir al prompt tres o cuatro ejemplos resueltos variados, cada uno con una entrada típica y la salida exacta que se quiere.",
+   "B": "Reescribir la instrucción como una regla concreta y comprobable, que indique el límite y qué dejar fuera.",
+   "C": "Mover el rol y la política fijos al system prompt y dejar el turno del usuario para lo variable.",
+   "D": "Pedir salida estructurada con un esquema JSON para que todas las respuestas traigan los mismos campos y tipos."
+  },
+  "rationale": "El contenido es correcto y solo falla la forma, que es lo que resuelve la salida estructurada con un esquema JSON: restringe la respuesta al esquema para que el importador reciba siempre los mismos campos y tipos (D). Más ejemplos (A) ya están en el prompt y no han evitado los fallos. Reformular la instrucción como una regla comprobable (B) ya se ha probado dos veces sin eliminar los fallos. Mover la política al system prompt (C) no impone nombres de campo ni tipos.",
+  "src": "hobeh4"
+ },
+ "developer-foundations-l4-45": {
+  "question": "El generador de itinerarios de un operador turístico pide a Claude un plan en JSON que su servicio de reservas comprueba con reglas fijas: fechas en orden, ninguna pareja de actividades solapada y precios de línea que suman el total indicado. Alrededor del 4 por ciento de los planes incumple una regla, y el comprobador nombra la regla exacta que ha fallado. Los precios y las horas se copian correctamente del catálogo incluido en el prompt; los fallos están en cómo se ensambla el plan. ¿Qué enfoque debería añadir el equipo?",
+  "options": {
+   "A": "Validar cada respuesta en código contra las reglas de formato y de negocio, y repetir la llamada añadiendo el error concreto detectado.",
+   "B": "Contrastar cada afirmación de la respuesta con los pasajes recuperados de las fuentes, y eliminar o marcar las que no respalden.",
+   "C": "Añadir una segunda pasada de Claude que relea la primera respuesta y corrija lo que considere erróneo, sin consultar ningún dato externo en ningún momento.",
+   "D": "Indicar a Claude que responda cuando esté seguro y que diga que no lo sabe cuando no lo esté."
+  },
+  "rationale": "Cada fallo es una regla determinista que el código puede comprobar y nombrar, así que validar en código y repetir la llamada con el error concreto le dice a Claude exactamente qué corregir (A). Comprobar afirmaciones contra las fuentes (B) no tiene objetivo aquí, porque los precios y las horas copiados ya son correctos. Una segunda pasada de Claude (C) añade una llamada y depende del criterio del modelo cuando ya existe una comprobación precisa. Una instrucción de certeza (D) no ayuda con los errores de aritmética y de orden cometidos al ensamblar el plan.",
+  "src": "1vioa7q"
+ },
+ "developer-foundations-l4-46": {
+  "question": "El asistente de ayuda de una agencia tributaria responde a las preguntas de los contribuyentes a partir de los tres boletines recuperados para cada pregunta y pegados en el prompt. Las respuestas siempre superan la comprobación de formato, pero los auditores encontraron dos que indicaban un plazo de presentación que los boletines no contienen, ambas redactadas con total seguridad. Ninguna regla de código puede distinguir un plazo verdadero de uno falso, aunque el texto del boletín está disponible para cada respuesta. ¿Qué enfoque debería añadir el equipo?",
+  "options": {
+   "A": "Validar cada respuesta en código contra las reglas de formato y de negocio, y repetir la llamada añadiendo el error concreto detectado.",
+   "B": "Contrastar cada afirmación de la respuesta con los pasajes recuperados de las fuentes, y eliminar o marcar las que no respalden.",
+   "C": "Añadir una segunda pasada de Claude que relea la primera respuesta y corrija lo que considere erróneo, sin consultar ningún dato externo en ningún momento.",
+   "D": "Indicar a Claude que responda cuando esté seguro y que diga que no lo sabe cuando no lo esté."
+  },
+  "rationale": "El problema son las afirmaciones sin respaldo, y las fuentes que deciden si una afirmación es cierta están a mano, así que comprobar cada afirmación contra los pasajes recuperados y eliminar las que no tienen respaldo lo resuelve directamente (B). La validación con reintentos (A) comprueba formato y reglas, que ya se cumplen, y no puede juzgar un plazo. Una segunda pasada sin datos externos (C) puede repetir el mismo error, ya que nunca consulta los boletines. Una instrucción de certeza (D) reduce la frecuencia de esas afirmaciones pero no verifica ninguna, y estas dos se enunciaron con total seguridad.",
+  "src": "n6bg03"
+ },
+ "developer-foundations-l4-47": {
+  "question": "El servicio de citas de un grupo dental permite a los pacientes pedir a un asistente de Claude las citas disponibles. La disponibilidad de los sillones está en una base de datos accesible solo desde la red propia del servicio, y la consulta ya existe como una función en el código del servicio. Ninguna otra aplicación la usará, y el equipo no quiere desplegar ni operar ningún servidor nuevo. ¿Cuál es la forma más ligera de darle a Claude lo que necesita?",
+  "options": {
+   "A": "Definir una tool de cliente con un esquema de entrada y ejecutarla en el propio código de la aplicación cuando Claude la llame.",
+   "B": "Activar una server tool de Anthropic, como la búsqueda web o la ejecución de código, que se ejecuta en el lado de Anthropic sin código de manejo.",
+   "C": "Exponer la capacidad una sola vez mediante un servidor MCP al que pueda conectarse cualquier aplicación de Claude con MCP.",
+   "D": "Empaquetar el procedimiento como una Skill, con instrucciones, una plantilla y un script, que Claude carga cuando una tarea lo requiere."
+  },
+  "rationale": "Los datos son privados, la función ya existe en una aplicación y solo esa aplicación la necesita, así que una tool de cliente personalizada cuyo manejador llame a la función es lo más ligero (A). Una server tool de Anthropic (B) se ejecuta en el lado de Anthropic y no puede llegar a una base de datos de la red privada del servicio. Un servidor MCP (C) compensa cuando varias aplicaciones comparten una capacidad, y aquí sería un servidor nuevo que operar para un único llamante. Una Skill (D) empaqueta instrucciones y scripts, no una consulta en vivo a una base de datos privada.",
+  "src": "1sxc9a9"
+ },
+ "developer-foundations-l4-48": {
+  "question": "Una cooperativa agrícola quiere que su asistente de Claude responda preguntas sobre los precios de las materias primas y los avisos meteorológicos de esta semana, que organismos públicos publican en sus sitios web y actualizan a diario. Nada de lo que el asistente necesita es privado, y el equipo no tiene contrato con ningún proveedor de búsqueda y no quiere escribir ni alojar un servicio de descarga de páginas. ¿Cuál es la forma más ligera de darle a Claude lo que necesita?",
+  "options": {
+   "A": "Definir una tool de cliente con un esquema de entrada y ejecutarla en el propio código de la aplicación cuando Claude la llame.",
+   "B": "Activar una server tool de Anthropic, como la búsqueda web o la ejecución de código, que se ejecuta en el lado de Anthropic sin código de manejo.",
+   "C": "Exponer la capacidad una sola vez mediante un servidor MCP al que pueda conectarse cualquier aplicación de Claude con MCP.",
+   "D": "Empaquetar el procedimiento como una Skill, con instrucciones, una plantilla y un script, que Claude carga cuando una tarea lo requiere."
+  },
+  "rationale": "La información es pública, reciente y está en la web, y el equipo no quiere manejador ni alojamiento, así que activar la server tool de búsqueda web de Anthropic hace que Anthropic ejecute las búsquedas y devuelva resultados con citas (B). Una tool de cliente personalizada (A) implicaría contratar un proveedor de búsqueda y escribir y operar el manejador. Un servidor MCP (C) seguiría siendo algo que construir y alojar para una necesidad que cubre una tool integrada. Una Skill (D) contiene instrucciones y scripts que se quedan obsoletos y no puede aportar los precios de esta semana.",
+  "src": "18w5l78"
+ },
+ "developer-foundations-l4-49": {
+  "question": "El equipo de plataforma de una empresa eléctrica es responsable del registro de equipos. Tres aplicaciones de Claude distintas necesitan las mismas consultas: un bot de soporte creado por un equipo, ingenieros que trabajan en Claude Code y un asistente de escritorio de un proveedor, todas capaces de conectarse a servidores MCP y sin compartir código. El equipo de plataforma quiere una sola implementación que mantener y un solo lugar donde controlar el acceso. ¿Cuál es la forma más ligera de darle a Claude lo que necesita?",
+  "options": {
+   "A": "Definir una tool de cliente con un esquema de entrada y ejecutarla en el propio código de la aplicación cuando Claude la llame.",
+   "B": "Activar una server tool de Anthropic, como la búsqueda web o la ejecución de código, que se ejecuta en el lado de Anthropic sin código de manejo.",
+   "C": "Exponer la capacidad una sola vez mediante un servidor MCP al que pueda conectarse cualquier aplicación de Claude con MCP.",
+   "D": "Empaquetar el procedimiento como una Skill, con instrucciones, una plantilla y un script, que Claude carga cuando una tarea lo requiere."
+  },
+  "rationale": "Una misma capacidad debe servir a tres aplicaciones sin relación entre sí, y exponerla una sola vez mediante un servidor MCP permite que cada cliente se conecte a la misma implementación y al mismo control de acceso (C). Una tool de cliente personalizada (A) vive dentro del código de una aplicación, así que habría que reconstruirla tres veces. Una server tool de Anthropic (B) se ejecuta en el lado de Anthropic y no puede consultar el registro de la empresa eléctrica. Una Skill (D) lleva instrucciones y scripts, no una conexión compartida y con acceso controlado a un sistema en vivo.",
+  "src": "1mw3wha"
+ },
+ "developer-foundations-l4-50": {
+  "question": "El equipo de subvenciones de una fundación de investigación usa Claude Code para redactar propuestas. Cada borrador debe seguir una guía de estilo interna de 14 páginas, rellenar una plantilla fija y superar un pequeño script que comprueba la longitud de las secciones. La mayoría de las sesiones en el repositorio no tienen nada que ver con subvenciones, así que el equipo no quiere ese material en todas las conversaciones. No interviene ningún sistema externo. ¿Cuál es la forma más ligera de darle a Claude lo que necesita?",
+  "options": {
+   "A": "Definir una tool de cliente con un esquema de entrada y ejecutarla en el propio código de la aplicación cuando Claude la llame.",
+   "B": "Activar una server tool de Anthropic, como la búsqueda web o la ejecución de código, que se ejecuta en el lado de Anthropic sin código de manejo.",
+   "C": "Exponer la capacidad una sola vez mediante un servidor MCP al que pueda conectarse cualquier aplicación de Claude con MCP.",
+   "D": "Empaquetar el procedimiento como una Skill, con instrucciones, una plantilla y un script, que Claude carga cuando una tarea lo requiere."
+  },
+  "rationale": "La necesidad es un procedimiento con material de referencia y un script, sin ningún sistema en vivo, que solo se quiere cuando surge una tarea de subvenciones, así que una Skill carga sus instrucciones solo cuando la tarea lo requiere y casi no consume contexto el resto del tiempo (D). Una tool de cliente personalizada (A) obliga a escribir un manejador para algo que son instrucciones, no una llamada a una función. Una server tool (B) ofrece búsqueda web o ejecución de código y no transporta la guía de estilo ni la plantilla. Un servidor MCP (C) sería un servidor que operar para material estático sin ningún sistema detrás.",
+  "src": "1unvf2v"
+ },
+ "developer-foundations-l4-51": {
+  "question": "El asistente de reservas de laboratorio de una universidad llama a una tool para reservar una sala. Cuando la sala pedida ya está ocupada, la tool lanza una excepción y el asistente le dice al estudiante que el sistema ha tenido un error, aunque la tool sabe qué salas están libres a esa hora. Las reservas se pueden cancelar sin coste. ¿Qué cambio debería hacer el equipo?",
+  "options": {
+   "A": "Devolver el fallo como un tool result con is_error activado, indicando qué estaba mal y qué cambiar en la llamada.",
+   "B": "Detenerse antes de ejecutar la tool, mostrar a una persona la acción exacta y ejecutarla solo tras su aprobación.",
+   "C": "Añadir una frase a la descripción de la tool que indique a Claude que vuelva a comprobar todos sus argumentos antes de llamarla.",
+   "D": "Envolver la llamada en código que repita la misma llamada hasta tres veces cuando no tenga éxito."
+  },
+  "rationale": "La llamada falló por un motivo sobre el que Claude puede actuar, así que devolver un tool result con is_error activado y un mensaje que nombre el problema y las salas libres le permite ajustar la llamada y responder al estudiante (A). La aprobación humana (B) protege acciones que no se pueden deshacer, y estas reservas se cancelan sin coste. Una frase en la descripción (C) no ayudaría, porque los argumentos eran válidos y la sala simplemente estaba ocupada. Repetir la misma llamada (D) vuelve a fallar por el mismo motivo.",
+  "src": "t8bwru"
+ },
+ "developer-foundations-l4-52": {
+  "question": "El asistente de comunicaciones de emergencia de un condado puede llamar a una tool que envía una alerta de evacuación a todos los teléfonos de un distrito, y una alerta enviada no se puede retirar. La tool funciona correctamente, y en las pruebas Claude eligió dos veces un distrito vecino a partir de un mensaje ambiguo del operador, con argumentos que superaron la validación. ¿Qué cambio debería hacer el equipo?",
+  "options": {
+   "A": "Devolver el fallo como un tool result con is_error activado, indicando qué estaba mal y qué cambiar en la llamada.",
+   "B": "Detenerse antes de ejecutar la tool, mostrar a una persona la acción exacta y ejecutarla solo tras su aprobación.",
+   "C": "Añadir una frase a la descripción de la tool que indique a Claude que vuelva a comprobar todos sus argumentos antes de llamarla.",
+   "D": "Envolver la llamada en código que repita la misma llamada hasta tres veces cuando no tenga éxito."
+  },
+  "rationale": "La llamada tiene éxito, el daño no se puede deshacer y el modelo a veces elige el destino equivocado, así que la aplicación, que es la que ejecuta las tools de cliente, debería retener la llamada y mostrar al operador la acción exacta para que la apruebe (B). Un resultado de error (A) necesita un fallo que notificar, y aquí no falla nada. Una frase en la descripción (C) es una orientación que el modelo todavía puede interpretar mal ante un mensaje ambiguo. Repetir la llamada (D) enviaría la alerta más de una vez.",
+  "src": "11fw1wo"
+ },
+ "developer-foundations-l4-53": {
+  "question": "El pipeline de publicación de un estudio móvil necesita notas de versión para las tiendas después de cada tag. Un trabajo debe leer los commits fusionados y escribir borradores en la carpeta de notas, y después pasar una lista JSON, con una entrada por idioma, al trabajo de publicación. El runner no tiene terminal, nadie lo vigila y además guarda las credenciales de publicación en las tiendas, por lo que el trabajo solo debe ejecutar git log, git diff y escrituras de archivos. ¿Qué configuración encaja mejor?",
+  "options": {
+   "A": "Ejecutar Claude Code de forma no interactiva en modo print, permitir solamente las tools necesarias mediante reglas de permisos y leer su salida JSON.",
+   "B": "Trabajar en una sesión interactiva y arrancar una skill del proyecto desde el repositorio, de modo que los pasos corran con el desarrollador presente.",
+   "C": "Ejecutar Claude Code de forma no interactiva con las comprobaciones de permisos desactivadas, para que ningún paso del trabajo se quede esperando una aprobación.",
+   "D": "Definir un subagent del proyecto con su propia lista de tools y su propia ventana de contexto, y delegarle el trabajo desde una sesión."
+  },
+  "rationale": "Nadie está presente para responder a las confirmaciones, el siguiente trabajo necesita una salida legible por máquinas y el runner guarda credenciales, así que encaja una ejecución en modo print con reglas de permisos limitadas a los comandos necesarios y salida JSON (A). Una sesión interactiva con una skill (B) necesita a un desarrollador ante una terminal. Desactivar las comprobaciones de permisos (C) elimina el límite sobre lo que puede ejecutar un trabajo que tiene credenciales de publicación. Un subagent (D) se inicia desde una sesión y por sí solo no ofrece al pipeline una ejecución desatendida ni un resultado JSON.",
+  "src": "zxu6o3"
+ },
+ "developer-foundations-l4-54": {
+  "question": "El equipo de SIG de una ciudad añade una capa de mapa unas pocas veces al mes siguiendo una lista de verificación de once pasos que abarca nomenclatura, comprobaciones de proyección, un formulario de metadatos y generación de teselas. En el paso siete el desarrollador debe elegir entre dos proyecciones después de mirar los datos, quiere aprobar cada edición a medida que se produce y quiere que sus compañeros ejecuten la misma lista desde el repositorio. ¿Qué configuración encaja mejor?",
+  "options": {
+   "A": "Ejecutar Claude Code de forma no interactiva en modo print, permitir solamente las tools necesarias mediante reglas de permisos y leer su salida JSON.",
+   "B": "Trabajar en una sesión interactiva y arrancar una skill del proyecto desde el repositorio, de modo que los pasos corran con el desarrollador presente.",
+   "C": "Ejecutar Claude Code de forma no interactiva con las comprobaciones de permisos desactivadas, para que ningún paso del trabajo se quede esperando una aprobación.",
+   "D": "Definir un subagent del proyecto con su propia lista de tools y su propia ventana de contexto, y delegarle el trabajo desde una sesión."
+  },
+  "rationale": "Hay un desarrollador presente, una decisión de criterio cae en mitad del procedimiento y la lista debe compartirse desde el repositorio, así que una skill del proyecto iniciada dentro de una sesión interactiva ejecuta sus pasos en la conversación principal, donde el desarrollador puede mirar, decidir y aprobar (B). Una ejecución no interactiva (A) no puede detenerse en el paso siete para preguntar qué proyección usar. Desactivar las comprobaciones de permisos (C) elimina las aprobaciones que el desarrollador quiere. Un subagent (D) trabaja en su propia ventana de contexto, aparte de la conversación en la que el desarrollador está decidiendo.",
+  "src": "1vgrwks"
  }
 }

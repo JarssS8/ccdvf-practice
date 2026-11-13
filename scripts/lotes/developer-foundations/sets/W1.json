@@ -1,0 +1,160 @@
+[
+ {
+  "set": "q04",
+  "kind": "quad",
+  "domain": "Applications and Integration",
+  "task": "Giving Claude a large or recurring body of material: whole text in the prompt, retrieval, Files API, search tools",
+  "ref": "https://www.anthropic.com/news/contextual-retrieval",
+  "options": {
+   "A": "Put the complete text in the prompt of this request, with the documents placed ahead of the question.",
+   "B": "Index the material and retrieve the passages that match each question, then send only those in the prompt.",
+   "C": "Upload each file once through the Files API and reference its file_id in the requests that need it.",
+   "D": "Give Claude a search tool and a read tool over the material so it looks up what it needs as it works."
+  },
+  "stems": [
+   {
+    "id": "l4-13",
+    "answer": "B",
+    "ref": "https://www.anthropic.com/news/contextual-retrieval",
+    "stem": "A telecom's network-operations helpdesk answers engineers' questions from about 25 million tokens of runbooks, vendor bulletins and fault notes, far more than fits in any context window. Authors edit the pages all day, each answer needs one or two paragraphs that the engineer's own wording usually points to, and replies must come back within a few seconds. How should the team give Claude the material?",
+    "rationale": "Each answer needs one or two paragraphs located from the engineer's wording, so retrieving just the matching passages keeps every request small and fast, and an index can be updated as pages change (B). The material is about 25 million tokens, so putting it in the prompt (A) is impossible. Letting Claude search and read page after page (D) costs several calls, and with replies wanted in seconds and no cross-references to follow it buys nothing. Uploaded files (C) cannot be edited after upload, and the material would still not fit in one request."
+   },
+   {
+    "id": "l4-14",
+    "answer": "D",
+    "ref": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+    "stem": "A game studio's engineers ask an assistant about an internal wiki of roughly 8 million tokens. Pages point to other pages, and a typical answer, such as why a console build fails, needs three to six pages that can be found only by following those links one after another. In tests, a single similarity search on the question returned just the first page. How should the studio give Claude the wiki?",
+    "rationale": "Answers depend on following references from page to page, which Claude can do when it has tools: search, read a page, then decide which link to open next, loading context just in time (D). A single up-front similarity search (B) returned only the first page in tests, because the following pages are reached only through links. The wiki is about 8 million tokens, so the complete text (A) cannot go into a prompt. Uploading files (C) changes how they are sent, not how much has to fit in the context window."
+   },
+   {
+    "id": "l4-15",
+    "answer": "A",
+    "ref": "https://www.anthropic.com/news/contextual-retrieval",
+    "stem": "A shipping company's in-house lawyer must decide by tomorrow whether any clause of one 120-page charter agreement, about 85,000 tokens of plain text, contradicts another. Nobody will ask about this document again, no similar files exist, and spotting a contradiction depends on reading the whole text together. How should the lawyer's tool give Claude the agreement?",
+    "rationale": "The agreement is about 85,000 tokens, fits comfortably in the context window, and the question needs the whole text read together, so placing it in the prompt with the document ahead of the question is the simplest approach that works (A). Retrieval (B) would return snippets that may miss the two clauses that contradict, and building an index for one file is wasted effort. Uploading once (C) pays off when a file is reused, and this one never is. A search tool (D) adds a loop of calls to read a document that can simply be read in full."
+   },
+   {
+    "id": "l4-16",
+    "answer": "C",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/files",
+    "stem": "A hospital's biomedical-engineering app lets staff ask about one 90-page, 40 MB scanner service manual in PDF form, full of annotated wiring diagrams that lose their meaning as plain text. Three services send hundreds of requests a day, each carrying the whole file again, and uploading it now dominates response time. Claude must see every page each time, and the token cost is acceptable. How should the app give Claude the manual?",
+    "rationale": "The same 40 MB file is sent in hundreds of requests, and the pain is encoding and uploading it each time, so uploading it once through the Files API and sending only its file_id removes that repeated transfer while Claude still sees every page (C). Pasting extracted text (A) would lose the annotated diagrams. Retrieving passages (B) would drop pages, yet Claude must see every page each time. A search tool (D) adds calls to reach pages the request could simply reference. File content is still billed as input tokens, which the team accepts."
+   }
+  ]
+ },
+ {
+  "set": "q05",
+  "kind": "quad",
+  "domain": "Applications and Integration",
+  "task": "Claude API mechanics: handling a failed or troubled API call (retry-after, client errors, spend cap, queueing)",
+  "ref": "https://platform.claude.com/docs/en/api/errors",
+  "options": {
+   "A": "Wait the number of seconds in the retry-after header, then resend the same request, backing off with jitter if it fails again.",
+   "B": "Treat it as a defect in the request: correct the offending field in the code and release the fix instead of resending the call.",
+   "C": "Pause calls to the API and get an account owner to restore access, by raising the limit or the usage tier, before resuming.",
+   "D": "Put the work on a queue or in a later batch and let it drain at a pace the limits allow, instead of retrying inline."
+  },
+  "stems": [
+   {
+    "id": "l4-17",
+    "answer": "C",
+    "ref": "https://platform.claude.com/docs/en/api/rate-limits",
+    "stem": "On the 12th of the month, every Claude call in an insurer's claims service starts failing with HTTP 429. The message says the organization crossed its monthly usage threshold and that access returns on the 1st, 19 days away, and the response carries no retry-after header. Adjusters need their claim summaries this week. What should the service do about these errors?",
+    "rationale": "This 429 comes from the monthly usage threshold, not from request rate: the message gives a date 19 days away and there is no retry-after header, so nothing the code does will succeed until an owner restores access by raising the limit or the tier (C). Waiting and resending (A) fails until access resumes, including the SDK's automatic retries. Correcting the request (B) applies to errors that name a problem in the request, and this one does not. Queueing the work (D) would leave adjusters waiting 19 days for summaries they need this week."
+   },
+   {
+    "id": "l4-18",
+    "answer": "A",
+    "ref": "https://platform.claude.com/docs/en/api/rate-limits",
+    "stem": "A ferry operator's booking-help chat occasionally gets an HTTP 429 for a perfectly valid request. The response carries a retry-after of 4 seconds, the message says a rate limit was reached, spend is nowhere near any cap, and the passenger is watching the chat. Such peaks last under half a minute. How should the backend handle the error?",
+    "rationale": "The request is valid, the message names a rate limit rather than a spend cap, and the retry-after of four seconds says when to try again, so waiting that long and resending the request (A) gets the passenger an answer within seconds. Rewriting the request (B) fixes nothing, because nothing in it is wrong. Pausing for an owner (C) is for the spend-cap 429, which has no retry-after, and spend here is far from any cap. A queue or later batch (D) turns a four-second pause into a hand-off for a passenger who is watching the chat."
+   },
+   {
+    "id": "l4-19",
+    "answer": "D",
+    "ref": "https://platform.claude.com/docs/en/api/rate-limits",
+    "stem": "A media archive's nightly job sends about 400,000 tagging requests, roughly six times what its rate limit allows per hour, and the same limit serves the live search feature. Each 429 carries a retry-after of about half a minute, so waiting it out keeps every worker blocked and slows live search. Nobody reads the tags before 8 a.m. How should the job deal with the 429 responses?",
+    "rationale": "Demand is about six times the limit and nobody needs the tags before 8 a.m., so putting the work on a queue or in batches that drain at the pace the limits allow keeps workers busy and spares live search; the Message Batches API also has its own rate limits, separate from the Messages API (D). Honouring retry-after (A) suits a short spike, but at six times the limit each retry fails again and the workers stay blocked. Fixing the request (B) does nothing, because the requests are valid. Pausing for an owner (C) is for the spend-cap 429, which has no retry-after, and these 429s do carry one."
+   },
+   {
+    "id": "l4-20",
+    "answer": "B",
+    "ref": "https://platform.claude.com/docs/en/api/errors",
+    "stem": "A Tuesday deploy switched a legal-research tool to a newer model and added a new request setting. Since then, every Claude call fails with HTTP 400 and an invalid_request_error whose message names a setting the chosen model does not accept. No retry-after header is present, and the message does not mention any spend limit. What should the team do about these failures?",
+    "rationale": "The status is 400 and the message names a setting the new model does not accept, so every request is wrong in the same way and the fix belongs in the code: correct the field and release it (B). Waiting and retrying (A) is meant for transient errors such as 429 rate limits (honour retry-after), 529 overloaded and 5xx, and an identical request would be rejected again here. Pausing for an owner to raise a limit (C) fits a spend limit, and the message mentions none. Queueing the work (D) only postpones the same rejection to a later time."
+   }
+  ]
+ },
+ {
+  "set": "q06",
+  "kind": "quad",
+  "domain": "Applications and Integration",
+  "task": "Claude application design and configuration management: where an instruction or setting belongs (system prompt, CLAUDE.md, skill, settings.json)",
+  "ref": "https://code.claude.com/docs/en/memory",
+  "options": {
+   "A": "Put the instruction in the system prompt that the application sends with each request to the Messages API.",
+   "B": "Write the instruction in the project's CLAUDE.md so each session in the repository reads it at the start.",
+   "C": "Package the instruction as a skill, with its template and script, that Claude loads when the task comes up.",
+   "D": "Enforce it with a deny rule in the project's settings.json, which Claude Code applies whatever Claude decides."
+  },
+  "stems": [
+   {
+    "id": "l4-21",
+    "answer": "D",
+    "ref": "https://code.claude.com/docs/en/permissions",
+    "stem": "A pension fund's developers use Claude Code in a repository whose config folder holds production credentials. Auditors want proof that Claude's own tools cannot open those files, whatever a developer types or Claude decides. A line in CLAUDE.md telling Claude to stay out of that folder has already been ignored once in a long session. Where should the team put the rule?",
+    "rationale": "Auditors need a restriction that holds whatever Claude decides, and permission rules in settings.json are enforced by Claude Code itself rather than left to Claude's judgement: deny rules are checked first and apply to its file tools (D), and a sandbox would be the addition if scripts had to be blocked too. CLAUDE.md (B) shapes behaviour but is context, not enforced configuration, which is why the line was already ignored once. A skill (C) guides a task when loaded and blocks nothing. A system prompt (A) belongs to an application that calls the Messages API, and nothing in this stem builds one."
+   },
+   {
+    "id": "l4-22",
+    "answer": "C",
+    "ref": "https://code.claude.com/docs/en/skills",
+    "stem": "A water utility's engineers use Claude Code for a quarterly regulatory filing: fourteen steps, a template file and a script that checks totals. Two people do the filing, a few times a year, yet the repository's CLAUDE.md, already near 190 lines, is read at the start of every session by thirty engineers. Where should the filing instructions go?",
+    "rationale": "The filing is a long multi-step procedure with a template and a script, needed by two people a few times a year, so a skill keeps only its short description in context and loads the full instructions when the task comes up (C). Adding it to CLAUDE.md (B) would load it in every session of thirty engineers and push a file already near 190 lines past the recommended size. A deny rule (D) restricts what Claude Code may do and cannot carry a procedure. A system prompt (A) is for an application calling the API, not for Claude Code sessions."
+   },
+   {
+    "id": "l4-23",
+    "answer": "B",
+    "ref": "https://code.claude.com/docs/en/memory",
+    "stem": "A logistics firm's thirty developers use Claude Code in one repository. Each session should use the team's pnpm test command, follow its error-message style and keep migrations in one folder, all in about a dozen short lines that rarely change. Nothing here is a security boundary or a long procedure. Where should the instruction go?",
+    "rationale": "Short conventions that each session in the repository needs and the whole team shares are what a project CLAUDE.md is for, loaded at the start of each session and shared through version control (B). A skill (C) loads on demand and suits long procedures, not a dozen lines wanted in every session. A permission rule (D) restricts what Claude Code may do and cannot express style or conventions. A system prompt (A) applies to calls made by an application, and nobody here is calling the API from their own code."
+   },
+   {
+    "id": "l4-24",
+    "answer": "A",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+    "stem": "A tour operator's website chat is the company's own backend calling the Messages API, and nobody on the team runs Claude Code for it. Product managers need each customer conversation to follow the same rules: reply in the customer's language, quote prices only from the retrieved offers, and decline visa advice. Where should those rules live?",
+    "rationale": "The chat is the company's own backend calling the Messages API, so rules that must frame each conversation belong in the system prompt the backend sends with every request (A). A project CLAUDE.md (B) is read by Claude Code sessions, and nobody runs Claude Code for this chat. A skill (C) loads only when the task matches its description, so it cannot guarantee that these rules frame every conversation, and on the API it also needs the code execution container. Permission rules in settings.json (D) configure Claude Code, so they never reach the backend's requests."
+   }
+  ]
+ },
+ {
+  "set": "t01",
+  "kind": "twin",
+  "domain": "Applications and Integration",
+  "task": "Software engineering foundations: evolving a JSON API contract (additive field, new version, in-place change, expand and contract)",
+  "ref": "https://platform.claude.com/docs/en/api/versioning",
+  "options": {
+   "A": "Add the new field as optional beside the existing ones and leave the current fields and their meaning as they are.",
+   "B": "Publish the changed contract as a new version of the endpoint and keep the old version running through a deprecation window.",
+   "C": "Change the response in place and release it on one day together with updates to the services that consume it.",
+   "D": "Add the new fields beside the old ones, migrate the consumers one by one, then remove the old fields in a later, announced release."
+  },
+  "stems": [
+   {
+    "id": "l4-25",
+    "answer": "B",
+    "ref": "https://platform.claude.com/docs/en/api/versioning",
+    "stem": "A freight-quoting API returns one JSON object per page of a shipment document, and the team now needs one object per document, with the pages nested inside. Mobile apps built by outside carriers read the current shape and ship updates only every few months. Fields such as total would mean something different in the new structure. How should the team release the change?",
+    "rationale": "The structure of the response changes and existing fields such as total would mean something new, so the new contract has to go out as a new version while the old one keeps serving the carriers' apps through a deprecation window (B). An optional extra field (A) cannot change what existing fields mean. Adding fields beside the old ones and removing them later (D) would need the same names to carry two meanings in one version. A one-day coordinated release (C) is impossible when outside apps ship updates every few months."
+   },
+   {
+    "id": "l4-26",
+    "answer": "A",
+    "ref": "https://platform.claude.com/docs/en/api/versioning",
+    "stem": "A hotel group's room-recommendation API returns JSON that five internal services and two partner sites read by field name, and all of them ignore fields they do not know. The team wants to return an extra optional confidence score with each recommendation. No existing field changes its type or meaning. How should the team release the change?",
+    "rationale": "Nothing existing changes and the consumers ignore unknown fields, so adding the optional score beside the existing ones is safe and needs no coordination, much like the additive changes the Claude API itself makes within a version (A). A new version (B) would make seven consumers migrate for no gain. Adding beside and removing later (D) leaves nothing to remove. A coordinated in-place release (C) would tie seven teams to one day for a change that breaks none of them."
+   }
+  ]
+ }
+]

@@ -200,9 +200,9 @@ export const es: Dict = {
   },
   lotes: {
     title: 'Lotes de preguntas',
-    note: 'Elige de dónde sacan sus preguntas los exámenes y los repasos por dominio. El Lote 1 es el banco original; los lotes 2 y 3 son escenarios más largos que hay que leer con atención. Son práctica: no cuentan para tu estimación.',
+    note: 'Elige de dónde sacan sus preguntas los exámenes y los repasos por dominio. El Lote 1 es el banco original; los lotes 2 y 3 son escenarios más largos que hay que leer con atención; en el Lote 4 varias preguntas comparten las mismas cuatro opciones y un detalle de cada escenario decide cuál es la correcta (mezclado con otros lotes, cada examen lleva una pregunta por conjunto; solo, incluye también las preguntas hermanas). Los lotes 2 a 4 son práctica: no cuentan para tu estimación.',
     name: (n: number) => `Lote ${n}`,
-    kind: { 1: 'Banco original', 2: 'Decisiones con restricciones', 3: 'Diagnóstico y revisión' } as Record<number, string>,
+    kind: { 1: 'Banco original', 2: 'Decisiones con restricciones', 3: 'Diagnóstico y revisión', 4: 'Conjuntos contrastivos' } as Record<number, string>,
     count: (n: number) => `${n} preguntas`,
   },
   exams: {

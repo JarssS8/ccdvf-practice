@@ -198,9 +198,9 @@ export const en = {
   },
   lotes: {
     title: 'Question lots',
-    note: 'Choose where exams and drills draw their questions from. Lote 1 is the original bank; lotes 2 and 3 are longer scenarios that you have to read closely. They are practice: they do not count towards your estimate.',
+    note: 'Choose where exams and drills draw their questions from. Lote 1 is the original bank; lotes 2 and 3 are longer scenarios that you have to read closely; in Lote 4 several questions share the same four options and one detail of each scenario decides which is right (mixed with other lots, an exam shows one question per set; on its own, it also includes the sibling questions). Lotes 2 to 4 are practice: they do not count towards your estimate.',
     name: (n: number) => `Lote ${n}`,
-    kind: { 1: 'Original bank', 2: 'Decisions under constraints', 3: 'Diagnosis and review' } as Record<number, string>,
+    kind: { 1: 'Original bank', 2: 'Decisions under constraints', 3: 'Diagnosis and review', 4: 'Contrastive sets' } as Record<number, string>,
     count: (n: number) => `${n} questions`,
   },
   exams: {

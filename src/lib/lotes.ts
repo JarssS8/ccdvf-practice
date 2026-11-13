@@ -16,7 +16,7 @@ export function getLotes(certId: string): number[] {
   try {
     const v: unknown = JSON.parse(localStorage.getItem(key(certId)) ?? 'null')
     if (Array.isArray(v)) {
-      const ok = [...new Set(v.filter((n): n is number => n === 1 || n === 2 || n === 3))].sort()
+      const ok = [...new Set(v.filter((n): n is number => Number.isInteger(n) && n >= 1 && n <= 9))].sort()
       if (ok.length) return ok
     }
   } catch { /* blocked or corrupt */ }

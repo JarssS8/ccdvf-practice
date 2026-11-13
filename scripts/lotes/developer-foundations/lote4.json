@@ -1,0 +1,1136 @@
+[
+  {
+    "id": "developer-foundations-l4-01",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Claude API mechanics: choosing how to process requests (synchronous, streaming, batch, queue with workers)",
+    "question": "A mortgage lender's intake service sends each uploaded payslip to Claude and gets back a small JSON object of about 150 tokens. The submit button stays disabled until that object has been validated against the applicant's form, which usually takes under three seconds in all. Nothing is displayed while Claude works, and the very next step needs the whole object. How should the service call Claude?",
+    "options": {
+      "A": "Make a standard synchronous call and wait for the complete response before the application continues.",
+      "B": "Stream the response with server-sent events and show or forward the text as it arrives.",
+      "C": "Submit the requests to the Message Batches API and fetch the results once the batch has finished.",
+      "D": "Put each job on a queue for background workers to call Claude, and tell the caller when it is done."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "The reply is tiny, nobody reads it as it is written, and the next step needs the complete object within seconds, so a plain synchronous call that returns the finished response is the simplest fit (A). Streaming (B) is built for showing text as it arrives or for very long outputs, and here no part of the object is usable before it is complete. A batch (C) returns results after minutes to hours, while an applicant is waiting at the button. A queue with workers (D) adds a hand-off and a notification for a call that finishes in about two seconds, far inside any gateway timeout.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/streaming",
+    "group": "developer-foundations-set-q01"
+  },
+  {
+    "id": "developer-foundations-l4-02",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Claude API mechanics: choosing how to process requests (synchronous, streaming, batch, queue with workers)",
+    "question": "A language-learning app lets learners chat with a Claude tutor whose explanations often run to six or seven hundred words. In testing, learners left the screen when nothing appeared for the first ten seconds, yet they happily read along once text started to show. The reply must appear in the same chat window the learner is already watching. How should the app call Claude?",
+    "options": {
+      "A": "Make a standard synchronous call and wait for the complete response before the application continues.",
+      "B": "Stream the response with server-sent events and show or forward the text as it arrives.",
+      "C": "Submit the requests to the Message Batches API and fetch the results once the batch has finished.",
+      "D": "Put each job on a queue for background workers to call Claude, and tell the caller when it is done."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "The learner is reading the answer live in the chat window and a long reply takes many seconds to finish, so streaming the tokens as they are generated removes the blank wait (B). A synchronous call (A) shows nothing until the whole reply is complete, which is exactly what made learners leave. A batch (C) is asynchronous and can take up to hours, which is unusable in a live chat. A queue with background workers (D) delivers the answer only after it is finished and as a notification, not as text appearing in the window the learner is watching.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/streaming",
+    "group": "developer-foundations-set-q01"
+  },
+  {
+    "id": "developer-foundations-l4-03",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Claude API mechanics: choosing how to process requests (synchronous, streaming, batch, queue with workers)",
+    "question": "A utility's data team must tag 90,000 archived maintenance work orders with a fault category for a quarterly report due in four days. Nobody waits for individual results, the tags are read only once the whole set is finished, and the team wants the lowest cost per token because the same job repeats every quarter. How should the team send the requests?",
+    "options": {
+      "A": "Make a standard synchronous call and wait for the complete response before the application continues.",
+      "B": "Stream the response with server-sent events and show or forward the text as it arrives.",
+      "C": "Submit the requests to the Message Batches API and fetch the results once the batch has finished.",
+      "D": "Put each job on a queue for background workers to call Claude, and tell the caller when it is done."
+    },
+    "answer": [
+      "C"
+    ],
+    "rationale": "Nothing is urgent and the deadline is days away, so the Message Batches API fits: it is priced 50 percent below standard requests, most batches finish within an hour, and a batch that is not done after 24 hours expires (C). A synchronous loop (A) pays the full price and has to be paced around rate limits for 90,000 calls. Streaming (B) is for text a person reads as it arrives and also pays the full price. A queue with workers (D) would work but means building and operating the workers, and it still pays the full price, which the team wants to avoid.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing",
+    "group": "developer-foundations-set-q01"
+  },
+  {
+    "id": "developer-foundations-l4-04",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Claude API mechanics: choosing how to process requests (synchronous, streaming, batch, queue with workers)",
+    "question": "An insurer's claims portal lets a handler upload a claim bundle that a Claude-based reviewer analyses in a loop of many calls to the insurer's own tools, taking four to eight minutes. The load balancer cuts any HTTP request after sixty seconds, handlers move on to other cases right after uploading, and the review must be ready within about fifteen minutes. How should the portal run the reviews?",
+    "options": {
+      "A": "Make a standard synchronous call and wait for the complete response before the application continues.",
+      "B": "Stream the response with server-sent events and show or forward the text as it arrives.",
+      "C": "Submit the requests to the Message Batches API and fetch the results once the batch has finished.",
+      "D": "Put each job on a queue for background workers to call Claude, and tell the caller when it is done."
+    },
+    "answer": [
+      "D"
+    ],
+    "rationale": "The work outlasts a single web request and nobody watches it, so the upload should enqueue a job that a background worker runs and then notify the handler, which also lets the team control how quickly each review starts (D). A synchronous call (A) would be cut off by the sixty-second limit. Streaming (B) assumes someone is reading the live text, but the handler has already left the page. A batch (C) gives no completion guarantee shorter than its 24-hour window, and every tool round trip of the loop would need another submission, so it cannot be relied on to deliver within fifteen minutes.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/batch-processing",
+    "group": "developer-foundations-set-q01"
+  },
+  {
+    "id": "developer-foundations-l4-05",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Model Selection and Optimization",
+    "task": "Cost, latency and quality levers: smaller model, effort level, prompt caching, trimming input",
+    "question": "A parcel-tracking company labels each customer message as delivery, billing or damage with a one-word answer. The prompt is about three hundred tokens, traffic is heavy, and the label must come back in well under half a second. A trial on the team's labelled test set showed the smaller model tier matching the current model's accuracy. Which change should the team make to cut cost and latency?",
+    "options": {
+      "A": "Move the task to a smaller, faster model tier and check on the test set that quality holds.",
+      "B": "Lower the effort level on the current model so it spends fewer tokens on reasoning and explanations.",
+      "C": "Mark the stable leading part of the prompt with cache_control so later requests read it from the cache.",
+      "D": "Cut each request down to the passages the task needs, so the model reads fewer input tokens per call."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "The task is a one-word label, the trial already showed the smaller tier matches accuracy, and the smaller tier has a lower price per token and a faster response, so moving to it fits (A). Lowering effort (B) keeps the larger model's higher per-token price and slower baseline response, so it cannot reach the sub-half-second target that the smaller tier already meets. Caching (C) needs a stable prefix long enough to be cacheable, and a three-hundred-token prompt is too short to save much. Trimming input (D) has little to remove from a prompt that small.",
+    "ref": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+    "group": "developer-foundations-set-q02"
+  },
+  {
+    "id": "developer-foundations-l4-06",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Model Selection and Optimization",
+    "task": "Cost, latency and quality levers: smaller model, effort level, prompt caching, trimming input",
+    "question": "A procurement assistant answers about four hundred varied supplier questions a day, each with its own short prompt. Most of the billed tokens are the model's own reasoning and long explanations, even for routine lookups. On the team's test set the smaller model tier loses accuracy on the harder third of the questions, so the current model has to stay. Which change should the team make to cut cost and latency?",
+    "options": {
+      "A": "Move the task to a smaller, faster model tier and check on the test set that quality holds.",
+      "B": "Lower the effort level on the current model so it spends fewer tokens on reasoning and explanations.",
+      "C": "Mark the stable leading part of the prompt with cache_control so later requests read it from the cache.",
+      "D": "Cut each request down to the passages the task needs, so the model reads fewer input tokens per call."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "The spend is in output and reasoning tokens on a model that has to stay, and the effort level controls how many tokens the model spends on thinking, explanations and tool calls, so lowering it addresses the cost directly (B). The smaller tier (A) is ruled out by its accuracy loss on the harder third. Caching (C) helps with a repeated prefix, but each prompt here is short and different. Trimming input (D) cuts input tokens, and the input is not where the tokens are going.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/effort",
+    "group": "developer-foundations-set-q02"
+  },
+  {
+    "id": "developer-foundations-l4-07",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Model Selection and Optimization",
+    "task": "Cost, latency and quality levers: smaller model, effort level, prompt caching, trimming input",
+    "question": "A pharmacy chain's help desk sends the same 45,000-token formulary manual at the start of every request, followed by a staff member's short question, and the answers run to two or three lines. Several hundred requests arrive each hour, any question can touch any section, and the team's tests show quality dropping on the smaller model tier. Which change should the team make to cut cost and latency?",
+    "options": {
+      "A": "Move the task to a smaller, faster model tier and check on the test set that quality holds.",
+      "B": "Lower the effort level on the current model so it spends fewer tokens on reasoning and explanations.",
+      "C": "Mark the stable leading part of the prompt with cache_control so later requests read it from the cache.",
+      "D": "Cut each request down to the passages the task needs, so the model reads fewer input tokens per call."
+    },
+    "answer": [
+      "C"
+    ],
+    "rationale": "A large identical prefix is sent many times within minutes, so caching it with cache_control lets later requests read it at a fraction of the input price and with less processing time (C). The smaller tier (A) is ruled out by the quality drop. Lower effort (B) has little to cut from a two-line answer, and the 45,000 input tokens would still be billed in full. Trimming the manual (D) would risk dropping the section a question needs, since any question can touch any section.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching",
+    "group": "developer-foundations-set-q02"
+  },
+  {
+    "id": "developer-foundations-l4-08",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Model Selection and Optimization",
+    "task": "Cost, latency and quality levers: smaller model, effort level, prompt caching, trimming input",
+    "question": "A law firm's tool sends one full 300-page contract to Claude per request, with a question about a single termination clause and a two-sentence answer. Nearly all billed tokens are the contract itself, every request carries a different contract, the firm's code can reliably find each clause by its numbered heading, the instructions are a couple of lines, and tests show the smaller model tier misreads the clause language. Which change should the team make to cut cost and latency?",
+    "options": {
+      "A": "Move the task to a smaller, faster model tier and check on the test set that quality holds.",
+      "B": "Lower the effort level on the current model so it spends fewer tokens on reasoning and explanations.",
+      "C": "Mark the stable leading part of the prompt with cache_control so later requests read it from the cache.",
+      "D": "Cut each request down to the passages the task needs, so the model reads fewer input tokens per call."
+    },
+    "answer": [
+      "D"
+    ],
+    "rationale": "The cost and the delay come from reading a whole contract to answer a question about one clause, so sending only the relevant passages cuts input tokens on every call (D). The smaller tier (A) is ruled out because it misreads the clause language. Lower effort (B) has little to cut from a two-sentence answer. Caching (C) needs an identical prefix across requests, and here each request carries a different contract, so there is nothing to reuse.",
+    "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-latency",
+    "group": "developer-foundations-set-q02"
+  },
+  {
+    "id": "developer-foundations-l4-09",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Agents and Workflows",
+    "task": "Agent architecture: single call, fixed workflow, agent loop with tools, orchestrator with subagents",
+    "question": "An HR team receives parental-leave requests by email and needs three fields from each: leave type, start date and manager name. A single prompt with five worked examples scored 97 percent on their 300-email test set, above the 95 percent bar they set. A colleague proposes a multi-step pipeline with a checking stage for extra safety. Which design should the team ship?",
+    "options": {
+      "A": "Make one well-structured Claude call with the instructions, examples and input in the prompt, and use its answer.",
+      "B": "Chain several Claude calls in a fixed order written in code, passing each step's output to the next.",
+      "C": "Run one agent in a loop that chooses its own tool calls, reads each result and decides the next step until done.",
+      "D": "Have an orchestrator agent split the work into independent subtasks and hand each to a subagent with its own context."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "The task is one self-contained transformation and one prompt already clears the bar, so the guidance to use the simplest solution and add complexity only when simpler ones fall short points to a single call (A). A fixed chain (B) adds calls, latency and cost for an accuracy problem the test set does not show. An agent loop (C) needs tools or outside data, and this task has neither. An orchestrator with subagents (D) has nothing to split, because each email is small and handled alone.",
+    "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+    "group": "developer-foundations-set-q03"
+  },
+  {
+    "id": "developer-foundations-l4-10",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Agents and Workflows",
+    "task": "Agent architecture: single call, fixed workflow, agent loop with tools, orchestrator with subagents",
+    "question": "A customs broker prepares import declarations from supplier invoices. Every file needs the same four steps in the same order: extract fields, map goods to tariff codes, check restrictions, draft the declaration. Auditors want each step's output stored per file, and in testing a single prompt sometimes skipped the restriction check. Which design fits best?",
+    "options": {
+      "A": "Make one well-structured Claude call with the instructions, examples and input in the prompt, and use its answer.",
+      "B": "Chain several Claude calls in a fixed order written in code, passing each step's output to the next.",
+      "C": "Run one agent in a loop that chooses its own tool calls, reads each result and decides the next step until done.",
+      "D": "Have an orchestrator agent split the work into independent subtasks and hand each to a subagent with its own context."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "The steps and their order are known in advance and auditors need the same sequence with a stored output at each stage, so a fixed chain written in code gives that predictability and gives each step its own focused prompt (B). A single call (A) already skipped a step in testing and leaves no per-step record. An agent loop (C) lets the model choose its own order and skip steps, which the audit does not allow. An orchestrator (D) assumes independent subtasks, but each step here depends on the output of the one before it.",
+    "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+    "group": "developer-foundations-set-q03"
+  },
+  {
+    "id": "developer-foundations-l4-11",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Agents and Workflows",
+    "task": "Agent architecture: single call, fixed workflow, agent loop with tools, orchestrator with subagents",
+    "question": "A telecom's network-operations assistant investigates alarm tickets using tools for device status, recent changes and topology. Some tickets are solved after two checks and others need fifteen, and what to inspect next depends entirely on what the last check returned. Nothing in the work can be split into independent parts. Which design fits best?",
+    "options": {
+      "A": "Make one well-structured Claude call with the instructions, examples and input in the prompt, and use its answer.",
+      "B": "Chain several Claude calls in a fixed order written in code, passing each step's output to the next.",
+      "C": "Run one agent in a loop that chooses its own tool calls, reads each result and decides the next step until done.",
+      "D": "Have an orchestrator agent split the work into independent subtasks and hand each to a subagent with its own context."
+    },
+    "answer": [
+      "C"
+    ],
+    "rationale": "The number and order of steps cannot be known in advance and each depends on the previous result, which is the open-ended case where one agent choosing its own tool calls in a loop fits (C). A single call (A) cannot reach live device data. A fixed chain (B) would need the path written in advance, and the path varies from two checks to fifteen. An orchestrator with subagents (D) has nothing to run in parallel and would add token cost and lose the shared thread of evidence.",
+    "ref": "https://www.anthropic.com/engineering/building-effective-agents",
+    "group": "developer-foundations-set-q03"
+  },
+  {
+    "id": "developer-foundations-l4-12",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Agents and Workflows",
+    "task": "Agent architecture: single call, fixed workflow, agent loop with tools, orchestrator with subagents",
+    "question": "A consultancy compares a new grid-connection rule across the countries a client names, usually between ten and twenty, and the list differs for every client. Each country needs dozens of searches and long regulator documents, countries can be studied independently, and one agent's context would fill up long before the last. The client accepts a higher token cost for speed. Which design fits best?",
+    "options": {
+      "A": "Make one well-structured Claude call with the instructions, examples and input in the prompt, and use its answer.",
+      "B": "Chain several Claude calls in a fixed order written in code, passing each step's output to the next.",
+      "C": "Run one agent in a loop that chooses its own tool calls, reads each result and decides the next step until done.",
+      "D": "Have an orchestrator agent split the work into independent subtasks and hand each to a subagent with its own context."
+    },
+    "answer": [
+      "D"
+    ],
+    "rationale": "The work is broad, the parts are independent and the list is only known once the client asks, so an orchestrator that spawns a subagent per country, each with its own context window, fits (D). A single call (A) cannot hold the material for ten to twenty countries. A fixed chain (B) needs the subtasks fixed in code, but the country list changes with each client. A single looping agent (C) would work through the countries one after another and fill its context with raw material before finishing.",
+    "ref": "https://www.anthropic.com/engineering/multi-agent-research-system",
+    "group": "developer-foundations-set-q03"
+  },
+  {
+    "id": "developer-foundations-l4-13",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Giving Claude a large or recurring body of material: whole text in the prompt, retrieval, Files API, search tools",
+    "question": "A telecom's network-operations helpdesk answers engineers' questions from about 25 million tokens of runbooks, vendor bulletins and fault notes, far more than fits in any context window. Authors edit the pages all day, each answer needs one or two paragraphs that the engineer's own wording usually points to, and replies must come back within a few seconds. How should the team give Claude the material?",
+    "options": {
+      "A": "Put the complete text in the prompt of this request, with the documents placed ahead of the question.",
+      "B": "Index the material and retrieve the passages that match each question, then send only those in the prompt.",
+      "C": "Upload each file once through the Files API and reference its file_id in the requests that need it.",
+      "D": "Give Claude a search tool and a read tool over the material so it looks up what it needs as it works."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "Each answer needs one or two paragraphs located from the engineer's wording, so retrieving just the matching passages keeps every request small and fast, and an index can be updated as pages change (B). The material is about 25 million tokens, so putting it in the prompt (A) is impossible. Letting Claude search and read page after page (D) costs several calls, and with replies wanted in seconds and no cross-references to follow it buys nothing. Uploaded files (C) cannot be edited after upload, and the material would still not fit in one request.",
+    "ref": "https://www.anthropic.com/news/contextual-retrieval",
+    "group": "developer-foundations-set-q04"
+  },
+  {
+    "id": "developer-foundations-l4-14",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Giving Claude a large or recurring body of material: whole text in the prompt, retrieval, Files API, search tools",
+    "question": "A game studio's engineers ask an assistant about an internal wiki of roughly 8 million tokens. Pages point to other pages, and a typical answer, such as why a console build fails, needs three to six pages that can be found only by following those links one after another. In tests, a single similarity search on the question returned just the first page. How should the studio give Claude the wiki?",
+    "options": {
+      "A": "Put the complete text in the prompt of this request, with the documents placed ahead of the question.",
+      "B": "Index the material and retrieve the passages that match each question, then send only those in the prompt.",
+      "C": "Upload each file once through the Files API and reference its file_id in the requests that need it.",
+      "D": "Give Claude a search tool and a read tool over the material so it looks up what it needs as it works."
+    },
+    "answer": [
+      "D"
+    ],
+    "rationale": "Answers depend on following references from page to page, which Claude can do when it has tools: search, read a page, then decide which link to open next, loading context just in time (D). A single up-front similarity search (B) returned only the first page in tests, because the following pages are reached only through links. The wiki is about 8 million tokens, so the complete text (A) cannot go into a prompt. Uploading files (C) changes how they are sent, not how much has to fit in the context window.",
+    "ref": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+    "group": "developer-foundations-set-q04"
+  },
+  {
+    "id": "developer-foundations-l4-15",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Giving Claude a large or recurring body of material: whole text in the prompt, retrieval, Files API, search tools",
+    "question": "A shipping company's in-house lawyer must decide by tomorrow whether any clause of one 120-page charter agreement, about 85,000 tokens of plain text, contradicts another. Nobody will ask about this document again, no similar files exist, and spotting a contradiction depends on reading the whole text together. How should the lawyer's tool give Claude the agreement?",
+    "options": {
+      "A": "Put the complete text in the prompt of this request, with the documents placed ahead of the question.",
+      "B": "Index the material and retrieve the passages that match each question, then send only those in the prompt.",
+      "C": "Upload each file once through the Files API and reference its file_id in the requests that need it.",
+      "D": "Give Claude a search tool and a read tool over the material so it looks up what it needs as it works."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "The agreement is about 85,000 tokens, fits comfortably in the context window, and the question needs the whole text read together, so placing it in the prompt with the document ahead of the question is the simplest approach that works (A). Retrieval (B) would return snippets that may miss the two clauses that contradict, and building an index for one file is wasted effort. Uploading once (C) pays off when a file is reused, and this one never is. A search tool (D) adds a loop of calls to read a document that can simply be read in full.",
+    "ref": "https://www.anthropic.com/news/contextual-retrieval",
+    "group": "developer-foundations-set-q04"
+  },
+  {
+    "id": "developer-foundations-l4-16",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Giving Claude a large or recurring body of material: whole text in the prompt, retrieval, Files API, search tools",
+    "question": "A hospital's biomedical-engineering app lets staff ask about one 90-page, 40 MB scanner service manual in PDF form, full of annotated wiring diagrams that lose their meaning as plain text. Three services send hundreds of requests a day, each carrying the whole file again, and uploading it now dominates response time. Claude must see every page each time, and the token cost is acceptable. How should the app give Claude the manual?",
+    "options": {
+      "A": "Put the complete text in the prompt of this request, with the documents placed ahead of the question.",
+      "B": "Index the material and retrieve the passages that match each question, then send only those in the prompt.",
+      "C": "Upload each file once through the Files API and reference its file_id in the requests that need it.",
+      "D": "Give Claude a search tool and a read tool over the material so it looks up what it needs as it works."
+    },
+    "answer": [
+      "C"
+    ],
+    "rationale": "The same 40 MB file is sent in hundreds of requests, and the pain is encoding and uploading it each time, so uploading it once through the Files API and sending only its file_id removes that repeated transfer while Claude still sees every page (C). Pasting extracted text (A) would lose the annotated diagrams. Retrieving passages (B) would drop pages, yet Claude must see every page each time. A search tool (D) adds calls to reach pages the request could simply reference. File content is still billed as input tokens, which the team accepts.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/files",
+    "group": "developer-foundations-set-q04"
+  },
+  {
+    "id": "developer-foundations-l4-17",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Claude API mechanics: handling a failed or troubled API call (retry-after, client errors, spend cap, queueing)",
+    "question": "On the 12th of the month, every Claude call in an insurer's claims service starts failing with HTTP 429. The message says the organization crossed its monthly usage threshold and that access returns on the 1st, 19 days away, and the response carries no retry-after header. Adjusters need their claim summaries this week. What should the service do about these errors?",
+    "options": {
+      "A": "Wait the number of seconds in the retry-after header, then resend the same request, backing off with jitter if it fails again.",
+      "B": "Treat it as a defect in the request: correct the offending field in the code and release the fix instead of resending the call.",
+      "C": "Pause calls to the API and get an account owner to restore access, by raising the limit or the usage tier, before resuming.",
+      "D": "Put the work on a queue or in a later batch and let it drain at a pace the limits allow, instead of retrying inline."
+    },
+    "answer": [
+      "C"
+    ],
+    "rationale": "This 429 comes from the monthly usage threshold, not from request rate: the message gives a date 19 days away and there is no retry-after header, so nothing the code does will succeed until an owner restores access by raising the limit or the tier (C). Waiting and resending (A) fails until access resumes, including the SDK's automatic retries. Correcting the request (B) applies to errors that name a problem in the request, and this one does not. Queueing the work (D) would leave adjusters waiting 19 days for summaries they need this week.",
+    "ref": "https://platform.claude.com/docs/en/api/rate-limits",
+    "group": "developer-foundations-set-q05"
+  },
+  {
+    "id": "developer-foundations-l4-18",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Claude API mechanics: handling a failed or troubled API call (retry-after, client errors, spend cap, queueing)",
+    "question": "A ferry operator's booking-help chat occasionally gets an HTTP 429 for a perfectly valid request. The response carries a retry-after of 4 seconds, the message says a rate limit was reached, spend is nowhere near any cap, and the passenger is watching the chat. Such peaks last under half a minute. How should the backend handle the error?",
+    "options": {
+      "A": "Wait the number of seconds in the retry-after header, then resend the same request, backing off with jitter if it fails again.",
+      "B": "Treat it as a defect in the request: correct the offending field in the code and release the fix instead of resending the call.",
+      "C": "Pause calls to the API and get an account owner to restore access, by raising the limit or the usage tier, before resuming.",
+      "D": "Put the work on a queue or in a later batch and let it drain at a pace the limits allow, instead of retrying inline."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "The request is valid, the message names a rate limit rather than a spend cap, and the retry-after of four seconds says when to try again, so waiting that long and resending the request (A) gets the passenger an answer within seconds. Rewriting the request (B) fixes nothing, because nothing in it is wrong. Pausing for an owner (C) is for the spend-cap 429, which has no retry-after, and spend here is far from any cap. A queue or later batch (D) turns a four-second pause into a hand-off for a passenger who is watching the chat.",
+    "ref": "https://platform.claude.com/docs/en/api/rate-limits",
+    "group": "developer-foundations-set-q05"
+  },
+  {
+    "id": "developer-foundations-l4-19",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Claude API mechanics: handling a failed or troubled API call (retry-after, client errors, spend cap, queueing)",
+    "question": "A media archive's nightly job sends about 400,000 tagging requests, roughly six times what its rate limit allows per hour, and the same limit serves the live search feature. Each 429 carries a retry-after of about half a minute, so waiting it out keeps every worker blocked and slows live search. Nobody reads the tags before 8 a.m. How should the job deal with the 429 responses?",
+    "options": {
+      "A": "Wait the number of seconds in the retry-after header, then resend the same request, backing off with jitter if it fails again.",
+      "B": "Treat it as a defect in the request: correct the offending field in the code and release the fix instead of resending the call.",
+      "C": "Pause calls to the API and get an account owner to restore access, by raising the limit or the usage tier, before resuming.",
+      "D": "Put the work on a queue or in a later batch and let it drain at a pace the limits allow, instead of retrying inline."
+    },
+    "answer": [
+      "D"
+    ],
+    "rationale": "Demand is about six times the limit and nobody needs the tags before 8 a.m., so putting the work on a queue or in batches that drain at the pace the limits allow keeps workers busy and spares live search; the Message Batches API also has its own rate limits, separate from the Messages API (D). Honouring retry-after (A) suits a short spike, but at six times the limit each retry fails again and the workers stay blocked. Fixing the request (B) does nothing, because the requests are valid. Pausing for an owner (C) is for the spend-cap 429, which has no retry-after, and these 429s do carry one.",
+    "ref": "https://platform.claude.com/docs/en/api/rate-limits",
+    "group": "developer-foundations-set-q05"
+  },
+  {
+    "id": "developer-foundations-l4-20",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Claude API mechanics: handling a failed or troubled API call (retry-after, client errors, spend cap, queueing)",
+    "question": "A Tuesday deploy switched a legal-research tool to a newer model and added a new request setting. Since then, every Claude call fails with HTTP 400 and an invalid_request_error whose message names a setting the chosen model does not accept. No retry-after header is present, and the message does not mention any spend limit. What should the team do about these failures?",
+    "options": {
+      "A": "Wait the number of seconds in the retry-after header, then resend the same request, backing off with jitter if it fails again.",
+      "B": "Treat it as a defect in the request: correct the offending field in the code and release the fix instead of resending the call.",
+      "C": "Pause calls to the API and get an account owner to restore access, by raising the limit or the usage tier, before resuming.",
+      "D": "Put the work on a queue or in a later batch and let it drain at a pace the limits allow, instead of retrying inline."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "The status is 400 and the message names a setting the new model does not accept, so every request is wrong in the same way and the fix belongs in the code: correct the field and release it (B). Waiting and retrying (A) is meant for transient errors such as 429 rate limits (honour retry-after), 529 overloaded and 5xx, and an identical request would be rejected again here. Pausing for an owner to raise a limit (C) fits a spend limit, and the message mentions none. Queueing the work (D) only postpones the same rejection to a later time.",
+    "ref": "https://platform.claude.com/docs/en/api/errors",
+    "group": "developer-foundations-set-q05"
+  },
+  {
+    "id": "developer-foundations-l4-21",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Claude application design and configuration management: where an instruction or setting belongs (system prompt, CLAUDE.md, skill, settings.json)",
+    "question": "A pension fund's developers use Claude Code in a repository whose config folder holds production credentials. Auditors want proof that Claude's own tools cannot open those files, whatever a developer types or Claude decides. A line in CLAUDE.md telling Claude to stay out of that folder has already been ignored once in a long session. Where should the team put the rule?",
+    "options": {
+      "A": "Put the instruction in the system prompt that the application sends with each request to the Messages API.",
+      "B": "Write the instruction in the project's CLAUDE.md so each session in the repository reads it at the start.",
+      "C": "Package the instruction as a skill, with its template and script, that Claude loads when the task comes up.",
+      "D": "Enforce it with a deny rule in the project's settings.json, which Claude Code applies whatever Claude decides."
+    },
+    "answer": [
+      "D"
+    ],
+    "rationale": "Auditors need a restriction that holds whatever Claude decides, and permission rules in settings.json are enforced by Claude Code itself rather than left to Claude's judgement: deny rules are checked first and apply to its file tools (D), and a sandbox would be the addition if scripts had to be blocked too. CLAUDE.md (B) shapes behaviour but is context, not enforced configuration, which is why the line was already ignored once. A skill (C) guides a task when loaded and blocks nothing. A system prompt (A) belongs to an application that calls the Messages API, and nothing in this stem builds one.",
+    "ref": "https://code.claude.com/docs/en/permissions",
+    "group": "developer-foundations-set-q06"
+  },
+  {
+    "id": "developer-foundations-l4-22",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Claude application design and configuration management: where an instruction or setting belongs (system prompt, CLAUDE.md, skill, settings.json)",
+    "question": "A water utility's engineers use Claude Code for a quarterly regulatory filing: fourteen steps, a template file and a script that checks totals. Two people do the filing, a few times a year, yet the repository's CLAUDE.md, already near 190 lines, is read at the start of every session by thirty engineers. Where should the filing instructions go?",
+    "options": {
+      "A": "Put the instruction in the system prompt that the application sends with each request to the Messages API.",
+      "B": "Write the instruction in the project's CLAUDE.md so each session in the repository reads it at the start.",
+      "C": "Package the instruction as a skill, with its template and script, that Claude loads when the task comes up.",
+      "D": "Enforce it with a deny rule in the project's settings.json, which Claude Code applies whatever Claude decides."
+    },
+    "answer": [
+      "C"
+    ],
+    "rationale": "The filing is a long multi-step procedure with a template and a script, needed by two people a few times a year, so a skill keeps only its short description in context and loads the full instructions when the task comes up (C). Adding it to CLAUDE.md (B) would load it in every session of thirty engineers and push a file already near 190 lines past the recommended size. A deny rule (D) restricts what Claude Code may do and cannot carry a procedure. A system prompt (A) is for an application calling the API, not for Claude Code sessions.",
+    "ref": "https://code.claude.com/docs/en/skills",
+    "group": "developer-foundations-set-q06"
+  },
+  {
+    "id": "developer-foundations-l4-23",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Claude application design and configuration management: where an instruction or setting belongs (system prompt, CLAUDE.md, skill, settings.json)",
+    "question": "A logistics firm's thirty developers use Claude Code in one repository. Each session should use the team's pnpm test command, follow its error-message style and keep migrations in one folder, all in about a dozen short lines that rarely change. Nothing here is a security boundary or a long procedure. Where should the instruction go?",
+    "options": {
+      "A": "Put the instruction in the system prompt that the application sends with each request to the Messages API.",
+      "B": "Write the instruction in the project's CLAUDE.md so each session in the repository reads it at the start.",
+      "C": "Package the instruction as a skill, with its template and script, that Claude loads when the task comes up.",
+      "D": "Enforce it with a deny rule in the project's settings.json, which Claude Code applies whatever Claude decides."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "Short conventions that each session in the repository needs and the whole team shares are what a project CLAUDE.md is for, loaded at the start of each session and shared through version control (B). A skill (C) loads on demand and suits long procedures, not a dozen lines wanted in every session. A permission rule (D) restricts what Claude Code may do and cannot express style or conventions. A system prompt (A) applies to calls made by an application, and nobody here is calling the API from their own code.",
+    "ref": "https://code.claude.com/docs/en/memory",
+    "group": "developer-foundations-set-q06"
+  },
+  {
+    "id": "developer-foundations-l4-24",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Claude application design and configuration management: where an instruction or setting belongs (system prompt, CLAUDE.md, skill, settings.json)",
+    "question": "A tour operator's website chat is the company's own backend calling the Messages API, and nobody on the team runs Claude Code for it. Product managers need each customer conversation to follow the same rules: reply in the customer's language, quote prices only from the retrieved offers, and decline visa advice. Where should those rules live?",
+    "options": {
+      "A": "Put the instruction in the system prompt that the application sends with each request to the Messages API.",
+      "B": "Write the instruction in the project's CLAUDE.md so each session in the repository reads it at the start.",
+      "C": "Package the instruction as a skill, with its template and script, that Claude loads when the task comes up.",
+      "D": "Enforce it with a deny rule in the project's settings.json, which Claude Code applies whatever Claude decides."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "The chat is the company's own backend calling the Messages API, so rules that must frame each conversation belong in the system prompt the backend sends with every request (A). A project CLAUDE.md (B) is read by Claude Code sessions, and nobody runs Claude Code for this chat. A skill (C) loads only when the task matches its description, so it cannot guarantee that these rules frame every conversation, and on the API it also needs the code execution container. Permission rules in settings.json (D) configure Claude Code, so they never reach the backend's requests.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+    "group": "developer-foundations-set-q06"
+  },
+  {
+    "id": "developer-foundations-l4-25",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Software engineering foundations: evolving a JSON API contract (additive field, new version, in-place change, expand and contract)",
+    "question": "A freight-quoting API returns one JSON object per page of a shipment document, and the team now needs one object per document, with the pages nested inside. Mobile apps built by outside carriers read the current shape and ship updates only every few months. Fields such as total would mean something different in the new structure. How should the team release the change?",
+    "options": {
+      "A": "Add the new field as optional beside the existing ones and leave the current fields and their meaning as they are.",
+      "B": "Publish the changed contract as a new version of the endpoint and keep the old version running through a deprecation window.",
+      "C": "Change the response in place and release it on one day together with updates to the services that consume it.",
+      "D": "Add the new fields beside the old ones, migrate the consumers one by one, then remove the old fields in a later, announced release."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "The structure of the response changes and existing fields such as total would mean something new, so the new contract has to go out as a new version while the old one keeps serving the carriers' apps through a deprecation window (B). An optional extra field (A) cannot change what existing fields mean. Adding fields beside the old ones and removing them later (D) would need the same names to carry two meanings in one version. A one-day coordinated release (C) is impossible when outside apps ship updates every few months.",
+    "ref": "https://platform.claude.com/docs/en/api/versioning",
+    "group": "developer-foundations-set-t01"
+  },
+  {
+    "id": "developer-foundations-l4-26",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Applications and Integration",
+    "task": "Software engineering foundations: evolving a JSON API contract (additive field, new version, in-place change, expand and contract)",
+    "question": "A hotel group's room-recommendation API returns JSON that five internal services and two partner sites read by field name, and all of them ignore fields they do not know. The team wants to return an extra optional confidence score with each recommendation. No existing field changes its type or meaning. How should the team release the change?",
+    "options": {
+      "A": "Add the new field as optional beside the existing ones and leave the current fields and their meaning as they are.",
+      "B": "Publish the changed contract as a new version of the endpoint and keep the old version running through a deprecation window.",
+      "C": "Change the response in place and release it on one day together with updates to the services that consume it.",
+      "D": "Add the new fields beside the old ones, migrate the consumers one by one, then remove the old fields in a later, announced release."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "Nothing existing changes and the consumers ignore unknown fields, so adding the optional score beside the existing ones is safe and needs no coordination, much like the additive changes the Claude API itself makes within a version (A). A new version (B) would make seven consumers migrate for no gain. Adding beside and removing later (D) leaves nothing to remove. A coordinated in-place release (C) would tie seven teams to one day for a change that breaks none of them.",
+    "ref": "https://platform.claude.com/docs/en/api/versioning",
+    "group": "developer-foundations-set-t01"
+  },
+  {
+    "id": "developer-foundations-l4-27",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Model Selection and Optimization",
+    "task": "Choosing a model tier or serving speed: most capable tier, mid tier, smallest tier, fast mode",
+    "question": "A pharmaceutical regulatory team asks Claude to compare each new 400-page submission dossier with the previous one and list every contradiction between sections. About ten dossiers arrive a week and the report is read the next morning, so nobody waits on a response. On the team's eval set the mid tier (Claude Sonnet 5.5) misses about a third of the planted contradictions, while the most capable tier (Claude Fable 5.2) finds nearly all of them. Which choice should the team make?",
+    "options": {
+      "A": "Run the task on the most capable model tier, accepting a higher price per token for the strongest results.",
+      "B": "Use the mid-range model tier, which balances capability, speed and price for everyday workloads.",
+      "C": "Use the smallest model tier, which has the lowest latency and the lowest price per token.",
+      "D": "Request fast mode on a model that supports it, so the same model's output arrives faster at a premium price."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "Accuracy on subtle cross-section contradictions is the requirement, volume is low and the report is read the next morning, so paying for the most capable tier is justified (A). The mid tier (B) is the usual balanced pick, but the eval shows it misses a third of the contradictions. The smallest tier (C) is cheaper and faster but sits below the mid tier on capability. Fast mode (D) keeps the same model and only speeds up output at a premium price, which buys nothing when nobody is waiting and the quality gap sits in the model tier.",
+    "ref": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+    "group": "developer-foundations-set-q07"
+  },
+  {
+    "id": "developer-foundations-l4-28",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Model Selection and Optimization",
+    "task": "Choosing a model tier or serving speed: most capable tier, mid tier, smallest tier, fast mode",
+    "question": "A sports-media company adds a feature that turns an editor's plain-English question into a SQL query over its match statistics and returns a short written summary. On the team's eval set the smallest tier scores 71 percent against a 90 percent bar, the mid tier scores 93 percent, and the most capable tier scores 94 percent at a clearly higher price. Editors are content with an answer in about two seconds. Which choice should the team make?",
+    "options": {
+      "A": "Run the task on the most capable model tier, accepting a higher price per token for the strongest results.",
+      "B": "Use the mid-range model tier, which balances capability, speed and price for everyday workloads.",
+      "C": "Use the smallest model tier, which has the lowest latency and the lowest price per token.",
+      "D": "Request fast mode on a model that supports it, so the same model's output arrives faster at a premium price."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "The mid tier clears the 90 percent bar with margin, at a price and speed suited to an everyday workload, and editors do not need faster answers (B). The most capable tier (A) adds one point above a bar that is already met and costs clearly more. The smallest tier (C) is cheapest but scores 71 percent, well under the bar. Fast mode (D) pays a premium to speed up output, and nobody is asking for a faster answer than two seconds.",
+    "ref": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+    "group": "developer-foundations-set-q07"
+  },
+  {
+    "id": "developer-foundations-l4-29",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Model Selection and Optimization",
+    "task": "Choosing a model tier or serving speed: most capable tier, mid tier, smallest tier, fast mode",
+    "question": "A video-streaming company writes a one-sentence alt text for each of the 3 million thumbnails it ingests every day, and a simple rubric checks every sentence. In a trial the smallest tier passed 96 percent of images against a 95 percent bar, and nobody reads a thumbnail's text until the catalogue page is published hours later. The budget is set by the lowest price per token available. Which choice should the team make?",
+    "options": {
+      "A": "Run the task on the most capable model tier, accepting a higher price per token for the strongest results.",
+      "B": "Use the mid-range model tier, which balances capability, speed and price for everyday workloads.",
+      "C": "Use the smallest model tier, which has the lowest latency and the lowest price per token.",
+      "D": "Request fast mode on a model that supports it, so the same model's output arrives faster at a premium price."
+    },
+    "answer": [
+      "C"
+    ],
+    "rationale": "A routine, high-volume task that the smallest tier already passes should run on the tier with the lowest price per token and lowest latency (C). The most capable tier (A) would cost far more across 3 million images for a quality gain the rubric does not need. The mid tier (B) would also pass, but it is priced higher than the budget allows when the smallest tier meets the bar. Fast mode (D) raises the price to speed up output, while the text is not read for hours.",
+    "ref": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+    "group": "developer-foundations-set-q07"
+  },
+  {
+    "id": "developer-foundations-l4-30",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Model Selection and Optimization",
+    "task": "Choosing a model tier or serving speed: most capable tier, mid tier, smallest tier, fast mode",
+    "question": "A stadium operations team has a controller who waits on screen while Claude drafts a revised 1,200-word crowd-management plan after a gate closes, about thirty times a day. The current model, Claude Fable 5.2, the most capable tier, is the only one that passes every case in the team's eval, so quality is not in question, yet the plan takes 45 seconds to finish and the target is under 25. The team accepts a higher price per token for these requests. Which choice should the team make?",
+    "options": {
+      "A": "Run the task on the most capable model tier, accepting a higher price per token for the strongest results.",
+      "B": "Use the mid-range model tier, which balances capability, speed and price for everyday workloads.",
+      "C": "Use the smallest model tier, which has the lowest latency and the lowest price per token.",
+      "D": "Request fast mode on a model that supports it, so the same model's output arrives faster at a premium price."
+    },
+    "answer": [
+      "D"
+    ],
+    "rationale": "Quality is already sufficient and the delay comes from generating a long output while someone waits, so fast mode on the same model, which raises output speed at a premium price, fits (D). The most capable tier (A) is what the team already runs, so choosing it changes nothing about the wait. The mid tier (B) would respond faster but is not the tier that passes the eval. The smallest tier (C) is faster still and has the same quality problem.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/fast-mode",
+    "group": "developer-foundations-set-q07"
+  },
+  {
+    "id": "developer-foundations-l4-31",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Agents and Workflows",
+    "task": "Keeping an agent's state and context healthy: stored history, compaction, clearing old tool results, notes or memory",
+    "question": "A telecom's support chatbot talks with a customer about a router fault for ten or twelve short turns, and the customer often returns the next day. The service restarts on every deploy and keeps nothing in memory, so a returning customer is greeted as a stranger. The whole conversation is a few thousand tokens with no bulky tool output, and the agent must resume the exact thread, including what the customer said word for word. How should the team keep the state?",
+    "options": {
+      "A": "Store the full message history outside the model and load it back into the next request when the conversation resumes.",
+      "B": "Turn on compaction so older turns are replaced by a summary Claude writes once the context nears its limit.",
+      "C": "Use context editing to clear old tool results from the conversation while the agent's own messages stay in place.",
+      "D": "Have the agent write durable facts to a notes file or the memory tool and read them back when it needs them."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "The Messages API is stateless, so storing the full history and sending it again restores the exact thread with the customer's own words, and a few thousand tokens fit easily (A). Compaction (B) replaces earlier turns with a summary and only matters near the window limit, which this conversation is far from. Clearing tool results (C) has nothing to remove, as there is no bulky tool output. A notes file (D) holds what the agent chose to condense, so the customer's exact wording would be lost.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/working-with-messages",
+    "group": "developer-foundations-set-q08"
+  },
+  {
+    "id": "developer-foundations-l4-32",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Agents and Workflows",
+    "task": "Keeping an agent's state and context healthy: stored history, compaction, clearing old tool results, notes or memory",
+    "question": "A wind-farm operator uses a Claude agent as a planning partner in an eight-hour outage-planning session, where an engineer and the agent trade decisions, constraints and revised options in one continuous conversation. Almost no tools are called, so the context is filled by the discussion itself and is nearing the window limit. The engineer will not stop for a handover, and decisions are scattered through the whole discussion. What should the team do to keep the agent going?",
+    "options": {
+      "A": "Store the full message history outside the model and load it back into the next request when the conversation resumes.",
+      "B": "Turn on compaction so older turns are replaced by a summary Claude writes once the context nears its limit.",
+      "C": "Use context editing to clear old tool results from the conversation while the agent's own messages stay in place.",
+      "D": "Have the agent write durable facts to a notes file or the memory tool and read them back when it needs them."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "The conversation is one continuous session whose earlier turns all matter in condensed form, so compaction replaces the older turns with a summary and lets the session continue (B). Reloading the stored history (A) would refill the window that is already nearly full. Clearing tool results (C) has almost nothing to clear because few tools are called. A notes file (D) depends on the agent filing facts in advance and on a handover, while the decisions here are spread across the discussion and the session does not stop.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/compaction",
+    "group": "developer-foundations-set-q08"
+  },
+  {
+    "id": "developer-foundations-l4-33",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Agents and Workflows",
+    "task": "Keeping an agent's state and context healthy: stored history, compaction, clearing old tool results, notes or memory",
+    "question": "A travel-booking agent searches hotel inventory with a tool that returns about 20,000 tokens of listings each time, and a typical task makes thirty searches. After each search the agent writes a short comparison of what it found and never needs the raw listings again. The context passes the team's 250,000-token working limit around the thirteenth search, and the team wants the agent's written comparisons preserved exactly as written. Which approach fits?",
+    "options": {
+      "A": "Store the full message history outside the model and load it back into the next request when the conversation resumes.",
+      "B": "Turn on compaction so older turns are replaced by a summary Claude writes once the context nears its limit.",
+      "C": "Use context editing to clear old tool results from the conversation while the agent's own messages stay in place.",
+      "D": "Have the agent write durable facts to a notes file or the memory tool and read them back when it needs them."
+    },
+    "answer": [
+      "C"
+    ],
+    "rationale": "The tokens that fill the window are old tool results, and context editing clears those by rule while leaving the agent's own messages, including its comparisons, untouched (C). Compaction (B) would summarize the whole conversation and rewrite the comparisons the team wants kept verbatim. Replaying the stored history (A) would restore all the bulky listings and fill the window again. A notes file (D) solves carrying facts across sessions, and nothing here has to outlive the task.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/context-editing",
+    "group": "developer-foundations-set-q08"
+  },
+  {
+    "id": "developer-foundations-l4-34",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Agents and Workflows",
+    "task": "Keeping an agent's state and context healthy: stored history, compaction, clearing old tool results, notes or memory",
+    "question": "A school district's tutoring agent meets each student once a week in a brand-new session that starts with an empty context. Teachers want it to remember each student's reading level, the topics already covered and what motivates them, which together fit in a few hundred words, while the full transcripts of past sessions would run to several million tokens by the end of the year. How should the team give the agent that continuity?",
+    "options": {
+      "A": "Store the full message history outside the model and load it back into the next request when the conversation resumes.",
+      "B": "Turn on compaction so older turns are replaced by a summary Claude writes once the context nears its limit.",
+      "C": "Use context editing to clear old tool results from the conversation while the agent's own messages stay in place.",
+      "D": "Have the agent write durable facts to a notes file or the memory tool and read them back when it needs them."
+    },
+    "answer": [
+      "D"
+    ],
+    "rationale": "A few hundred words of durable facts have to survive between separate sessions, which is what a notes file or the memory tool is for, and reading them back costs far less than old transcripts (D). Loading the stored history (A) would exceed the context window and bury the useful facts. Compaction (B) shrinks a conversation inside one session and does nothing for a session that starts empty. Clearing tool results (C) addresses bulky tool output inside a running context, which is not the problem here.",
+    "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool",
+    "group": "developer-foundations-set-q08"
+  },
+  {
+    "id": "developer-foundations-l4-35",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Security and Safety",
+    "task": "Matching a control to a threat: least-privilege scope, human approval, redaction before the call, keeping a secret out of the model's context",
+    "question": "An energy company's overnight agent reads supplier emails, looks up the matching contract rows in a database and writes a summary to a file. It never needs to change a contract, yet it runs with the database account the developers use, which can update and delete rows. Nobody is awake while it runs, and its API key sits in a secrets manager the model never touches. How should the team limit the damage if a hostile email slips an instruction past the model?",
+    "options": {
+      "A": "Narrow the agent's tool permissions to the minimum the task needs, such as a read-only credential on one dataset.",
+      "B": "Require a person to approve each specific action, with its exact arguments shown, before the tool runs.",
+      "C": "Redact or replace the sensitive values in the input with placeholders before the request is sent to the API.",
+      "D": "Keep the credential in a proxy outside the agent's environment that adds it to requests, so the model never sees it."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "The job only reads, so removing write and delete rights bounds what any injected instruction can do, and it works unattended (A). A human approval gate (B) needs a person at the keyboard, and nobody is awake overnight. Redacting inputs (C) protects what the provider receives and does not limit what a manipulated agent can do with its account. A credential proxy (D) hides a secret but leaves the account's update and delete rights unchanged, so an injected instruction could still use them.",
+    "ref": "https://code.claude.com/docs/en/agent-sdk/secure-deployment",
+    "group": "developer-foundations-set-q09"
+  },
+  {
+    "id": "developer-foundations-l4-36",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Security and Safety",
+    "task": "Matching a control to a threat: least-privilege scope, human approval, redaction before the call, keeping a secret out of the model's context",
+    "question": "A property-management firm's agent can issue deposit refunds through a payments tool, which is exactly its job, and it handles about a dozen refunds a day. A refund cannot be recalled once it is sent, and a mistaken or manipulated payout to the wrong account would be costly. A finance clerk is on shift all day, and the agent's credential is already limited to the refunds endpoint. What control should the team add against a wrong payout?",
+    "options": {
+      "A": "Narrow the agent's tool permissions to the minimum the task needs, such as a read-only credential on one dataset.",
+      "B": "Require a person to approve each specific action, with its exact arguments shown, before the tool runs.",
+      "C": "Redact or replace the sensitive values in the input with placeholders before the request is sent to the API.",
+      "D": "Keep the credential in a proxy outside the agent's environment that adds it to requests, so the model never sees it."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "The risky action is one the agent legitimately must be able to take, it is irreversible, the volume is small and a clerk is present, so a person approving each refund with its exact arguments is the right gate, and since the application runs the payments tool itself it can hold each call until the clerk approves (B). Narrowing permissions (A) has already been done, and a wrong refund sits inside the scope the agent needs. Redaction (C) does not constrain which payment goes out. A credential proxy (D) keeps the key hidden, yet the agent could still ask it to send a wrong payout.",
+    "ref": "https://code.claude.com/docs/en/agent-sdk/secure-deployment",
+    "group": "developer-foundations-set-q09"
+  },
+  {
+    "id": "developer-foundations-l4-37",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Security and Safety",
+    "task": "Matching a control to a threat: least-privilege scope, human approval, redaction before the call, keeping a secret out of the model's context",
+    "question": "A municipal complaints office wants Claude to sort free-text resident letters into twelve topics. The letters often contain national ID numbers and home addresses, the legal team forbids sending those to an outside processor, and the topic never depends on them. The pipeline has no tools and no credentials, and its batches run without anyone reviewing them. What control should the team add?",
+    "options": {
+      "A": "Narrow the agent's tool permissions to the minimum the task needs, such as a read-only credential on one dataset.",
+      "B": "Require a person to approve each specific action, with its exact arguments shown, before the tool runs.",
+      "C": "Redact or replace the sensitive values in the input with placeholders before the request is sent to the API.",
+      "D": "Keep the credential in a proxy outside the agent's environment that adds it to requests, so the model never sees it."
+    },
+    "answer": [
+      "C"
+    ],
+    "rationale": "The concern is what leaves the building in the request, and the task does not need the identifiers, so replacing them with placeholders before the call is the only control that stops the identifiers from reaching the provider at all (C). Scoping tool permissions (A) is moot because the pipeline has no tools to scope. Per-action approval (B) would not remove the data from the request and nobody reviews these batches anyway. A credential proxy (D) protects secrets, and this pipeline holds no credentials.",
+    "ref": "https://platform.claude.com/docs/en/manage-claude/api-and-data-retention",
+    "group": "developer-foundations-set-q09"
+  },
+  {
+    "id": "developer-foundations-l4-38",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Security and Safety",
+    "task": "Matching a control to a threat: least-privilege scope, human approval, redaction before the call, keeping a secret out of the model's context",
+    "question": "A public-transport agency's coding agent runs hundreds of shell commands per task in a sandbox and pushes branches to the company's code host using an access token stored in an environment variable of that sandbox. The token is already limited to pushing branches in one repository, and engineers review every merge. A security review notes that a hostile web page the agent reads could make it print and send out that variable. What should the team change?",
+    "options": {
+      "A": "Narrow the agent's tool permissions to the minimum the task needs, such as a read-only credential on one dataset.",
+      "B": "Require a person to approve each specific action, with its exact arguments shown, before the tool runs.",
+      "C": "Redact or replace the sensitive values in the input with placeholders before the request is sent to the API.",
+      "D": "Keep the credential in a proxy outside the agent's environment that adds it to requests, so the model never sees it."
+    },
+    "answer": [
+      "D"
+    ],
+    "rationale": "The danger is the token's value leaking, so the credential should live in a proxy outside the sandbox that injects it into outgoing requests, leaving nothing for the agent to print (D). Narrowing the token (A) has already been done, and a leaked branch-push token is still usable by an attacker. Approving each command (B) is impractical at hundreds per task, and a reviewer reading raw shell commands could easily miss a harmful one. Redacting the input (C) addresses data sent to the API, while this secret sits in the environment.",
+    "ref": "https://code.claude.com/docs/en/agent-sdk/secure-deployment",
+    "group": "developer-foundations-set-q09"
+  },
+  {
+    "id": "developer-foundations-l4-39",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Eval, Testing, and Debugging",
+    "task": "Isolating an integration-layer bug from a model-output problem using the captured request and reply",
+    "question": "A ski-resort app lets guests ask a Claude assistant for lesson slots, and 6 of 40 test conversations offered lessons on the wrong day. The team captured the exact request the application sent for one of them: the guest asked for 3 February, but the application's date formatter wrote 2 March into the prompt, and the assistant's answer is consistent with that date. The failure repeats every time for days before the 13th. What should the team do first?",
+    "options": {
+      "A": "Fix the integration layer first: how the application builds the request, passes tool results back or parses the reply.",
+      "B": "Revise the instructions and add worked examples for the failing cases, then rerun the test set to confirm the change.",
+      "C": "Add the failing conversations to the evaluation set and gather more examples of each failure before deciding what to change.",
+      "D": "Switch to a more capable model tier and rerun the failing conversations to see whether the errors disappear."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "Reading the captured request before changing anything separates an integration fault from a model fault, and here it shows the model received the wrong date and answered correctly for it, so the fault is in how the application builds the request, and it fails only for days that can be read as months (A). Rewriting the instructions (B) would tune a prompt that was never the cause. Collecting more failing conversations (C) adds nothing when the failure is already explained and repeats every time. A more capable tier (D) cannot recover a date it was never given.",
+    "ref": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+    "group": "developer-foundations-set-t02"
+  },
+  {
+    "id": "developer-foundations-l4-40",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Eval, Testing, and Debugging",
+    "task": "Isolating an integration-layer bug from a model-output problem using the captured request and reply",
+    "question": "A university registrar's assistant answers tuition-refund questions, and 11 of 60 test conversations cite the standard clause when a medical-withdrawal exception applies. The captured request holds the full rules text and the question as intended, the reply parses without error, and replaying that request in the console gives the same wrong answer. The prompt has one sentence about exceptions and no examples, and the team already runs the most capable tier (Claude Fable 5.2). What should the team do first?",
+    "options": {
+      "A": "Fix the integration layer first: how the application builds the request, passes tool results back or parses the reply.",
+      "B": "Revise the instructions and add worked examples for the failing cases, then rerun the test set to confirm the change.",
+      "C": "Add the failing conversations to the evaluation set and gather more examples of each failure before deciding what to change.",
+      "D": "Switch to a more capable model tier and rerun the failing conversations to see whether the errors disappear."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "Reading the captured request before changing anything separates an integration fault from a model fault, and here the input is correct, the parsing works and the error reproduces outside the application, so the problem is in the model's output, and the thin exception guidance and lack of examples are the cheapest thing to improve and re-test (B). Searching the integration layer (A) is pointless when the request and the parsing are verified. Gathering more examples (C) delays a fix when the failures already reproduce on demand. Moving to a more capable tier (D) is not an option, because the team already runs the most capable one.",
+    "ref": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+    "group": "developer-foundations-set-t02"
+  },
+  {
+    "id": "developer-foundations-l4-41",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Prompt and Context Engineering",
+    "task": "Prompt engineering: choosing the technique that fixes a symptom (examples, explicit rules, system prompt placement, structured output)",
+    "question": "An air-quality agency turns inspectors' shorthand field notes into formal log entries with Claude. The written rules are already specific and complete, and ordinary notes come out right. The failures are on odd note styles, such as abbreviations mixed with sketches described in words, which the rules cannot capture, though staff can supply a correct entry for each style. A supervisor reads the entries as prose. Which change fits best?",
+    "options": {
+      "A": "Add three or four varied worked examples to the prompt, each pairing a typical input with the exact output wanted.",
+      "B": "Rewrite the instruction as a specific rule that can be checked, stating the limit and what to leave out.",
+      "C": "Move the fixed role and policy into the system prompt and keep the user turn for the variable content.",
+      "D": "Request structured output with a JSON schema so every response comes back with the same fields and types."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "The rules are already precise and the gap is in unusual input styles that are easier to show than to describe, so a few varied worked examples that cover those styles steer format and handling directly (A). Rewriting the rules as a checkable rule (B) has nothing left to sharpen, since the rules are already specific. Moving content to the system prompt (C) changes placement, and nothing in the prompt is misplaced. A JSON schema (D) fixes the shape of data a program reads, while this output is prose read by a person.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+    "group": "developer-foundations-set-q10"
+  },
+  {
+    "id": "developer-foundations-l4-42",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Prompt and Context Engineering",
+    "task": "Prompt engineering: choosing the technique that fixes a symptom (examples, explicit rules, system prompt placement, structured output)",
+    "question": "A game studio's writers use Claude to draft one short quest hook per prompt, shown in a text box for a designer to read and paste. The prompt only says to write a quest hook. The content is good, but some replies carry three alternatives, a designer's note or two hundred words. The studio wants exactly one hook of at most forty words and nothing else, and wants each hook to differ in setting and tone, so any sample would pull the drafts toward it. Which change fits best?",
+    "options": {
+      "A": "Add three or four varied worked examples to the prompt, each pairing a typical input with the exact output wanted.",
+      "B": "Rewrite the instruction as a specific rule that can be checked, stating the limit and what to leave out.",
+      "C": "Move the fixed role and policy into the system prompt and keep the user turn for the variable content.",
+      "D": "Request structured output with a JSON schema so every response comes back with the same fields and types."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "The prompt never states the count, the length or what to leave out, so the model fills the gap in its own way, and writing those limits as an explicit rule that can be checked closes it (B). Worked examples (A) would pull every hook toward the samples, which the writers do not want. Placement in the system prompt (C) does not supply a rule that is missing from the prompt. A JSON schema (D) suits output that a program parses, and nobody parses this text box.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+    "group": "developer-foundations-set-q10"
+  },
+  {
+    "id": "developer-foundations-l4-43",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Prompt and Context Engineering",
+    "task": "Prompt engineering: choosing the technique that fixes a symptom (examples, explicit rules, system prompt placement, structured output)",
+    "question": "A rail operator's passenger assistant sends each request as one user message: a 500-word block of fixed policy on refund limits, tone and languages, then the passenger's text. When passengers paste long forwarded emails, Claude sometimes answers in the voice of the forwarded sender and drops the policy. The policy is clearly worded and never changes between requests, and the replies are free text for the passenger. Which change fits best?",
+    "options": {
+      "A": "Add three or four varied worked examples to the prompt, each pairing a typical input with the exact output wanted.",
+      "B": "Rewrite the instruction as a specific rule that can be checked, stating the limit and what to leave out.",
+      "C": "Move the fixed role and policy into the system prompt and keep the user turn for the variable content.",
+      "D": "Request structured output with a JSON schema so every response comes back with the same fields and types."
+    },
+    "answer": [
+      "C"
+    ],
+    "rationale": "The standing policy and the passenger's pasted text share one user turn. Putting the policy in the system prompt and keeping the user turn for the passenger's text, wrapped in tags, is the documented split between durable rules and variable input (C). Worked examples (A) would not explain why the policy is lost when long text is pasted. Rewriting the rules (B) is pointless because the wording is already clear. A JSON schema (D) shapes data for a program, and these replies are free text.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+    "group": "developer-foundations-set-q10"
+  },
+  {
+    "id": "developer-foundations-l4-44",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Prompt and Context Engineering",
+    "task": "Prompt engineering: choosing the technique that fixes a symptom (examples, explicit rules, system prompt placement, structured output)",
+    "question": "A public library's catalogue importer asks Claude to turn scanned donation forms into a JSON record that is loaded straight into the database. The prompt describes the fields in words, already contains a few examples and has been reworded twice to demand JSON only, and the content is accurate. Yet about one reply in fifty wraps the record in a sentence, renames a field or omits a required one, and the importer rejects it. Which change fits best?",
+    "options": {
+      "A": "Add three or four varied worked examples to the prompt, each pairing a typical input with the exact output wanted.",
+      "B": "Rewrite the instruction as a specific rule that can be checked, stating the limit and what to leave out.",
+      "C": "Move the fixed role and policy into the system prompt and keep the user turn for the variable content.",
+      "D": "Request structured output with a JSON schema so every response comes back with the same fields and types."
+    },
+    "answer": [
+      "D"
+    ],
+    "rationale": "The content is right and only the shape fails, which is what structured output with a JSON schema addresses: it constrains the response to the schema so the importer gets the same fields and types each time (D). More examples (A) are already in the prompt and have not stopped the slips. Rewording the instruction as a checkable rule (B) has already been tried twice without removing the slips. Moving the policy to the system prompt (C) does not enforce field names or types.",
+    "ref": "https://platform.claude.com/docs/en/build-with-claude/structured-outputs",
+    "group": "developer-foundations-set-q10"
+  },
+  {
+    "id": "developer-foundations-l4-45",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Prompt and Context Engineering",
+    "task": "Reliability of outputs: validating in code and retrying with the error versus verifying claims against a source",
+    "question": "A tour operator's itinerary builder asks Claude for a JSON plan that its booking service checks with fixed rules: dates in order, no two activities overlapping, and line prices adding up to the stated total. About 4 percent of plans break one rule, and the checker names the exact rule that failed. Prices and times are copied correctly from the catalogue in the prompt; the faults are in how the plan is assembled. Which approach should the team add?",
+    "options": {
+      "A": "Validate each response in code against the format and business rules, and retry the call with the specific error added.",
+      "B": "Check each claim in the answer against the retrieved source passages, and drop or flag claims they do not support.",
+      "C": "Add a second Claude pass that rereads the first answer and corrects what it judges wrong, without consulting any outside data.",
+      "D": "Instruct Claude to answer when it is certain and to say that it does not know when it is not."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "Each fault is a deterministic rule that code can test and name, so validating in code and retrying with the specific error tells Claude exactly what to fix (A). Checking claims against sources (B) has no target here, because the copied prices and times are already correct. A second Claude pass (C) adds a call and relies on the model's judgment when a precise check already exists. A certainty instruction (D) does not help with arithmetic and ordering mistakes made while assembling the plan.",
+    "ref": "https://www.anthropic.com/research/building-effective-agents",
+    "group": "developer-foundations-set-t03"
+  },
+  {
+    "id": "developer-foundations-l4-46",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Prompt and Context Engineering",
+    "task": "Reliability of outputs: validating in code and retrying with the error versus verifying claims against a source",
+    "question": "A tax agency's help assistant answers taxpayers' questions from the three bulletins retrieved for each question and pasted into the prompt. Answers always pass the format check, but auditors found two that stated a filing deadline the bulletins do not contain, both worded with full confidence. No code rule can tell a true deadline from a false one, though the bulletin text is available for every answer. Which approach should the team add?",
+    "options": {
+      "A": "Validate each response in code against the format and business rules, and retry the call with the specific error added.",
+      "B": "Check each claim in the answer against the retrieved source passages, and drop or flag claims they do not support.",
+      "C": "Add a second Claude pass that rereads the first answer and corrects what it judges wrong, without consulting any outside data.",
+      "D": "Instruct Claude to answer when it is certain and to say that it does not know when it is not."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "The problem is unsupported claims, and the sources that decide whether a claim is true are at hand, so checking each claim against the retrieved passages and dropping the unsupported ones addresses it directly (B). Validation with retries (A) tests format and rules, which already pass, and cannot judge a deadline. A second pass without outside data (C) can repeat the same mistake, since it never consults the bulletins. A certainty instruction (D) lowers the rate of such claims but verifies none of them, and these two were stated with full confidence.",
+    "ref": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+    "group": "developer-foundations-set-t03"
+  },
+  {
+    "id": "developer-foundations-l4-47",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Tools and MCPs",
+    "task": "Agentic customization: choosing between a custom tool, an Anthropic server tool, an MCP server and a Skill",
+    "question": "A dental group's scheduling service lets patients ask a Claude assistant for open appointments. The chair availability lives in a database reachable only from the service's own network, and the lookup already exists as a function in the service's code. No other application will use it, and the team does not want to deploy or operate any new server. What is the lightest way to give Claude what it needs?",
+    "options": {
+      "A": "Define a custom client tool with an input schema and run it in the application's own code when Claude calls it.",
+      "B": "Enable an Anthropic server tool, such as web search or code execution, which runs on Anthropic's side without handler code.",
+      "C": "Expose the capability once through an MCP server that any MCP-capable Claude application can connect to.",
+      "D": "Package the procedure as a Skill, with instructions, a template and a script, that Claude loads when a task calls for it."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "The data is private, the function already exists in one application and only that application needs it, so a custom client tool whose handler calls the function is the lightest fit (A). An Anthropic server tool (B) runs on Anthropic's side and cannot reach a database on the service's private network. An MCP server (C) pays off when several applications share a capability, and here it would be a new server to run for a single caller. A Skill (D) packages instructions and scripts, not a live lookup into a private database.",
+    "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works",
+    "group": "developer-foundations-set-q11"
+  },
+  {
+    "id": "developer-foundations-l4-48",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Tools and MCPs",
+    "task": "Agentic customization: choosing between a custom tool, an Anthropic server tool, an MCP server and a Skill",
+    "question": "A farmers' co-op wants its Claude assistant to answer questions about this week's commodity prices and weather warnings, which public agencies publish on their websites and update daily. Nothing the assistant needs is private, and the team has no search provider contract and does not want to write or host a fetching service. What is the lightest way to give Claude what it needs?",
+    "options": {
+      "A": "Define a custom client tool with an input schema and run it in the application's own code when Claude calls it.",
+      "B": "Enable an Anthropic server tool, such as web search or code execution, which runs on Anthropic's side without handler code.",
+      "C": "Expose the capability once through an MCP server that any MCP-capable Claude application can connect to.",
+      "D": "Package the procedure as a Skill, with instructions, a template and a script, that Claude loads when a task calls for it."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "The information is public, fresh and on the web, and the team wants no handler or hosting, so enabling Anthropic's web search server tool lets Anthropic run the searches and return cited results (B). A custom client tool (A) would mean contracting a search provider and writing and running the handler. An MCP server (C) would still be something to build and host for a need that a built-in tool covers. A Skill (D) holds instructions and scripts that go stale, and cannot supply this week's prices.",
+    "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool",
+    "group": "developer-foundations-set-q11"
+  },
+  {
+    "id": "developer-foundations-l4-49",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Tools and MCPs",
+    "task": "Agentic customization: choosing between a custom tool, an Anthropic server tool, an MCP server and a Skill",
+    "question": "A power utility's platform team owns the equipment registry. Three separate Claude applications need the same lookups: a support bot built by one team, engineers working in Claude Code, and a desktop assistant from a vendor, all able to connect to MCP servers and sharing no code. The platform team wants one implementation to maintain and one place to control access. What is the lightest way to give Claude what it needs?",
+    "options": {
+      "A": "Define a custom client tool with an input schema and run it in the application's own code when Claude calls it.",
+      "B": "Enable an Anthropic server tool, such as web search or code execution, which runs on Anthropic's side without handler code.",
+      "C": "Expose the capability once through an MCP server that any MCP-capable Claude application can connect to.",
+      "D": "Package the procedure as a Skill, with instructions, a template and a script, that Claude loads when a task calls for it."
+    },
+    "answer": [
+      "C"
+    ],
+    "rationale": "One capability must serve three unrelated applications, and exposing it once through an MCP server lets each client connect to the same implementation and the same access control (C). A custom client tool (A) lives inside one application's code, so it would be rebuilt three times. An Anthropic server tool (B) runs on Anthropic's side and cannot query the utility's registry. A Skill (D) carries instructions and scripts, not a shared, access-controlled connection to a live system.",
+    "ref": "https://modelcontextprotocol.io/docs/getting-started/intro",
+    "group": "developer-foundations-set-q11"
+  },
+  {
+    "id": "developer-foundations-l4-50",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Tools and MCPs",
+    "task": "Agentic customization: choosing between a custom tool, an Anthropic server tool, an MCP server and a Skill",
+    "question": "A research foundation's grants team uses Claude Code to draft proposals. Each draft must follow a 14-page house style guide, fill a fixed template and pass a small script that checks section lengths. Most sessions in the repository have nothing to do with grants, so the team does not want that material in every conversation. No outside system is involved. What is the lightest way to give Claude what it needs?",
+    "options": {
+      "A": "Define a custom client tool with an input schema and run it in the application's own code when Claude calls it.",
+      "B": "Enable an Anthropic server tool, such as web search or code execution, which runs on Anthropic's side without handler code.",
+      "C": "Expose the capability once through an MCP server that any MCP-capable Claude application can connect to.",
+      "D": "Package the procedure as a Skill, with instructions, a template and a script, that Claude loads when a task calls for it."
+    },
+    "answer": [
+      "D"
+    ],
+    "rationale": "The need is a procedure with reference material and a script, with no live system, wanted only when a grant task comes up, so a Skill loads its instructions only when the task calls for them and costs almost no context otherwise (D). A custom client tool (A) means writing a handler for something that is instructions, not a function call. A server tool (B) offers web search or code execution and does not carry the house guide or template. An MCP server (C) would be a server to run for static material with no system behind it.",
+    "ref": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview",
+    "group": "developer-foundations-set-q11"
+  },
+  {
+    "id": "developer-foundations-l4-51",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Tools and MCPs",
+    "task": "Tool implementation: error handling with is_error versus approval before irreversible actions",
+    "question": "A university's lab-booking assistant calls a tool to reserve a room. When the requested room is already taken, the tool throws an exception and the assistant tells the student that the system had an error, although the tool knows which rooms are free at that hour. Reservations can be cancelled at no cost. Which change should the team make?",
+    "options": {
+      "A": "Return the failure as a tool result with is_error set, saying what was wrong and what to change in the call.",
+      "B": "Stop before the tool runs, show a person the exact action, and run it only after they approve it.",
+      "C": "Add a sentence to the tool description telling Claude to double-check all of its arguments before calling the tool.",
+      "D": "Wrap the call in code that repeats the same call up to three times when it does not succeed."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "The call failed for a reason Claude can act on, so returning a tool result with is_error set and a message naming the problem and the free rooms lets it adjust the call and answer the student (A). Human approval (B) guards actions that cannot be undone, and these reservations cancel at no cost. A description sentence (C) would not help, because the arguments were valid and the room was simply taken. Repeating the same call (D) fails again for the same reason.",
+    "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/handle-tool-calls",
+    "group": "developer-foundations-set-t04"
+  },
+  {
+    "id": "developer-foundations-l4-52",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Tools and MCPs",
+    "task": "Tool implementation: error handling with is_error versus approval before irreversible actions",
+    "question": "A county's emergency-communications assistant can call a tool that sends an evacuation alert to every phone in a district, and a sent alert cannot be recalled. The tool works correctly, and in testing Claude twice picked a neighbouring district from an ambiguous operator message, with arguments that passed validation. Which change should the team make?",
+    "options": {
+      "A": "Return the failure as a tool result with is_error set, saying what was wrong and what to change in the call.",
+      "B": "Stop before the tool runs, show a person the exact action, and run it only after they approve it.",
+      "C": "Add a sentence to the tool description telling Claude to double-check all of its arguments before calling the tool.",
+      "D": "Wrap the call in code that repeats the same call up to three times when it does not succeed."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "The call succeeds, the harm cannot be undone and the model sometimes picks the wrong target, so the application, which runs client tools itself, should hold the call and show an operator the exact action for approval (B). An error result (A) needs a failure to report, and here nothing fails. A description sentence (C) is guidance the model can still misjudge on an ambiguous message. Repeating the call (D) would send the alert more than once.",
+    "ref": "https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works",
+    "group": "developer-foundations-set-t04"
+  },
+  {
+    "id": "developer-foundations-l4-53",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Claude Code",
+    "task": "Claude Code workflows: non-interactive runs in CI versus interactive sessions with project skills",
+    "question": "A mobile studio's release pipeline needs store release notes after every tag. A job must read the merged commits and write drafts to the notes folder, then pass a JSON list, one entry per language, to the publishing job. The runner has no terminal and nobody watches it, and it also holds the store-publishing credentials, so the job should run only git log, git diff and file writes. Which setup fits best?",
+    "options": {
+      "A": "Run Claude Code non-interactively in print mode, allow only the needed tools by permission rule, and read its JSON output.",
+      "B": "Work in an interactive session and start a project skill from the repository, so the steps run with the developer present.",
+      "C": "Run Claude Code non-interactively with permission checks switched off, so that no step of the job stalls waiting for an approval.",
+      "D": "Define a project subagent with its own tool list and context window, and delegate the work to it from a session."
+    },
+    "answer": [
+      "A"
+    ],
+    "rationale": "Nobody is there to answer prompts, the next job needs machine-readable output and the runner holds credentials, so a print-mode run with permission rules limited to the needed commands and JSON output fits (A). An interactive session with a skill (B) needs a developer at a terminal. Switching permission checks off (C) removes the limit on what a job with publishing credentials may run. A subagent (D) is started from a session and does not by itself give the pipeline an unattended run or a JSON result.",
+    "ref": "https://code.claude.com/docs/en/headless",
+    "group": "developer-foundations-set-t05"
+  },
+  {
+    "id": "developer-foundations-l4-54",
+    "cert": "developer-foundations",
+    "source": "lote",
+    "lote": 4,
+    "domain": "Claude Code",
+    "task": "Claude Code workflows: non-interactive runs in CI versus interactive sessions with project skills",
+    "question": "A city GIS team adds a map layer a few times a month by following an eleven-step checklist covering naming, projection checks, a metadata form and tile builds. At step seven the developer must choose between two projections after looking at the data, wants to approve each edit as it happens, and wants teammates to run the same checklist from the repository. Which setup fits best?",
+    "options": {
+      "A": "Run Claude Code non-interactively in print mode, allow only the needed tools by permission rule, and read its JSON output.",
+      "B": "Work in an interactive session and start a project skill from the repository, so the steps run with the developer present.",
+      "C": "Run Claude Code non-interactively with permission checks switched off, so that no step of the job stalls waiting for an approval.",
+      "D": "Define a project subagent with its own tool list and context window, and delegate the work to it from a session."
+    },
+    "answer": [
+      "B"
+    ],
+    "rationale": "A developer is present, a judgment call falls mid-procedure and the checklist must be shared from the repository, so a project skill started inside an interactive session runs its steps in the main conversation where the developer can look, decide and approve (B). A non-interactive run (A) cannot pause at step seven to ask which projection to use. Switching permission checks off (C) removes the approvals the developer wants. A subagent (D) works in its own context window, apart from the conversation in which the developer is deciding.",
+    "ref": "https://code.claude.com/docs/en/skills",
+    "group": "developer-foundations-set-t05"
+  }
+]
