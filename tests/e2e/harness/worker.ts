@@ -17,7 +17,8 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const system = body.messages.find((m) => m.role === 'system')?.content ?? ''
     deepseekSystems.push(system)
     if (body.stream) return new Response('data: {"choices":[{"delta":{"content":"mock tutor reply"}}]}\n\ndata: [DONE]\n\n', { headers: { 'content-type': 'text/event-stream' } })
-    return Response.json({ choices: [{ message: { content: JSON.stringify(jsonReply(system)) }, finish_reason: 'stop' }], usage: { total_tokens: 1 } })
+    const user = body.messages.filter((m) => m.role === 'user').map((m) => m.content).join('\n')
+    return Response.json({ choices: [{ message: { content: JSON.stringify(jsonReply(system, user)) }, finish_reason: 'stop' }], usage: { total_tokens: 1 } })
   }
   if (url.startsWith('https://oauth2.googleapis.com/token')) {
     const form = new URLSearchParams(typeof init?.body === 'string' ? init.body : input instanceof Request ? await input.clone().text() : String(init?.body))
@@ -30,8 +31,8 @@ globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
   return realFetch(input as RequestInfo, init)
 }) as typeof fetch
 
-/** JSON-mode answers: one well-formed item quoting the notes it was given, and a blind check that agrees with its key. */
-function jsonReply(system: string) {
+/** JSON-mode answers: one well-formed item quoting the notes it was given, and a blind check (one entry per ITEM sent) that agrees with its key. */
+function jsonReply(system: string, user: string) {
   if (system.startsWith('You write exam items')) {
     const notes = system.slice(system.indexOf('NOTES:') + 6)
     const evidence = notes.match(/[A-Za-z][A-Za-z ,]{59}/)?.[0] ?? ''
@@ -41,7 +42,8 @@ function jsonReply(system: string) {
       answer: ['B'], select: 1, rationale: 'B checks the change against the documented guidance, which isolates the cause; the other options either skip diagnosis or overreact to a single anomaly.', evidence,
     }] }
   }
-  return { answer: ['B'], fits_domain: true }
+  const items = (user.match(/^ITEM \d+$/gm) ?? []).length
+  return { results: Array.from({ length: items }, (_, i) => ({ item: i + 1, answer: ['B'], fits_domain: true })) }
 }
 
 export default {

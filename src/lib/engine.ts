@@ -1,4 +1,4 @@
-import { mulberry32, shuffle, type Letter, type Question } from '../shared/exam'
+import { loteOf, mulberry32, shuffle, type Letter, type Question } from '../shared/exam'
 import { SCALE, certById, certOfAttempt, domainQuotas, quickMinutes, type CertDef } from '../shared/certs'
 import { groupOf, guideCount, inCert, type AiQuestion } from './content'
 export { stemPreview } from '../shared/exam'
@@ -11,10 +11,10 @@ export { displayLetter, optionOrder } from '../shared/exam'
 /** A bank that has calibrated questions (no answer-pattern cues) measures readiness on those alone. */
 export const isCalibratedBank = (qs: Map<string, AiQuestion>) => { for (const q of qs.values()) if (q.calibrated) return true; return false }
 
-/** Only bank questions measure readiness: AI-generated and app-written ones are practice. In a calibrated bank, only
+/** Only bank questions measure readiness: AI-generated, app-written and lote 2/3 ones are practice. In a calibrated bank, only
  *  calibrated questions answered after they were calibrated (`at`, ms) count. */
 export const countsForReadiness = (q: Pick<Question, 'source' | 'calibrated'> | undefined, at?: number, calibratedBank = false) =>
-  !!q && q.source !== 'ai' && q.source !== 'app' && (!calibratedBank || (!!q.calibrated && at !== undefined && at >= Date.parse(q.calibrated)))
+  !!q && q.source !== 'ai' && q.source !== 'app' && q.source !== 'lote' && (!calibratedBank || (!!q.calibrated && at !== undefined && at >= Date.parse(q.calibrated)))
 
 export const isCorrect = (q: Question, choice: Letter[] | undefined) =>
   !!choice && choice.length === q.answer.length && q.answer.every((l) => choice.includes(l))
@@ -104,8 +104,10 @@ export function latestByQuestion(data: Data, cert: CertDef) {
   return latest
 }
 
-export function buildAttempt(mode: Mode, data: Data, index: Map<string, AiQuestion>, opts: { cert: CertDef; domain?: string; fromAttempt?: string; now: number }): Omit<Attempt, 'status'> | { error: 'no_missed' | 'no_questions' } {
+/** `lotes`: which lotes full, quick and drill draw from (default: Lote 1, the original bank). The repo mocks, the guide samples and AI questions ignore it. */
+export function buildAttempt(mode: Mode, data: Data, index: Map<string, AiQuestion>, opts: { cert: CertDef; domain?: string; fromAttempt?: string; lotes?: number[]; now: number }): Omit<Attempt, 'status'> | { error: 'no_missed' | 'no_questions' } {
   const { cert } = opts
+  const lotes = opts.lotes?.length ? opts.lotes : [1]
   const spec = modeSpec(mode, cert)
   const seed = (Math.random() * 2 ** 32) >>> 0
   const rnd = mulberry32(seed)
@@ -113,6 +115,7 @@ export function buildAttempt(mode: Mode, data: Data, index: Map<string, AiQuesti
   const qs = inCert(index, cert)
   const all = [...qs.values()].filter((q) => !(q as AiQuestion).reported)
   const repo = all.filter((q) => q.source !== 'ai')
+  const picked = repo.filter((q) => lotes.includes(loteOf(q)))
   const exp = exposures(data, qs, cert)
   let chosen: AiQuestion[] = []
   let label: string | undefined
@@ -120,9 +123,9 @@ export function buildAttempt(mode: Mode, data: Data, index: Map<string, AiQuesti
   if (mode === 'full' || mode === 'quick') {
     const quotas = domainQuotas(cert, spec.items)
     const used = new Set<string>()
-    for (const d of cert.domains) chosen.push(...pickDistinct(byFreshness(repo.filter((q) => q.domain === d.name), exp, rnd), quotas[d.name], used))
+    for (const d of cert.domains) chosen.push(...pickDistinct(byFreshness(picked.filter((q) => q.domain === d.name), exp, rnd), quotas[d.name], used))
     // A domain without enough distinct questions is topped up from the freshest of the rest
-    if (chosen.length < spec.items) chosen.push(...pickDistinct(byFreshness(repo, exp, rnd), spec.items - chosen.length, used))
+    if (chosen.length < spec.items) chosen.push(...pickDistinct(byFreshness(picked, exp, rnd), spec.items - chosen.length, used))
     chosen = shuffle(chosen, rnd)
   } else if (mode.startsWith('repo-mock-')) {
     chosen = repo.filter((q) => q.source === 'mock-' + mode.slice(-1))
@@ -130,7 +133,7 @@ export function buildAttempt(mode: Mode, data: Data, index: Map<string, AiQuesti
     chosen = repo.filter((q) => q.source === 'guide')
   } else if (mode === 'drill') {
     label = opts.domain
-    const pool = all.filter((q) => q.domain === opts.domain && q.source !== 'ai')
+    const pool = picked.filter((q) => q.domain === opts.domain)
     chosen = pickDistinct(byFreshness(pool, exp, rnd), spec.items, new Set())
   } else if (mode === 'ai') {
     label = opts.domain

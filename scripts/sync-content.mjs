@@ -1,6 +1,6 @@
 // Imports the study material from the parent repo into static JSON bundled with the app, one folder per certification.
 // Run after `git pull` in the repo: `npm run sync` (all certifications) or `npm run sync -- <cert-id>`.
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
@@ -75,6 +75,9 @@ for (const cert of CERTS) {
   const samples = local('guide-samples')
   // Curated items belong to the calibrated bank; items written by the app for thin domains (source "app") are always served
   const extra = local('extra-questions').filter((q) => calibratedBank || q.source !== 'curated')
+  // Lotes 2 and 3 (scripts/lotes/<cert>/lote<N>.json, source "lote"): long-scenario questions the user picks per exam; Lote 1 is everything above
+  const lotesDir = join(here, 'lotes', cert.id)
+  const lotes = existsSync(lotesDir) ? readdirSync(lotesDir).filter((f) => /^lote\d+\.json$/.test(f)).sort().flatMap((f) => JSON.parse(readFileSync(join(lotesDir, f), 'utf8'))) : []
   const keyOf = (q) => (Array.isArray(q.answer) ? q.answer.join('') : String(q.answer)).replace(/[^A-E]/g, '').split('')
   const shape = (q) => ({
     id: q.id,
@@ -86,10 +89,11 @@ for (const cert of CERTS) {
     answer: keyOf(q),
     rationale: q.rationale,
     ...(q.evidence ? { evidence: q.evidence } : {}),
-    ...(calibratedBank && q.ref ? { ref: q.ref } : {}),
+    ...((calibratedBank || q.source === 'lote') && q.ref ? { ref: q.ref } : {}),
     ...(calibratedBank && q.calibrated ? { calibrated: q.calibrated } : {}),
+    ...(q.source === 'lote' ? { lote: q.lote } : {}),
   })
-  const upstream = [...bank.questions.filter((q) => q.exam === cert.id), ...samples, ...extra].map(shape)
+  const upstream = [...bank.questions.filter((q) => q.exam === cert.id), ...samples, ...extra, ...lotes].map(shape)
 
   // Rewrites of upstream questions without their answer-pattern cues (scripts/question-overrides/): same id and key, new wording.
   // Each one names the upstream text it rewrote; when upstream moves, the question falls back to it, uncalibrated.
@@ -108,7 +112,7 @@ for (const cert of CERTS) {
 
   // Clusters use the upstream wording, so rewriting a question never regroups what was already seen.
   // App-written and curated items stay out of them: a shared group would let them hide behind a question already seen.
-  const own = (q) => q.source === 'app' || q.source === 'curated'
+  const own = (q) => q.source === 'app' || q.source === 'curated' || q.source === 'lote'
   const toks = upstream.map((q) => tokens(q.question + ' ' + q.options[q.answer[0]]))
   const parent = questions.map((_, i) => i)
   const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])))
@@ -162,7 +166,7 @@ for (const cert of CERTS) {
     syncedAt: previous?.contentHash === contentHash ? previous.syncedAt : new Date().toISOString(),
     contentHash,
     factsVerified: verified,
-    counts: { questions: questions.length, flashcards: flashcards.length, guide: samples.length, app: extra.filter((q) => q.source === 'app').length, ...(calibratedBank ? { curated: extra.filter((q) => q.source === 'curated').length, calibrated: questions.filter((q) => q.calibrated).length } : {}), distinct: pool },
+    counts: { questions: questions.length, flashcards: flashcards.length, guide: samples.length, app: extra.filter((q) => q.source === 'app').length, ...(lotes.length ? { lotes: lotes.length } : {}), ...(calibratedBank ? { curated: extra.filter((q) => q.source === 'curated').length, calibrated: questions.filter((q) => q.calibrated).length } : {}), distinct: pool },
   })
   console.log(`${cert.code}: questions ${questions.length} (${dups} near-duplicate pairs, ${samples.length} from the guide, ${extra.filter((q) => q.source === 'app').length} written by the app${calibratedBank ? `, ${extra.filter((q) => q.source === 'curated').length} curated, ${questions.filter((q) => q.calibrated).length} calibrated` : ', calibrated bank off'}) · flashcards ${flashcards.length} · facts verified ${verified}`)
 }

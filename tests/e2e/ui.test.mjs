@@ -54,6 +54,28 @@ describe('browser', { skip }, () => {
     await page.waitForSelector('.topbar')
   })
 
+  it('draws exams from the chosen question lots', async () => {
+    await page.goto(BASE + '/#/exams')
+    await page.getByRole('heading', { name: 'Lotes de preguntas' }).waitFor()
+    const lot = (n) => page.getByRole('checkbox', { name: new RegExp(`Lote ${n}`) })
+    assert.equal(await lot(1).isChecked(), true, 'Lote 1 is the default')
+    await lot(1).click()
+    assert.equal(await lot(1).isChecked(), true, 'the last selected lot cannot be unticked')
+    await lot(2).click()
+    await lot(1).click()
+    assert.deepEqual([await lot(1).isChecked(), await lot(2).isChecked(), await lot(3).isChecked()], [false, true, false])
+    await page.getByRole('button', { name: /Mock rápido/ }).click()
+    await page.waitForSelector('.exam')
+    assert.equal(await page.locator('.chip', { hasText: /^Lote 2$/ }).count(), 1, 'the question comes from Lote 2')
+    await page.locator('.exam-head button.mono').click()
+    await page.getByRole('button', { name: 'Discard attempt' }).click()
+    await page.waitForSelector('.topbar')
+    await page.goto(BASE + '/#/exams')
+    await lot(1).click()
+    await lot(2).click()
+    assert.deepEqual([await lot(1).isChecked(), await lot(2).isChecked()], [true, false])
+  })
+
   it('runs drills in Spanish and charts the result', async () => {
     await page.goto(BASE + '/#/domains')
     await page.getByRole('button', { name: 'Drill', exact: true }).first().click()

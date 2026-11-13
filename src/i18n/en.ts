@@ -196,6 +196,13 @@ export const en = {
     examWeek: 'Exam week: go through the checklist',
     more: 'More',
   },
+  lotes: {
+    title: 'Question lots',
+    note: 'Choose where exams and drills draw their questions from. Lote 1 is the original bank; lotes 2 and 3 are longer scenarios that you have to read closely. They are practice: they do not count towards your estimate.',
+    name: (n: number) => `Lote ${n}`,
+    kind: { 1: 'Original bank', 2: 'Decisions under constraints', 3: 'Diagnosis and review' } as Record<number, string>,
+    count: (n: number) => `${n} questions`,
+  },
   exams: {
     title: 'Exams',
     intro: 'Full mocks pick questions you have never seen first, so the estimate does not get inflated.',

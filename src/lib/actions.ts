@@ -1,6 +1,7 @@
 import { ensureCert, isLoaded, questionIndex } from './content'
 import { attemptsOf, buildAttempt, scoreAttempt } from './engine'
 import { currentCert } from './cert'
+import { effectiveLotes } from './lotes'
 import { go } from './router'
 import { dispatch, getData, now } from './store'
 import { certOfAttempt, type CertDef } from '../shared/certs'
@@ -17,7 +18,7 @@ export function startAttempt(mode: Mode, domain?: string, fromAttempt?: string):
   const cert = currentCert()
   if (!isLoaded(cert.id)) return 'loading'
   const qs = questionIndex(data.aiQuestions)
-  const a = buildAttempt(mode, data, qs, { cert, domain, fromAttempt, now: now() })
+  const a = buildAttempt(mode, data, qs, { cert, domain, fromAttempt, lotes: effectiveLotes(qs, cert), now: now() })
   if ('error' in a) return a.error
   dispatch({ type: 'attempt.create', attempt: a })
   go(`/exam/${a.id}`)

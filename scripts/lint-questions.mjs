@@ -2,7 +2,7 @@
 //   node scripts/lint-questions.mjs [cert-id]              table for every bank, then the calibrated rules (exit 1 if they fail)
 //   node scripts/lint-questions.mjs --candidates <file>    check draft items (array) before they go into scripts/extra-questions/
 // The same rules run in tests/unit/bank.test.ts, so a calibrated bank that regresses fails `npm test`.
-import { readFileSync, existsSync } from 'node:fs'
+import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { CERTS } from '../src/shared/certs.ts'
@@ -124,6 +124,21 @@ export function setProblems(qs, { label, curated = false } = {}) {
   return out
 }
 
+/** Lotes 2 and 3 (scripts/lotes/<cert>/lote<N>.json): long prose items, single answer, no code or exhibits. */
+export const LOTE_RULES = { minStem: 280, maxStem: 560 }
+
+/** Item rules for a lote item: the shared ones plus length, single answer and no code. */
+export function loteItemProblems(q) {
+  const out = itemProblems(q)
+  const n = q.question.length
+  const say = (m) => out.push(`${q.id}: ${m}`)
+  if (n < LOTE_RULES.minStem || n > LOTE_RULES.maxStem) say(`stem is ${n} characters (want ${LOTE_RULES.minStem}–${LOTE_RULES.maxStem})`)
+  if (q.question.includes('`')) say('no code or backticks in a lote stem')
+  if (Object.values(q.options).some((o) => o.includes('`'))) say('no code or backticks in lote options')
+  if (q.answer.length !== 1) say('lote items are single-answer')
+  return out
+}
+
 /** New items must not cluster with anything: a shared dupGroup would hide them from readiness behind a question already seen. */
 export function nearDuplicates(news, others) {
   const out = []
@@ -159,6 +174,20 @@ const HEADER = `${'set'.padEnd(26)} items   longest   shortest  len ranks 1/2/3/
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2)
   let failed = false
+  if (args[0] === '--lote') {
+    // node scripts/lint-questions.mjs --lote scripts/lotes/developer-foundations
+    // Each lote<N>.json is one set (key-length rules apply per lote); near-duplicates are checked against the whole existing bank and across lotes
+    const lotesDir = args[1]
+    const sets = readdirSync(lotesDir).filter((f) => /^lote\d+\.json$/.test(f)).sort().map((f) => [f, JSON.parse(readFileSync(join(lotesDir, f), 'utf8'))])
+    const all = sets.flatMap(([, s]) => s)
+    const bank = loadBank(all[0]?.cert ?? 'developer-foundations').filter((q) => !all.some((d) => d.id === q.id))
+    console.log(HEADER)
+    for (const [f, s] of sets) console.log(row(f, s))
+    const problems = [...all.flatMap(loteItemProblems), ...sets.flatMap(([f, s]) => setProblems(s, { label: f })), ...nearDuplicates(all, bank)]
+    for (const p of problems) console.log('  ! ' + p)
+    console.log(problems.length ? `${problems.length} problems` : 'ok')
+    process.exit(problems.length ? 1 : 0)
+  }
   if (args[0] === '--candidates') {
     // Drafts: item rules, set rules as new items, and no clustering with any bank question or with each other
     const drafts = JSON.parse(readFileSync(args[1], 'utf8'))

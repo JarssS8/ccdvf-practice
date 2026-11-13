@@ -18,7 +18,12 @@ export interface Question {
   ref?: string
   /** ISO time from which the item is free of answer-pattern cues; only answers given after it measure readiness. */
   calibrated?: string
+  /** Which lote an item belongs to when source is "lote" (2 or 3); every other bank question is Lote 1. */
+  lote?: number
 }
+
+/** The lote a question is served in: 1 for the original bank, 2 or 3 for the long-scenario lotes. */
+export const loteOf = (q: Pick<Question, 'lote'>) => q.lote ?? 1
 
 /** A stem split into prose and ``` code blocks, in order (an unclosed fence runs to the end). */
 export function stemParts(s: string): { code: boolean; text: string }[] {

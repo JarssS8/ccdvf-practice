@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { Icon } from '../components/Icon'
 import { activeAttempt, discardAttempt, startAttempt } from '../lib/actions'
 import { attemptTitle, attemptsOf, modeSpec } from '../lib/engine'
-import { guideCount } from '../lib/content'
+import { guideCount, isLoaded, questionIndex } from '../lib/content'
 import { useCert } from '../lib/cert'
+import { loteCounts, setLotes, useLotes } from '../lib/lotes'
 import { errorText, useT } from '../i18n'
 import { useStore } from '../lib/store'
 import type { Mode } from '../lib/types'
@@ -22,6 +23,16 @@ export default function Exams() {
   const mine = attemptsOf(data, cert)
   const count = (m: Mode) => mine.filter((a) => a.mode === m && a.status === 'submitted').length
   const detail = (m: Mode) => { const spec = modeSpec(m, cert); return t.modes[m].detail(spec.items, spec.minutes ?? 0) }
+  // Lotes: shown only when the certification has more than the original bank; at least one stays selected
+  const counts = isLoaded(cert.id) ? loteCounts(questionIndex(data.aiQuestions), cert) : {}
+  const avail = Object.keys(counts).map(Number).sort()
+  const saved = useLotes(cert.id)
+  const chosen = saved.filter((n) => avail.includes(n))
+  const eff = chosen.length ? chosen : [1]
+  const toggle = (n: number) => {
+    const next = eff.includes(n) ? eff.filter((x) => x !== n) : [...eff, n].sort()
+    if (next.length) setLotes(cert.id, next)
+  }
 
   return (
     <>
@@ -39,6 +50,22 @@ export default function Exams() {
         </div>
       )}
       {err && <p role="alert" className="callout callout-bad">{errorText(t, err)}</p>}
+      {avail.length > 1 && (
+        <section className="card stack" style={{ gap: 12 }} aria-labelledby="lotes-h">
+          <div className="stack" style={{ gap: 4 }}>
+            <h2 id="lotes-h" className="h-section">{t.lotes.title}</h2>
+            <p className="small muted">{t.lotes.note}</p>
+          </div>
+          <div className="row" style={{ gap: 20, flexWrap: 'wrap' }}>
+            {avail.map((n) => (
+              <label key={n} className="row small" style={{ gap: 8, minHeight: 48 }}>
+                <input type="checkbox" checked={eff.includes(n)} onChange={() => toggle(n)} style={{ width: 20, height: 20 }} />
+                <span><strong>{t.lotes.name(n)}</strong> <span className="muted">· {t.lotes.kind[n]} · {t.lotes.count(counts[n])}</span></span>
+              </label>
+            ))}
+          </div>
+        </section>
+      )}
       {SECTIONS.map((modes, si) => (
         <section key={modes[0]} className="stack" style={{ gap: 14 }} aria-labelledby={`s-${modes[0]}`}>
           <div className="stack" style={{ gap: 4 }}>

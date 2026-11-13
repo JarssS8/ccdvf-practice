@@ -52,7 +52,7 @@ function purgeLocal(uid: string | null) {
   if (uid) { drop(LS.base(uid)); drop(LS.outbox(uid)); drop(LS.cert(uid)) }
   drop(LS.uid)
   try {
-    for (const k of Object.keys(localStorage)) if (k.startsWith('ccdvf_tutor_') || k.startsWith('ccdvf_pos_')) localStorage.removeItem(k)
+    for (const k of Object.keys(localStorage)) if (k.startsWith('ccdvf_tutor_') || k.startsWith('ccdvf_pos_') || k.startsWith('ccdvf_lotes_')) localStorage.removeItem(k)
   } catch { /* blocked */ }
 }
 

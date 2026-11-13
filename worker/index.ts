@@ -405,7 +405,8 @@ async function generate(req: Request, env: Env, user: User) {
   const { bank, notes: notesText, blueprint: blueprints, grounding } = materialOf(cert)
   const count = Math.min(Math.max(Number(body?.count) || 3, 1), 4)
   const multi = !!body?.multi
-  const budget = await takeAiBudget(env, u, ip, 1 + count)
+  // Two calls whatever the count: one generation and one blind check for the whole batch (see below)
+  const budget = await takeAiBudget(env, u, ip, 2)
   if (budget) return json({ error: budget }, 429)
 
   // Style examples from the calibrated items when there are any: the older ones teach the longest-key cue
@@ -436,7 +437,8 @@ Rules:
 NOTES:
 ${notesText}`
 
-  const covered = [...bank, ...mine].map((q) => `- ${stemPreview(q.question).slice(0, 170)}`).join('\n')
+  // Only this domain's scenarios go into the prompt (a different domain tests a different skill); the token check below still compares with everything
+  const covered = [...bank, ...mine].filter((q) => q.domain === domain).map((q) => `- ${stemPreview(q.question).slice(0, 170)}`).join('\n')
   const userPrompt = `Write ${count} new items. Style examples (do not copy):\n\n${examples.map((q) => `${q.question}\n${optionText(q)}\nKey: ${q.answer.join(',')}`).join('\n\n')}\n\nAlready in the bank (do not reuse these scenarios):\n${covered}`
 
   let drafts: Draft[] = []
@@ -447,7 +449,7 @@ ${notesText}`
     if (out && !drafts.length) why.push('the JSON had no "questions"')
   } catch (e) {
     console.error(e)
-    await refundAi(env, u, ip, 1 + count)
+    await refundAi(env, u, ip, 2)
     return json({ error: 'ai_upstream' }, 502)
   }
 
@@ -464,24 +466,42 @@ ${notesText}`
     candidates.push(d)
   }
 
-  // Blind check, in parallel: another model answers without the key and judges whether the item fits the domain
-  const checks = await Promise.all(candidates.map(async (d) => {
-    const reasons: string[] = []
-    try {
-      const r = await deepseekJson<{ answer: string[]; fits_domain: boolean }>(env, env.DEEPSEEK_CHECK_MODEL,
-        `You are taking the ${cert.name} exam. Answer the item. Then judge whether the skill that decides it is covered by this blueprint for the domain "${domain}":
+  // Blind check in ONE call for the whole batch: another model answers every item without the keys and judges whether each fits the domain.
+  // If that answer comes back cut or incomplete, the missing items are checked one by one, and each extra call is charged.
+  type Check = { answer: string[]; fits_domain: boolean }
+  const checks: (Check | null)[] = candidates.map(() => null)
+  const checkWhy: string[] = []
+  const checkSystem = `You are taking the ${cert.name} exam. Answer every item. Then judge, for each item, whether the skill that decides it is covered by this blueprint for the domain "${domain}":
 ${blueprint}
-Reply in json: {"answer":["<letter>"],"fits_domain":true} with exactly the number of letters the item asks for.`,
-        `${d.question}\n${optionText(d as unknown as Question)}\nSelect ${d.select}.`, 6000, reasons, true)
-      return { r, reasons }
-    } catch (e) { return { r: null, reasons: [String((e as Error).message)] } }
-  }))
+Reply in json: {"results":[{"item":1,"answer":["<letter>"],"fits_domain":true}]} with one entry per item, in order, and exactly the number of letters each item asks for.`
+  const runCheck = async (idx: number[]) => {
+    const out = await deepseekJson<{ results: (Check & { item: number })[] }>(env, env.DEEPSEEK_CHECK_MODEL, checkSystem,
+      idx.map((i, n) => `ITEM ${n + 1}\n${candidates[i].question}\n${optionText(candidates[i] as unknown as Question)}\nSelect ${candidates[i].select}.`).join('\n\n'),
+      Math.min(4000 + 3000 * idx.length, 16000), checkWhy, true)
+    for (const r of out?.results ?? []) {
+      const i = idx[Number(r?.item) - 1]
+      if (i !== undefined && Array.isArray(r.answer)) checks[i] = { answer: r.answer, fits_domain: r.fits_domain }
+    }
+  }
+  if (!candidates.length) await refundAi(env, u, ip, 1) // nothing to check: the second call was never made
+  else {
+    let upstreamFailed = false
+    try { await runCheck(candidates.map((_, i) => i)) } catch (e) {
+      upstreamFailed = true
+      checkWhy.push(String((e as Error).message))
+      await refundAi(env, u, ip, 1)
+    }
+    const missing = checks.flatMap((c, i) => (c ? [] : [i]))
+    if (missing.length && !upstreamFailed && !(await takeAiBudget(env, u, ip, missing.length))) {
+      await Promise.all(missing.map((i) => runCheck([i]).catch((e) => { checkWhy.push(String((e as Error).message)) })))
+    }
+  }
 
   const inserts: D1PreparedStatement[] = []
   for (const [i, d] of candidates.entries()) {
-    const { r: check, reasons } = checks[i]
+    const check = checks[i]
     const a = [...(check?.answer ?? [])].map(String).sort().join('')
-    if (!check) { rejected.push({ question: d.question.slice(0, 80), reason: `check failed (${reasons.join(', ') || 'no answer'})` }); continue }
+    if (!check) { rejected.push({ question: d.question.slice(0, 80), reason: `check failed (${[...new Set(checkWhy)].join(', ') || 'no answer'})` }); continue }
     if (a !== [...d.answer].sort().join('')) { rejected.push({ question: d.question.slice(0, 80), reason: `blind check answered ${a || 'nothing'}` }); continue }
     if (check.fits_domain === false) { rejected.push({ question: d.question.slice(0, 80), reason: 'does not fit the domain blueprint' }); continue }
 

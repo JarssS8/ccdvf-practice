@@ -219,9 +219,14 @@ describe('API: certifications', () => {
     let systems = (await client()('/api/__test/deepseek-systems')).json
     assert.match(systems.at(-1), /tutor for the Claude Certified Architect – Professional exam/)
 
+    const used0 = (await C('/api/state')).json.ai.usedToday
+    const calls0 = (await client()('/api/__test/deepseek-calls')).json.length
     const g = await C('/api/ai/generate', { method: 'POST', body: { cert: 'associate-foundations', domain: 'Prompting and Task Execution', count: 1 } })
     assert.equal(g.status, 200, JSON.stringify(g.json))
     assert.equal(g.json.accepted.length, 1, JSON.stringify(g.json.rejected))
+    // One generation plus one blind check for the whole batch: two calls charged, two made
+    assert.equal((await C('/api/state')).json.ai.usedToday - used0, 2)
+    assert.equal((await client()('/api/__test/deepseek-calls')).json.length - calls0, 2)
     assert.equal(g.json.accepted[0].cert, 'associate-foundations')
     systems = (await client()('/api/__test/deepseek-systems')).json
     const gen = systems.findLast((x) => x.startsWith('You write exam items'))

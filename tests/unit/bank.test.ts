@@ -18,7 +18,8 @@ describe.each(CERTS.map((c) => [c.code, c.id] as const))('%s question bank', (_c
 
   it('serves the original questions while the calibrated bank is off', () => {
     if (on) return
-    expect(bank.filter((q) => q.calibrated || q.ref || q.source === 'curated').map((q) => q.id)).toEqual([])
+    // Lotes 2 and 3 (source "lote") always carry their official source; they are not part of the calibrated bank
+    expect(bank.filter((q) => q.source !== 'lote' && (q.calibrated || q.ref || q.source === 'curated')).map((q) => q.id)).toEqual([])
   })
 
   // The calibrated bank's sources stay valid whether or not it is switched on

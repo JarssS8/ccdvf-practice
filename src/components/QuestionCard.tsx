@@ -31,6 +31,7 @@ export function QuestionCard({ q, seed, selected, onToggle, reveal, showDomain }
         <span className="chip">{t.question.selectN(q.answer.length)}</span>
         {q.source === 'ai' && <span className="chip"><Icon name="sparkle" size={12} />{t.sources.ai}</span>}
         {q.source === 'app' && <span className="chip">{t.sources.app}</span>}
+        {q.source === 'lote' && <span className="chip">{t.lotes.name(q.lote ?? 2)}</span>}
       </div>
       <div className="q-stem" id={`${name}-stem`}><Stem text={q.question} /></div>
       <fieldset className="options" aria-labelledby={`${name}-stem`}>
