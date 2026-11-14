@@ -137,6 +137,14 @@
    ]
   },
   {
+   "id": "introduction-to-evals",
+   "title": "Introduction to evals",
+   "summary": "Building a graded eval on your own cases, so a model and prompt are chosen from evidence rather than impression, and keep being checked after launch",
+   "url": "https://academy.claude.com/courses/introduction-to-evals",
+   "section": "Developer and integration",
+   "certs": []
+  },
+  {
    "id": "introduction-to-model-context-protocol",
    "title": "Introduction to Model Context Protocol",
    "summary": "MCP servers and clients from scratch in Python: tools, resources, and prompts",
@@ -383,7 +391,7 @@
    "Corporate network domains cleared with IT, or a personal machine and network arranged",
    "Know the shutdown list: browsers, Zoom, Teams, Outlook, Discord, remote-access tools, and the Claude desktop app",
    "Private room arranged, desk clear, second monitor disconnected",
-   "Reschedule decision made no later than 24 hours out, since after that the fee is forfeited"
+   "Reschedule decision made no later than 48 hours out, since after that the fee is forfeited"
   ],
   "during": [
    "120 minutes for 53 to 63 questions is roughly two minutes each. Flag and move on rather than stalling; unanswered questions score zero, so answer everything.",
