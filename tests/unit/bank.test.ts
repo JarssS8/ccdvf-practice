@@ -49,6 +49,34 @@ describe.each(CERTS.map((c) => [c.code, c.id] as const))('%s question bank', (_c
   })
 })
 
+// Lote 1 with the calibrated bank off: upstream stems, options rebalanced so the key's length gives nothing away (scripts/option-balance/)
+describe.each(CERTS.filter((c) => existsSync(`scripts/option-balance/${c.id}.json`)).map((c) => [c.code, c.id] as const))('%s option balance', (_code, id) => {
+  const on = flags[id] === true
+  const bank = read<Question[]>(`src/content/${id}/questions.json`)
+  const es = read<Record<string, { options: Record<string, string> }>>(`src/content/${id}/es/questions.json`)
+  const balance = read<Record<string, { src: string; options: Record<string, string> }>>(`scripts/option-balance/${id}.json`)
+  const ids = Object.keys(balance).filter((k) => k !== '_')
+  const lote1 = bank.filter((q) => q.source !== 'lote')
+  /** Only what the length rules look at: the item rules that need a ref or a long rationale do not apply to the original bank. */
+  const lengthProblems = (qs: Question[]) => qs.flatMap((q) => itemProblems(q).filter((p: string) => /option lengths differ/.test(p)))
+
+  it.skipIf(on)('is served: every balanced question carries its options, with the same letters', () => {
+    for (const qid of ids) {
+      const q = bank.find((x) => x.id === qid)
+      expect(q, qid).toBeDefined()
+      expect(q!.options, qid).toEqual(balance[qid].options)
+    }
+  })
+
+  it.skipIf(on)('leaves no length cue in Lote 1, in English or in Spanish', () => {
+    const spanish = lote1.map((q) => ({ ...q, options: es[q.id]?.options ?? q.options }))
+    for (const [label, qs] of [['en', lote1], ['es', spanish]] as const) {
+      expect(lengthProblems(qs as Question[]), label).toEqual([])
+      expect(setProblems(qs, { label }), label).toEqual([])
+    }
+  })
+})
+
 describe('the lint', () => {
   it('catches the cues it is meant to catch', () => {
     const q = { id: 'x', source: 'curated', domain: 'Claude Code', question: 'Which?', options: { A: 'a', B: 'a much longer and more specific answer', C: 'c', D: 'd' }, answer: ['B'], rationale: 'Option B is right.', ref: 'https://example.com' }

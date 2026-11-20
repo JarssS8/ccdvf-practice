@@ -43,10 +43,10 @@ if git diff --quiet -- src/content && [ -z "$(git ls-files --others --exclude-st
   exit 0
 fi
 git checkout -q -B content-sync
-# A rewritten question whose upstream text moved would ship uncalibrated: the owner re-reviews it by hand
+# A rewritten or rebalanced question whose upstream text moved would ship as upstream wrote it: the owner re-reviews it by hand
 if grep -q 'upstream changed, re-review' "$STATE/sync.txt"; then
   git checkout -q -- src/content && git clean -fdq -- src/content && git checkout -q main
-  fail "an upstream question with an override changed: re-review scripts/question-overrides/"
+  fail "an upstream question with an override or balanced options changed: re-review scripts/question-overrides/ or scripts/option-balance/"
 fi
 
 step "translate and map (Claude Code)"
