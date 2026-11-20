@@ -100,13 +100,22 @@ for (const cert of CERTS) {
   // Rewrites of upstream questions without their answer-pattern cues (scripts/question-overrides/): same id and key, new wording.
   // Each one names the upstream text it rewrote; when upstream moves, the question falls back to it, uncalibrated.
   const overrides = calibratedBank ? local('question-overrides') : {}
+  // While the calibrated bank is off, Lote 1 keeps its upstream stems but takes options of comparable length
+  // (scripts/option-balance/): same letters, same key and meaning, so the right answer is no longer the longest one.
+  const balance = calibratedBank ? {} : local('option-balance')
   const questions = upstream.map((q) => {
+    if (Object.hasOwn(balance, q.id)) {
+      const b = balance[q.id]
+      if (b.src !== upstreamHash(q)) { warn(`${q.id}: upstream changed, re-review its options in scripts/option-balance/`); return q }
+      return { ...q, options: b.options }
+    }
     if (!Object.hasOwn(overrides, q.id)) return q
     const o = overrides[q.id]
     if (o.src !== upstreamHash(q)) { warn(`${q.id}: upstream changed, re-review its override in scripts/question-overrides/`); return q }
     return { ...q, question: o.question, options: o.options, rationale: o.rationale, ...(o.evidence ? { evidence: o.evidence } : {}), ref: o.ref, calibrated: o.calibrated }
   })
   for (const id of Object.keys(overrides)) if (!upstream.some((q) => q.id === id)) warn(`${id}: override for a question that no longer exists`)
+  for (const id of Object.keys(balance)) if (id !== '_' && !upstream.some((q) => q.id === id)) warn(`${id}: balanced options for a question that no longer exists`)
   for (const q of questions) {
     if (!names.includes(q.domain)) warn(`${q.id}: unknown domain "${q.domain}"`)
     if (!q.answer.length || q.answer.some((l) => !q.options[l])) warn(`${q.id}: answer not among options`)
