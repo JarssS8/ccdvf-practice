@@ -38,7 +38,7 @@ export function schedule(data: Data, at: Date) {
   const firstSeen = new Map<string, number>()
   for (const r of [...data.reviews].sort((a, b) => a.reviewedAt - b.reviewedAt)) {
     if (r.rating === ADDED) continue
-    const prev = byCard.get(r.cardId) ?? createEmptyCard<Card>(new Date(r.reviewedAt))
+    const prev = byCard.get(r.cardId) ?? createEmptyCard(new Date(r.reviewedAt))
     byCard.set(r.cardId, scheduler.next(prev, new Date(r.reviewedAt), r.rating as Grade).card)
     if (!firstSeen.has(r.cardId)) firstSeen.set(r.cardId, r.reviewedAt)
   }
@@ -57,7 +57,7 @@ export function queue(cards: StudyCard[], s: ReturnType<typeof schedule>) {
 }
 
 export function preview(cardId: string, s: ReturnType<typeof schedule>) {
-  const card = s.byCard.get(cardId) ?? createEmptyCard<Card>(s.at)
+  const card = s.byCard.get(cardId) ?? createEmptyCard(s.at)
   const p = scheduler.repeat(card, s.at)
   const fmt = (d: Date) => {
     const mins = Math.round((+d - +s.at) / 60000)
