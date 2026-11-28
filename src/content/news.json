@@ -1,6 +1,16 @@
 [
  {
   "year": "2026",
+  "title": "November 12: payment and scheduling moved to Pearson",
+  "body": "At 8am PT on November 12, 2026, registration stopped finishing on Partner\nAcademy. You now start on the certification page there, select Register, and\ncontinue to Pearson, where you pay and book in the same pass. The partner\ndiscount is applied at Pearson's checkout and the price is locked when you\nschedule.\n\n**Who this affects.** Everyone registering from now on, and anyone holding an\nunbooked registration from before. Four things changed with it:\n\n- **The free reschedule window is no longer one number.** It is one hour before\n  an online proctored exam, and 48 hours before a test center exam. Later than\n  that, or a no-show, forfeits the fee. Rescheduling keeps the price you paid.\n- **An unbooked registration bought before the cutover still lasts five years.**\n  Registering after it means paying and scheduling together, so there is no\n  unbooked registration to carry.\n- **If you paid before November 12, you do not pay again.** Open the exam in\n  Partner Academy and go to your Pearson account from there; the checkout total\n  should read $0. If it does not, do not check out.\n- **Cancelling a Pearson-paid exam starts an automatic refund**, 7 to 10\n  business days. A purchase made through Partner Academy before the cutover is\n  refunded by Anthropic and can take a few days longer.\n\nAppeals changed shape too: open a case with Pearson support within 14 days and\nkeep the case number, then escalate to\n[certifications-support@anthropic.com](mailto:certifications-support@anthropic.com)\nwith that number if Pearson's review does not settle it.\n\nA voucher storefront for buying in bulk is described as in progress, with no\ndate. It is recorded here as announced, not as available."
+ },
+ {
+  "year": "2026",
+  "title": "November: Introduction to evals, and a badge for tool use",
+  "body": "**Introduction to evals** was published on\n[Claude Academy](https://academy.claude.com/courses/introduction-to-evals),\ntaking the catalog to twenty-eight. Four main lessons on building a graded eval\nover your own cases, so a model and a prompt are chosen from evidence rather\nthan impression and keep being checked after release. It stays with prompts\nthat run as a single call to the Messages API, does not cover evaluating agents\nor measuring latency, and names Claude Platform 101 as the prerequisite. The\ncode is Python plus one GitHub Actions workflow. A graded quiz issues a badge.\n\n**Who this affects.** Developer and Architect candidates: evaluation is a named\ndomain in both Architect blueprints, and this is the first course in the\ncatalog devoted to it. It is not listed as prep for any exam, so the exam\nguides remain the authoritative scope.\n\n**Tool use with the Messages API** issued its completion badge\non 1 November 2026, so that course moved from published to recorded here.\n\nAlso on 3 November, **Introduction to subagents stopped appearing on any\nlisting page** while remaining live at its own URL. That is a listing change,\nnot a withdrawal, and the course is still documented here. It is the third\ncourse to do this, after Model Context Protocol: Advanced Topics and Teaching\nAI Fluency."
+ },
+ {
+  "year": "2026",
   "title": "October: the catalog grew to twenty-seven courses",
   "body": "**Tool use with the Messages API** was added, on\n[Claude Academy](https://academy.claude.com/courses/tool-use-with-the-messages-api)\nand on the Partner Academy platform product page. It is for people whose tool\nuse already runs and breaks in specific ways: wrong tool choice, rejected\ncalls, stalled responses, input tokens that grow with every tool result. Eight\nmain lessons, one problem each, worked through a fictional consultancy, with no\ncode written on the page. A graded quiz issues a completion badge, and\nClaude Platform 101 is named as the prerequisite.\n\n**Who this affects.** Developer – Foundations and Architect candidates, since\ntool use sits in the heavy domains of both. It is not listed as prep for any\nexam, so the exam guides remain the authoritative scope.\n\nFound by the daily catalog check, which reads the union of the Academy listing\npages: the published count went to twenty-seven while this repository\ndocumented twenty-six."
  },
@@ -31,8 +41,8 @@
  },
  {
   "year": "2026",
-  "title": "August 31: the Global Premier discount ends",
-  "body": "Through August 31, 2026, Global Premier partners paid nothing. From September 1\nthe standard 50% partner discount applies.\n\n**Who this affects.** Global Premier partners who were planning to sit an exam\nin the autumn. Booking before the deadline was worth the full fee."
+  "title": "August 31: the Global Premier discount was due to end, and did not",
+  "body": "Through August 31, 2026, Global Premier partners paid nothing, and the standard\n50% partner discount was to apply from September 1. It was extended instead:\nthe FAQ now puts the 100% discount at **through December 31, 2026**, with the\nstandard 50% afterward. Recorded here rather than deleted, because the original\ndeadline was published and people planned around it.\n\n**Who this affects.** Global Premier partners, who still pay nothing until the\nend of the year. The lesson for everyone else is that a published deadline in\nthis program can move, so check the FAQ rather than a date written down here\nwhen the money matters."
  },
  {
   "year": "2026",
